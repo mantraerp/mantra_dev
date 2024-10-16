@@ -1,0 +1,44 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2024-05-29 15:11:57.827108",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2024-05-29 15:11:57.827108",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Stock Reservation Details",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Order",
+ "report_name": "Stock Reservation Details",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Maintenance User"
+  },
+  {
+   "role": "Sales Executive"
+  },
+  {
+   "role": "SCM - Manager"
+  }
+ ]
+}

@@ -1,0 +1,1715 @@
+[
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-06 10:54:36.663305",
+  "module": "Mantra Dev",
+  "name": "Delivery Note Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Delivery Note",
+  "reference_report": null,
+  "report_name": "Delivery Note Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery User"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery Manager"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Delivery Note Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-06-06 18:11:48.451775",
+  "module": "Mantra Dev",
+  "name": "Sales Analytics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Sales Analytics",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-05-24 16:28:37.989687",
+  "module": "Mantra Dev",
+  "name": "Stock Reservation deatils",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Stock Reservation deatils",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Stock Reservation deatils",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "JV",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "JV",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-08-05 14:54:34.525752",
+  "module": "Mantra Dev",
+  "name": "JV",
+  "prepared_report": 0,
+  "query": "SELECT \n    jv.posting_date AS 'Posting Date',\n    jv.voucher_type AS 'Voucher Type',\n    jv.name AS 'Voucher Number',\n    jea.reference_name as 'Reference',\n    jv.bill_date as 'Bill Date',\n    jea.reference_type as 'Reference Type',\n    jea.reference_name as 'Reference',\n    jea.cost_center as 'Cost Center',\n    jea.account as 'Account',\n    jv.total_amount as 'Ledger Amount',\n    jv.total_amount_currency as 'Amt Type',\n    jea.user_remark as 'Final Narration'\n\nFROM `tabJournal Entry` AS jv\nJOIN `tabJournal Entry Account` AS jea\nON jv.name = jea.parent\n\nWHERE jv.docstatus = 1 AND jv.posting_date BETWEEN %(from_date)s AND %(to_date)s\n;\n",
+  "ref_doctype": "Journal Entry",
+  "reference_report": null,
+  "report_name": "JV",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:40:30.678100",
+  "module": "Mantra Dev",
+  "name": "Ledger Master",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Customer",
+  "reference_report": null,
+  "report_name": "Ledger Master",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Master Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Transactions",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Transactions",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:29:36.724140",
+  "module": "Mantra Dev",
+  "name": "Sales Transactions",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Sales Invoice",
+  "reference_report": null,
+  "report_name": "Sales Transactions",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Sales Invoice",
+  "modified": "2024-03-29 11:36:35.008079",
+  "module": "Mantra Dev",
+  "name": "BUwise Sales",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Invoice",
+  "reference_report": null,
+  "report_name": "BUwise Sales",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "SO and Customer",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "SO and Customer",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-08-05 14:55:32.601632",
+  "module": "Mantra Dev",
+  "name": "SO and Customer",
+  "prepared_report": 0,
+  "query": "select \n    so.name as \"Sales Order No\",\n    so.transaction_date as \"Date\",\n    so.status as \"Status\",\n    so.customer as \"Customer Code\",\n    so.customer_name as \"Customer Name\",\n    soi.item_code as \"Item Code\",\n    soi.qty as \"Qty\",\n    soi.delivered_qty as \"Delivered Qty\",\n    soi.qty - soi.delivered_qty as \"Qty to Deliver\"\n    \nfrom\n    `tabSales Order` AS so\n\njoin `tabSales Order Item` as soi on soi.parent = so.name\n\nwhere so.status = \"To Deliver\" OR so.status = \"Completed\" OR so.status = \"To Deliver and Bill\" OR so.status = \"To Bill\" AND so.transaction_date BETWEEN %(from_date)s AND %(to_date)s\n\norder by so.transaction_date DESC\n    ;",
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "SO and Customer",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "SO and Customer",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-08-05 15:37:11.498962",
+  "module": "Mantra Dev",
+  "name": "Items consumed in BOM",
+  "prepared_report": 0,
+  "query": "Select \n    bi.item_code as \"Consumed Item Code\", \n    bi.item_name as \"Consumed Item Name\",\n    b.item as \"Finished Product\",\n    b.item_name as \"Finsihed Product Name\",\n    bi.qty as \"Quantity\",\n    b.name as \"BOM Name\"\n    \n    \nfrom `tabBOM` as b\n\njoin `tabBOM Item` AS bi on bi.parent = b.name\n;",
+  "ref_doctype": "BOM",
+  "reference_report": null,
+  "report_name": "Items consumed in BOM",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Items consumed in BOM",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Items consumed in BOM",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing Manager"
+   },
+   {
+    "parent": "Items consumed in BOM",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Items consumed in BOM",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:03:39.183131",
+  "module": "Mantra Dev",
+  "name": "Purchase report for Tally with Tax",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase report for Tally with Tax",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:25:58.627374",
+  "module": "Mantra Dev",
+  "name": "Purchase report for Tally without Tax",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase report for Tally without Tax",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 14:57:37.740412",
+  "module": "Mantra Dev",
+  "name": "Sales Order Delivery Status",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Sales Order Delivery Status",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Sales Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:00:25.488681",
+  "module": "Mantra Dev",
+  "name": "Purchase Order Delivery Status",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Purchase Order",
+  "reference_report": null,
+  "report_name": "Purchase Order Delivery Status",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase Order Delivery Status",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-05-29 15:11:57.827108",
+  "module": "Mantra Dev",
+  "name": "Stock Reservation Details",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Stock Reservation Details",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Stock Reservation Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-06-12 17:59:37.328373",
+  "module": "Mantra Dev",
+  "name": "Stock Ledger Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Stock Ledger Entry",
+  "reference_report": null,
+  "report_name": "Stock Ledger Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Stock Ledger Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Stock Ledger Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Stock Ledger Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Stock Ledger Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase Report",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase Report",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 14:41:00.981524",
+  "module": "Mantra Dev",
+  "name": "Purchase Report",
+  "prepared_report": 0,
+  "query": "select \r    pi.custom_invoice_type as \"VoucherType\",\r    pi.name as \"VoucherNumber\",\r    pi.posting_date as \"Date\",\r    pi.bill_no as \"Supplier Inv No\",\r    pi.bill_date as \"Sup. Date\",\r    pi.supplier_name as \"PartyName\",\r    pii.purchase_receipt as \"Tracking\",\r    pr.posting_date as \"Receipt Date\",\r    pii.purchase_receipt as \"Receipt Doc no\",\r    \" \" as \"Dispatch Through\",\r    \" \" as \"Destination\",\r    \" \" as \"Carrier Name\",\r    \" \" as \"Bill of Lading\",\r    \" \" as \"Bill of Landing Date\",\r    pii.purchase_order as \"Order No.\",\r    po.transaction_date as \"Order Date\",\r    pi.payment_terms_template as \"Terms of Payment\",\r    pi.supplier_name as \"Supplier Name\",\r    sa.address_line1 as \"Address 1\",\r    sa.address_line2 as \"Address 2\",\r    sa.city as \"Address 3\",\r    sa.state as \"State\",\r    sa.country as \"Country\",\r    sa.pincode as \"Pincode\",\r    sa.gstin as \"GSTIN\",\r    pi.company as \"Buyers Name\",\r    ca.address_line1 as \"Buyers Address 1\",\r    ca.address_line2 as \"Buyers Address 2\",\r    ca.city as \"Buyers Address 3\",\r    ca.state as \"Buyers State\",\r    ca.country as \"Buyers Country\",\r    ca.pincode as \"Buyers Pincode\",\r    ca.gstin as \"Buyers GSTIN\",\r    pi.base_grand_total as \"Ledger Amount\",\r    \"CR\" as \"Amount Type\",\r    \"New Ref\" as \"New Ref\",\r    pi.bill_no as \"Ref Name\",\r    pii.purchase_order as \"PO Number\",\r    po.transaction_date as \"PO Date\",\r    pi.due_date as \"Due Date / Days\",\r    pi.base_total as \"Amount\",\r    pii.expense_account as \"Purchase Ledger\",\r    pi.taxes_and_charges as \"Nature of Transaction\",\r    CONCAT(pii.item_code, \" \", pii.item_name) as \"Item Name\",\r    pii.custom_item_description as \"ItemDesc1\",\r    pii.custom_note as \"ItemDesc2\",\r    \" \" as \"ItemDesc3\",\r    pii.warehouse as \"Godown\",\r    pii.qty as \"Actual Qty\",\r    pii.qty as \" Billed Qty\",\r    pii.discount_amount as \" Discount\",\r    pii.uom as \"UOM\",\r    pii.rate as \"Rate\",\r    pii.base_amount as \"Amount\",\r    \"Input CGST\" as \"TaxName1\",\r    pii.cgst_rate as \"TaxRate1\",\r    pii.cgst_amount as \"TaxAmount1\",\r    \"Input SGST\" as \"TaxName2\",\r    pii.sgst_rate as \"TaxRate2\",\r    pii.sgst_amount as \"TaxAmount2\",\r    \"Input IGST\" as \"TaxName3\",\r    pii.igst_rate as \"TaxRate3\",\r    pii.igst_amount as \"TaxAmount3\",\r    pt.account_head as \"TaxName4\",\r    pt.rate as \"TaxRate4\",\r    pt.tax_amount as \"TaxAmount4\",\r    \" \" as \"TaxName5\",\r    \" \" as \"TaxRate5\",\r    \" \" as \"TaxAmount5\",\r    be.name as \"Bill of entry no.\",\r    be.bill_of_entry_date as \"Bill of Entry Date\",\r    be.port_code as \"Port code\",\r    pi.custom_narration as \"Narration\",\r    pi.cost_center as \"Department/Class\"\r    \r    \r    \rfrom `tabPurchase Invoice` pi\r\rjoin `tabPurchase Invoice Item` as pii on pii.parent = pi.name\r\rleft join `tabPurchase Order` as po on pii.purchase_order = po.name\r\rleft join `tabPurchase Receipt` as pr on pr.name = pii.purchase_receipt\r\rleft join `tabAddress` as sa on sa.name = pi.supplier_address\r\rleft join `tabAddress` as ca on ca.name = pi.billing_address\r\rleft join `tabBill of Entry` as be on be.purchase_invoice = pi.name\r\rleft join `tabPurchase Taxes and Charges` as pt on pt.parent = pi.name\r\rwhere pi.docstatus = 1 AND pi.posting_date BETWEEN %(from_date)s AND %(to_date)s\r\rorder by pii.parent\r;",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 14:39:10.678245",
+  "module": "Mantra Dev",
+  "name": "Purchase report for Tally",
+  "prepared_report": 0,
+  "query": "select \r    pi.custom_invoice_type as \"VoucherType\",\r    pi.name as \"VoucherNumber\",\r    pi.posting_date as \"Date\",\r    pi.bill_no as \"Supplier Inv No\",\r    pi.bill_date as \"Sup. Date\",\r    pi.supplier_name as \"PartyName\",\r    pii.purchase_receipt as \"Tracking\",\r    pr.posting_date as \"Receipt Date\",\r    pii.purchase_receipt as \"Receipt Doc no\",\r    \" \" as \"Dispatch Through\",\r    \" \" as \"Destination\",\r    \" \" as \"Carrier Name\",\r    \" \" as \"Bill of Lading\",\r    \" \" as \"Bill of Landing Date\",\r    pii.purchase_order as \"Order No.\",\r    po.transaction_date as \"Order Date\",\r    pi.payment_terms_template as \"Terms of Payment\",\r    pi.supplier_name as \"Supplier Name\",\r    sa.address_line1 as \"Address 1\",\r    sa.address_line2 as \"Address 2\",\r    sa.city as \"Address 3\",\r    sa.state as \"State\",\r    sa.country as \"Country\",\r    sa.pincode as \"Pincode\",\r    sa.gstin as \"GSTIN\",\r    pi.company as \"Buyers Name\",\r    ca.address_line1 as \"Buyers Address 1\",\r    ca.address_line2 as \"Buyers Address 2\",\r    ca.city as \"Buyers Address 3\",\r    ca.state as \"Buyers State\",\r    ca.country as \"Buyers Country\",\r    ca.pincode as \"Buyers Pincode\",\r    ca.gstin as \"Buyers GSTIN\",\r    pi.base_grand_total as \"Ledger Amount\",\r    \"CR\" as \"Amount Type\",\r    \"New Ref\" as \"New Ref\",\r    pi.bill_no as \"Ref Name\",\r    pii.purchase_order as \"PO Number\",\r    po.transaction_date as \"PO Date\",\r    pi.due_date as \"Due Date / Days\",\r    pi.base_total as \"Amount\",\r    pii.expense_account as \"Purchase Ledger\",\r    pi.taxes_and_charges as \"Nature of Transaction\",\r    CONCAT(pii.item_code, \" \", pii.item_name) as \"Item Name\",\r    pii.custom_item_description as \"ItemDesc1\",\r    pii.custom_note as \"ItemDesc2\",\r    \" \" as \"ItemDesc3\",\r    pii.warehouse as \"Godown\",\r    pii.qty as \"Actual Qty\",\r    pii.qty as \" Billed Qty\",\r    pii.discount_amount as \" Discount\",\r    pii.uom as \"UOM\",\r    pii.rate as \"Rate\",\r    pii.base_amount as \"Amount\",\r    \"Input CGST\" as \"TaxName1\",\r    pii.cgst_rate as \"TaxRate1\",\r    pii.cgst_amount as \"TaxAmount1\",\r    \"Input SGST\" as \"TaxName2\",\r    pii.sgst_rate as \"TaxRate2\",\r    pii.sgst_amount as \"TaxAmount2\",\r    \"Input IGST\" as \"TaxName3\",\r    pii.igst_rate as \"TaxRate3\",\r    pii.igst_amount as \"TaxAmount3\",\r    pt.account_head as \"TaxName4\",\r    pt.rate as \"TaxRate4\",\r    pt.tax_amount as \"TaxAmount4\",\r    \" \" as \"TaxName5\",\r    \" \" as \"TaxRate5\",\r    \" \" as \"TaxAmount5\",\r    be.name as \"Bill of entry no.\",\r    be.bill_of_entry_date as \"Bill of Entry Date\",\r    be.port_code as \"Port code\",\r    pi.custom_narration as \"Narration\",\r    pi.cost_center as \"Department/Class\"\r    \r    \r    \rfrom `tabPurchase Invoice` pi\r\rjoin `tabPurchase Invoice Item` as pii on pii.parent = pi.name\r\rleft join `tabPurchase Order` as po on pii.purchase_order = po.name\r\rleft join `tabPurchase Receipt` as pr on pr.name = pii.purchase_receipt\r\rleft join `tabAddress` as sa on sa.name = pi.supplier_address\r\rleft join `tabAddress` as ca on ca.name = pi.billing_address\r\rleft join `tabBill of Entry` as be on be.purchase_invoice = pi.name\r\rleft join `tabPurchase Taxes and Charges` as pt on pt.parent = pi.name\r\rwhere pi.docstatus = 1 AND pi.posting_date BETWEEN %(from_date)s AND %(to_date)s\r\rorder by pii.parent\r;",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase report for Tally",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase report for Tally",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-07-11 17:36:10.131949",
+  "module": "Mantra Dev",
+  "name": "Sales by Cost Center and Salesperson",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Person",
+  "reference_report": null,
+  "report_name": "Sales by Cost Center and Salesperson",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales by Cost Center and Salesperson",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Sales by Cost Center and Salesperson",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Master Manager"
+   },
+   {
+    "parent": "Sales by Cost Center and Salesperson",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Sales by Cost Center and Salesperson",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "All"
+   },
+   {
+    "parent": "Sales by Cost Center and Salesperson",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-07-12 12:47:14.751521",
+  "module": "Mantra Dev",
+  "name": "Stock Balance by Item Category and Warehouse",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item Group",
+  "reference_report": null,
+  "report_name": "Stock Balance by Item Category and Warehouse",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Sales Executive"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Stock Balance by Item Category and Warehouse",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-07-12 13:15:37.075544",
+  "module": "Mantra Dev",
+  "name": "Item Category Stock Balance Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item Group",
+  "reference_report": null,
+  "report_name": "Item Category Stock Balance Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Sales Executive"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-07-17 14:56:15.681730",
+  "module": "Mantra Dev",
+  "name": "Sales Order Analytics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Sales Order Analytics",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Sales Order Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:43:03.416388",
+  "module": "Mantra Dev",
+  "name": "Completed Work Orders",
+  "prepared_report": 0,
+  "query": "SELECT\n  `tabWork Order`.name as \"Work Order:Link/Work Order:200\",\n  `tabWork Order`.creation as \"Date:Date:120\",\n  `tabWork Order`.production_item as \"Item:Link/Item:150\",\n  `tabWork Order`.qty as \"To Produce:Int:100\",\n  `tabWork Order`.produced_qty as \"Produced:Int:100\",\n  `tabWork Order`.company as \"Company:Link/Company:\"\nFROM\n  `tabWork Order`\nWHERE\n  `tabWork Order`.docstatus=1\n  AND ifnull(`tabWork Order`.produced_qty,0) >= `tabWork Order`.qty",
+  "ref_doctype": "Work Order",
+  "reference_report": null,
+  "report_name": "Completed Work Orders",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Completed Work Orders",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Completed Work Orders",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-08-08 16:40:02.511150",
+  "module": "Mantra Dev",
+  "name": "BOM Stock Calculated with Valuation rate",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "BOM",
+  "reference_report": null,
+  "report_name": "BOM Stock Calculated with Valuation rate",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "BOM Stock Calculated with Valuation rate",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing Manager"
+   },
+   {
+    "parent": "BOM Stock Calculated with Valuation rate",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Sales Invoice",
+  "modified": "2024-08-12 11:32:40.207809",
+  "module": "Mantra Dev",
+  "name": "Sales Flow with nos",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Delivery Note",
+  "reference_report": null,
+  "report_name": "Sales Flow with nos",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery User"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery Manager"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Sales Flow with nos",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   }
+  ]
+ }
+]

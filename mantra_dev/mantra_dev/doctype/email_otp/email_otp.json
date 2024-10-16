@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:email_id",
+ "creation": "2024-05-16 11:35:08.765472",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "email_id",
+  "email_otp",
+  "column_break_zopd",
+  "full_name",
+  "datetime"
+ ],
+ "fields": [
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Email ID",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "email_otp",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Email OTP"
+  },
+  {
+   "fieldname": "datetime",
+   "fieldtype": "Datetime",
+   "label": "Date/Time"
+  },
+  {
+   "fetch_from": "email_id.full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full name"
+  },
+  {
+   "fieldname": "column_break_zopd",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-11 14:36:30.478673",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Email OTP",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

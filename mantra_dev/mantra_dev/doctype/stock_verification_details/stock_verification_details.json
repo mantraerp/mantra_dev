@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-01 15:18:08.594753",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "date",
+  "column_break_tycf",
+  "defult_system_stock",
+  "physical_stock",
+  "diffrent_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "column_break_tycf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "defult_system_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Defult System Stock"
+  },
+  {
+   "fieldname": "physical_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Physical Stock"
+  },
+  {
+   "fieldname": "diffrent_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Diffrent Qty"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-01 15:24:47.375566",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Stock Verification Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:bank_account",
+ "creation": "2024-06-18 12:05:15.640589",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bank",
+  "enabled",
+  "section_break_imdp",
+  "bank_account",
+  "mode_of_payment_setting",
+  "products_section",
+  "payments",
+  "file_upload_path",
+  "file_pull_path",
+  "file_backup_path",
+  "column_break_gcyc",
+  "bank_statement",
+  "section_break_upuo",
+  "user"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "depends_on": "eval:doc.enabled==1",
+   "fieldname": "products_section",
+   "fieldtype": "Section Break",
+   "label": "Products"
+  },
+  {
+   "default": "0",
+   "fieldname": "payments",
+   "fieldtype": "Check",
+   "label": "Payments"
+  },
+  {
+   "fieldname": "file_upload_path",
+   "fieldtype": "Data",
+   "label": "Payment File Upload Path",
+   "mandatory_depends_on": "eval:doc.payments==1"
+  },
+  {
+   "fieldname": "file_pull_path",
+   "fieldtype": "Data",
+   "label": "Payment File Pull Path",
+   "mandatory_depends_on": "eval:doc.payments==1"
+  },
+  {
+   "fieldname": "column_break_gcyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_statement",
+   "fieldtype": "Check",
+   "label": "Bank Statement"
+  },
+  {
+   "depends_on": "eval:doc.enabled==1;",
+   "fieldname": "section_break_imdp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "mode_of_payment_setting",
+   "fieldtype": "Table",
+   "label": "Mode of Payment Setting",
+   "options": "Mode of Payment Setting",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_upuo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Table",
+   "label": "User",
+   "options": "Bank User"
+  },
+  {
+   "fieldname": "file_backup_path",
+   "fieldtype": "Data",
+   "label": "File Backup Path"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-13 12:47:18.587300",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Bank Integration",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

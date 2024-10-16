@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-01 15:13:56.134931",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_xmlj",
+  "warehouse",
+  "amended_from",
+  "column_break_eiac",
+  "total_system_stock",
+  "total_physical_stock",
+  "section_break_frxj",
+  "stock_verification_details",
+  "cycle_count"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_xmlj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Verification",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "total_system_stock",
+   "fieldtype": "Float",
+   "label": "Total System Stock"
+  },
+  {
+   "fieldname": "total_physical_stock",
+   "fieldtype": "Float",
+   "label": "Total Physical Stock"
+  },
+  {
+   "fieldname": "column_break_eiac",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_frxj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_verification_details",
+   "fieldtype": "Table",
+   "label": "Stock Verification Details",
+   "options": "Stock Verification Details"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "cycle_count",
+   "fieldtype": "Table",
+   "label": "Cycle Count",
+   "no_copy": 1,
+   "options": "Cycle Count"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-07-29 16:12:26.367739",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Stock Verification",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

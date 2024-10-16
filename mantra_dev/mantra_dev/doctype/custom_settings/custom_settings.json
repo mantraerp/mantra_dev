@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-05-27 16:07:32.159522",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "stock_tab",
+  "auto_create_delivery_note",
+  "selling_tab",
+  "role_allowed_to_reserve_stock",
+  "subcontracting_tab",
+  "auto_create_stock_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "stock_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock"
+  },
+  {
+   "default": "0",
+   "description": "Delivery Note (Draft) will be auto-created on submission of Sales Invoice.",
+   "fieldname": "auto_create_delivery_note",
+   "fieldtype": "Check",
+   "label": "Auto Create Delivery Note"
+  },
+  {
+   "fieldname": "selling_tab",
+   "fieldtype": "Tab Break",
+   "label": "Selling"
+  },
+  {
+   "description": "Users with this role are allowed to Reserve Stock against Sales Order",
+   "fieldname": "role_allowed_to_reserve_stock",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Reserve Stock",
+   "options": "Role"
+  },
+  {
+   "description": "Stock Entry will be auto-created Before submission of Subcontracting Receipt.",
+   "fieldname": "subcontracting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Subcontracting"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_create_stock_entry",
+   "fieldtype": "Check",
+   "label": "Auto Create Stock Entry"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-05-28 17:20:06.606407",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Custom Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

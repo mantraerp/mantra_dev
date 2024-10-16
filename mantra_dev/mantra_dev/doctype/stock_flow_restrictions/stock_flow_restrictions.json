@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2024-04-10 16:16:51.220088",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_b8jq",
+  "title",
+  "lft",
+  "rgt",
+  "is_group",
+  "old_parent",
+  "parent_stock_flow_restrictions"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_b8jq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Old Parent",
+   "options": "Stock Flow Restrictions"
+  },
+  {
+   "fieldname": "parent_stock_flow_restrictions",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Parent Stock Flow Restrictions",
+   "options": "Stock Flow Restrictions"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2024-04-10 16:18:44.773033",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Stock Flow Restrictions",
+ "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_stock_flow_restrictions",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,244 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-05-20 14:29:20.702348",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tran_id",
+  "value_date",
+  "part_tran_srl_num",
+  "tran_sub_type",
+  "drcr_ind",
+  "tran_amount",
+  "acct_name",
+  "acct_sol_id",
+  "rate",
+  "balance",
+  "tran_particular",
+  "tran_rmks",
+  "uad_module_key",
+  "party_account_num",
+  "party_code",
+  "sender_receiver_info",
+  "inst_type",
+  "column_break_vkry",
+  "tran_date",
+  "dtd_vfd_date",
+  "tran_type",
+  "tran_mode",
+  "tran_crncy_code",
+  "foracid",
+  "acct_crncy_code",
+  "init_sol_id",
+  "init_br_name",
+  "tran_particular2",
+  "uad_module_id",
+  "utr_ref_num",
+  "ifsc_code",
+  "party_name",
+  "party_ref_num",
+  "inst_num",
+  "isureapay_ref_num"
+ ],
+ "fields": [
+  {
+   "fieldname": "tran_date",
+   "fieldtype": "Datetime",
+   "label": "Transaction Date"
+  },
+  {
+   "fieldname": "dtd_vfd_date",
+   "fieldtype": "Datetime",
+   "label": "Transaction Date & Time"
+  },
+  {
+   "fieldname": "value_date",
+   "fieldtype": "Date",
+   "label": "Value Date"
+  },
+  {
+   "fieldname": "part_tran_srl_num",
+   "fieldtype": "Int",
+   "label": "Transaction Serial No"
+  },
+  {
+   "fieldname": "tran_type",
+   "fieldtype": "Data",
+   "label": "Transaction Type"
+  },
+  {
+   "fieldname": "tran_sub_type",
+   "fieldtype": "Data",
+   "label": "Transaction Sub Type"
+  },
+  {
+   "fieldname": "tran_mode",
+   "fieldtype": "Data",
+   "label": "Payment Mode"
+  },
+  {
+   "fieldname": "drcr_ind",
+   "fieldtype": "Data",
+   "label": "Debit / Credit Indicator"
+  },
+  {
+   "fieldname": "tran_amount",
+   "fieldtype": "Data",
+   "label": "Transaction Amount"
+  },
+  {
+   "fieldname": "tran_crncy_code",
+   "fieldtype": "Currency",
+   "label": "Transaction Currency"
+  },
+  {
+   "fieldname": "foracid",
+   "fieldtype": "Data",
+   "label": "Credit Account"
+  },
+  {
+   "fieldname": "acct_name",
+   "fieldtype": "Data",
+   "label": "Beneficiary Name"
+  },
+  {
+   "fieldname": "acct_sol_id",
+   "fieldtype": "Data",
+   "label": "Beneficiary Account Brn No"
+  },
+  {
+   "fieldname": "acct_crncy_code",
+   "fieldtype": "Data",
+   "label": "Account Curreny"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Data",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "init_sol_id",
+   "fieldtype": "Data",
+   "label": "Transaction Initiating Branch"
+  },
+  {
+   "fieldname": "init_br_name",
+   "fieldtype": "Data",
+   "label": "Trn Branch Initiating Name"
+  },
+  {
+   "fieldname": "balance",
+   "fieldtype": "Data",
+   "label": "Effective Balance"
+  },
+  {
+   "fieldname": "tran_particular",
+   "fieldtype": "Data",
+   "label": "Remarks 1"
+  },
+  {
+   "fieldname": "tran_particular2",
+   "fieldtype": "Data",
+   "label": "Remarks 2"
+  },
+  {
+   "fieldname": "tran_rmks",
+   "fieldtype": "Data",
+   "label": "Remarks 3"
+  },
+  {
+   "fieldname": "uad_module_id",
+   "fieldtype": "Data",
+   "label": "Module"
+  },
+  {
+   "fieldname": "uad_module_key",
+   "fieldtype": "Data",
+   "label": "Module Key"
+  },
+  {
+   "fieldname": "utr_ref_num",
+   "fieldtype": "Data",
+   "label": "UTR No"
+  },
+  {
+   "fieldname": "party_account_num",
+   "fieldtype": "Data",
+   "label": "Remitter Account"
+  },
+  {
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "Remitter IFSC Code"
+  },
+  {
+   "fieldname": "party_code",
+   "fieldtype": "Data",
+   "label": "Remitter / Virtual Code"
+  },
+  {
+   "fieldname": "sender_receiver_info",
+   "fieldtype": "Data",
+   "label": "STRI"
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "label": "Remitter Name"
+  },
+  {
+   "fieldname": "party_ref_num",
+   "fieldtype": "Data",
+   "label": "Remitter Ref No"
+  },
+  {
+   "fieldname": "inst_num",
+   "fieldtype": "Data",
+   "label": "Instrument Ref No"
+  },
+  {
+   "fieldname": "inst_type",
+   "fieldtype": "Data",
+   "label": "Instrument Type"
+  },
+  {
+   "fieldname": "isureapay_ref_num",
+   "fieldtype": "Data",
+   "label": "iSurePay ref No"
+  },
+  {
+   "fieldname": "column_break_vkry",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tran_id",
+   "fieldtype": "Data",
+   "label": "Trancation ID"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-05-23 11:47:35.120073",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Bank Transaction Integration",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

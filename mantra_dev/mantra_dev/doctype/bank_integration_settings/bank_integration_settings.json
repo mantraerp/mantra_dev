@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-18 11:42:51.682467",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "products_section",
+  "payments",
+  "file_upload_path",
+  "file_pull_path",
+  "column_break_gcyc",
+  "bank_statement",
+  "section_break_imdp",
+  "bank_account"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "depends_on": "eval:doc.enabled==1;",
+   "fieldname": "products_section",
+   "fieldtype": "Section Break",
+   "label": "Products"
+  },
+  {
+   "default": "0",
+   "fieldname": "payments",
+   "fieldtype": "Check",
+   "label": "Payments"
+  },
+  {
+   "fieldname": "column_break_gcyc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_statement",
+   "fieldtype": "Check",
+   "label": "Bank Statement"
+  },
+  {
+   "depends_on": "eval:doc.enabled==1;",
+   "fieldname": "section_break_imdp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "file_upload_path",
+   "fieldtype": "Data",
+   "label": "Payment File Upload Path"
+  },
+  {
+   "fieldname": "file_pull_path",
+   "fieldtype": "Data",
+   "label": "Payment File Pull Path"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-06-18 11:58:56.764821",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Bank Integration Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

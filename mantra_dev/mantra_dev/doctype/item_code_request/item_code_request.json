@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2024-05-09 14:27:09.848935",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_name",
+  "description",
+  "new_item_code",
+  "reqesting_date",
+  "uom",
+  "naming_series",
+  "column_break_bdvq",
+  "status",
+  "form_type",
+  "sales_order_id",
+  "line_id",
+  "doument_attachment",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Description",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "new_item_code",
+   "fieldtype": "Link",
+   "label": "New Item Code",
+   "options": "Item"
+  },
+  {
+   "default": "now",
+   "fieldname": "reqesting_date",
+   "fieldtype": "Datetime",
+   "label": "Reqesting Date Time",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_bdvq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Requested",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Requested\nCompleted\nApproved"
+  },
+  {
+   "fieldname": "sales_order_id",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Form  Id",
+   "options": "form_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "line_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Line ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Item Code Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "doument_attachment",
+   "fieldtype": "Attach",
+   "label": "Doument Attachment"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Item Code Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "form_type",
+   "fieldtype": "Link",
+   "label": "Form Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "MAN/ITEM-REQ/.######"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-09-27 22:18:59.067939",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Item Code Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Requested"
+  },
+  {
+   "color": "Yellow",
+   "title": "In progress"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  }
+ ]
+}
