@@ -428,6 +428,13 @@ def create_shipment(values, delivery_note_id):
     except Exception as e:
         frappe.log_error(message=str(e), title="Shipment Creation Error")
         return f"Error: {str(e)}"
+    
+
+@frappe.whitelist()
+def login_to_avdm_scheduled():
+    frappe.enqueue('mantra_dev.backend_code.api.login_to_avdm', queue='long', timeout=3600)     
+    
+
 @frappe.whitelist()
 def login_to_avdm():
     if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
@@ -478,7 +485,7 @@ def login_to_avdm():
                 dc_doc = frappe.get_doc("Delivery Note", dc)
                 dc_item = dc_doc.items
                 for i in dc_item:
-                    if i.custom_abdm_enable == 1:
+                    if i.custom_abdm_enable == 1 and i.custom_reference_model_no:
                         if i.serial_no:
                             sr_no = i.serial_no
                             serial_no = sr_no.replace("\n", ",")
@@ -492,7 +499,7 @@ def login_to_avdm():
                                     "custName": dc_doc.customer_name,
                                     "dcNo": dc_doc.name,
                                     "dcDate": f"{dc_doc.posting_date}T{dc_doc.posting_time}Z",
-                                    "model": 17,
+                                    "model": i.custom_reference_model_no,
                                     "subModelType": 0
                                 }
                                 body.append(data)
@@ -509,6 +516,58 @@ def login_to_avdm():
                 print(f"Response Content: {dc_response_content}")
                 dc_response_json = json.loads(dc_response_content)
                 print(f"Response JSON: {dc_response_json}")
+                
+                
+                if dc_response_json:
+                    response_serial_no = []
+                    count = 0
+                    for i in dc_response_json:
+                        print("serial_no: ", i['devicesr'])
+                        response_serial_no.append(i['devicesr'])
+    
+                    
+
+                    
+                    result = []
+                    dc_dict = {}
+
+                    # Iterate through each item in the data list
+                    for item in body:
+                        dc_no = item['dcNo']
+                        serial_no = item['serialNo']
+                        
+                        # Check if the dcNo already exists in the dictionary
+                        if dc_no in dc_dict:
+                            # Append the serialNo to the existing key
+                            dc_dict[dc_no].append(serial_no)
+                        else:
+                            # Create a new dictionary with dcNo as key and serialNo as value in a list
+                            dc_dict[dc_no] = [serial_no]
+
+                    # Convert the dictionary into a list of dictionaries
+                    for key, value in dc_dict.items():
+                        result.append({key: value})
+
+                    # Output the final result
+                    print(result)
+                    
+                    for i in result:
+                        for key, values in i.items():
+                            # print(key, values)
+                            for j in values:
+                                if j in response_serial_no:
+                                    frappe.db.set_value('Serial No', j, 'custom_marked_in_avdm', 1)
+                                    
+                                else:
+                                    count = count + 1
+                        if count == 0:
+                            frappe.db.set_value('Delivery Note', key, 'custom_marked_in_avdm', 1)
+                            # frappe.db.commit()
+                        else:
+                            pass
+                    frappe.db.commit()
+                
+                
             else :
                 print("else")
                 dc_response_json=response1.status_code

@@ -11,7 +11,10 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mantra_dev/css/mantra_dev.css"
-app_include_js = "/assets/mantra_dev/js/email_button.js"
+app_include_js = [
+    "/assets/mantra_dev/js/email_button.js",
+    "/assets/mantra_dev/js/workflow.js",
+    ]
 
 
 # include js, css files in header of web template
@@ -172,6 +175,12 @@ scheduler_events = {
         # This may be used for predefined frequencies if they fit your needs
         "0/5 * * * *": [
             "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
+        ]
+    },
+    
+    "cron": {
+        "30 23 * * *": [
+            "mantra_dev.backend_code.api.login_to_avdm_scheduled"
         ]
     },
  
