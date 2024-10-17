@@ -207,6 +207,9 @@ def create_shipment(values, delivery_note_id):
                 })
         
         sale_person_email = frappe.db.get_value("Sales Person", dc.custom_sales_person, "custom_email")
+        sender_details = frappe.db.get_value("Email Account", filters={'default_outgoing': 1}, fieldname=["name", "email_id"])
+        sender = f"{sender_details[0]} <{sender_details[1]}>"
+        
         so_id = next((i.against_sales_order for i in dc.items), "")
         po_no=frappe.db.get_value("Sales Order", so_id, "po_no")
         if po_no:
@@ -415,12 +418,24 @@ def create_shipment(values, delivery_note_id):
             </html>
             '''
         
-        frappe.sendmail(
+        # frappe.sendmail(
+        #     recipients=recipients,
+        #     cc=cc_email,
+        #     subject=f"Dispatch Detail {dc.posting_date} - {dc.custom_sales_invoice_no} / {dc.customer_name}",
+        #     message=message
+        # )
+
+        frappe.enqueue(
+            'frappe.core.doctype.communication.email.make',
+            sender=sender,
             recipients=recipients,
             cc=cc_email,
             subject=f"Dispatch Detail {dc.posting_date} - {dc.custom_sales_invoice_no} / {dc.customer_name}",
-            message=message
+            content=message,
+            send_email=True,
+            now=True 
         )
+
         flush()
         frappe.local.response["message"] = "Done"
         return "Done"
@@ -442,7 +457,7 @@ def login_to_avdm():
             password = frappe.db.get_single_value("AVDM Setting", "password")
             print(f"Password: {password}")  # For debugging; remove in production
 
-            login_url = "http://192.168.6.111:5050/ErptoAVDM/Login"
+            login_url = "https://erptoavdm.aadhaardevice.com"
             login_headers = {
                 "accept": "application/json",
             }
