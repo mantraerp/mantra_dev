@@ -2,12 +2,16 @@ frappe.ui.form.on("Payment Entry", {
 
 
   before_save(frm){
-    // frappe.msgprint("H")
-    if (frm.doc.status === 'Draft' && !frm.doc.mode_of_payment.includes('H2H')){
-      frm.set_value('custom_unique_batch_number', 'Not Available');   
+    if (!frm.doc.mode_of_payment){
+      
     }
     else{
-      frm.set_value('custom_unique_batch_number')
+      if (frm.doc.status === 'Draft' && !frm.doc.mode_of_payment.includes('H2H')){
+        frm.set_value('custom_unique_batch_number', 'Not Available');   
+      }
+      else{
+        frm.set_value('custom_unique_batch_number')
+      }
     }
   },
 

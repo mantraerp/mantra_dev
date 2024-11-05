@@ -9,6 +9,12 @@ import mantra_dev.purchase_invoice
 import erpnext.stock.doctype.purchase_receipt.purchase_receipt
 import mantra_dev.purchase_receipt
 
+import erpnext.stock.doctype.shipment.shipment
+import mantra_dev.backend_code.shipment.shipment
+
+import erpnext.selling.doctype.sales_order.sales_order
+import mantra_dev.backend_code.sales_order.sales_order
+
 erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items = mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items
 
 erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
@@ -16,3 +22,7 @@ erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.po_re
 erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.pr_required = mantra_dev.purchase_invoice.PurchaseInvoice.pr_required
 
 erpnext.stock.doctype.purchase_receipt.purchase_receipt.PurchaseReceipt.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
+
+erpnext.stock.doctype.shipment.shipment.Shipment.on_submit = mantra_dev.backend_code.shipment.shipment.Shipment.on_submit
+
+erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request = mantra_dev.backend_code.sales_order.sales_order.make_raw_material_request

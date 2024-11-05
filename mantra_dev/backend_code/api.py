@@ -456,8 +456,9 @@ def login_to_avdm():
             username = frappe.db.get_single_value("AVDM Setting", "username")
             password = frappe.db.get_single_value("AVDM Setting", "password")
             print(f"Password: {password}")  # For debugging; remove in production
+            print(f"Username: {username}")
 
-            login_url = "https://erptoavdm.aadhaardevice.com"
+            login_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/Login"
             login_headers = {
                 "accept": "application/json",
             }
@@ -484,7 +485,7 @@ def login_to_avdm():
             api_token = details["_APIToken"]
             print(f"API Token: {api_token}")
             
-            creating_url = "http://192.168.6.111:5050/ErptoAVDM"
+            creating_url = "https://erptoavdm.aadhaardevice.com/"
             headers = {
                 "accept": "application/json",
                 "Authorization": f"Bearer {api_token}"

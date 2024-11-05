@@ -9,7 +9,7 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2024-08-13 18:45:57.612485",
+   "creation": "2024-10-17 20:47:37.103448",
    "default_value": null,
    "doc_type": "Item Barcode",
    "docstatus": 0,
@@ -17,15 +17,15 @@
    "field_name": "barcode",
    "idx": 0,
    "is_system_generated": 1,
-   "modified": "2024-08-22 11:59:02.155486",
-   "modified_by": "Administrator",
+   "modified": "2024-10-17 20:47:37.103448",
+   "modified_by": "abhishek.jain@mantratec.com",
    "module": null,
    "name": "Item Barcode-barcode-hidden",
-   "owner": "Administrator",
+   "owner": "abhishek.jain@mantratec.com",
    "property": "hidden",
    "property_type": "Check",
    "row_name": null,
-   "value": "0"
+   "value": "1"
   }
  ],
  "sync_on_migrate": 1

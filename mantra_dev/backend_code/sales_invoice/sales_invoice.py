@@ -1,5 +1,7 @@
-# import frappe
-# from frappe.model.document import Document
+import frappe
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+import json
 
 # @frappe.whitelist()
 # def make_dc(doc, method=None):
@@ -108,3 +110,78 @@
 #             frappe.db.commit()
 #             frappe.msgprint(f"Delivery Note {dc.name} created successfully.")
        
+
+
+@frappe.whitelist()
+def create_delivery_note(**args):
+    
+    if frappe.get_single('Custom Settings').auto_create_delivery_note==0:
+         return True
+
+    
+    try:
+        doc = json.loads(args['data'])
+        if doc['einvoice_status'] == "Not Applicable":
+            delivery_note = get_mapped_doc(
+            "Sales Invoice", 
+            doc['name'], {
+                "Sales Invoice": {
+                    "doctype": "Delivery Note",
+                    "field_map": {
+                        "name": 'against_sales_invoice',
+                        "customer": "customer",
+                        "posting_date": "posting_date"
+                    }
+                },
+                "Sales Invoice Item": {
+                    "doctype": "Delivery Note Item",
+                    "field_map": {
+                        "name": "si_detail",  # Link to Sales Invoice Item row
+                        "item_code": "item_code",
+                        "qty": "qty",
+                        "rate": "rate",
+                        "parent": "against_sales_invoice",
+                    }
+                }
+            },
+            target_doc=None
+            )
+            delivery_note.save()
+            frappe.msgprint(f"Delivery Note created.")
+            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
+            
+        elif doc['einvoice_status'] == "Generated":
+            delivery_note = get_mapped_doc(
+            "Sales Invoice", 
+            doc['name'], {
+                "Sales Invoice": {
+                    "doctype": "Delivery Note",
+                    "field_map": {
+                        "name": 'against_sales_invoice',
+                        "customer": "customer",
+                        "posting_date": "posting_date"
+                    }
+                },
+                "Sales Invoice Item": {
+                    "doctype": "Delivery Note Item",
+                    "field_map": {
+                        "name": "si_detail",  # Link to Sales Invoice Item row
+                        "item_code": "item_code",
+                        "qty": "qty",
+                        "rate": "rate",
+                        "parent": "against_sales_invoice",
+                    }
+                }
+            }, 
+            target_doc=None
+            )
+            delivery_note.save()
+            frappe.msgprint(f"Delivery Note created.")
+            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
+        
+        
+        # else:
+        #     # frappe.msgprint("NO")
+        #     raise Exception(", Sorry")
+    except Exception as e:
+        frappe.msgprint("Delivery Note is not created {}".format(str(e)))

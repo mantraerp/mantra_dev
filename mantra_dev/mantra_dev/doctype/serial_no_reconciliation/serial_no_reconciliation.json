@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-29 11:47:44.891580",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "column_break_0zox",
+  "warehouse",
+  "section_break_8xab",
+  "serial_no",
+  "get_data",
+  "column_break_uvtd",
+  "non_matching_serial_no",
+  "section_break_j2un",
+  "item_serial_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_8xab",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_0zox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Serial No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "get_data",
+   "fieldtype": "Button",
+   "label": "Get Data"
+  },
+  {
+   "fieldname": "column_break_uvtd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "non_matching_serial_no",
+   "fieldtype": "Text",
+   "label": "Non Matching Serial No"
+  },
+  {
+   "fieldname": "section_break_j2un",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "item_serial_no",
+   "fieldtype": "Table",
+   "label": "Item Serial No",
+   "options": "Item Serial No"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-29 15:46:20.378395",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Serial No Reconciliation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

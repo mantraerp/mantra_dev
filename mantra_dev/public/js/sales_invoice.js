@@ -21,6 +21,33 @@ frappe.ui.form.on('Sales Invoice', {
             });
         }
     },
+
+    
+    on_submit(frm){
+        frappe.call({
+            method: "mantra_dev.backend_code.sales_invoice.sales_invoice.create_delivery_note",
+            args: {
+                data: frm.doc,
+            },
+            callback: function(r) {
+                console.log('lllllllllllll');
+            }
+        });
+    },
+
+    
+    einvoice_status(frm){
+        frappe.call({
+            method: "mantra_dev.backend_code.sales_invoice.sales_invoice.create_delivery_note",
+            args: {
+                data: frm.doc,
+            },
+            callback: function(r) {
+                console.log('dsfgsdfsdf');
+            }
+        });
+    },
+
     
 });
 
