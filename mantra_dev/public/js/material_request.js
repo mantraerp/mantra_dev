@@ -2,26 +2,26 @@ frappe.ui.form.on('Material Request', {
     refresh(frm) {
 
 
-        if (frm.doc.workflow_state == "Cancelled"){
-			frappe.msgprint('fsdfsdfsdfsdfsdfsdfsdfsdfsdfsdfsdf')
-			// var items = frm.doc.items.length
-			// var item_code = []
-			// frm.doc.items.forEach((item) => {
-			// 	if (item.item_code) {
-			// 		item_code.push(item.item_code)
-			// 	}
-			// })
-			// console.log(item_code)
-			// console.log(items)
-			// if (items != item_code.length) {
-			// 	frappe.throw("Please enter vaild Item Code")
-			// 	// validate:false
-			// }
-			// // if (frm.doc.total == 0) {
-			// 	//     frm.set_value("per_billed", 100)
-			// 	// }
+        // if (frm.doc.workflow_state == "Cancelled"){
+		// 	frappe.msgprint('fsdfsdfsdfsdfsdfsdfsdfsdfsdfsdfsdf')
+		// 	// var items = frm.doc.items.length
+		// 	// var item_code = []
+		// 	// frm.doc.items.forEach((item) => {
+		// 	// 	if (item.item_code) {
+		// 	// 		item_code.push(item.item_code)
+		// 	// 	}
+		// 	// })
+		// 	// console.log(item_code)
+		// 	// console.log(items)
+		// 	// if (items != item_code.length) {
+		// 	// 	frappe.throw("Please enter vaild Item Code")
+		// 	// 	// validate:false
+		// 	// }
+		// 	// // if (frm.doc.total == 0) {
+		// 	// 	//     frm.set_value("per_billed", 100)
+		// 	// 	// }
 				
-			}
+		// 	}
 
 
 

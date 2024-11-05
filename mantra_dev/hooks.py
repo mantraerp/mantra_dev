@@ -11,6 +11,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mantra_dev/css/mantra_dev.css"
+app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
     "/assets/mantra_dev/js/email_button.js",
     "/assets/mantra_dev/js/workflow.js",
@@ -145,7 +146,9 @@ override_doctype_class = {
     # "Purchase Receipt": "mantra_dev.purchase_receipt.PurchaseReceipt",
     "Material Request": "mantra_dev.material_request.MaterialRequest",
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
-    "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry"
+    "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
+    "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction"
+
 }
 
 # Document Events
@@ -165,6 +168,9 @@ doc_events = {
     # # "Subcontracting Receipt": {
     #     "before_submit": "mantra_dev.backend_code.subcontracting.subcontracting_receipt.make_stock_entry"
     # }
+    "Bank Transaction": {
+		"on_update_after_submit": "mantra_dev.overrides.bank_transaction.on_update_after_submit",
+	}
 }
 
 # Scheduled Tasks
