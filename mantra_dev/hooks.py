@@ -298,3 +298,6 @@ fixtures = [
     {"dt": "Custom DocPerm",},
     {"dt": "Role",},
 ]
+
+
+get_matching_queries = "mantra_dev.mantra_dev.doctype.bank_reconciliation_tool_mantra.bank_reconciliation_tool_mantra.get_matching_queries"
