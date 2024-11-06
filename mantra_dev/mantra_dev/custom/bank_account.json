@@ -468,7 +468,7 @@
    "role": "Accounts - Banking Manager",
    "select": 1,
    "share": 0,
-   "submit": 0,
+   "submit": 1,
    "write": 1
   },
   {

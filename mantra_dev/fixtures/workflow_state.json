@@ -1,0 +1,137 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-05 12:43:33.702466",
+  "name": "Primary Approval",
+  "style": "Primary",
+  "workflow_state_name": "Primary Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-03-12 16:25:31.643497",
+  "name": "To Check",
+  "style": "Info",
+  "workflow_state_name": "To Check"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-03-27 17:11:20.363041",
+  "name": "Approval Requested",
+  "style": "Info",
+  "workflow_state_name": "Approval Requested"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-09-14 15:23:37.812144",
+  "name": "Processed",
+  "style": "Success",
+  "workflow_state_name": "Processed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-04-02 16:50:55.498030",
+  "name": "Cancelled",
+  "style": "Danger",
+  "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:11:17.680685",
+  "name": "BU Rejection",
+  "style": "",
+  "workflow_state_name": "BU Rejection"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-03-08 17:19:25.858649",
+  "name": "Initiated",
+  "style": "Danger",
+  "workflow_state_name": "Initiated"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "Hold",
+  "style": "Danger",
+  "workflow_state_name": "Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-04-03 12:07:13.447231",
+  "name": "Posted in Tally",
+  "style": "Success",
+  "workflow_state_name": "Posted in Tally"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2024-01-25 17:56:40.645048",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-03-12 16:25:57.261501",
+  "name": "Checked",
+  "style": "Success",
+  "workflow_state_name": "Checked"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
+  "style": "",
+  "workflow_state_name": "BU Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:05:19.885801",
+  "name": "Reviewed",
+  "style": "",
+  "workflow_state_name": "Reviewed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2024-01-25 17:56:40.644234",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2024-01-25 17:56:40.643417",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
+ }
+]

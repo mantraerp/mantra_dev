@@ -290,12 +290,17 @@ override_whitelisted_methods = {
 # }
 
 fixtures = [
+    "Workflow",
+    "Workflow State",
+    "Workflow Action Master",
+    "Letter Head",
     {"dt": "Report", "filters": [["module", "in", ["Mantra Dev"]]]},
-    # {"dt": "Print Format", "filters": [["module", "in", ["Mantra Dev"]]]},
+    {"dt": "Print Format", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Server Script", "filters": [["module", "in", ["Mantra Dev"]]]},
-    # {"dt": "Client Script", "filters": [["module", "in", ["Mantra Dev"]]]},
+    {"dt": "Client Script", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Property Setter", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Custom DocPerm",},
+    {"dt": "Document Naming Rule"},
     {"dt": "Role",},
 ]
 

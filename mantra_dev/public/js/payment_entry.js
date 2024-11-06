@@ -1,15 +1,15 @@
 frappe.ui.form.on("Payment Entry", {
 
 
-  before_save(frm){
-    if (!frm.doc.mode_of_payment){
-      
+  before_save(frm) {
+    if (!frm.doc.mode_of_payment) {
+
     }
-    else{
-      if (frm.doc.status === 'Draft' && !frm.doc.mode_of_payment.includes('H2H')){
-        frm.set_value('custom_unique_batch_number', 'Not Available');   
+    else {
+      if (frm.doc.status === 'Draft' && !frm.doc.mode_of_payment.includes('H2H')) {
+        frm.set_value('custom_unique_batch_number', 'Not Available');
       }
-      else{
+      else {
         frm.set_value('custom_unique_batch_number')
       }
     }
@@ -31,18 +31,22 @@ frappe.ui.form.on("Payment Entry", {
       });
     }, 1000);
   },
-  after_workflow_action: function (frm) {    
-    if (frm.doc.workflow_state == "Approved") {           
-        console.log("on_submit function called");
-        frm.set_value("custom_approved_by",frappe.session.user)
-        frm.update()
-        frm.save()
+  after_workflow_action: function (frm) {
+    if (frm.doc.workflow_state == "Approved") {
+      console.log("on_submit function called");
+      frm.set_value("custom_approved_by", frappe.session.user)
+      frm.update()
+      frm.save()
 
     }
   }
 });
 
 frappe.listview_settings["Payment Entry"] = {
+  refresh: function (listview) {
+    $(".layout-side-section").hide();
+
+  },
   onload: function (listview) {
     if (frappe.user.has_role("Make Payment")) {
       listview.page.add_inner_button(__("Make Payment"), function () {
@@ -182,20 +186,20 @@ function selectPaymentEntry(bank_account) {
         frappe.call({
           method: "mantra_dev.api_code.banck_transaction.upload_file",
           args: {
-            payment_entry_list:r.message.payment_entry_list,
+            payment_entry_list: r.message.payment_entry_list,
             bank_account: bank_account,
           },
           callback: function (r) {
             if (r.message) {
-              if(r.message=="Done"){
+              if (r.message == "Done") {
                 // location.reload()
                 window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
               }
-              else{
+              else {
                 // window.location.reload()
               }
 
-              
+
 
 
             }
