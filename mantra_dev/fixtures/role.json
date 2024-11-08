@@ -220,14 +220,14 @@
   "home_page": null,
   "is_custom": 0,
   "list_sidebar": 1,
-  "modified": "2024-01-25 17:56:10.189185",
+  "modified": "2024-11-08 11:42:07.260752",
   "name": "All",
   "notifications": 1,
   "restrict_to_domain": null,
   "role_name": "All",
   "search_bar": 1,
   "timeline": 1,
-  "two_factor_auth": 0,
+  "two_factor_auth": 1,
   "view_switcher": 1
  },
  {

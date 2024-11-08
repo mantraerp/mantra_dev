@@ -175,6 +175,27 @@ def repost_entries_single(doc_name,status):
 	reply['message']="Job is schedule in background"
 	return reply
 
+@frappe.whitelist(allow_guest=True)
+def repost_entries_query(query):
+
+	if str(query.lower()).startswith("delete"):
+		return "Delete query not perform"
+
+
+	reply = {}
+	# query = "SELECT name from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation <= '{}' and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc limit 100".format(now(),'2024-11-1 00:00:52.242515')
+	# query = "SELECT creation from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc".format('2024-10-01 00:00:52.242515')
+
+	reply['query']=query
+	test= frappe.db.sql(query,as_dict=1)
+	reply['data']=test
+	reply['data_length']=len(test)
+
+	return reply
+
+
+
+
 
 def repost(doc):
 

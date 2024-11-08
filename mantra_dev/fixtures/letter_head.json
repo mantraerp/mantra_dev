@@ -20,11 +20,11 @@
   "letter_head_name": "Stock Entry",
   "modified": "2024-04-16 13:38:18.423558",
   "name": "Stock Entry",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
-  "content": "<div style=\"display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0, 0, 0, 0.3);\"> \n    <div style=\"text-align: right; padding: 5px;\">\n        <h3 style=\"font-size: 16px; color: cornflowerblue; margin: 0px;\">MANTRA SOFTECH (INDIA) PRIVATE LIMITED</h3>\n        <p style=\"font-size: 10px; color: black;\"><b>ISO 9001 : 2015 COMPANY</b></p>\n        <p style=\"font-size: 12px; color: black;\"><b>CIN No: U72200GJ2006PTC048092</b></p>\n    </div>\n    <div style=\"padding: 5px;\"> \n        <img style=\"height:40px; width: 170px;\" src=\"/files/mantratagline.png\"> \n    </div>\n</div>",
+  "content": "<div style=\"display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0, 0, 0, 0.3);\"> \n    <div style=\"text-align: right; padding: 5px;\">\n        <h3 style=\"font-size: 16px; color: cornflowerblue; margin: 0px;\">MANTRA SOFTECH (INDIA) PRIVATE LIMITED</h3>\n        <p style=\"font-size: 10px; color: black;\"><b>ISO 9001 : 2015 COMPANY</b></p>\n        <p style=\"font-size: 12px; color: black;\"><b>CIN No: U72200GJ2006PTC048092</b></p>\n    </div>\n    <div style=\"padding: 5px;\"> \n        <img style=\"height:40px; width: 170px;\" src=\"/files/Mantra-Logo_1.png\"> \n    </div>\n</div>",
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Letter Head",
@@ -41,7 +41,7 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Salary Slip",
-  "modified": "2024-10-23 17:56:58.536519",
+  "modified": "2024-11-08 11:51:12.712185",
   "name": "Salary Slip",
   "source": "HTML"
  },
@@ -66,11 +66,11 @@
   "letter_head_name": "Proforma Invoice",
   "modified": "2024-03-08 12:08:57.638474",
   "name": "Proforma Invoice",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
-  "content": "<div style=\"display: flex;\n    border: 1px solid black;\n    justify-content: space-between;\n    align-items: center;\">\n  <div style=\"width: 25%; padding: 20px;\">\n    <img style=\"height: 40px; width: 170px;\" src=\"/files/mantralogo.png\">\n    <p style=\"margin: 0; padding-top: 10px; font-size: 10px;\">\n      <b>CIN No.: U72200GJ2006PTC048092</b>\n    </p>\n  </div>\n  <div style=\"width: 40%;\n      text-align: center;\n      padding: 0px !important;\n      border-left: none;\">\n    <div style=\"text-align: center;\">\n      <p style=\"margin: 0; font-size: 20px;\">\n        MANTRA SOFTECH (INDIA) PRIVATE LIMITED\n      </p>\n      <p style=\"margin: 0;\"><b>(ISO 9000:2015 COMPANY)</b></p>\n      <p style=\"margin: 0;\">B203-Shapath Hexa</p>\n      <p style=\"margin: 0;\">Nr. Gujrat High Court, S.G. Highway</p>\n      <p style=\"margin: 0;\">Ahmedabad, Gujarat ,India, 380060</p>\n      <p style=\"margin: 0;\"><b>GSTIN: 24AAECM6360N1Z6</b></p>\n      <p style=\"margin: 0;\"><b>PAN No:AAECM6360N {{doc.po_no}}</b></p>\n    </div>\n  </div>\n  <div>\n    <!-- old code -->\n    <!-- {% if doc.irn %}\n        &amp;amp;amp;amp;amp;amp;lt;div style=&amp;amp;amp;amp;amp;amp;quot;width: 70%; text-align: right; padding: 0px !important; border-left: none;&amp;amp;amp;amp;amp;amp;quot;&amp;amp;amp;amp;amp;amp;gt;\n            &amp;amp;amp;amp;amp;amp;lt;img src=&amp;amp;amp;amp;amp;amp;quot;https://chart.googleapis.com/chart?cht=qr&amp;amp;amp;amp;amp;amp;amp;amp;chl={{doc.irn}}&amp;amp;amp;amp;amp;amp;amp;amp;chs=160x160&amp;amp;amp;amp;amp;amp;amp;amp;chld=L|0&amp;amp;amp;amp;amp;amp;quot; class=&amp;amp;amp;amp;amp;amp;quot;qr-code img-thumbnail \n            img-responsive&amp;amp;amp;amp;amp;amp;quot;&amp;amp;amp;amp;amp;amp;gt;\n       &amp;amp;amp;amp;amp;amp;lt;/div&amp;amp;amp;amp;amp;amp;gt;\n       {% else %}\n       &amp;amp;amp;amp;amp;amp;lt;div&amp;amp;amp;amp;amp;amp;gt;\n\n       &amp;amp;amp;amp;amp;amp;lt;/div&amp;amp;amp;amp;amp;amp;gt;\n       {%endif%} -->\n    <!-- new code for invoice log -->\n    {% if doc.irn %}\n{% set e_invoice_log = frappe.db.get_value(\n \"e-Invoice Log\", doc.irn, (\"invoice_data\", \"signed_qr_code\"), as_dict=True\n) %}\n\n{%- set invoice_data = dict(json.loads(e_invoice_log.invoice_data)) -%}\n\n <img src=\"{{ doc.po_no }}\" class=\"qrcode\">\n{% endif %}\n  </div>\n</div>",
+  "content": "<div style=\"display: flex;\n    border: 1px solid black;\n    justify-content: space-between;\n    align-items: center;\">\n  <div style=\"width: 25%; padding: 20px;\">\n    <img style=\"height: 40px; width: 170px;\" src=\"/files/mantralogo.png\">\n    <p style=\"margin: 0; padding-top: 10px; font-size: 10px;\">\n      <b>CIN No.: U72200GJ2006PTC048092</b>\n    </p>\n  </div>\n  <div style=\"width: 40%;\n      text-align: center;\n      padding: 0px !important;\n      border-left: none;\">\n    <div style=\"text-align: center;\">\n      <p style=\"margin: 0; font-size: 20px;\">\n        MANTRA SOFTECH (INDIA) PRIVATE LIMITED\n      </p>\n      <p style=\"margin: 0;\"><b>(ISO 9000:2015 COMPANY)</b></p>\n      <p style=\"margin: 0;\">B203-Shapath Hexa</p>\n      <p style=\"margin: 0;\">Nr. Gujrat High Court, S.G. Highway</p>\n      <p style=\"margin: 0;\">Ahmedabad, Gujarat ,India, 380060</p>\n      <p style=\"margin: 0;\"><b>GSTIN: 24AAECM6360N1Z6</b></p>\n      <p style=\"margin: 0;\"><b>PAN No:AAECM6360N {{doc.po_no}}</b></p>\n    </div>\n  </div>\n  <div>\n    <!-- old code -->\n    <!-- {% if doc.irn %}\n        &amp;amp;amp;amp;amp;amp;amp;lt;div style=&amp;amp;amp;amp;amp;amp;amp;quot;width: 70%; text-align: right; padding: 0px !important; border-left: none;&amp;amp;amp;amp;amp;amp;amp;quot;&amp;amp;amp;amp;amp;amp;amp;gt;\n            &amp;amp;amp;amp;amp;amp;amp;lt;img src=&amp;amp;amp;amp;amp;amp;amp;quot;https://chart.googleapis.com/chart?cht=qr&amp;amp;amp;amp;amp;amp;amp;amp;amp;chl={{doc.irn}}&amp;amp;amp;amp;amp;amp;amp;amp;amp;chs=160x160&amp;amp;amp;amp;amp;amp;amp;amp;amp;chld=L|0&amp;amp;amp;amp;amp;amp;amp;quot; class=&amp;amp;amp;amp;amp;amp;amp;quot;qr-code img-thumbnail \n            img-responsive&amp;amp;amp;amp;amp;amp;amp;quot;&amp;amp;amp;amp;amp;amp;amp;gt;\n       &amp;amp;amp;amp;amp;amp;amp;lt;/div&amp;amp;amp;amp;amp;amp;amp;gt;\n       {% else %}\n       &amp;amp;amp;amp;amp;amp;amp;lt;div&amp;amp;amp;amp;amp;amp;amp;gt;\n\n       &amp;amp;amp;amp;amp;amp;amp;lt;/div&amp;amp;amp;amp;amp;amp;amp;gt;\n       {%endif%} -->\n    <!-- new code for invoice log -->\n    {% if doc.irn %}\n{% set e_invoice_log = frappe.db.get_value(\n \"e-Invoice Log\", doc.irn, (\"invoice_data\", \"signed_qr_code\"), as_dict=True\n) %}\n\n{%- set invoice_data = dict(json.loads(e_invoice_log.invoice_data)) -%}\n\n <img src=\"{{ doc.po_no }}\" class=\"qrcode\">\n{% endif %}\n  </div>\n</div>",
   "disabled": 1,
   "docstatus": 0,
   "doctype": "Letter Head",
@@ -89,7 +89,7 @@
   "letter_head_name": "test",
   "modified": "2024-03-11 12:50:06.464255",
   "name": "test",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -112,7 +112,7 @@
   "letter_head_name": "Delivery Challan",
   "modified": "2024-03-20 12:44:37.889240",
   "name": "Delivery Challan",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -135,7 +135,7 @@
   "letter_head_name": "Purchase Order",
   "modified": "2024-10-09 18:45:49.264482",
   "name": "Purchase Order",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -158,7 +158,7 @@
   "letter_head_name": "DC Invoice",
   "modified": "2024-06-20 17:34:34.647331",
   "name": "DC Invoice",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -179,7 +179,7 @@
   "image_width": 0.0,
   "is_default": 1,
   "letter_head_name": "Sales Invoice",
-  "modified": "2024-11-04 18:11:19.303261",
+  "modified": "2024-11-08 11:50:51.450245",
   "name": "Sales Invoice",
   "source": "HTML"
  }

@@ -16,6 +16,116 @@ import ast
 from cryptography.fernet import Fernet
 import requests
 
+@frappe.whitelist()
+# Upload Approved Beneficiary file on Snorkel with Indicator A
+def upload_beneficiary_file(doc_name):
+    try:
+
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+
+        file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
+
+        if not directory_list:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
+
+        directory = directory_list[0].get("beneficiary_file_upload_path")
+
+        file_path = os.path.join(directory, file_name)
+
+        header = [
+                'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
+            ]
+
+        bank_account = frappe.get_doc("Bank Account", doc_name)
+
+        data_rows = [[
+            "A",  # Indicator
+            bank_account.party,  # Beneficiary Code
+            bank_account.account_name,  # Beneficiary Name
+            bank_account.custom_ifsc,  # Beneficiary IFSC
+            bank_account.bank_account_no,  # Beneficiary Account No
+            bank_account.custom_branch_location  # Beneficiary Address
+        ]]
+
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path, 'rb') as file:
+                file_content = file.read()
+
+        frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
+        frappe.db.commit()
+        
+        print(f'File {file_name} created successfully in {directory}.')
+        return f"File created successfully: {file_name}"
+
+    except Exception as e :
+        frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
+        return str(e)
+
+@frappe.whitelist()
+# Upload Approved Beneficiary file on Snorkel with Indicator D
+def upload_beneficiary_file_for_cancelled_doc(doc_name):
+    try:
+
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+
+        file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
+
+        if not directory_list:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
+
+        directory = directory_list[0].get("beneficiary_file_upload_path")
+
+        file_path = os.path.join(directory, file_name)
+
+        header = [
+                'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
+            ]
+
+        bank_account = frappe.get_doc("Bank Account", doc_name)
+
+        data_rows = [[
+            "D",  # Indicator
+            bank_account.party,  # Beneficiary Code
+            bank_account.account_name,  # Beneficiary Name
+            bank_account.custom_ifsc,  # Beneficiary IFSC
+            bank_account.bank_account_no,  # Beneficiary Account No
+            bank_account.custom_branch_location  # Beneficiary Address
+        ]]
+
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path, 'rb') as file:
+                file_content = file.read()
+
+        frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
+        frappe.db.commit()
+        
+        print(f'File {file_name} created successfully in {directory}.')
+        return f"File created successfully: {file_name}"
+
+    except Exception as e :
+        frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
+        return str(e)
+
 # Check User & then end Otp On Email
 @frappe.whitelist(allow_guest=True)
 def send_otp(email):

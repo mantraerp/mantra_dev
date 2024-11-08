@@ -18,6 +18,8 @@
   "file_backup_path",
   "column_break_gcyc",
   "bank_statement",
+  "upload_beneficiary_file",
+  "beneficiary_file_upload_path",
   "section_break_upuo",
   "user"
  ],
@@ -105,11 +107,23 @@
    "fieldname": "file_backup_path",
    "fieldtype": "Data",
    "label": "File Backup Path"
+  },
+  {
+   "default": "0",
+   "fieldname": "upload_beneficiary_file",
+   "fieldtype": "Check",
+   "label": "Upload Beneficiary File"
+  },
+  {
+   "depends_on": "upload_beneficiary_file",
+   "fieldname": "beneficiary_file_upload_path",
+   "fieldtype": "Data",
+   "label": "Beneficiary File Upload Path"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-13 12:47:18.587300",
+ "modified": "2024-11-08 17:39:44.449830",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Integration",

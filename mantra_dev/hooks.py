@@ -48,6 +48,7 @@ doctype_js = {
     "Sales Order": "public/js/sales_order.js",
     "Purchase Order": "public/js/purchase_order.js",
     "Employee": "public/js/employee.js",
+    "Bank Account": "public/js/bank_account.js",
     # "Delivery Note": "public/js/delivery_note.js",
 }
 # doctype_js=  {"Sales Invoice" : "public/js/sales_invoice.js"}
@@ -296,11 +297,11 @@ fixtures = [
     "Letter Head",
     {"dt": "Report", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Print Format", "filters": [["module", "in", ["Mantra Dev"]]]},
-    {"dt": "Server Script", "filters": [["module", "in", ["Mantra Dev"]]]},
+    # {"dt": "Server Script", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Client Script", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Property Setter", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Custom DocPerm",},
-    {"dt": "Document Naming Rule"},
+    # {"dt": "Document Naming Rule"},
     {"dt": "Role",},
 ]
 
