@@ -29,7 +29,14 @@ def upload_beneficiary_file(doc_name):
 
         file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
 
-        directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
+        directory_sql = """
+            SELECT beneficiary_file_upload_path
+            FROM `tabBank Integration`
+            WHERE upload_beneficiary_file = 1
+        """
+
+        directory_list = frappe.db.sql(directory_sql, as_dict=True) 
+        # directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
 
         if not directory_list:
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
@@ -84,7 +91,14 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 
         file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
 
-        directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
+        directory_sql = """
+            SELECT beneficiary_file_upload_path
+            FROM `tabBank Integration`
+            WHERE upload_beneficiary_file = 1
+        """
+
+        directory_list = frappe.db.sql(directory_sql, as_dict=True) 
+        # directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
 
         if not directory_list:
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
