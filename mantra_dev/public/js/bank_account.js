@@ -1,6 +1,6 @@
 frappe.ui.form.on('Bank Account', {
     after_workflow_action(frm) {
-        return
+        // return
         // Upload Approved Beneficiary file on Snorkel 
         if (frm.doc.workflow_state === "Approved") {
             if (frm.doc.party_type !== "Shareholder" && !frm.doc.is_company_account) {
@@ -23,7 +23,7 @@ frappe.ui.form.on('Bank Account', {
 
         // Upload Cancelled Beneficiary file on Snorkel
         if (frm.doc.workflow_state === "Cancelled") {
-            return
+            // return
             if (frm.doc.party_type !== "Shareholder" && !frm.doc.is_company_account) {
                 // frappe.msgprint("Hello");
                 frappe.call({

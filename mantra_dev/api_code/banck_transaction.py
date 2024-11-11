@@ -119,7 +119,7 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
         frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
         frappe.db.commit()
         
-        print(f'File {file_name} created successfully in {directory}.')
+        # print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
     except Exception as e :
