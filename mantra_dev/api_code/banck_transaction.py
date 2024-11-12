@@ -43,7 +43,8 @@ def upload_beneficiary_file(doc_name):
 
         directory = directory_list[0].get("beneficiary_file_upload_path")
 
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -66,7 +67,15 @@ def upload_beneficiary_file(doc_name):
             writer.writerows(data_rows) 
 
         with open(file_path, 'rb') as file:
-                file_content = file.read()
+            file_content = file.read()
+
+        with open(file_path2, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path2, 'rb') as file:
+            file_content = file.read()
 
         frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
         frappe.db.commit()
@@ -105,7 +114,8 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 
         directory = directory_list[0].get("beneficiary_file_upload_path")
 
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -128,7 +138,17 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
             writer.writerows(data_rows) 
 
         with open(file_path, 'rb') as file:
-                file_content = file.read()
+            file_content = file.read()
+
+        
+
+        with open(file_path2, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path2, 'rb') as file:
+            file_content = file.read()
 
         frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
         frappe.db.commit()
