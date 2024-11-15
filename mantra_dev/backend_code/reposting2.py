@@ -178,6 +178,10 @@ def repost_entries_single(doc_name,status):
 @frappe.whitelist(allow_guest=True)
 def repost_entries_query(query):
 
+	# frappe.db.commit()
+
+	# return True
+
 	if str(query.lower()).startswith("delete"):
 		return "Delete query not perform"
 

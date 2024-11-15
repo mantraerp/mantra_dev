@@ -14,7 +14,8 @@
   "column_break_uvtd",
   "non_matching_serial_no",
   "section_break_j2un",
-  "item_serial_no"
+  "item_serial_no",
+  "reconcile_all_match"
  ],
  "fields": [
   {
@@ -71,11 +72,16 @@
    "fieldtype": "Table",
    "label": "Item Serial No",
    "options": "Item Serial No"
+  },
+  {
+   "fieldname": "reconcile_all_match",
+   "fieldtype": "Button",
+   "label": "Reconcile All Match"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-29 15:46:20.378395",
+ "modified": "2024-11-15 13:11:52.362837",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Serial No Reconciliation",

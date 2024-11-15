@@ -13,6 +13,72 @@ import traceback
 
 
 
+@frappe.whitelist(allow_guest=True)
+def salary_slip_tbp_value1(salary_slip_no,tbp_value):
+    
+	reply={}
+	reply["message"]="Update sucessfully."
+	reply["status_code"]="200"
+	reply["data"]=[]
+
+	try:
+		# query = "UPDATE `tabSerial No` SET `warehouse`='{}' WHERE `item_code`='{}' AND `name`='{}'".format(warehouse,item_code,serial_no)
+		query = "UPDATE `tabSalary Detail` SET amount={} WHERE salary_component='TBP Balance' AND parent={}".format(tbp_value,salary_slip_no)
+		# return query
+		frappe.db.sql(query)
+		frappe.db.commit()
+		return reply
+	except Exception as e:
+		frappe.local.response['http_status_code'] = 500
+		reply["status_code"]="500"
+		reply["error"]=str(e)
+		reply["message"]=str(e)
+		reply["error1"]=traceback.format_exc()
+		return reply
+
+@frappe.whitelist(allow_guest=True)
+def salary_slip_tbp_value2(salary_slip_no,tbp_value):
+    
+	reply={}
+	reply["message"]="Update sucessfully."
+	reply["status_code"]="200"
+	reply["data"]=[]
+
+	try:
+		# query = "UPDATE `tabSerial No` SET `warehouse`='{}' WHERE `item_code`='{}' AND `name`='{}'".format(warehouse,item_code,serial_no)
+		query = "UPDATE `tabSalary Detail` SET year_to_date={} WHERE salary_component='TBP Balance' AND parent={}".format(tbp_value,salary_slip_no)
+		frappe.db.sql(query)
+		frappe.db.commit()
+		return reply
+	except Exception as e:
+		frappe.local.response['http_status_code'] = 500
+		reply["status_code"]="500"
+		reply["error"]=str(e)
+		reply["message"]=str(e)
+		reply["error1"]=traceback.format_exc()
+		return reply
+
+@frappe.whitelist(allow_guest=True)
+def salary_slip_tbp_value3(salary_slip_no,tbp_value):
+    
+	reply={}
+	reply["message"]="Update sucessfully."
+	reply["status_code"]="200"
+	reply["data"]=[]
+
+	try:
+		# query = "UPDATE `tabSerial No` SET `warehouse`='{}' WHERE `item_code`='{}' AND `name`='{}'".format(warehouse,item_code,serial_no)
+		query = "UPDATE `tabSalary Detail` SET default_amount={} WHERE salary_component='TBP Balance' AND parent={}".format(tbp_value,salary_slip_no)
+		frappe.db.sql(query)
+		frappe.db.commit()
+		return reply
+	except Exception as e:
+		frappe.local.response['http_status_code'] = 500
+		reply["status_code"]="500"
+		reply["error"]=str(e)
+		reply["message"]=str(e)
+		reply["error1"]=traceback.format_exc()
+		return reply
 
 
 @frappe.whitelist(allow_guest=True)

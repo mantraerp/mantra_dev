@@ -15,6 +15,7 @@ import string
 import ast
 from cryptography.fernet import Fernet
 import requests
+from datetime import datetime
 
 @frappe.whitelist()
 # Upload Approved Beneficiary file on Snorkel with Indicator A
@@ -393,7 +394,7 @@ def select_payment_entry(bank_account):
     unique_code=0
     payment_entry_list=[]
     for i in payment_entry:
-            payment_entry_list.append(i['name'])
+        payment_entry_list.append(i['name'])
     return {"payment_entry_list":payment_entry_list}
      
 @frappe.whitelist()
@@ -427,6 +428,7 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
         formatted_date = current_date.strftime("%d%m%Y")
         file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
         file_path = os.path.join(directory, file_name)
+        # file_path2 = os.path.join('/home/mantra/Desktop/Payments', file_name)
         print("\n\n",file_path,"\n\n")
         total_amount = 0
         
@@ -460,10 +462,10 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             payable_location_name = ""
             print_location = ""
             input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
-            date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
+            date = datetime.today().strftime('%d-%b-%Y')
+            # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
             remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
             ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
-            
             bane_add1 = payment_entry.name
             bane_add2 = payment_entry.owner
             bane_add3 = payment_entry.custom_approved_by
@@ -491,6 +493,10 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             writer = csv.writer(file, delimiter="|")
             writer.writerow(header)
             writer.writerows(data_rows)
+        # with open(file_path2, 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter="|")
+        #     writer.writerow(header)
+        #     writer.writerows(data_rows)
         email_file_path='/home/mantra/Documents/email_file_folder/ICICI'
         email_file_name=f"MANTRAS_{unique_batch_number}.csv"
         email_path=os.path.join(email_file_path, email_file_name)
@@ -503,6 +509,8 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
 
         with open(file_path, 'rb') as file:
             file_content = file.read()
+        # with open(file_path2, 'rb') as file:
+        #     file_content = file.read()
 
         with open(email_path, 'rb') as file:
             email_file_content = file.read()

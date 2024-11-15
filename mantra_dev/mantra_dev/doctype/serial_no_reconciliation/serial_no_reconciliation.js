@@ -52,8 +52,33 @@ frappe.ui.form.on("Serial No Reconciliation", {
             }
         }
     },
+    reconcile_all_match(frm){
 
+        if (frm.is_new()) {
+            frappe.throw("Please Save the document first...");
+            return;
+        }
+
+        if(frm.doc.item_serial_no.length==0){
+            frappe.show_alert({ message: "No record found!", indicator: "red" });
+            return;
+        }
+
+        frappe.call({
+            method: "mantra_dev.mantra_dev.doctype.serial_no_reconciliation.serial_no_reconciliation.process_bulk_serial_no",
+            args: {
+                doc_name: frm.doc.name,
+            },
+            callback: function (r) {
+                if (r.message) {
+                    frappe.show_alert({ message: r.message, indicator: "green" });
+                    frm.doc.refresh_field("item_serial_no");
+                }
+            }
+        });
+    },
     refresh(frm) {
+        frm.set_df_property('item_serial_no', 'cannot_add_rows', true);
         // Add Reconcile button in listview of child table
         frm.fields_dict["item_serial_no"].$wrapper.find('.grid-body .rows').find(".grid-row").each(function (i, item) {
             let field = $(item).find('[data-fieldname="reconcile"]');
