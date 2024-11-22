@@ -93,7 +93,7 @@
  },
  {
   "align": "Left",
-  "content": "\t<div style=\"display:flex; justify-content:space-between; border:1px solid black; border-width: 2px; padding:5px; border-bottom: none;\"> <div style=\"padding:5px;\"> <img style=\"height:40px; width: 170px;\" src=\"/files/mantratagline.png\"> <p style=\"margin: 0; padding-top:10px;\"><b>CIN No.: U72200GJ2006PTC048092</b></p> </div> <div style=\"text-align:center;\"> <p style=\"margin: 0;\"><b>MANTRA SOFTECH (INDIA) PRIVATE LIMITED</b></p> <p style=\"margin: 0;\">( ISO 9001 : 2015 COMPANY )</p> <p style=\"margin: 0;\"> B203-Shapath Hexa ,Nr. Gujrat High Court, S.G. Highway </p> <p style=\"margin: 0;\">Ahmedabad, Gujarat, India, 380060</p> </div> </div>",
+  "content": "\t<div style=\"display:flex; justify-content:space-between; border:1px solid black; border-width: 2px; padding:5px; border-bottom: none;\"> <div style=\"padding:5px;\"> <img style=\"height:40px; width: 170px;\" src=\"/files/Mantra-Logo_1.png\"> <p style=\"margin: 0; padding-top:10px;\"><b>CIN No.: U72200GJ2006PTC048092</b></p> </div> <div style=\"text-align:center;\"> <p style=\"margin: 0;\"><b>MANTRA SOFTECH (INDIA) PRIVATE LIMITED</b></p> <p style=\"margin: 0;\">( ISO 9001 : 2015 COMPANY )</p> <p style=\"margin: 0;\"> B203-Shapath Hexa ,Nr. Gujrat High Court, S.G. Highway </p> <p style=\"margin: 0;\">Ahmedabad, Gujarat, India, 380060</p> </div> </div>",
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Letter Head",
@@ -110,9 +110,9 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Delivery Challan",
-  "modified": "2024-03-20 12:44:37.889240",
+  "modified": "2024-11-14 16:00:20.059568",
   "name": "Delivery Challan",
-  "source": "Image"
+  "source": "HTML"
  },
  {
   "align": "Left",

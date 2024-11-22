@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-22 13:53:55.977909",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_name",
+  "bank",
+  "bank_account_no",
+  "workflow_state",
+  "column_break_eokv",
+  "ifsc",
+  "branch_location",
+  "branch_code",
+  "change_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Account Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bank Account No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Workflow State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_eokv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ifsc",
+   "fieldtype": "Data",
+   "label": "IFSC",
+   "translatable": 1
+  },
+  {
+   "fieldname": "branch_location",
+   "fieldtype": "Data",
+   "label": "Branch Location",
+   "translatable": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Branch Code"
+  },
+  {
+   "fieldname": "change_status",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Change Status"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-11-22 14:04:21.048510",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Bank Account Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

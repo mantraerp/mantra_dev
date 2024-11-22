@@ -15,6 +15,13 @@ import mantra_dev.backend_code.shipment.shipment
 import erpnext.selling.doctype.sales_order.sales_order
 import mantra_dev.backend_code.sales_order.sales_order
 
+
+import erpnext.accounts.doctype.bank_account.bank_account
+import mantra_dev.backend_code.bank_account.bank_account
+
+erpnext.accounts.doctype.bank_account.bank_account.BankAccount.on_trash = mantra_dev.backend_code.bank_account.bank_account.BankAccount.on_trash
+
+
 erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items = mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items
 
 erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required

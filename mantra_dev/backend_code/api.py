@@ -16,6 +16,118 @@ import ast
 from cryptography.fernet import Fernet
 import requests
 
+
+
+@frappe.whitelist()
+def add_bank_account(account_table, doc, name1):
+    doc = json.loads(doc)
+    bank_account = frappe.new_doc('Bank Account')
+    bank_account.account_name = doc.get('account_name')
+    bank_account.bank = doc.get('bank')
+    bank_account.party = name1
+    bank_account.bank_account_no = doc.get('bank_account_no')
+    bank_account.custom_branch_location = doc.get('branch_location')
+    bank_account.branch_code = doc.get('branch_code')
+    bank_account.custom_ifsc = doc.get('ifsc')
+    bank_account.party_type = "Supplier"
+    
+    # Link to the Supplier
+    bank_account.parent = name1  # Supplier name
+    bank_account.parenttype = "Supplier"
+    bank_account.parentfield = "custom_bank_account_table"
+    bank_account.insert()
+    frappe.db.commit()
+    # fetch_existing_documents(doc, name)
+    if account_table:
+        doc = account_table
+        name = name1
+        fetch_existing_documents(doc, name)
+    return "heyyy"
+
+
+
+@frappe.whitelist()
+def fetch_existing_documents(doc,name):
+    get_all_accounts = frappe.get_all('Bank Account',filters={'party': name},fields=['*'],)
+    document = frappe.get_doc("Supplier",name)
+    document.set("custom_bank_account_table", [])
+    if get_all_accounts:
+        document.save()
+        for j in get_all_accounts:
+            row = {
+            "workflow_state" : j.workflow_state,
+            "account_name" : j.account_name,
+            "bank_account_no" : j.bank_account_no,
+            "bank" : j.bank,
+            "branch_location" : j.custom_branch_location,
+            "branch_code" : j.branch_code,
+            "ifsc" : j.custom_ifsc,
+            }
+            document.append("custom_bank_account_table", row)
+            document.save()
+    document.save()
+    frappe.db.set_value('Supplier', name, "custom_update_data", 0)
+
+@frappe.whitelist()
+def fetch_workflow_state(doc,name): 
+    get_all_accounts = frappe.get_all('Bank Account',filters={'party': name},fields=['*'],)
+    doc = json.loads(doc)
+    nnnn=''
+    # doc.set("custom_bank_account_table", [])
+    for i in doc:
+        for j in get_all_accounts:
+            if i.get('bank_account_no') in j.bank_account_no:
+                state = j.workflow_state
+                acc_name = j.account_name
+                acc_num = j.bank_account_no
+                acc_bank = j.bank
+                acc_branch_location = j.custom_branch_location
+                acc_branch_code = j.branch_code
+                acc_ifsc = j.custom_ifsc
+                n = i.get('name')
+                frappe.db.set_value('Bank Account Table', n, "workflow_state", state)
+                frappe.db.set_value('Bank Account Table', n, "account_name", acc_name)
+                frappe.db.set_value('Bank Account Table', n, "bank_account_no", acc_num)
+                frappe.db.set_value('Bank Account Table', n, "bank", acc_bank)
+                frappe.db.set_value('Bank Account Table', n, "branch_location", acc_branch_location)
+                frappe.db.set_value('Bank Account Table', n, "branch_code", acc_branch_code)
+                frappe.db.set_value('Bank Account Table', n, "ifsc", acc_ifsc)
+                nnnn = j
+
+    frappe.db.set_value('Supplier', name, "custom_update_data", 0)
+    frappe.db.commit()
+    return nnnn
+
+
+
+@frappe.whitelist()
+def create_bank_account(doc,name):
+    doc = json.loads(doc)
+    for i in doc:
+        bank_account = frappe.new_doc('Bank Account')
+        bank_account.account_name = i.get('account_name')
+        bank_account.bank = i.get('bank')
+        bank_account.party = name
+        bank_account.bank_account_no = i.get('bank_account_no')
+        bank_account.custom_branch_location = i.get('branch_location')
+        bank_account.branch_code = i.get('branch_code')
+        bank_account.custom_ifsc = i.get('ifsc')
+        bank_account.party_type = "Supplier"
+        
+        # Link to the Supplier
+        bank_account.parent = name  # Supplier name
+        bank_account.parenttype = "Supplier"
+        bank_account.parentfield = "custom_bank_account_table"
+        bank_account.insert()
+    frappe.db.commit()
+    return "hello"
+
+
+
+
+
+
+
 @frappe.whitelist()
 def get_party_name(party_type,party):
     if party_type == "Supplier":
