@@ -18,6 +18,41 @@ import requests
 
 
 
+
+# @frappe.whitelist()
+# def update_custom_processed_field():
+#     # Fetch all Purchase Receipts
+#     purchase_receipts = frappe.get_all("Purchase Receipt", fields=["name", "custom_processed"])
+
+#     for pr in purchase_receipts:
+#         # Check if there are linked Purchase Invoice Items with a Purchase Invoice that is not "Cancelled"
+#         linked_invoices = frappe.db.sql("""
+#             SELECT pi.name
+#             FROM `tabPurchase Invoice Item` pii
+#             JOIN `tabPurchase Invoice` pi ON pii.parent = pi.name
+#             WHERE pii.purchase_receipt = %s AND pi.docstatus != 2
+#         """, (pr["name"],), as_dict=True)
+
+#         print(linked_invoices)
+#         # Update the custom_processed field
+#         frappe.db.set_value(
+#             "Purchase Receipt",
+#             pr["name"],
+#             "custom_processed",
+#             1 if linked_invoices else 0
+#         )
+
+#     # Commit the changes to the database
+#     frappe.db.commit()
+
+
+
+
+
+
+
+
+
 @frappe.whitelist()
 def add_bank_account(account_table, doc, name1):
     doc = json.loads(doc)
@@ -172,6 +207,34 @@ def purchase_receipt_check_box(invoice_name, invoice_docstatus):
             # frappe.msgprint(i)
             frappe.db.set_value('Purchase Receipt',i, 'custom_processed', 0)
             frappe.db.commit()
+
+@frappe.whitelist()
+def purchase_receipt_check_box_v1(invoice_name,checkvalue):
+
+    purchase_receipt_list1 = []
+    document = frappe.get_doc('Purchase Invoice', invoice_name)
+
+    items = document.items
+    for i in items:
+        purchase_receipt_list1.append(i.purchase_receipt)
+    purchase_receipt_list1 = set(purchase_receipt_list1)
+    purchase_receipt_list1 = list(purchase_receipt_list1)
+
+    # print(purchase_receipt_list1)
+
+    for i in purchase_receipt_list1:
+        print(i,checkvalue)
+        frappe.db.set_value('Purchase Receipt',i, 'custom_processed', checkvalue)
+    frappe.db.commit()
+
+
+
+@frappe.whitelist()
+def cron_to_check_pr_to_pi():
+    tw = frappe.db.sql("SELECT set_warehouse FROM `tabMaterial Request` WHERE `per_billed` = %s", (mr_no,))
+
+
+
 
         
 @frappe.whitelist()

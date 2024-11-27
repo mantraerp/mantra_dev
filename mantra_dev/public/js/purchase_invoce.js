@@ -22,18 +22,18 @@ frappe.ui.form.on('Purchase Invoice', {
 
 
     refresh(frm) {
-        if (frm.is_dirty()  && !frm.is_new()){
+        // if (frm.is_dirty()  && !frm.is_new()){
 
-            frappe.call({
-                method: "mantra_dev.backend_code.api.purchase_receipt_check_box",
-                args: {
-                    invoice_name: frm.doc.name,
-                    invoice_docstatus: frm.doc.docstatus
-                },
-                callback: function (r) {
-                }
-            });
-        }
+        //     frappe.call({
+        //         method: "mantra_dev.backend_code.api.purchase_receipt_check_box",
+        //         args: {
+        //             invoice_name: frm.doc.name,
+        //             invoice_docstatus: frm.doc.docstatus
+        //         },
+        //         callback: function (r) {
+        //         }
+        //     });
+        // }
     },
 
     before_save(frm) {
@@ -64,6 +64,33 @@ frappe.ui.form.on('Purchase Invoice', {
             });
 
         }
-
     },
+    after_save(frm) {
+        if(frm.doc.docstatus !== 2){
+            frappe.call({
+                method: "mantra_dev.backend_code.api.purchase_receipt_check_box_v1",
+                args: {
+                    invoice_name: frm.doc.name,
+                    checkvalue:1
+                },
+                callback: function (r) {
+                }
+            });
+        }
+    },
+    after_workflow_action: function(frm) {
+
+        if(frm.doc.docstatus === 2)
+        {
+            frappe.call({
+                method: "mantra_dev.backend_code.api.purchase_receipt_check_box_v1",
+                args: {
+                    invoice_name: frm.doc.name,
+                    checkvalue:0
+                },
+                callback: function (r) {
+                }
+            });
+        }
+    }
 });

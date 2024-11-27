@@ -7,8 +7,6 @@ frappe.ui.form.on("Supplier", {
     },
     
     refresh(frm){
-
-
         if(frm.is_new()){
 
             frm.set_df_property('custom_add_bank_account', 'hidden', 1);
@@ -107,7 +105,7 @@ frappe.ui.form.on("Supplier", {
             
         },
         
-        after_save(frm){
+    after_save(frm){
             frappe.call({
                 method: "mantra_dev.backend_code.api.create_bank_account",
                 args: {
