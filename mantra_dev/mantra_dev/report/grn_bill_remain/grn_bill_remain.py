@@ -26,9 +26,10 @@ def execute(filters=None):
 							row['name'],
 							row['posting_date'],
 
+							"{}".format(row['total_qty']),
+							"0",
+							"0",
 							"100%",
-							"0%",
-							# "0%",
 
 							row['status'],
 							row['supplier'],
@@ -41,9 +42,12 @@ def execute(filters=None):
 							row['name'],
 							row['posting_date'],
 
-							"{}%".format(round(100-bill_created,2)),
-							"{}%".format(round(bill_created,2)),
-							# "{}%".format(row['per_billed']),
+							row['total_qty'],
+							"{}".format(bill_created),
+
+							"{}".format(row['total_qty']-bill_created),
+							"{}%".format(dividation_value(row['total_qty'],bill_created)),
+							
 
 							row['status'],
 							row['supplier'],
@@ -57,7 +61,41 @@ def execute(filters=None):
 		
 	return columns, data
 
+def dividation_value(v1,v2):
+
+	if v1==0:
+		return 0
+	
+	if v2==0:
+		return 0
+
+	return round((((v1-v2)*100)/v2),2),
+
+
+
 def check_created_status(pr_no,grand_total):
+
+	query = """SELECT pii.qty,pii.name as docname,pi.name,pii.amount,pi.grand_total FROM `tabPurchase Invoice Item` AS pii INNER JOIN `tabPurchase Invoice` AS pi ON pi.name=pii.parent WHERE pi.status NOT IN ('Cancelled') AND pii.purchase_receipt='"""+str(pr_no)+"""'"""
+	data_raw = frappe.db.sql(query,as_dict=1)
+
+	nameProcess = []
+	amount = 0.0
+
+	for index, row in enumerate(data_raw):
+		# if pr_no=="PR-24-00049":
+		# 	frappe.msgprint(str(row['docname']))
+		if row['docname'] not in nameProcess:
+			# if pr_no=="PR-24-00049":
+			# 	frappe.msgprint(str(row['amount']))
+
+			nameProcess.append(row['docname'])
+			amount += row['qty']
+
+	return amount
+
+
+
+def check_created_status_amount(pr_no,grand_total):
 
 	query = """SELECT pii.name as docname,pi.name,pii.amount,pi.grand_total FROM `tabPurchase Invoice Item` AS pii INNER JOIN `tabPurchase Invoice` AS pi ON pi.name=pii.parent WHERE pi.status NOT IN ('Cancelled') AND pii.purchase_receipt='"""+str(pr_no)+"""'"""
 	data_raw = frappe.db.sql(query,as_dict=1)
@@ -111,8 +149,12 @@ def get_columns(filters):
 	columns.append({'fieldname':'pr_date','label':"Date",'fieldtype':'data','align':'left','width':120})
 
 	
-	columns.append({'fieldname':'pr_create_remain','label':"Remain",'fieldtype':'data','align':'left','width':100})
+	columns.append({'fieldname':'pr_total','label':"Total",'fieldtype':'data','align':'left','width':100})
 	columns.append({'fieldname':'pr__bill_create_remain','label':"Bill Create",'fieldtype':'data','align':'left','width':100})
+
+	columns.append({'fieldname':'pr_create_remain','label':"Remain",'fieldtype':'data','align':'left','width':100})
+	columns.append({'fieldname':'pr_create_remain_per','label':"Remain %",'fieldtype':'data','align':'left','width':100})
+
 	# columns.append({'fieldname':'pr_bill_completed','label':"Bill Completed",'fieldtype':'data','align':'left','width':100})
 
 	columns.append({'fieldname':'pr_status','label':"Status",'fieldtype':'data','align':'left','width':100})
