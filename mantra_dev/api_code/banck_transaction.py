@@ -379,7 +379,7 @@ def select_payment_entry(bank_account):
     # if decrypted_message == otp:
         # get payment reqest id
     sql_query = """
-        SELECT name
+        SELECT name, base_paid_amount_after_tax
         FROM `tabPayment Entry`
         WHERE custom_unique_batch_number IS NULL
         AND docstatus=1
@@ -391,11 +391,16 @@ def select_payment_entry(bank_account):
     # Execute the query and fetch results as dictionaries
     payment_entry = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)       
     print(payment_entry)
-    unique_code=0
-    payment_entry_list=[]
-    for i in payment_entry:
-        payment_entry_list.append(i['name'])
-    return {"payment_entry_list":payment_entry_list}
+    amount=0
+    if payment_entry:
+        unique_code=0
+        payment_entry_list=[]
+        for i in payment_entry:
+            payment_entry_list.append(i['name'])
+            amount += i['base_paid_amount_after_tax']
+        return {"payment_entry_list":payment_entry_list,"amount":amount}
+    else:
+        return {"payment_entry_list":[],"amount":0}
      
 @frappe.whitelist()
 def upload_file(payment_entry_list,bank_account, delimiter=','):

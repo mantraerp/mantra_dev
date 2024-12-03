@@ -182,29 +182,41 @@ function selectPaymentEntry(bank_account) {
     callback: function (r) {
       if (r.message) {
         console.log(r.message)
+        if(r.message.amount === 0){
+          frappe.throw('No related transcation found.')
+        }else{
+          frappe.confirm("Transaction Details:".concat("<br>","Total transaction: ",r.message.payment_entry_list.length,"<br>","Total amount: ",r.message.amount),
+            () => {
+                // action to perform if Yes is selected
+                frappe.call({
+                  method: "mantra_dev.api_code.banck_transaction.upload_file",
+                  args: {
+                    payment_entry_list: r.message.payment_entry_list,
+                    bank_account: bank_account,
+                  },
+                  callback: function (r) {
+                    if (r.message) {
+                      if (r.message == "Done") {
+                        // location.reload()
+                        window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
+                      }
+                      else {
+                        // window.location.reload()
+                      }
+        
+        
+        
+        
+                    }
+                  },
+                });
 
-        frappe.call({
-          method: "mantra_dev.api_code.banck_transaction.upload_file",
-          args: {
-            payment_entry_list: r.message.payment_entry_list,
-            bank_account: bank_account,
-          },
-          callback: function (r) {
-            if (r.message) {
-              if (r.message == "Done") {
-                // location.reload()
-                window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
-              }
-              else {
-                // window.location.reload()
-              }
+            }, () => {
+                // action to perform if No is selected
+                
+            })
+        }
 
-
-
-
-            }
-          },
-        });
         // frappe.msgprint(__('Payment entry selected successfully.'));
       }
     },

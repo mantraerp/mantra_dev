@@ -59,23 +59,23 @@ frappe.ui.form.on("Supplier", {
             });
         });
 
-        if(frm.doc.custom_bank_account_table.length === 0 && frm.doc.workflow_state === 'Approved'){
-            frm.set_df_property('custom_bank_account_table', 'read_only', 1);
-            frm.set_df_property('custom_add_bank_account', 'hidden', 0);
-            if(frm.doc.workflow_state === 'Approved'){
-                frappe.call({
-                    method: "mantra_dev.backend_code.api.fetch_existing_documents",
-                    args: {
-                        doc: frm.doc.custom_bank_account_table,
-                        name: frm.doc.name,
-                    },
-                    callback: function (r) {
-                        // console.log('refresh: ',r);
-                        frm.refresh_field('custom_bank_account_table')     
-                    }
-                })  
-            }
-        }else{
+        // if(frm.doc.custom_bank_account_table.length === 0 && frm.doc.workflow_state === 'Approved'){
+        //     frm.set_df_property('custom_bank_account_table', 'read_only', 1);
+        //     frm.set_df_property('custom_add_bank_account', 'hidden', 0);
+        //     if(frm.doc.workflow_state === 'Approved'){
+        //         frappe.call({
+        //             method: "mantra_dev.backend_code.api.fetch_existing_documents",
+        //             args: {
+        //                 doc: frm.doc.custom_bank_account_table,
+        //                 name: frm.doc.name,
+        //             },
+        //             callback: function (r) {
+        //                 // console.log('refresh: ',r);
+        //                 frm.refresh_field('custom_bank_account_table')     
+        //             }
+        //         })  
+        //     }
+        // }else{
             if (frm.doc.custom_update_data === 1){
                     frappe.call({
                         method: "mantra_dev.backend_code.api.fetch_existing_documents",
@@ -88,7 +88,7 @@ frappe.ui.form.on("Supplier", {
                         }
                     })  
                 }
-        }
+        // }
     },
     after_workflow_action: function(frm) {
             console.log('Parth',frm.doc.custom_bank_account_table);

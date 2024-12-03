@@ -50,6 +50,7 @@ class BankAccount(Document):
 
 	def on_trash(self):
 		delete_contact_and_address("BankAccount", self.name)
+		frappe.db.set_value('Supplier', self.party, "custom_update_data", 1)
 
 	def validate(self):
 		self.validate_company()

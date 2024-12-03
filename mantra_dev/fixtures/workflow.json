@@ -451,7 +451,7 @@
   "doctype": "Workflow",
   "document_type": "Purchase Invoice",
   "is_active": 1,
-  "modified": "2024-10-10 17:50:48.951558",
+  "modified": "2024-11-28 11:29:19.238068",
   "name": "Purchase Invoice",
   "override_status": 1,
   "send_email_alert": 0,
@@ -694,6 +694,30 @@
     "parenttype": "Workflow",
     "state": "Posted in Tally",
     "workflow_builder_id": null
+   },
+   {
+    "action": "Hold",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "next_state": "Hold",
+    "parent": "Purchase Invoice",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Checked",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Purchase Invoice",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Hold",
+    "workflow_builder_id": null
    }
   ],
   "workflow_data": null,
@@ -881,7 +905,7 @@
   "doctype": "Workflow",
   "document_type": "Item",
   "is_active": 1,
-  "modified": "2024-08-23 12:14:12.804210",
+  "modified": "2024-11-28 13:07:36.355763",
   "name": "ITEM Master",
   "override_status": 0,
   "send_email_alert": 0,
@@ -929,6 +953,21 @@
     "state": "Rejected",
     "update_field": "disabled",
     "update_value": "1",
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "SCM - Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "ITEM Master",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "update_field": null,
+    "update_value": null,
     "workflow_builder_id": null
    }
   ],
@@ -1215,7 +1254,7 @@
   "doctype": "Workflow",
   "document_type": "Payment Entry",
   "is_active": 1,
-  "modified": "2024-11-05 19:04:42.796967",
+  "modified": "2024-11-27 17:58:59.114958",
   "name": "Payment Entry",
   "override_status": 0,
   "send_email_alert": 0,
@@ -1309,6 +1348,21 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "System Manager",
+    "avoid_status_override": 0,
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payment Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Cancelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -1394,6 +1448,18 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "state": "Pending",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "next_state": "Cancelled",
+    "parent": "Payment Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approved",
     "workflow_builder_id": null
    }
   ],

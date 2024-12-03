@@ -39,19 +39,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:50:55.498030",
-  "name": "Cancelled",
-  "style": "Danger",
-  "workflow_state_name": "Cancelled"
+  "modified": "2024-02-08 15:11:17.680685",
+  "name": "BU Rejection",
+  "style": "",
+  "workflow_state_name": "BU Rejection"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:11:17.680685",
-  "name": "BU Rejection",
-  "style": "",
-  "workflow_state_name": "BU Rejection"
+  "modified": "2024-03-08 17:19:25.858649",
+  "name": "Initiated",
+  "style": "Danger",
+  "workflow_state_name": "Initiated"
  },
  {
   "docstatus": 0,
@@ -66,10 +66,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-03-08 17:19:25.858649",
-  "name": "Initiated",
+  "modified": "2024-04-02 16:50:55.498030",
+  "name": "Cancelled",
   "style": "Danger",
-  "workflow_state_name": "Initiated"
+  "workflow_state_name": "Cancelled"
  },
  {
   "docstatus": 0,
@@ -93,19 +93,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-03-12 16:25:57.261501",
-  "name": "Checked",
-  "style": "Success",
-  "workflow_state_name": "Checked"
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
+  "style": "",
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
+  "modified": "2024-03-12 16:25:57.261501",
+  "name": "Checked",
+  "style": "Success",
+  "workflow_state_name": "Checked"
  },
  {
   "docstatus": 0,

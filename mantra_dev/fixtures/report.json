@@ -6,6 +6,36 @@
   "docstatus": 0,
   "doctype": "Report",
   "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Sales Invoice",
+  "modified": "2024-11-27 11:33:25.563774",
+  "module": "Mantra Dev",
+  "name": "GRN Bill Remain",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Receipt",
+  "reference_report": null,
+  "report_name": "GRN Bill Remain",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "GRN Bill Remain",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
   "is_standard": "No",
   "javascript": null,
   "json": "{\"columns\":[{\"fieldname\":\"date\",\"fieldtype\":\"Datetime\",\"label\":\"Date\",\"width\":150,\"id\":\"date\",\"name\":\"Date\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"item_code\",\"fieldtype\":\"Link\",\"label\":\"Item\",\"options\":\"Item\",\"width\":100,\"id\":\"item_code\",\"name\":\"Item\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"item_name\",\"label\":\"Item Name\",\"width\":100,\"id\":\"item_name\",\"name\":\"Item Name\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"is_customer_provided_item\",\"fieldtype\":\"Check\",\"label\":\"Is Customer Provided Item\",\"insert_after_index\":2,\"link_field\":{\"fieldname\":\"item_code\",\"names\":{}},\"doctype\":\"Item\",\"width\":100,\"id\":\"is_customer_provided_item\",\"name\":\"Is Customer Provided Item\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"customer\",\"fieldtype\":\"Link\",\"label\":\"Customer\",\"insert_after_index\":3,\"link_field\":{\"fieldname\":\"item_code\",\"names\":{}},\"doctype\":\"Item\",\"options\":\"Customer\",\"width\":100,\"id\":\"customer\",\"name\":\"Customer\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"stock_uom\",\"fieldtype\":\"Link\",\"label\":\"Stock UOM\",\"options\":\"UOM\",\"width\":90,\"id\":\"stock_uom\",\"name\":\"Stock UOM\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"qty\",\"fieldname\":\"in_qty\",\"fieldtype\":\"Float\",\"label\":\"In Qty\",\"width\":80,\"id\":\"in_qty\",\"name\":\"In Qty\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"qty\",\"fieldname\":\"out_qty\",\"fieldtype\":\"Float\",\"label\":\"Out Qty\",\"width\":80,\"id\":\"out_qty\",\"name\":\"Out Qty\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"qty\",\"fieldname\":\"qty_after_transaction\",\"fieldtype\":\"Float\",\"label\":\"Balance Qty\",\"width\":100,\"id\":\"qty_after_transaction\",\"name\":\"Balance Qty\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"warehouse\",\"fieldtype\":\"Link\",\"label\":\"Warehouse\",\"options\":\"Warehouse\",\"width\":150,\"id\":\"warehouse\",\"name\":\"Warehouse\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"item_group\",\"fieldtype\":\"Link\",\"label\":\"Item Group\",\"options\":\"Item Group\",\"width\":100,\"id\":\"item_group\",\"name\":\"Item Group\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"brand\",\"fieldtype\":\"Link\",\"label\":\"Brand\",\"options\":\"Brand\",\"width\":100,\"id\":\"brand\",\"name\":\"Brand\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"description\",\"label\":\"Description\",\"width\":200,\"id\":\"description\",\"name\":\"Description\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"rate\",\"fieldname\":\"incoming_rate\",\"fieldtype\":\"Currency\",\"label\":\"Incoming Rate\",\"options\":\"Company:company:default_currency\",\"width\":110,\"id\":\"incoming_rate\",\"name\":\"Incoming Rate\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"rate\",\"fieldname\":\"valuation_rate\",\"fieldtype\":\"Currency\",\"label\":\"Avg Rate (Balance Stock)\",\"options\":\"Company:company:default_currency\",\"width\":180,\"id\":\"valuation_rate\",\"name\":\"Avg Rate (Balance Stock)\",\"editable\":false,\"compareValue\":null},{\"convertible\":\"rate\",\"fieldname\":\"in_out_rate\",\"fieldtype\":\"Currency\",\"label\":\"Valuation Rate\",\"options\":\"Company:company:default_currency\",\"width\":140,\"id\":\"in_out_rate\",\"name\":\"Valuation Rate\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"stock_value\",\"fieldtype\":\"Currency\",\"label\":\"Balance Value\",\"options\":\"Company:company:default_currency\",\"width\":110,\"id\":\"stock_value\",\"name\":\"Balance Value\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"stock_value_difference\",\"fieldtype\":\"Currency\",\"label\":\"Value Change\",\"options\":\"Company:company:default_currency\",\"width\":110,\"id\":\"stock_value_difference\",\"name\":\"Value Change\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"voucher_type\",\"label\":\"Voucher Type\",\"width\":110,\"id\":\"voucher_type\",\"name\":\"Voucher Type\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"voucher_no\",\"fieldtype\":\"Dynamic Link\",\"label\":\"Voucher #\",\"options\":\"voucher_type\",\"width\":100,\"id\":\"voucher_no\",\"name\":\"Voucher #\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"batch_no\",\"fieldtype\":\"Link\",\"label\":\"Batch\",\"options\":\"Batch\",\"width\":100,\"id\":\"batch_no\",\"name\":\"Batch\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"serial_no\",\"fieldtype\":\"Link\",\"label\":\"Serial No\",\"options\":\"Serial No\",\"width\":100,\"id\":\"serial_no\",\"name\":\"Serial No\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"serial_and_batch_bundle\",\"fieldtype\":\"Link\",\"label\":\"Serial and Batch Bundle\",\"options\":\"Serial and Batch Bundle\",\"width\":100,\"id\":\"serial_and_batch_bundle\",\"name\":\"Serial and Batch Bundle\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"project\",\"fieldtype\":\"Link\",\"label\":\"Project\",\"options\":\"Project\",\"width\":100,\"id\":\"project\",\"name\":\"Project\",\"editable\":false,\"compareValue\":null},{\"fieldname\":\"company\",\"fieldtype\":\"Link\",\"label\":\"Company\",\"options\":\"Company\",\"width\":110,\"id\":\"company\",\"name\":\"Company\",\"editable\":false,\"compareValue\":null}],\"filters\":{\"company\":\"Mantra Softech India Private Limited\",\"from_date\":\"2024-09-28\",\"to_date\":\"2024-10-28\",\"valuation_field_type\":\"Currency\"}}",
