@@ -1,4 +1,5 @@
 {
+ "_seen": "[\"Administrator\"]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -18,6 +19,7 @@
   "sales_order_id",
   "line_id",
   "doument_attachment",
+  "requested_by",
   "amended_from"
  ],
  "fields": [
@@ -123,12 +125,19 @@
    "fieldtype": "Select",
    "label": "Series",
    "options": "MAN/ITEM-REQ/.######"
+  },
+  {
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "options": "User",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-27 22:18:59.067939",
+ "modified": "2024-12-16 14:50:25.292980",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Item Code Request",

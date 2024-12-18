@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "creation": "2024-11-05 16:03:25.377653",
  "default_view": "List",
  "doctype": "DocType",
@@ -117,7 +119,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-05 16:29:35.977163",
+ "modified": "2024-12-14 20:15:17.444123",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Reconciliation Tool Mantra",
@@ -160,5 +162,7 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

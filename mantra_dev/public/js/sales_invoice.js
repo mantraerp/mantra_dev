@@ -25,7 +25,7 @@ frappe.ui.form.on('Sales Invoice', {
     
     on_submit(frm){
         frappe.call({
-            method: "mantra_dev.backend_code.sales_invoice.sales_invoice.create_delivery_note",
+            method: "mantra_dev.backend_code.api.create_delivery_note",
             args: {
                 data: frm.doc,
             },
@@ -38,7 +38,7 @@ frappe.ui.form.on('Sales Invoice', {
     
     einvoice_status(frm){
         frappe.call({
-            method: "mantra_dev.backend_code.sales_invoice.sales_invoice.create_delivery_note",
+            method: "mantra_dev.backend_code.api.create_delivery_note",
             args: {
                 data: frm.doc,
             },

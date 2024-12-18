@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2024-06-26 12:50:09.382006",
  "doctype": "DocType",
@@ -29,7 +31,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-26 12:53:13.239492",
+ "modified": "2024-12-14 20:15:12.542466",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Mode of Payment Setting",
@@ -37,5 +39,7 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

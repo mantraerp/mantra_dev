@@ -1,7 +1,7 @@
-import frappe
-from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-import json
+# import frappe
+# from frappe.model.document import Document
+# from frappe.model.mapper import get_mapped_doc
+# import json
 
 # @frappe.whitelist()
 # def make_dc(doc, method=None):
@@ -112,76 +112,96 @@ import json
        
 
 
-@frappe.whitelist()
-def create_delivery_note(**args):
-    
-    if frappe.get_single('Custom Settings').auto_create_delivery_note==0:
-         return True
+import frappe
+from frappe import _, msgprint, throw
+from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.mapper import get_mapped_doc
+from frappe.model.utils import get_fetch_values
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
-    
-    try:
-        doc = json.loads(args['data'])
-        if doc['einvoice_status'] == "Not Applicable":
-            delivery_note = get_mapped_doc(
-            "Sales Invoice", 
-            doc['name'], {
-                "Sales Invoice": {
-                    "doctype": "Delivery Note",
-                    "field_map": {
-                        "name": 'against_sales_invoice',
-                        "customer": "customer",
-                        "posting_date": "posting_date"
-                    }
-                },
-                "Sales Invoice Item": {
-                    "doctype": "Delivery Note Item",
-                    "field_map": {
-                        "name": "si_detail",  # Link to Sales Invoice Item row
-                        "item_code": "item_code",
-                        "qty": "qty",
-                        "rate": "rate",
-                        "parent": "against_sales_invoice",
-                    }
-                }
-            },
-            target_doc=None
-            )
-            delivery_note.save()
-            frappe.msgprint(f"Delivery Note created.")
-            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
-            
-        elif doc['einvoice_status'] == "Generated":
-            delivery_note = get_mapped_doc(
-            "Sales Invoice", 
-            doc['name'], {
-                "Sales Invoice": {
-                    "doctype": "Delivery Note",
-                    "field_map": {
-                        "name": 'against_sales_invoice',
-                        "customer": "customer",
-                        "posting_date": "posting_date"
-                    }
-                },
-                "Sales Invoice Item": {
-                    "doctype": "Delivery Note Item",
-                    "field_map": {
-                        "name": "si_detail",  # Link to Sales Invoice Item row
-                        "item_code": "item_code",
-                        "qty": "qty",
-                        "rate": "rate",
-                        "parent": "against_sales_invoice",
-                    }
-                }
-            }, 
-            target_doc=None
-            )
-            delivery_note.save()
-            frappe.msgprint(f"Delivery Note created.")
-            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
-        
-        
-        # else:
-        #     # frappe.msgprint("NO")
-        #     raise Exception(", Sorry")
-    except Exception as e:
-        frappe.msgprint("Delivery Note is not created {}".format(str(e)))
+import erpnext
+from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+	get_loyalty_program_details_with_points,
+	validate_loyalty_points,
+)
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	validate_docs_for_deferred_accounting,
+	validate_docs_for_voucher_types,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_account_currency
+from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
+	get_disposal_account_and_cost_center,
+	get_gl_entries_on_asset_disposal,
+	get_gl_entries_on_asset_regain,
+	reset_depreciation_schedule,
+	reverse_depreciation_entry_made_after_disposal,
+)
+from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+from erpnext.controllers.accounts_controller import validate_account_head
+from erpnext.controllers.selling_controller import SellingController
+from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
+from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+
+form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+
+
+
+
+
+
+@frappe.whitelist()
+def make_delivery_note(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
+		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
+
+		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
+		target_doc.amount = target_doc.qty * flt(source_doc.rate)
+
+	doclist = get_mapped_doc(
+		"Sales Invoice",
+		source_name,
+		{
+			"Sales Invoice": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+			"Sales Invoice Item": {
+				"doctype": "Delivery Note Item",
+				"field_map": {
+					"name": "si_detail",
+					"parent": "against_sales_invoice",
+					"serial_no": "serial_no",
+					"sales_order": "against_sales_order",
+					"so_detail": "so_detail",
+					"cost_center": "cost_center",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.delivered_by_supplier != 1 and doc.custom_is_service_item != 1,
+			},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
+			"Sales Team": {
+				"doctype": "Sales Team",
+				"field_map": {"incentives": "incentives"},
+				"add_if_empty": True,
+			},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	return doclist
+
+

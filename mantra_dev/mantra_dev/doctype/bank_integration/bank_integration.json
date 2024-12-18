@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "autoname": "field:bank_account",
  "creation": "2024-06-18 12:05:15.640589",
@@ -123,7 +125,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-08 17:39:44.449830",
+ "modified": "2024-12-14 20:15:12.414225",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Integration",
@@ -144,5 +146,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "track_seen": 1
 }

@@ -113,7 +113,8 @@ function openQuickEntryForm(frm) {
                                             "user_id": frappe.session.user,
                                             "doument_attachment": d.custom_document_attachment,
                                             "form_type": "Material Request",
-                                            "uom": d.uom
+                                            "uom": d.uom,
+                                            "requested_by":frappe.session.user
                                             // Add more fields as needed
                                         }
                                     },

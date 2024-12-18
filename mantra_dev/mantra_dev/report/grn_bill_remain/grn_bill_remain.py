@@ -8,10 +8,8 @@ import traceback
 def execute(filters=None):
 	columns, data = [], []
 
-
 	try:
 		columns = get_columns(filters)
-
 
 		data_raw = getProcessData(filters)
 		nameProcess = []
@@ -69,7 +67,7 @@ def dividation_value(v1,v2):
 	if v2==0:
 		return 0
 
-	return round((((v1-v2)*100)/v2),2),
+	return int((((v1-v2)*100)/v2))
 
 
 

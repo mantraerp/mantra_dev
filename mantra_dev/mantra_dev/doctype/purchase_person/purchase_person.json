@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "autoname": "field:purchase_person_name",
  "creation": "2024-02-14 17:52:41.495119",
@@ -86,7 +88,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-02-14 17:56:00.565048",
+ "modified": "2024-12-14 20:14:53.090181",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Purchase Person",
@@ -109,5 +111,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

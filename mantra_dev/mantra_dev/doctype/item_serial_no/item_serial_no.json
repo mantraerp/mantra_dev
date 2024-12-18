@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2024-10-29 11:44:48.866285",
  "doctype": "DocType",
@@ -55,7 +57,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-05 16:07:25.683210",
+ "modified": "2024-12-14 20:15:17.681085",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Item Serial No",
@@ -63,5 +65,7 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

@@ -38,7 +38,9 @@ frappe.ui.form.on('Bank Account', {
     },
 
     after_workflow_action(frm) {
-        frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
+        if (frm.doc.party_type === "Supplier"){
+            frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
+        }
         // Upload Cancelled Beneficiary file on Snorkel
         if (frm.doc.workflow_state === "Cancelled") {
             if (frm.doc.party_type !== "Shareholder" && !frm.doc.is_company_account) {
@@ -59,7 +61,9 @@ frappe.ui.form.on('Bank Account', {
         }
     },
     after_save(frm){
-        frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
+        if (frm.doc.party_type === "Supplier"){
+            frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
+        }
     },
 
 });

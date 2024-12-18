@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "autoname": "field:invoice_type",
  "creation": "2024-02-27 12:25:45.283663",
@@ -46,7 +48,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-09 11:16:16.359071",
+ "modified": "2024-12-14 20:15:01.876503",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Voucher Type",
@@ -98,5 +100,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

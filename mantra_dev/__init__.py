@@ -15,9 +15,13 @@ import mantra_dev.backend_code.shipment.shipment
 import erpnext.selling.doctype.sales_order.sales_order
 import mantra_dev.backend_code.sales_order.sales_order
 
+import erpnext.accounts.doctype.sales_invoice.sales_invoice
+import mantra_dev.backend_code.sales_invoice.sales_invoice
 
 import erpnext.accounts.doctype.bank_account.bank_account
 import mantra_dev.backend_code.bank_account.bank_account
+
+erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note = mantra_dev.backend_code.sales_invoice.sales_invoice.make_delivery_note
 
 erpnext.accounts.doctype.bank_account.bank_account.BankAccount.on_trash = mantra_dev.backend_code.bank_account.bank_account.BankAccount.on_trash
 

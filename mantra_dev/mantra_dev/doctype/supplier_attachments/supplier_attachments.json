@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2024-06-05 18:06:20.944722",
  "doctype": "DocType",
@@ -29,7 +31,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-05 18:14:20.172033",
+ "modified": "2024-12-14 20:15:10.638659",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Supplier Attachments",
@@ -37,5 +39,7 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

@@ -1,6 +1,16 @@
 frappe.ui.form.on("Payroll Entry", {
     refresh(frm) {
-        if (frm.custom_buttons) frm.clear_custom_buttons();
+
+        if (frm.doc.custom_salary_slip_file_generated === 1 && frm.doc.docstatus === 1){
+            if (frm.custom_buttons) frm.clear_custom_buttons();
+        }else{
+            frm.doc.custom_salary_slip_file_generated = 0
+        }
+
+        // if (frm.doc.docstatus === 0 && !frm.is_new()) {
+        //     if (frm.custom_buttons) frm.clear_custom_buttons();
+        // }
+
         // Check if both Journal Entries are submitted
         frappe.call({
             method: "frappe.client.get_list",
@@ -53,16 +63,17 @@ frappe.ui.form.on("Payroll Entry", {
                 args: { payroll_entry: frm.doc.name },
                 callback: function (r) {
                     console.log(r);
-                    if (r.message && r.message.startsWith("File created successfully")) {
-                        frappe.msgprint(r.message);
-                        frm.remove_custom_button("Generate Salary-Slip.txt");
-                    } else {
-                        frappe.msgprint({
-                            title: "Error",
-                            message: r.message || "File generation failed!",
-                            indicator: "red"
-                        });
-                    }
+                    frm.reload_doc()
+                    // if (r.message && r.message.startsWith("File created successfully")) {
+                    //     frappe.msgprint(r.message);
+                    //     frm.remove_custom_button("Generate Salary-Slip.txt");
+                    // } else {
+                    //     frappe.msgprint({
+                    //         title: "Error",
+                    //         message: r.message || "File generation failed!",
+                    //         indicator: "red"
+                    //     });
+                    // }
                 }
             });
         });

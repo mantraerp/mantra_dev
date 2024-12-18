@@ -20,20 +20,11 @@ class SubcontractingOrder(SubcontractingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import LandedCostTaxesandCharges
+		from erpnext.subcontracting.doctype.subcontracting_order_item.subcontracting_order_item import SubcontractingOrderItem
+		from erpnext.subcontracting.doctype.subcontracting_order_service_item.subcontracting_order_service_item import SubcontractingOrderServiceItem
+		from erpnext.subcontracting.doctype.subcontracting_order_supplied_item.subcontracting_order_supplied_item import SubcontractingOrderSuppliedItem
 		from frappe.types import DF
-
-		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
-			LandedCostTaxesandCharges,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_order_item.subcontracting_order_item import (
-			SubcontractingOrderItem,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_order_service_item.subcontracting_order_service_item import (
-			SubcontractingOrderServiceItem,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_order_supplied_item.subcontracting_order_supplied_item import (
-			SubcontractingOrderSuppliedItem,
-		)
 
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
 		address_display: DF.SmallText | None
@@ -60,16 +51,7 @@ class SubcontractingOrder(SubcontractingController):
 		set_warehouse: DF.Link | None
 		shipping_address: DF.Link | None
 		shipping_address_display: DF.SmallText | None
-		status: DF.Literal[
-			"Draft",
-			"Open",
-			"Partially Received",
-			"Completed",
-			"Material Transferred",
-			"Partial Material Transferred",
-			"Cancelled",
-			"Closed",
-		]
+		status: DF.Literal["Draft", "Open", "Partially Received", "Completed", "Material Transferred", "Partial Material Transferred", "Cancelled", "Closed"]
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
 		supplier_address: DF.Link | None

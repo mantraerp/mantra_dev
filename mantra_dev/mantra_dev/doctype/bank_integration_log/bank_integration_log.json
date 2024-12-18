@@ -1,54 +1,51 @@
 {
- "_seen": "[\"abhishek.jain@mantratec.com\"]",
+ "_seen": "[\"abhishek.jain@mantratec.com\", \"Administrator\"]",
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_rename": 1,
- "creation": "2024-08-07 17:23:34.604699",
+ "creation": "2024-12-12 15:54:34.120550",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "enable",
-  "username",
-  "column_break_vfav",
-  "password"
+  "file_from",
+  "file_type",
+  "file_name"
  ],
  "fields": [
   {
-   "default": "0",
-   "fieldname": "enable",
-   "fieldtype": "Check",
-   "label": "Enable"
+   "fieldname": "file_from",
+   "fieldtype": "Select",
+   "label": "File From",
+   "options": "Mantra\nMefron"
   },
   {
-   "fieldname": "username",
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "Payment\nBene\nSalary\nReverse MIS\nMail Send Bene"
+  },
+  {
+   "fieldname": "file_name",
    "fieldtype": "Data",
-   "label": "Username"
-  },
-  {
-   "fieldname": "column_break_vfav",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "password",
-   "fieldtype": "Data",
-   "label": "Password"
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
- "issingle": 1,
  "links": [],
- "modified": "2024-12-14 20:14:16.954904",
+ "modified": "2024-12-17 15:51:13.380705",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
- "name": "AVDM Setting",
+ "name": "Bank Integration Log",
  "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
    "delete": 1,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
+   "report": 1,
    "role": "System Manager",
    "share": 1,
    "write": 1

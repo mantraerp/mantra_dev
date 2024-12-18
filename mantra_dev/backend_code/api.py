@@ -19,6 +19,160 @@ import requests
 
 
 
+@frappe.whitelist()
+def share_item_with_user(item_code, user_email):
+    """
+    Share an item with a specific user with read rights.
+    
+    :param item_code: The item code of the Item to share
+    :param user_email: The email ID of the user to share the Item with
+    """
+    try:
+        # Use the Frappe Share API to share the document
+        frappe.share.add(
+            doctype="Item",  # Doctype to share
+            name=item_code,  # Name of the document (Item code)
+            user=user_email, # Email ID of the user
+            read=1,          # Grant Read access
+            write=0,         # Do not grant Write access
+            share=0          # Do not grant Share access
+        )
+        # frappe.msgprint(f"Item {item_code} shared with {user_email} successfully.")
+        return f"Item {item_code} shared with {user_email} successfully."
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Error Sharing Item")
+        frappe.throw(f"Failed to share item {item_code} with {user_email}. Please check the error log.")
+
+
+
+
+# @frappe.whitelist()
+# def check():
+#     target_dir=""
+#     doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
+#     target_dir = doc.beneficiary_file_upload_path
+#     print(target_dir)
+
+
+@frappe.whitelist(allow_guest=True)
+def recive_file():
+    # Get the uploaded file
+    uploaded_file = frappe.request.files.get("file")
+    file_type = frappe.form_dict.get("file_type")
+    
+    if not uploaded_file:
+        frappe.throw("No file received!")
+    target_directory =""
+    if file_type == "Bene":
+        doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
+        # target_directory = doc.beneficiary_file_upload_path
+        target_directory = "/home/mantra/Desktop/Storing Folder"
+    else:
+        doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
+        target_directory = doc.file_upload_path
+    # Define the target directory
+    # target_directory = "/home/frappeuser/backup"
+    os.makedirs(target_directory, exist_ok=True)
+
+    # Save the file to the target directory
+    file_path = os.path.join(target_directory, uploaded_file.filename)
+    try:
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(uploaded_file.stream, f)
+        
+        doc = frappe.new_doc('Bank Integration Log')
+        doc.file_from = "Mefron"
+        doc.file_type = file_type
+        doc.file_name = uploaded_file.filename
+        doc.insert(ignore_permissions=True)
+        return {"status": "success", "message": f"File saved at {file_path}"}
+    except Exception as e:
+        frappe.throw(f"Error saving file: {str(e)}")
+
+
+
+
+
+
+@frappe.whitelist()
+def create_delivery_note(**args):
+    
+    if frappe.get_single('Custom Settings').auto_create_delivery_note==0:
+         return True
+
+    
+    try:
+        doc = json.loads(args['data'])
+        if doc['einvoice_status'] == "Not Applicable":
+            delivery_note = get_mapped_doc(
+            "Sales Invoice", 
+            doc['name'], {
+                "Sales Invoice": {
+                    "doctype": "Delivery Note",
+                    "field_map": {
+                        "name": 'against_sales_invoice',
+                        "customer": "customer",
+                        "posting_date": "posting_date"
+                    }
+                },
+                "Sales Invoice Item": {
+                    "doctype": "Delivery Note Item",
+                    "field_map": {
+                        "name": "si_detail",  # Link to Sales Invoice Item row
+                        "item_code": "item_code",
+                        "qty": "qty",
+                        "rate": "rate",
+                        "parent": "against_sales_invoice",
+                    }
+                }
+            },
+            target_doc=None
+            )
+            delivery_note.save()
+            frappe.msgprint(f"Delivery Note created.")
+            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
+            
+        elif doc['einvoice_status'] == "Generated":
+            delivery_note = get_mapped_doc(
+            "Sales Invoice", 
+            doc['name'], {
+                "Sales Invoice": {
+                    "doctype": "Delivery Note",
+                    "field_map": {
+                        "name": 'against_sales_invoice',
+                        "customer": "customer",
+                        "posting_date": "posting_date"
+                    }
+                },
+                "Sales Invoice Item": {
+                    "doctype": "Delivery Note Item",
+                    "field_map": {
+                        "name": "si_detail",  # Link to Sales Invoice Item row
+                        "item_code": "item_code",
+                        "qty": "qty",
+                        "rate": "rate",
+                        "parent": "against_sales_invoice",
+                    }
+                }
+            }, 
+            target_doc=None
+            )
+            delivery_note.save()
+            frappe.msgprint(f"Delivery Note created.")
+            # frappe.msgprint(f"Delivery Note {delivery_note.name} created for Sales Invoice {doc['name']}")
+        
+        
+        # else:
+        #     # frappe.msgprint("NO")
+        #     raise Exception(", Sorry")
+    except Exception as e:
+        frappe.msgprint("Delivery Note is not created {}".format(str(e)))
+
+
+
+
+
+
 # @frappe.whitelist()
 # def update_custom_processed_field():
 #     # Fetch all Purchase Receipts

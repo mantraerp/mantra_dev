@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2024-06-18 11:42:51.682467",
  "doctype": "DocType",
@@ -69,7 +71,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-18 11:58:56.764821",
+ "modified": "2024-12-14 20:15:11.587276",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Integration Settings",
@@ -88,5 +90,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

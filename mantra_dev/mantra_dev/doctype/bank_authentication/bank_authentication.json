@@ -1,5 +1,7 @@
 {
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2024-06-13 16:08:32.561110",
  "doctype": "DocType",
@@ -28,7 +30,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-13 16:09:57.893626",
+ "modified": "2024-12-14 20:15:11.243808",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Authentication",
@@ -47,5 +49,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
 }

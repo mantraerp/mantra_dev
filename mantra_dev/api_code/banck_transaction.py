@@ -16,6 +16,8 @@ import ast
 from cryptography.fernet import Fernet
 import requests
 from datetime import datetime
+import traceback
+
 
 @frappe.whitelist()
 # Upload Approved Beneficiary file on Snorkel with Indicator A
@@ -44,8 +46,11 @@ def upload_beneficiary_file(doc_name):
 
         directory = directory_list[0].get("beneficiary_file_upload_path")
 
+        if not directory:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
+
         file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop/Storing Folder', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -81,6 +86,14 @@ def upload_beneficiary_file(doc_name):
         frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
         frappe.db.commit()
         
+
+        doc = frappe.new_doc('Bank Integration Log')
+        doc.file_from = "Mantra"
+        doc.file_type = "Bene"
+        doc.file_name = file_name
+        doc.insert(ignore_permissions=True)
+
+
         print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
@@ -88,8 +101,95 @@ def upload_beneficiary_file(doc_name):
         frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
         return str(e)
 
+
 @frappe.whitelist()
+# Upload Modified Approved Beneficiary file on Snorkel with Indicator M
+def upload_beneficiary_file_for_modified_doc(doc_name):
+    try:
+
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+
+        file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        directory_sql = """
+            SELECT beneficiary_file_upload_path
+            FROM `tabBank Integration`
+            WHERE upload_beneficiary_file = 1
+        """
+
+        directory_list = frappe.db.sql(directory_sql, as_dict=True) 
+
+        # directory_list = frappe.db.get_list("Bank Integration", filters={'upload_beneficiary_file':1}, fields=["beneficiary_file_upload_path"])
+
+        if not directory_list:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
+
+        directory = directory_list[0].get("beneficiary_file_upload_path")
+
+        if not directory:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
+
+        # file_path = os.path.join(directory, file_name)
+        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
+
+        header = [
+                'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
+            ]
+
+        bank_account = frappe.get_doc("Bank Account", doc_name)
+
+        data_rows = [[
+            "M",  # Indicator
+            bank_account.party,  # Beneficiary Code
+            bank_account.account_name,  # Beneficiary Name
+            bank_account.custom_ifsc,  # Beneficiary IFSC
+            bank_account.bank_account_no,  # Beneficiary Account No
+            bank_account.custom_branch_location  # Beneficiary Address
+        ]]
+
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path, 'rb') as file:
+            file_content = file.read()
+
+        with open(file_path2, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows) 
+
+        with open(file_path2, 'rb') as file:
+            file_content = file.read()
+
+        frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
+        frappe.db.commit()
+        
+
+        doc = frappe.new_doc('Bank Integration Log')
+        doc.file_from = "Mantra"
+        doc.file_type = "Bene"
+        doc.file_name = file_name
+        doc.insert(ignore_permissions=True)
+
+
+
+        print(f'File {file_name} created successfully in {directory}.')
+        return f"File created successfully: {file_name}"
+
+    except Exception as e :
+        frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
+        return str(e)
+
+
 # Upload Approved Beneficiary file on Snorkel with Indicator D
+@frappe.whitelist()
 def upload_beneficiary_file_for_cancelled_doc(doc_name):
     try:
 
@@ -114,6 +214,9 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
 
         directory = directory_list[0].get("beneficiary_file_upload_path")
+
+        if not directory:
+            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
 
         file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
         file_path2 = os.path.join('/home/mantra/Desktop', file_name)
@@ -154,12 +257,190 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
         frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
         frappe.db.commit()
         
+
+
+        doc = frappe.new_doc('Bank Integration Log')
+        doc.file_from = "Mantra"
+        doc.file_type = "Bene"
+        doc.file_name = file_name
+        doc.insert(ignore_permissions=True)
+
+
         # print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
     except Exception as e :
         frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
         return str(e)
+
+
+# get reverse MIS of Beneficiary File
+@frappe.whitelist()
+def get_bene_file(delimiter='|'):
+    try:
+        folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
+        one_hour_ago = datetime.now() - timedelta(hours=1)
+
+        processed_files = []
+        errors = []
+
+        for file_name in os.listdir(folder_path):
+            if file_name.endswith('.txt'):
+                csv_file_path = os.path.join(folder_path, file_name)
+                modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
+                if modification_time >= one_hour_ago:
+                    frappe.logger().info(f"Processing file: {file_name} (Modified at {modification_time})")
+                    processed_files.append(file_name)
+
+                    data = []
+                    with open(csv_file_path, mode='r') as file:
+                        for line in file:
+                            row = line.strip().split(delimiter)
+                            if len(row) < 8:
+                                frappe.logger().warning(f"Skipping row with insufficient columns: {row}")
+                                frappe.sendmail(
+                                    recipients=["ravi.patel@mantratec.com"],
+                                    subject="Bene file row not suffcient",
+                                    message=str(row)
+                                )
+                                continue
+                            data.append(row)
+
+
+
+                    #   if file_name.startswith("MEFRONH2H_MEFRONBENH2HUP"):
+                    #     #Call funcation to send in mefron server
+                    #         frappe.sendmail(
+                    #             recipients=["ravi.patel@mantratec.com"],
+                    #             subject="Bene file need to send on mefron server",
+                    #             message="This is bene file send on mefron server"
+                    #         )
+                    #         return
+
+
+                    for data_dict in data:
+                        try:
+                            #If beny get sucussesful uploaded
+                            if data_dict[0] == "P" and data_dict[6] == "Added":
+                                bank_account_no = data_dict[4]
+                                bank_account_doc = frappe.db.get_value(
+                                    "Bank Account", 
+                                    {"bank_account_no": bank_account_no, "docstatus": 1}, 
+                                    "name"
+                                )
+                                if bank_account_doc:
+                                    frappe.db.set_value(
+                                        "Bank Account", bank_account_doc, {"custom_remark": data_dict[7]}
+                                    )
+                                    frappe.db.commit()
+
+                            elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
+
+                                wantToReject = True
+
+
+                                # if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table']:
+                                #     wantToReject = False
+                                #     frappe.sendmail(
+                                #         recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
+                                #         subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
+                                #         message=str(data_dict)
+                                #     )
+                                #     return "Bank account is already uploaded on CMS."
+
+
+                                bank_account_no = data_dict[5]
+                                bank_account_doc = frappe.db.get_value(
+                                    "Bank Account", 
+                                    {"bank_account_no": bank_account_no, "docstatus": 1}, 
+                                    "name"
+                                )
+                                if bank_account_doc:
+                                    if wantToReject:
+                                        frappe.db.set_value(
+                                            "Bank Account", bank_account_doc, {
+                                                "workflow_state": "Rejected",
+                                                "custom_beneficiary_file_uploaded": 0,
+                                                "custom_remark": data_dict[8]
+                                            }
+                                        )
+                                        # frappe.db.commit()
+                                        error_message = f"""
+                                            <p><strong>File:</strong> {file_name}</p>
+                                            <p><strong>Row Data:</strong> {data_dict}</p>
+                                            <p>The workflow state has been set to "Rejected" for the bank account with account number: {bank_account_no}.</p>
+                                        """
+                                        previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene'],['file_name', '=', data_dict[0]]])
+                                        if len(previous_file)==0:
+                                            send_bene_file_error_email(error_message)
+
+                                            #insert bank transaction log
+                                            doc = frappe.new_doc('Bank Integration Log')
+                                            doc.file_from = "Mantra"
+                                            doc.file_type = "Mail Send Bene"
+                                            doc.file_name = data_dict[0]
+                                            doc.insert(ignore_permissions=True)
+                                    else:
+                                        frappe.db.set_value(
+                                            "Bank Account", bank_account_doc, {
+                                                "custom_remark": data_dict[8]
+                                            }
+                                        )
+                            # else:
+                            #     frappe.sendmail(
+                            #         recipients=["ravi.patel@mantratec.com"],
+                            #         subject="Bene file not match on any condition",
+                            #         message=str(data_dict)
+                            #     )    
+
+                        except Exception as e:
+                            frappe.logger().error(f"Error processing row {data_dict}: {e}")
+                            errors.append({"file": file_name, "row": data_dict, "error": str(e)})
+
+        if errors:
+            error_details = "".join([
+                f"""
+                <p><strong>File:</strong> {error['file']}</p>
+                <p><strong>Row:</strong> {error['row']}</p>
+                <p><strong>Error:</strong> {error['error']}</p>
+                <hr>
+                """ for error in errors
+            ])
+            send_bene_file_error_email(error_details)
+
+    except FileNotFoundError as e:
+        error_message = f"Folder path {folder_path} not found. Exception: {str(e)}"
+        send_bene_file_error_email(error_message)
+
+    except Exception as e:
+        error_message = f"Unexpected error: {str(e)}"
+        send_bene_file_error_email(error_message)
+
+def send_bene_file_error_email(error_message):
+    """
+    Sends an email with the error message.
+    """
+    recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"]  # Replace with actual recipients
+    subject = "Error in Beneficiary File Processing"
+    message = f"""
+    <p>Dear User,</p>
+    <p>An error occurred during the execution of the scheduled task:</p>
+    <p>{error_message}</p>
+    <p>Please check the logs and take necessary action.</p>
+    """
+    try:
+        frappe.sendmail(
+            recipients=recipients,
+            subject=subject,
+            message=message
+        )
+        send = flush()
+        print(f"Error email sent to: {recipients}")
+        frappe.logger().info(f"Error email sent to: {recipients}")
+    except Exception as email_error:
+        print(f"Failed to send error email: {email_error}")
+        frappe.logger().error(f"Failed to send error email: {email_error}")
+
 
 # Check User & then end Otp On Email
 @frappe.whitelist(allow_guest=True)
@@ -308,7 +589,7 @@ def login_user(user):
 def login_via_token(login_token: str, number,user):
     sid = frappe.cache().get_value(f"login_token:{login_token}", expires=True)
     if not sid:
-        frappe.respond_as_web_page(_("Invalid Request"), _(
+        frappe.respond_as_web_page(("Invalid Request"), (
             "Invalid Login Token"), http_status_code=417)
         return
 
@@ -588,6 +869,162 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
         return "Done"
     except Exception as e :
         return e
+
+@frappe.whitelist()
+# upload salary slip.txt file on snorkel
+def generate_salary_slip(payroll_entry=None):
+# def generate_salary_slip():
+    # payroll_entry = 'HR-PRUN-2024-00044'
+    try:
+
+        directory_sql = """
+            SELECT file_upload_path
+            FROM `tabBank Integration`
+        """
+
+        directory_list = frappe.db.sql(directory_sql, as_dict=True) 
+
+        if not directory_list:
+            frappe.throw("Payment File Upload Path not set in 'Bank Integration'")
+
+        directory = directory_list[0].get("file_upload_path")
+
+        if not directory:
+            frappe.throw("Payment File Upload Path not set in 'Bank Integration'")
+
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+        file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        # file_name = "MANTRASH2H_MANTRASH2HUP.txt"
+        # directory = '/home/foramshah/Downloads/epayments/PayUpload'
+        # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
+        file_path = os.path.join(directory, file_name)
+        # file_path = os.path.join("/home/mantra/Desktop", file_name)
+        # Fetch Salary Slip details based on Payroll Entry
+        salary_slips = frappe.get_all(
+            "Salary Slip",
+            filters={"payroll_entry": payroll_entry} if payroll_entry else {},
+            fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
+        )
+        
+        if not salary_slips:
+            frappe.throw("No Salary Slips found for the given Payroll Entry.")
+
+        headers = [
+            'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
+            'Amt', 'Pay Mod', 'Date', 'IFSC', 'Payable Location name', 'Print Location',
+            'Bene Mobile no', 'Bene email id', 'Ben add1', 'Ben add2', 'Ben add3',
+            'Ben add4', 'Add details 1', 'Add details 2', 'Add details 3',
+            'Add details 4', 'Add details 5', 'Remarks'
+        ]
+
+        payment_account = frappe.db.get_value("Payroll Entry", payroll_entry, "bank_account") or ""
+        debit_ac_no = frappe.db.get_value("Bank Account", payment_account, "bank_account_no") or ""
+        
+        if debit_ac_no=="":
+            frappe.throw("Debit account not found.")
+
+
+        rows = []
+        rows_not_process = []
+        for slip in salary_slips:
+            # ifsc_code = frappe.db.get_value("Employee", slip["employee"], "ifsc_code") or ""
+            date = datetime.today().strftime('%d-%b-%Y')
+
+            # employee_account_no = frappe.db.get_value("Bank Account", payment_account, "bank_account_no") or ""
+            # employee_account_no, ifsc_code = frappe.db.get_value('Bank Account', {'party_type': 'Employee','party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no', 'custom_ifsc'])
+            employee_account_no=""
+            ifsc_code=""
+            try:
+                employee_account_no, ifsc_code = frappe.db.get_value('Bank Account', {'party_type': 'Employee','party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no', 'custom_ifsc'])
+            except Exception as e:
+                employee_account_no=""
+                ifsc_code=""
+
+            addedInFail = False
+            if employee_account_no in ["",None,"Null","None"]:
+                rows_not_process.append(slip)
+                addedInFail = True
+
+            if ifsc_code in ["",None,"Null","None"]:
+                if not addedInFail:
+                    rows_not_process.append(slip)
+
+            rows.append([
+                debit_ac_no,
+                slip["employee"],
+                employee_account_no,
+                slip["employee_name"],
+                slip["net_pay"],
+                "N",
+                date,
+                ifsc_code,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                slip["name"],
+                "",
+                "",
+                "",
+                "",
+                ""
+            ])
+
+
+        if len(rows_not_process)!=0:
+            message = ""
+            for slip in rows_not_process:
+                message="{}\n{}".format(message,slip["employee"])
+
+
+            print("Error Message","Account no or IFCF code issue with below employee code\n{}".format(message))
+
+            frappe.throw("Account no or IFCF code issue with below employee code\n{}".format(message))
+            return
+
+
+        # frappe.throw("File uploaded")
+        # return 
+
+
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(headers) 
+            writer.writerows(rows)  
+
+        with open(file_path, 'rb') as file:
+            file_content = file.read()
+
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "file_size": len(file_content),
+            "attached_to_doctype": "Payroll Entry",
+            "attached_to_name": payroll_entry,
+            "content": file_content,
+            "is_private": True  # Set this to True if you want it to be private
+        })
+        file_doc.save()
+
+        print(f'File {file_name} created successfully in {directory}.')
+        frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)
+        return f"File created successfully: {file_name}"
+
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Salary Slip TXT Generation Error")
+        frappe.throw("Error\n{}".format(str(traceback.format_exc())))
+        return False
+        # return str(traceback.format_exc())
+        # return str(e)
+
 #this function is use for a pnb file creation
 def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
     try:
@@ -770,6 +1207,7 @@ def get_pnb_file():
                     frappe.db.set_value("Payment Entry",data_dict["Transaction Reference No."],"docstatus",2)
                     frappe.db.commit()
     print(parsed_data)
+
 #get revers Mis From Bank ICICI
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):   
@@ -781,9 +1219,6 @@ def get_icici_bank_file(delimiter='|'):
         
         print("Folder path:", folder_path)
         print("Backup folder:", backup_folder)
-        
-        data = [] 
-        all_data = []
           
         # Iterate over each file in the specified folder
         for file_name in os.listdir(folder_path):
@@ -797,88 +1232,157 @@ def get_icici_bank_file(delimiter='|'):
                 with open(csv_file_path, mode='r') as file:
                     for line in file:
                         row = line.strip().split(delimiter)
-                        print(row)
+                        # print(row)
                         data.append(row)
                 
-                print(len(data))
-                print("Data are printed")
-                
-                i1 = 0
                 for data_dict in data:
-                    print("\n\n\n\n", (data_dict,"vnlkjmkjmj"), "\n\n\n\n")
-                    i1 = i1 + 1
                     
                     try:
-                        # data_dict1 = {
-                        # "Status": data_dict[22],
-                        # }
-                        # print(data_dict1,"Dictdata 1")
-                        # payment_entry_name = data_dict[15]
-                        # status = data_dict1["Status"]
-                        
-                        if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                            if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                                docstatus = 2
-                                frappe.db.set_value("Payment Entry", data_dict[15], {
-                                "custom_payment_status_": "Rejected",
-                                "custom_payment_ref_no": data_dict[21],
-                                "custom_customer_ref_no": data_dict[24],
-                                "custom_instrument_no": data_dict[26],
-                                "custom_instrument_ref_no": data_dict[25],
-                                "custom_liquidation_date": data_dict[23],
-                                "custom_utr_no":  data_dict[28],
-                                "custom_rejection_reason":data_dict[22],
-                                "docstatus": docstatus
-                                })
-                                frappe.db.commit()
+                        if frappe.db.exists("Payment Entry", data_dict[15]):
+                            print("Payment : ",data_dict[15])
 
-                            else :
-                                payment_status = data_dict[22]
-                                docstatus = 1
+                            ERP_status = ""
+                            rejection_reason = ""
+
+
+                            if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                    ERP_status = "Fail"
+                                    rejection_reason = "Rejected"
+
+                                    frappe.db.set_value("Payment Entry", data_dict[15], {
+                                    "workflow_state": "Cancelled",
+                                    })
+                                    
+                                else:
+                                    if data_dict[22] == "Paid":
+                                        ERP_status = "Success"
+                                    else:
+                                        ERP_status = "Authorization Pending"
+                                    
                                 frappe.db.set_value("Payment Entry", data_dict[15], {
-                                "custom_payment_status_": payment_status,
-                                "custom_payment_ref_no": data_dict[21],
-                                "custom_customer_ref_no": data_dict[24],
-                                "custom_instrument_no": data_dict[26],
-                                "custom_instrument_ref_no": data_dict[25],
-                                "custom_liquidation_date": data_dict[23],
-                                "custom_utr_no":  data_dict[28],
-                                "docstatus": docstatus,
-                                
+                                    "custom_payment_status_": ERP_status,
+                                    "custom_payment_ref_no": data_dict[21],
+                                    "custom_customer_ref_no": data_dict[24],
+                                    "custom_instrument_no": data_dict[26],
+                                    "custom_instrument_ref_no": data_dict[25],
+                                    "custom_liquidation_date": data_dict[23],
+                                    "custom_utr_no":  data_dict[28],
+                                    "custom_rejection_reason":rejection_reason,
+                                    # "docstatus": docstatus
                                 })
-                                frappe.db.commit()
-                        else: 
+                                # frappe.db.commit()
+
+
+                        elif frappe.db.exists("Salary Slip", data_dict[15]):
+                            print("Salary : ",data_dict[15])
+
+                            ERP_status = ""
+                            rejection_reason = ""
+
+                            if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                    ERP_status = "Fail"
+                                    rejection_reason = "Rejected"
+                           
+                                else:
+                                    if data_dict[22] == "Paid":
+                                        ERP_status = "Success"
+                                    else:
+                                        ERP_status = "Authorization Pending"
+
+                            # Update Salary Slip
+                                frappe.db.set_value("Salary Slip", data_dict[15], {
+                                    "custom_payment_status": ERP_status,
+                                    "custom_payment_ref_no": data_dict[21],
+                                    "custom_customer_ref_no": data_dict[24],
+                                    "custom_instrument_no": data_dict[26],
+                                    "custom_instrument_ref_no": data_dict[25],
+                                    "custom_liquidation_date": data_dict[23],
+                                    "custom_utr_no":  data_dict[28],
+                                    "custom_rejection_reason":rejection_reason,
+                                })
+                            # frappe.db.commit()
+
+                        else:
+                            if frappe.db.exists("Payment Entry", data_dict[17]):
+                                print("Payment : ",data_dict[17]) 
+
                                 if data_dict[24]=="P":
                                     frappe.db.set_value("Payment Entry", data_dict[17], {
-                                    "custom_rejection_reason":data_dict[25],
-                                    "custom_payment_status_": "Fail",
-                                    "docstatus": 2,
-                                    
+                                        "custom_rejection_reason":data_dict[25],
+                                        "custom_payment_status_": "Fail",
+                                        "workflow_state": "Cancelled",
                                     })
-                                    frappe.db.commit()
+                                    # frappe.db.commit()
                                 else:
                                     frappe.db.set_value("Payment Entry", data_dict[17], {
-                                    "custom_payment_status_": "Fail",
-                                    "docstatus": 2,
+                                        "custom_payment_status_": "Fail",
+                                        "workflow_state": "Cancelled",
                                     })
-                                    frappe.db.commit()
+                                    # frappe.db.commit()
+
+                            elif frappe.db.exists("Salary Slip", data_dict[17]):
+                                print("Salary : ",data_dict[17])
+
+                                if data_dict[24]=="P":
+                                    frappe.db.set_value("Salary Slip", data_dict[17], {
+                                        "custom_rejection_reason":data_dict[25],
+                                        "custom_payment_status": "Fail",
+                                    })
+                                else:
+                                    frappe.db.set_value("Salary Slip", data_dict[17], {
+                                        "custom_payment_status": "Fail",
+                                    })
 
                     except KeyError as ke:
-                        print(f"KeyError: {ke}")
-                        
+                        error_message = f"KeyError: {ke} in file {file_name}"
+                        send_icici_bank_file_error_email(error_message)
+
                     except Exception as e:
-                        print(f"An error occurred while updating Payment Entry: {e}")
+                        error_message = f"An error occurred while processing data_dict: {e} in file {file_name}"
+                        send_icici_bank_file_error_email(error_message)
+
+
                 backup_file_path = os.path.join(backup_folder, file_name)
                 shutil.move(csv_file_path, backup_file_path)
-                print(f"File '{file_name}' has been moved to the backup folder.")  
+                print(f"File '{file_name}' has been moved to the backup folder.")
                 # Move the file to the backup folder after processing
                 
-                    
-                
-    
+        get_bene_result = get_bene_file(delimiter=delimiter)
+        print("Beneficiary file processing result:", get_bene_result)     
+
+        get_bene_file()
+
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return e
+        error_message = f"An error occurred in the get_icici_bank_file function: {e}"
+        send_icici_bank_file_error_email(error_message)
+
+def send_icici_bank_file_error_email(error_message):
+    """
+    Sends an email with the error message.
+    """
+    recipients = ["mailto:ravi.patel@mantratec.com","helpdesk.erp"]  # Replace with actual recipients
+    subject = "Error in ICICI Bank File Processing"
+    message = f"""
+    <p>Dear User,</p>
+    <p>An error occurred during the execution of the scheduled task:</p>
+    <p>{error_message}</p>
+    <p>Please check the logs and take necessary action.</p>
+    """
+    try:
+        frappe.sendmail(
+            recipients=recipients,
+            subject=subject,
+            message=message
+        )
+        send = flush()
+        print(f"Error email sent to: {recipients}")
+    except Exception as email_error:
+        print(f"Failed to send error email: {email_error}")
+ 
+
+
 @frappe.whitelist()
 def send_frappe_mail():   
     try:
@@ -900,7 +1404,7 @@ def send_frappe_mail():
         
         # Send the email
         frappe.sendmail(
-            recipients = 'dhruvikaneriya52@gmail.com',
+            recipients = 'abhishek.jain@mantratec.com',
             subject = 'Subject of the Email',
             message = 'Body of the email',
             attachments=attachments
@@ -908,3 +1412,63 @@ def send_frappe_mail():
         send = flush()
     except Exception as e:
         return e
+
+
+
+@frappe.whitelist()
+def send_file(file_path,file_name):
+    # URL to send the POST request
+    url = "http://192.168.5.56:8003/api/method/mefron_dev.backend_code.api.recive_file"
+
+    # Path to the file to be uploaded
+    file_path = file_path
+    # frappe.msgprint(file_path)
+
+    try:
+        # Open the file in binary mode
+        with open(file_path, "rb") as file:
+            # Prepare the file payload
+            files = {"file": file}
+            # Send POST request
+            response = requests.post(url, files=files)
+            
+            if response.status_code == 200:
+                print("File uploaded successfully!")
+                doc = frappe.new_doc('Bank Integration Log')
+                doc.file_from = "Mefron"
+                doc.file_type = "Reverse MIS"
+                doc.file_name = file_name
+                doc.insert(ignore_permissions=True)
+            else:
+                print(f"Failed to upload file. Status code: {response.status_code}")
+                print("Response:", response.text)
+                recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
+                subject = "Error in Beneficiary File Processing"
+                message = f"""
+                <p>Dear User,</p>
+                <p>An error occurred during the execution of the scheduled task:</p>
+                <p>{response.text}</p>
+                <p>Please check the logs and take necessary action.</p>
+                """
+                frappe.sendmail(
+                    recipients=recipients,
+                    subject=subject,
+                    message=message
+                )
+                send = flush()
+    except Exception as e:
+        print("An error occurred:", e)
+        recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
+        subject = "Error in Beneficiary File Processing"
+        message = f"""
+        <p>Dear User,</p>
+        <p>An error occurred during the execution of the scheduled task:</p>
+        <p>{e}</p>
+        <p>Please check the logs and take necessary action.</p>
+        """
+        frappe.sendmail(
+            recipients=recipients,
+            subject=subject,
+            message=message
+        )
+        send = flush()

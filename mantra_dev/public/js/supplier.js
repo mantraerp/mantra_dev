@@ -122,7 +122,8 @@ frappe.ui.form.on("Supplier", {
                         },
                         callback: function (r) {
                             // console.log('refresh: ',r);
-                            frm.refresh_field('custom_bank_account_table')     
+                            frm.refresh_field('custom_bank_account_table')
+                            frm.reload_doc()   
                         }
                     })  
                 }

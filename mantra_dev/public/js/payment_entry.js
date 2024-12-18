@@ -1,6 +1,64 @@
 frappe.ui.form.on("Payment Entry", {
 
 
+  refresh: function (frm) {
+
+    frm.add_custom_button(
+      __("Fetch Account"),
+      function () {
+
+        frappe.call({
+          method: 'frappe.client.get_value',
+          args: {
+            'doctype': 'Bank Account',
+            'filters': { 'is_default': 1, 'is_company_account': 1 },
+            'fieldname': ['name']
+          },
+          callback: function (r) {
+            if (String(r.message.name) === "undefined") {
+              alert("Company bank account is not found")
+            }
+            else {
+              frm.set_value('bank_account', r.message.name);
+              frm.refresh_field("bank_account");
+              if (frm.doc.docstatus == 0) {
+                frm.save();
+              } else {
+                frm.save('Update');
+              }
+            }
+          }
+        });
+        frappe.call({
+          method: 'frappe.client.get_value',
+          args: {
+            'doctype': 'Bank Account',
+            'filters': { 'party_type': frm.doc.party_name, 'party': frm.doc.party, "workflow_state": "Approved", "disabled": 0 },
+            'fieldname': ['name']
+          },
+          callback: function (r) {
+            if (r.message) {
+              if (String(r.message.name) === "undefined") {
+                alert("".concat(frm.doc.party_name, " ", frm.doc.party_name, " ", "account is not found."));
+              }
+              else {
+                frm.set_value('party_bank_account', r.message.name);
+                frm.refresh_field("party_bank_account");
+                if (frm.doc.docstatus == 0) {
+                  frm.save();
+                } else {
+                  frm.save('Update');
+                }
+              }
+            }
+          }
+        });
+      },
+      __("Actions")
+    );
+  },
+
+
   before_save(frm) {
     if (!frm.doc.mode_of_payment) {
 
@@ -182,38 +240,38 @@ function selectPaymentEntry(bank_account) {
     callback: function (r) {
       if (r.message) {
         console.log(r.message)
-        if(r.message.amount === 0){
+        if (r.message.amount === 0) {
           frappe.throw('No related transcation found.')
-        }else{
-          frappe.confirm("Transaction Details:".concat("<br>","Total transaction: ",r.message.payment_entry_list.length,"<br>","Total amount: ",r.message.amount),
+        } else {
+          frappe.confirm("Transaction Details:".concat("<br>", "Total transaction: ", r.message.payment_entry_list.length, "<br>", "Total amount: ", r.message.amount),
             () => {
-                // action to perform if Yes is selected
-                frappe.call({
-                  method: "mantra_dev.api_code.banck_transaction.upload_file",
-                  args: {
-                    payment_entry_list: r.message.payment_entry_list,
-                    bank_account: bank_account,
-                  },
-                  callback: function (r) {
-                    if (r.message) {
-                      if (r.message == "Done") {
-                        // location.reload()
-                        window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
-                      }
-                      else {
-                        // window.location.reload()
-                      }
-        
-        
-        
-        
+              // action to perform if Yes is selected
+              frappe.call({
+                method: "mantra_dev.api_code.banck_transaction.upload_file",
+                args: {
+                  payment_entry_list: r.message.payment_entry_list,
+                  bank_account: bank_account,
+                },
+                callback: function (r) {
+                  if (r.message) {
+                    if (r.message == "Done") {
+                      // location.reload()
+                      window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
                     }
-                  },
-                });
+                    else {
+                      // window.location.reload()
+                    }
+
+
+
+
+                  }
+                },
+              });
 
             }, () => {
-                // action to perform if No is selected
-                
+              // action to perform if No is selected
+
             })
         }
 

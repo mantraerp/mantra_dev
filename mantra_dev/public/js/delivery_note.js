@@ -1,4 +1,28 @@
 frappe.ui.form.on('Delivery Note', {
+    refresh(frm){
+
+
+        // https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=Delivery%20Challan&no_letterhead=0&letterhead=Salary%20Slip&settings=%7B%7D&_lang=en
+
+        frm.add_custom_button(("DC Invoice"), () => {
+            window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=DC Invoice&no_letterhead=0&letterhead=Sales Invoice%20Slip&settings=%7B%7D&_lang=en`)
+        },('Print Options'));
+        frm.add_custom_button(("DC Print Pack"), () => {
+            window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=DC Print Pack&no_letterhead=0&letterhead=Delivery Challan&settings=%7B%7D&_lang=en`)
+        },('Print Options'));
+        frm.add_custom_button(("DC Sales Invoice"), () => {
+            window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=DC Sales Invoice&no_letterhead=0&letterhead=Delivery Challan&settings=%7B%7D&_lang=en`)
+        },('Print Options'));
+        frm.add_custom_button(("Delivery Challan"), () => {
+            window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=Delivery Challan&no_letterhead=0&letterhead=Delivery Challan&settings=%7B%7D&_lang=en`)
+        },('Print Options'));
+        frm.add_custom_button(("Delivery Label"), () => {
+            window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=Delivery Label&no_letterhead=1&letterhead=Delivery Challan&settings=%7B%7D&_lang=en`)
+        },('Print Options'));
+
+
+
+    },
     onload(frm) {
         frm.set_query('set_warehouse', () => {
             return {
