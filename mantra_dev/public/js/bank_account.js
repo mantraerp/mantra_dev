@@ -21,6 +21,7 @@ frappe.ui.form.on('Bank Account', {
         // Upload Modified Approved Beneficiary file on Snorkel
         if (frm.doc.workflow_state === "Rejected" && frm.selected_workflow_action === 'Approve') {
             if (frm.doc.party_type !== "Shareholder" && !frm.doc.is_company_account) {
+                
                 frappe.call({
                     method: "mantra_dev.api_code.banck_transaction.upload_beneficiary_file_for_modified_doc",
                     args: {

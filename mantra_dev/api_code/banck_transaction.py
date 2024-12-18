@@ -102,10 +102,18 @@ def upload_beneficiary_file(doc_name):
         return str(e)
 
 
-@frappe.whitelist()
 # Upload Modified Approved Beneficiary file on Snorkel with Indicator M
+@frappe.whitelist()
 def upload_beneficiary_file_for_modified_doc(doc_name):
     try:
+
+        bank_account = frappe.get_doc("Bank Account", doc_name)
+        if bank_account.custom_remark in ["Field code Beneficiary Account No does not exists in buyer Mst Table","CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table"]:
+            upload_beneficiary_file(doc_name)
+            return
+
+
+
 
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
@@ -141,7 +149,6 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
             ]
 
-        bank_account = frappe.get_doc("Bank Account", doc_name)
 
         data_rows = [[
             "M",  # Indicator
