@@ -15,6 +15,7 @@ import string
 import ast
 from cryptography.fernet import Fernet
 import requests
+from frappe.model.mapper import get_mapped_doc
 
 
 
@@ -65,8 +66,8 @@ def recive_file():
     target_directory =""
     if file_type == "Bene":
         doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
-        # target_directory = doc.beneficiary_file_upload_path
-        target_directory = "/home/mantra/Desktop/Storing Folder"
+        target_directory = doc.beneficiary_file_upload_path
+        # target_directory = "/home/mantra/Desktop/Storing Folder"
     else:
         doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
         target_directory = doc.file_upload_path
@@ -454,9 +455,9 @@ def purchase_receipt_check_box_v1(invoice_name,checkvalue):
 
 
 
-@frappe.whitelist()
-def cron_to_check_pr_to_pi():
-    tw = frappe.db.sql("SELECT set_warehouse FROM `tabMaterial Request` WHERE `per_billed` = %s", (mr_no,))
+# @frappe.whitelist()
+# def cron_to_check_pr_to_pi():
+#     tw = frappe.db.sql("SELECT set_warehouse FROM `tabMaterial Request` WHERE `per_billed` = %s", (mr_no,))
 
 
 

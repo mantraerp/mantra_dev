@@ -19,8 +19,8 @@ from datetime import datetime
 import traceback
 
 
-@frappe.whitelist()
 # Upload Approved Beneficiary file on Snorkel with Indicator A
+@frappe.whitelist()
 def upload_beneficiary_file(doc_name):
     try:
 
@@ -315,14 +315,15 @@ def get_bene_file(delimiter='|'):
 
 
 
-                    #   if file_name.startswith("MEFRONH2H_MEFRONBENH2HUP"):
-                    #     #Call funcation to send in mefron server
-                    #         frappe.sendmail(
-                    #             recipients=["ravi.patel@mantratec.com"],
-                    #             subject="Bene file need to send on mefron server",
-                    #             message="This is bene file send on mefron server"
-                    #         )
-                    #         return
+                        if file_name.startswith("MEFRON"):
+                            #Call funcation to send in mefron server
+                            send_file(csv_file_path,file_name)
+                            frappe.sendmail(
+                                recipients=["ravi.patel@mantratec.com"],
+                                subject="Bene file need to send on mefron server",
+                                message="This is bene file send on mefron server"
+                            )
+                            return
 
 
                     for data_dict in data:
@@ -422,6 +423,7 @@ def get_bene_file(delimiter='|'):
     except Exception as e:
         error_message = f"Unexpected error: {str(e)}"
         send_bene_file_error_email(error_message)
+
 
 def send_bene_file_error_email(error_message):
     """
@@ -1424,20 +1426,20 @@ def send_frappe_mail():
 
 @frappe.whitelist()
 def send_file(file_path,file_name):
+    
     # URL to send the POST request
     url = "http://192.168.5.56:8003/api/method/mefron_dev.backend_code.api.recive_file"
 
     # Path to the file to be uploaded
-    file_path = file_path
-    # frappe.msgprint(file_path)
 
     try:
         # Open the file in binary mode
         with open(file_path, "rb") as file:
             # Prepare the file payload
             files = {"file": file}
+            data = {"file_type": "Reverse MIS"}
             # Send POST request
-            response = requests.post(url, files=files)
+            response = requests.post(url, files=files, data=data)
             
             if response.status_code == 200:
                 print("File uploaded successfully!")
@@ -1462,7 +1464,6 @@ def send_file(file_path,file_name):
                     subject=subject,
                     message=message
                 )
-                send = flush()
     except Exception as e:
         print("An error occurred:", e)
         recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
@@ -1478,4 +1479,3 @@ def send_file(file_path,file_name):
             subject=subject,
             message=message
         )
-        send = flush()
