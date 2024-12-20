@@ -20,29 +20,29 @@ from frappe.model.mapper import get_mapped_doc
 
 
 
-@frappe.whitelist()
-def share_item_with_user(item_code, user_email):
-    """
-    Share an item with a specific user with read rights.
+# @frappe.whitelist()
+# def share_item_with_user(item_code, user_email):
+#     """
+#     Share an item with a specific user with read rights.
     
-    :param item_code: The item code of the Item to share
-    :param user_email: The email ID of the user to share the Item with
-    """
-    try:
-        # Use the Frappe Share API to share the document
-        frappe.share.add(
-            doctype="Item",  # Doctype to share
-            name=item_code,  # Name of the document (Item code)
-            user=user_email, # Email ID of the user
-            read=1,          # Grant Read access
-            write=0,         # Do not grant Write access
-            share=0          # Do not grant Share access
-        )
-        # frappe.msgprint(f"Item {item_code} shared with {user_email} successfully.")
-        return f"Item {item_code} shared with {user_email} successfully."
-    except Exception as e:
-        frappe.log_error(message=str(e), title="Error Sharing Item")
-        frappe.throw(f"Failed to share item {item_code} with {user_email}. Please check the error log.")
+#     :param item_code: The item code of the Item to share
+#     :param user_email: The email ID of the user to share the Item with
+#     """
+#     try:
+#         # Use the Frappe Share API to share the document
+#         frappe.share.add(
+#             doctype="Item",  # Doctype to share
+#             name=item_code,  # Name of the document (Item code)
+#             user=user_email, # Email ID of the user
+#             read=1,          # Grant Read access
+#             write=0,         # Do not grant Write access
+#             share=0          # Do not grant Share access
+#         )
+#         # frappe.msgprint(f"Item {item_code} shared with {user_email} successfully.")
+#         return f"Item {item_code} shared with {user_email} successfully."
+#     except Exception as e:
+#         frappe.log_error(message=str(e), title="Error Sharing Item")
+#         frappe.throw(f"Failed to share item {item_code} with {user_email}. Please check the error log.")
 
 
 
