@@ -1,0 +1,25 @@
+name: Deploy to Servers
+
+on:
+  push:
+    branches:
+      - main  # replace with your branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: SSH and Deploy to First Server
+        env:
+          SSH_PASSWORD: ${{ secrets.MANTRA }}
+        run: |
+          sshpass -p $SSH_PASSWORD ssh mantra@192.168.5.78 "cd /home/frappeuser/frappe-bench/apps/mantra_dev && git pull && bench migrate"
+
+      
