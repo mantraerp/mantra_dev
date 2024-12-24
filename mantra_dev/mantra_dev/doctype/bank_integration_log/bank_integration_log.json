@@ -22,7 +22,7 @@
    "fieldname": "file_type",
    "fieldtype": "Select",
    "label": "File Type",
-   "options": "Payment\nBene\nSalary\nReverse MIS\nMail Send Bene"
+   "options": "Payment\nBene\nSalary\nReverse MIS\nMail Send Bene\nMail Send Bene Mefron"
   },
   {
    "fieldname": "file_name",
@@ -32,7 +32,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-17 15:51:13.380705",
+ "modified": "2024-12-24 12:40:21.657693",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Integration Log",

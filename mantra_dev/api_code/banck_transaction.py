@@ -318,11 +318,23 @@ def get_bene_file(delimiter='|'):
                         if file_name.startswith("585730452"):
                             #Call funcation to send in mefron server
                             send_file(csv_file_path,file_name)
-                            frappe.sendmail(
-                                recipients=["ravi.patel@mantratec.com"],
-                                subject="Bene file need to send on mefron server 3",
-                                message="This is bene file send on mefron server {}".format(file_name)
-                            )
+
+                            previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene Mefron'],['file_name', '=', file_name]])
+                            if len(previous_file)==0:
+
+                                #insert bank transaction log
+                                doc = frappe.new_doc('Bank Integration Log')
+                                doc.file_from = "Mefron"
+                                doc.file_type = "Mail Send Bene Mefron"
+                                doc.file_name = file_name
+                                doc.insert(ignore_permissions=True)
+
+
+                                frappe.sendmail(
+                                    recipients=["ravi.patel@mantratec.com"],
+                                    subject="Bene file need to send on mefron server 3",
+                                    message="This is bene file send on mefron server {}".format(file_name)
+                                )
                             return
 
 
