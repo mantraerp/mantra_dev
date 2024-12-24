@@ -1,0 +1,76 @@
+{
+ "_seen": "[\"Administrator\"]",
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-12-24 15:44:30.439738",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "default_inward_warehouse",
+  "default_qc_processing_warehouse",
+  "auto_transfer_stock",
+  "column_break_ntwv",
+  "default_qc_accepted_warehouse",
+  "default_qc_rejected_warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_inward_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Inward Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_qc_processing_warehouse",
+   "fieldtype": "Link",
+   "label": "Default QC Processing Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_transfer_stock",
+   "fieldtype": "Check",
+   "label": "Auto Transfer Stock"
+  },
+  {
+   "fieldname": "column_break_ntwv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_qc_accepted_warehouse",
+   "fieldtype": "Link",
+   "label": "Default QC Accepted Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_qc_rejected_warehouse",
+   "fieldtype": "Link",
+   "label": "Default QC Rejected Warehouse",
+   "options": "Warehouse"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-12-24 15:49:07.061379",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "QC Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

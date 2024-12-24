@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 import random
 import shutil
 from frappe.utils import flt, nowdate
@@ -57,6 +58,176 @@ from frappe.model.mapper import get_mapped_doc
 #     doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
 #     target_dir = doc.beneficiary_file_upload_path
 #     print(target_dir)
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+# Filter Items based on warehouse mentioned in QC Settings --> Default QC Processing Warehouse
+def get_items_from_warehouse(doctype, txt, searchfield, start, page_len, filters):
+
+
+   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+   if not warehouse:
+       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+
+
+   return frappe.db.sql("""
+       SELECT DISTINCT item_code
+       FROM `tabBin`
+       WHERE warehouse = %s
+       AND item_code LIKE %s
+       LIMIT %s, %s
+   """, (warehouse, f"%{txt}%", start, page_len))
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+# Filter Item Serial No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
+def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
+  
+   item_code = filters.get("item_code")
+   if not item_code:
+       frappe.throw(_("Item Code is required to filter Serial Nos."))
+
+
+   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+   if not warehouse:
+       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+
+
+   return frappe.db.sql("""
+       SELECT name
+       FROM `tabSerial No`
+       WHERE item_code = %s
+       AND warehouse = %s
+       AND name LIKE %s
+       LIMIT %s, %s
+   """, (item_code, warehouse, f"%{txt}%", start, page_len))
+
+
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+# Fetch Quality Inspection Template from Item master Quality Inspection Template field
+def get_quality_inspection_templates(doctype, txt, searchfield, start, page_len, filters):
+
+
+   item_code = filters.get("item_code")
+   if not item_code:
+       frappe.throw(_("Item Code is required to fetch Quality Inspection Templates."))
+
+
+   return frappe.db.sql("""
+       SELECT quality_inspection_template
+       FROM `tabItem`
+       WHERE item_code = %s
+       AND quality_inspection_template LIKE %s
+       LIMIT %s, %s
+   """, (item_code, f"%{txt}%", start, page_len))
+
+
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+# Filter Batch No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
+def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
+
+
+   item_code = filters.get("item_code")
+   if not item_code:
+       frappe.throw(_("Item Code is required to filter Batch Nos."))
+
+
+   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+   if not warehouse:
+       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+
+
+   # Fetch batch numbers directly associated with the given item_code and warehouse.
+   batch_nos_from_sle = get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt)
+
+
+   # Fetch batch numbers linked through serial and batch bundles.
+   batch_nos_from_bundle = get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt)
+
+
+   batch_nos = {batch["batch_no"] for batch in batch_nos_from_sle + batch_nos_from_bundle}
+   return [[batch_no] for batch_no in batch_nos]
+
+
+
+
+# Fetch batch numbers directly associated with the given item_code and warehouse.
+def get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt):
+  
+   sle = frappe.qb.DocType("Stock Ledger Entry")
+   query = (
+       frappe.qb.from_(sle)
+       .select(sle.batch_no)
+       .where(
+           (sle.item_code == item_code)
+           & (sle.warehouse == warehouse)
+           & (sle.docstatus == 1)
+           & (sle.batch_no.like(f"%{txt}%"))
+       )
+       .distinct()
+   )
+
+
+   return query.run(as_dict=True) or []
+
+
+
+
+# Fetch batch numbers linked through serial and batch bundles.
+def get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt):
+  
+   sle = frappe.qb.DocType("Stock Ledger Entry")
+   batch_package = frappe.qb.DocType("Serial and Batch Entry")
+
+
+   query = (
+       frappe.qb.from_(sle)
+       .inner_join(batch_package)
+       .on(batch_package.parent == sle.serial_and_batch_bundle)
+       .select(batch_package.batch_no)
+       .where(
+           (sle.item_code == item_code)
+           & (sle.warehouse == warehouse)
+           & (sle.docstatus == 1)
+           & (batch_package.batch_no.like(f"%{txt}%"))
+       )
+       .distinct()
+   )
+
+
+   return query.run(as_dict=True) or []
+
+
+ 
+@frappe.whitelist()
+# Sample Size can not exceed total No of Items in QC Settings --> Default QC Processing Warehouse
+def get_available_qty(item_code):
+  
+   if not item_code:
+       frappe.throw(_("Item Code is required to validate Sample Size."))
+
+
+   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+   if not warehouse:
+       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+
+
+   total_qty = frappe.db.get_value(
+       "Bin",
+       {"item_code": item_code, "warehouse": warehouse},
+       "actual_qty"
+   )
+
+
+   return total_qty or 0
+
 
 
 @frappe.whitelist(allow_guest=True)

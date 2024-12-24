@@ -55,4 +55,33 @@ frappe.ui.form.on('Purchase Receipt', {
         }
 
     },
+
+    after_workflow_action(frm) {
+        if(frm.doc.workflow_state === "Approved") {
+            frappe.call({
+                method: "frappe.client.get_single_value",
+                args: {
+                    doctype: "QC Settings",
+                    field: "auto_transfer_stock"
+                },
+                callback: function(r) {
+                    if (r.message === 1) {
+                        // If auto_transfer_stock is 1, create a stock entry for all items which do not required QC
+                        frappe.call({
+                            method: "mantra_dev.backend_code.stock_entry.qc_request_stock_entry.create_stock_entry_for_auto_transfer_stock",
+                            args: {
+                                purchase_receipt: frm.doc.name
+                            },
+                            callback: function(res) {
+                                if (res.message) {
+                                    frappe.msgprint(res.message);
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    },
+ 
 });

@@ -10,8 +10,10 @@
   "item_code",
   "item_name",
   "qty",
+  "received_qty",
   "schedule_date",
   "column_break_vhxw",
+  "status",
   "expected_qty",
   "expected_delivery_date",
   "buffer_days",
@@ -22,28 +24,33 @@
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
-   "options": "Purchase Invoice"
+   "options": "Purchase Order"
   },
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item"
   },
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
-   "label": "Qty"
+   "label": "Qty",
+   "read_only": 1
   },
   {
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Required By"
+   "label": "Required By",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_vhxw",
@@ -67,12 +74,29 @@
   {
    "fieldname": "final_expected_receive_date",
    "fieldtype": "Date",
-   "label": "Final expected receive date "
+   "in_list_view": 1,
+   "label": "Final expected receive date ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nClosed\nDelivered\nApproved\nCancelled\nReceived",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-17 14:51:51.921110",
+ "modified": "2024-12-24 16:46:38.424981",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Purchase Order Expected Date",

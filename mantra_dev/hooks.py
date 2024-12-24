@@ -50,6 +50,7 @@ doctype_js = {
     "Employee": "public/js/employee.js",
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
+    "Quality Inspection": "public/js/quality_inspection.js",
     # "Delivery Note": "public/js/delivery_note.js",
 }
 # doctype_js=  {"Sales Invoice" : "public/js/sales_invoice.js"}
@@ -173,6 +174,14 @@ doc_events = {
     "Bank Transaction": {
 		"on_update_after_submit": "mantra_dev.overrides.bank_transaction.on_update_after_submit",
 	},
+    "Purchase Order": {
+        "on_submit": "mantra_dev.backend_code.purchase_order.purchase_order.create_purchase_order_expected_date",
+        "on_cancel": "mantra_dev.backend_code.purchase_order.purchase_order.cancel_purchase_order_expected_date"
+    },
+    "Purchase Receipt": {
+        "on_submit": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_purchase_order_expected_date",
+        "on_cancel": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_cancel_purchase_order_expected_date" 
+    }
 }
 
 # Scheduled Tasks
