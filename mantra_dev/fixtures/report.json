@@ -10,7 +10,7 @@
   "javascript": null,
   "json": null,
   "letter_head": "Sales Invoice",
-  "modified": "2024-11-27 11:33:25.563774",
+  "modified": "2024-12-13 13:15:08.768899",
   "module": "Mantra Dev",
   "name": "GRN Bill Remain",
   "prepared_report": 0,
@@ -26,6 +26,12 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "SCM - Manager"
+   },
+   {
+    "parent": "GRN Bill Remain",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "All"
    }
   ]
  },
@@ -194,66 +200,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Stock Manager"
-   }
-  ]
- },
- {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-06-06 18:11:48.451775",
-  "module": "Mantra Dev",
-  "name": "Sales Analytics",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Sales Order",
-  "reference_report": null,
-  "report_name": "Sales Analytics",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Maintenance User"
-   },
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Manager"
-   },
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "SCM - Manager"
-   },
-   {
-    "parent": "Sales Analytics",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Auditor"
    }
   ]
  },
@@ -1751,6 +1697,480 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Manufacturing User"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2024-12-17 12:59:12.652825",
+  "module": "Mantra Dev",
+  "name": "Minimum Stock Level",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item",
+  "reference_report": null,
+  "report_name": "Minimum Stock Level",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "All"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-12-24 15:43:31.152201",
+  "module": "Mantra Dev",
+  "name": "QC Request",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Receipt",
+  "reference_report": null,
+  "report_name": "QC Request",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Integrated Warehouse Manager"
+   },
+   {
+    "parent": "QC Request",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-12-24 15:43:39.269726",
+  "module": "Mantra Dev",
+  "name": "QC Request Approval",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Receipt",
+  "reference_report": null,
+  "report_name": "QC Request Approval",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Integrated Warehouse Manager"
+   },
+   {
+    "parent": "QC Request Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-12-24 15:43:46.328410",
+  "module": "Mantra Dev",
+  "name": "Quality Inspection Approval",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Quality Inspection",
+  "reference_report": null,
+  "report_name": "Quality Inspection Approval",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Integrated Warehouse Manager"
+   },
+   {
+    "parent": "Quality Inspection Approval",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-12-24 15:44:03.790130",
+  "module": "Mantra Dev",
+  "name": "Rejected Quality Inspection",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Quality Inspection",
+  "reference_report": null,
+  "report_name": "Rejected Quality Inspection",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Rejected Quality Inspection",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Quality Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2024-12-24 16:53:50.170963",
+  "module": "Mantra Dev",
+  "name": "Stock Planned Quantity",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Purchase Order Expected Date",
+  "reference_report": null,
+  "report_name": "Stock Planned Quantity",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Stock Planned Quantity",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-06-06 18:11:48.451775",
+  "module": "Mantra Dev",
+  "name": "Sales Analytics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Order",
+  "reference_report": null,
+  "report_name": "Sales Analytics",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Sales Analytics",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
    }
   ]
  },
