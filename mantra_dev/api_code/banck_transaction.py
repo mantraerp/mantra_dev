@@ -315,13 +315,13 @@ def get_bene_file(delimiter='|'):
 
 
 
-                        if file_name.startswith("MEFRON"):
+                        if file_name.startswith("585730452"):
                             #Call funcation to send in mefron server
                             send_file(csv_file_path,file_name)
                             frappe.sendmail(
                                 recipients=["ravi.patel@mantratec.com"],
-                                subject="Bene file need to send on mefron server",
-                                message="This is bene file send on mefron server"
+                                subject="Bene file need to send on mefron server 3",
+                                message="This is bene file send on mefron server {}".format(file_name)
                             )
                             return
 
@@ -411,7 +411,7 @@ def get_bene_file(delimiter='|'):
                 <p><strong>File:</strong> {error['file']}</p>
                 <p><strong>Row:</strong> {error['row']}</p>
                 <p><strong>Error:</strong> {error['error']}</p>
-                <hr>
+                <hr> Test
                 """ for error in errors
             ])
             send_bene_file_error_email(error_details)
@@ -422,7 +422,7 @@ def get_bene_file(delimiter='|'):
 
     except Exception as e:
         error_message = f"Unexpected error: {str(e)}"
-        send_bene_file_error_email(error_message)
+        send_bene_file_error_email(str(traceback.format_exc()))
 
 
 def send_bene_file_error_email(error_message):
@@ -430,7 +430,7 @@ def send_bene_file_error_email(error_message):
     Sends an email with the error message.
     """
     recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"]  # Replace with actual recipients
-    subject = "Error in Beneficiary File Processing"
+    subject = "Error in Beneficiary File Processing 2"
     message = f"""
     <p>Dear User,</p>
     <p>An error occurred during the execution of the scheduled task:</p>
@@ -1245,7 +1245,6 @@ def get_icici_bank_file(delimiter='|'):
                         data.append(row)
                 
                 for data_dict in data:
-                    
                     try:
                         if frappe.db.exists("Payment Entry", data_dict[15]):
                             print("Payment : ",data_dict[15])
@@ -1443,16 +1442,25 @@ def send_file(file_path,file_name):
             
             if response.status_code == 200:
                 print("File uploaded successfully!")
-                doc = frappe.new_doc('Bank Integration Log')
-                doc.file_from = "Mefron"
-                doc.file_type = "Reverse MIS"
-                doc.file_name = file_name
-                doc.insert(ignore_permissions=True)
+                mefron_files = frappe.db.sql('''select file_name from `tabBank Integration Log` where file_from="Mefron"''',as_list=True)
+                count = 0
+                for i in mefron_files:
+                    if i[0] == file_name:
+                        count = count+1
+                # mefron_files = frappe.get_all('Bank Integration Log',filters={'file_from': 'Mefron'},fields=['file_name'],as_list=True)
+                if count != 0:
+                    pass
+                else:
+                    doc = frappe.new_doc('Bank Integration Log')
+                    doc.file_from = "Mefron"
+                    doc.file_type = "Reverse MIS"
+                    doc.file_name = file_name
+                    doc.insert(ignore_permissions=True)
             else:
                 print(f"Failed to upload file. Status code: {response.status_code}")
                 print("Response:", response.text)
-                recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
-                subject = "Error in Beneficiary File Processing"
+                recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
+                subject = "Error in Beneficiary File Processing 1"
                 message = f"""
                 <p>Dear User,</p>
                 <p>An error occurred during the execution of the scheduled task:</p>
@@ -1462,12 +1470,12 @@ def send_file(file_path,file_name):
                 frappe.sendmail(
                     recipients=recipients,
                     subject=subject,
-                    message=message
+                    message="{}<br>{}".format(message,str(traceback.format_exc()))
                 )
     except Exception as e:
         print("An error occurred:", e)
-        recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
-        subject = "Error in Beneficiary File Processing"
+        recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
+        subject = "Error in Beneficiary File Processing : Using send file"
         message = f"""
         <p>Dear User,</p>
         <p>An error occurred during the execution of the scheduled task:</p>
@@ -1477,5 +1485,5 @@ def send_file(file_path,file_name):
         frappe.sendmail(
             recipients=recipients,
             subject=subject,
-            message=message
+            message="{}<br>{}".format(message,str(traceback.format_exc()))
         )

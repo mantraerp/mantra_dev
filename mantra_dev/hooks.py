@@ -172,7 +172,7 @@ doc_events = {
     # }
     "Bank Transaction": {
 		"on_update_after_submit": "mantra_dev.overrides.bank_transaction.on_update_after_submit",
-	}
+	},
 }
 
 # Scheduled Tasks
