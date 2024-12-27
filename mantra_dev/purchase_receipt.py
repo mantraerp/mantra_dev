@@ -1,5 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txtMan
+# License: GNU General Public License v3. See license.txtMan1
 
 
 import frappe
