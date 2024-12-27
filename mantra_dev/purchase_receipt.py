@@ -1,5 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txtravi
+# License: GNU General Public License v3. See license.txtrav
 
 
 import frappe
