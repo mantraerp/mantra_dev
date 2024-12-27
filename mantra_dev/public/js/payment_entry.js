@@ -3,59 +3,62 @@ frappe.ui.form.on("Payment Entry", {
 
   refresh: function (frm) {
 
-    frm.add_custom_button(
-      __("Fetch Account"),
-      function () {
+    // frm.add_custom_button(
+    //   __("Fetch Account"),
+    //   function () {
 
-        frappe.call({
-          method: 'frappe.client.get_value',
-          args: {
-            'doctype': 'Bank Account',
-            'filters': { 'is_default': 1, 'is_company_account': 1 },
-            'fieldname': ['name']
-          },
-          callback: function (r) {
-            if (String(r.message.name) === "undefined") {
-              alert("Company bank account is not found")
-            }
-            else {
-              frm.set_value('bank_account', r.message.name);
-              frm.refresh_field("bank_account");
-              if (frm.doc.docstatus == 0) {
-                frm.save();
-              } else {
-                frm.save('Update');
-              }
-            }
-          }
-        });
-        frappe.call({
-          method: 'frappe.client.get_value',
-          args: {
-            'doctype': 'Bank Account',
-            'filters': { 'party_type': frm.doc.party_name, 'party': frm.doc.party, "workflow_state": "Approved", "disabled": 0 },
-            'fieldname': ['name']
-          },
-          callback: function (r) {
-            if (r.message) {
-              if (String(r.message.name) === "undefined") {
-                alert("".concat(frm.doc.party_name, " ", frm.doc.party_name, " ", "account is not found."));
-              }
-              else {
-                frm.set_value('party_bank_account', r.message.name);
-                frm.refresh_field("party_bank_account");
-                if (frm.doc.docstatus == 0) {
-                  frm.save();
-                } else {
-                  frm.save('Update');
-                }
-              }
-            }
-          }
-        });
-      },
-      __("Actions")
-    );
+    //     frappe.call({
+    //       method: 'frappe.client.get_value',
+    //       args: {
+    //         'doctype': 'Bank Account',
+    //         'filters': { 'is_company_account': 1 },
+    //         'fieldname': ['name']
+    //       },
+    //       callback: function (r) {
+    //         if (String(r.message.name) === "undefined") {
+    //           alert("Company bank account is not found")
+    //         }
+    //         else {
+    //           frm.set_value('bank_account', r.message.name);
+    //           frm.refresh_field("bank_account");
+    //           if (frm.doc.docstatus == 0) {
+    //             frm.save();
+    //           } else {
+    //             frm.save('Update');
+    //           }
+    //         }
+    //       }
+    //     });
+    //     frappe.call({
+    //       method: 'frappe.client.get_value',
+    //       args: {
+    //         'doctype': 'Bank Account',
+    //         'filters': { 'party_type': frm.doc.party_name, 'party': frm.doc.party, "workflow_state": "Approved", "disabled": 0 },
+    //         'fieldname': ['name']
+    //       },
+    //       callback: function (r) {
+    //         if (r.message) {
+    //           if (String(r.message.name) === "undefined") {
+    //             alert("".concat(frm.doc.party_name, " ", frm.doc.party_name, " ", "account is not found."));
+    //           }
+    //           else {
+    //             frm.set_value('party_bank_account', r.message.name);
+    //             frm.refresh_field("party_bank_account");
+    //             if (frm.doc.docstatus == 0) {
+    //               frm.save();
+    //             } else {
+    //               frm.save('Update');
+    //             }
+    //           }
+    //         }
+    //       }
+    //     });
+    //   },
+    //   __("Actions")
+    // );
+  if(frm.is_new()){
+    frm.set_value('bank_account', "")
+  }
   },
 
 

@@ -59,6 +59,23 @@ from frappe.model.mapper import get_mapped_doc
 #     target_dir = doc.beneficiary_file_upload_path
 #     print(target_dir)
 
+
+
+
+@frappe.whitelist(allow_guest=True)
+def mantra_git_pull():
+    # os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git.sh')
+    return "Git pull run"
+
+@frappe.whitelist(allow_guest=True)
+def mantra_git_pull_migrate():
+    # os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_migrate.sh')
+    return "Git pull run with migrate"
+
+
+
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 # Filter Items based on warehouse mentioned in QC Settings --> Default QC Processing Warehouse
