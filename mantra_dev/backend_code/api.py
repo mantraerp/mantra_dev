@@ -71,7 +71,7 @@ def mantra_git_pull():
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull_migrate():
     os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_migrate.sh')
-    return "Git pull run with migrate"
+    return "Git pull run with build"
 
 
 
