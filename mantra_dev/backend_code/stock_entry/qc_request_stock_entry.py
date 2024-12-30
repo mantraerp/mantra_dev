@@ -128,7 +128,7 @@ def create_draft_stock_entry_for_material_transfer(purchase_receipt, item_code, 
 
 @frappe.whitelist()
 # Approve drafted stock entry for material transfer
-def appove_stock_entry(stock_entry):
+def approve_stock_entry(stock_entry):
 
 
    try:
@@ -195,77 +195,69 @@ def quality_inspection_approval(quality_inspection, status):
        frappe.throw(_("Could not approve Quality Inspection. Error: {0}").format(str(e)))
 
 
-
-
 def create_stock_entry_for_quality_inspection(quality_inspection, stock_entry_type):
-   try:
+    try:
 
+        if stock_entry_type == "Accepted":
+            source_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+            target_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_accepted_warehouse")
+        elif stock_entry_type == "Rejected":
+            source_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+            target_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_rejected_warehouse")
+        else:
+            frappe.throw(_("Invalid stock entry type: {0}").format(stock_entry_type))
 
-       if stock_entry_type == "Accepted":
-           source_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-           target_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_accepted_warehouse")
-       elif stock_entry_type == "Rejected":
-           source_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-           target_warehouse = frappe.db.get_single_value("QC Settings", "default_qc_rejected_warehouse")
-       else:
-           frappe.throw(_("Invalid stock entry type: {0}").format(stock_entry_type))
+        if not source_warehouse or not target_warehouse:
+            frappe.throw(_("Source or Target Warehouse is not set in QC Settings."))
 
+        qty = quality_inspection.sample_size or 1
+        use_serial_batch_fields = 0
+        serial_no = None
+        batch_no = None
 
-       if not source_warehouse or not target_warehouse:
-           frappe.throw(_("Source or Target Warehouse is not set in QC Settings."))
-      
-       if quality_inspection.item_serial_no:
-           qty = 1
-           use_serial_batch_fields = 1
-           serial_no = quality_inspection.item_serial_no
-           batch_no = None
+        if quality_inspection.item_serial_no and quality_inspection.batch_no:
+            serial_no = quality_inspection.item_serial_no
+            batch_no = quality_inspection.batch_no
+            use_serial_batch_fields = 1
+            qty = 1 
 
+        elif quality_inspection.item_serial_no:
+            serial_no = quality_inspection.item_serial_no
+            use_serial_batch_fields = 1
+            qty = 1 
 
-       elif quality_inspection.batch_no:
-           use_serial_batch_fields = 1
-           batch_no = quality_inspection.batch_no
-           batch_size = frappe.db.get_value("Batch", quality_inspection.batch_no, "batch_qty")
-           if not batch_size:
-               frappe.throw(_("Batch {0} does not have a defined size.").format(quality_inspection.batch_no))
-           qty = batch_size
-           serial_no = None
+        elif quality_inspection.batch_no:
+            batch_no = quality_inspection.batch_no
+            use_serial_batch_fields = 1
+            batch_size = frappe.db.get_value("Batch", quality_inspection.batch_no, "batch_qty")
+            if not batch_size:
+                frappe.throw(_("Batch {0} does not have a defined size.").format(quality_inspection.batch_no))
+            qty = batch_size
 
+        stock_entry = frappe.get_doc({
+            "doctype": "Stock Entry",
+            "stock_entry_type": "Material Transfer",
+            "purpose": "Material Transfer",
+            "items": [
+                {
+                    "item_code": quality_inspection.item_code,
+                    "qty": qty,  
+                    "s_warehouse": source_warehouse,
+                    "t_warehouse": target_warehouse,
+                    "use_serial_batch_fields": use_serial_batch_fields,
+                    "batch_no": batch_no if batch_no else None,
+                    "serial_no": serial_no if serial_no else None,
+                }
+            ]
+        })
+        stock_entry.insert(ignore_permissions=True)
+        stock_entry.submit()
 
-       else:
-           qty = quality_inspection.sample_size or 1
-           use_serial_batch_fields = 0
-           serial_no = None
-           batch_no = None
+        return stock_entry.name
 
-
-       stock_entry = frappe.get_doc({
-           "doctype": "Stock Entry",
-           "stock_entry_type": "Material Transfer",
-           "purpose": "Material Transfer",
-           "items": [
-               {
-                   "item_code": quality_inspection.item_code,
-                   "qty": qty, 
-                   "s_warehouse": source_warehouse,
-                   "t_warehouse": target_warehouse,
-                   "use_serial_batch_fields": use_serial_batch_fields,
-                   "batch_no": batch_no if batch_no else None,
-                   "serial_no": serial_no if serial_no else None,
-               }
-           ]
-       })
-       stock_entry.insert(ignore_permissions=True)
-       stock_entry.submit()
-
-
-       return stock_entry.name
-
-
-   except Exception as e:
-       frappe.log_error(frappe.get_traceback(), _("Stock Entry Creation Error"))
-       frappe.throw(_("Could not create Stock Entry. Error: {0}").format(str(e)))
-
-
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Stock Entry Creation Error"))
+        frappe.throw(_("Could not create Stock Entry. Error: {0}").format(str(e)))
 
 
 @frappe.whitelist()
