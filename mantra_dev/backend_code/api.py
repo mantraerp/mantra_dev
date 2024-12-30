@@ -17,6 +17,8 @@ import ast
 from cryptography.fernet import Fernet
 import requests
 from frappe.model.mapper import get_mapped_doc
+from collections import defaultdict
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 
 
 # frappe.whitelist()
@@ -159,83 +161,144 @@ def get_quality_inspection_templates(doctype, txt, searchfield, start, page_len,
    """, (item_code, f"%{txt}%", start, page_len))
 
 
-
-
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 # Filter Batch No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 
+    item_code = filters.get("item_code")
+    if not item_code:
+        frappe.throw(_("Item Code is required to filter Batch Nos."))
 
-   item_code = filters.get("item_code")
-   if not item_code:
-       frappe.throw(_("Item Code is required to filter Batch Nos."))
+    warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+    if not warehouse:
+        frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
 
+    active_batches = []
 
-   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-   if not warehouse:
-       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+    batches = get_batch_qty(
+        item_code=item_code,
+        warehouse=warehouse
+    )
 
+    for batch_no, qty in batches.items():
+        if qty > 0:
+            active_batches.append(batch_no)
 
-   # Fetch batch numbers directly associated with the given item_code and warehouse.
-   batch_nos_from_sle = get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt)
-
-
-   # Fetch batch numbers linked through serial and batch bundles.
-   batch_nos_from_bundle = get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt)
-
-
-   batch_nos = {batch["batch_no"] for batch in batch_nos_from_sle + batch_nos_from_bundle}
-   return [[batch_no] for batch_no in batch_nos]
-
+    return [[batch_no] for batch_no in active_batches]
 
 
+# Get batch quantities using get_auto_batch_nos
+@frappe.whitelist()
+def get_batch_qty(
+    batch_no=None,
+    warehouse=None,
+    item_code=None,
+    posting_date=None,
+    posting_time=None,
+    ignore_voucher_nos=None,
+    for_stock_levels=False,
+):
+    batchwise_qty = defaultdict(float)
+    kwargs = frappe._dict(
+        {
+            "item_code": item_code,
+            "warehouse": warehouse,
+            "posting_date": posting_date,
+            "posting_time": posting_time,
+            "batch_no": batch_no,
+            "ignore_voucher_nos": ignore_voucher_nos,
+            "for_stock_levels": for_stock_levels,
+        }
+    )
 
-# Fetch batch numbers directly associated with the given item_code and warehouse.
-def get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt):
+    batches = get_auto_batch_nos(kwargs)
+
+    for batch in batches:
+        batchwise_qty[batch.get("batch_no")] += batch.get("qty")
+
+    # If batch_no is provided, return its quantity
+    if batch_no:
+        return batchwise_qty.get(batch_no, 0)
+
+    return batchwise_qty
+
+
+# @frappe.whitelist()
+# @frappe.validate_and_sanitize_search_inputs
+# # Filter Batch No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
+# def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
+
+
+#    item_code = filters.get("item_code")
+#    if not item_code:
+#        frappe.throw(_("Item Code is required to filter Batch Nos."))
+
+
+#    warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
+#    if not warehouse:
+#        frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
+
+
+#    # Fetch batch numbers directly associated with the given item_code and warehouse.
+#    batch_nos_from_sle = get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt)
+
+
+#    # Fetch batch numbers linked through serial and batch bundles.
+#    batch_nos_from_bundle = get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt)
+
+
+#    batch_nos = {batch["batch_no"] for batch in batch_nos_from_sle + batch_nos_from_bundle}
+#    return [[batch_no] for batch_no in batch_nos]
+
+
+
+
+# # Fetch batch numbers directly associated with the given item_code and warehouse.
+# def get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt):
   
-   sle = frappe.qb.DocType("Stock Ledger Entry")
-   query = (
-       frappe.qb.from_(sle)
-       .select(sle.batch_no)
-       .where(
-           (sle.item_code == item_code)
-           & (sle.warehouse == warehouse)
-           & (sle.docstatus == 1)
-           & (sle.batch_no.like(f"%{txt}%"))
-       )
-       .distinct()
-   )
+#    sle = frappe.qb.DocType("Stock Ledger Entry")
+#    query = (
+#        frappe.qb.from_(sle)
+#        .select(sle.batch_no)
+#        .where(
+#            (sle.item_code == item_code)
+#            & (sle.warehouse == warehouse)
+#            & (sle.docstatus == 1)
+#            & (sle.batch_no.like(f"%{txt}%"))
+#        )
+#        .distinct()
+#    )
 
 
-   return query.run(as_dict=True) or []
+#    return query.run(as_dict=True) or []
 
 
 
 
-# Fetch batch numbers linked through serial and batch bundles.
-def get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt):
+# # Fetch batch numbers linked through serial and batch bundles.
+# def get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt):
   
-   sle = frappe.qb.DocType("Stock Ledger Entry")
-   batch_package = frappe.qb.DocType("Serial and Batch Entry")
+#    sle = frappe.qb.DocType("Stock Ledger Entry")
+#    batch_package = frappe.qb.DocType("Serial and Batch Entry")
 
 
-   query = (
-       frappe.qb.from_(sle)
-       .inner_join(batch_package)
-       .on(batch_package.parent == sle.serial_and_batch_bundle)
-       .select(batch_package.batch_no)
-       .where(
-           (sle.item_code == item_code)
-           & (sle.warehouse == warehouse)
-           & (sle.docstatus == 1)
-           & (batch_package.batch_no.like(f"%{txt}%"))
-       )
-       .distinct()
-   )
+#    query = (
+#        frappe.qb.from_(sle)
+#        .inner_join(batch_package)
+#        .on(batch_package.parent == sle.serial_and_batch_bundle)
+#        .select(batch_package.batch_no)
+#        .where(
+#            (sle.item_code == item_code)
+#            & (sle.warehouse == warehouse)
+#            & (sle.docstatus == 1)
+#            & (batch_package.batch_no.like(f"%{txt}%"))
+#        )
+#        .distinct()
+#    )
 
 
-   return query.run(as_dict=True) or []
+#    return query.run(as_dict=True) or []
 
 
  
