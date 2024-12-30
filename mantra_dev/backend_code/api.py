@@ -23,7 +23,7 @@ from frappe.model.mapper import get_mapped_doc
 # def stop_print_in_draft(doc, method, x):    
 #     if doc.docstatus == 0:  # Draft state
 #         frappe.throw("You cannot print the Delivery Note in Draft state.")
-#mantra3
+#mantra
 
 
 # @frappe.whitelist()
@@ -65,6 +65,7 @@ from frappe.model.mapper import get_mapped_doc
 
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull():
+    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/storescreate.sh')
     os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git.sh')
     return "Git pull run"
 
