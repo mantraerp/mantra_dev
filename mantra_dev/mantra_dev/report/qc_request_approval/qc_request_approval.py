@@ -45,7 +45,7 @@ def get_data(filters):
           i.custom_inspection_required_before_transfer_warehouse AS InspectionRequired,
           pri.custom_stock_entry AS StockEntry,
        CONCAT(
-           '<button class="btn btn-primary pt-0 pb-0 approve" style="background-color: white" ',
+           '<button class="btn btn-primary pt-0 pb-0 approvestockentry" style="background-color: grey" ',
            'data-stock_entry="', pri.custom_stock_entry, '" ',
            '>Approve</button>'
        ) AS Approve
