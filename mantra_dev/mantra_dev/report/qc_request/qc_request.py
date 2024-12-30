@@ -45,7 +45,7 @@ def get_data(filters):
        CASE
            WHEN i.custom_inspection_required_before_transfer_warehouse = 1 THEN
                CONCAT(
-                   '<button class="btn btn-primary pt-0 pb-0 qcrequest" style="background-color: white" ',
+                   '<button class="btn btn-primary pt-0 pb-0 qcrequest" style="background-color: grey" ',
                    'data-id="', pr.name, '" ',
                    'data-pr-date="', pr.posting_date, '" ',
                    'data-item_code="', pri.item_code, '" ',
@@ -63,7 +63,7 @@ def get_data(filters):
        CASE
            WHEN i.custom_inspection_required_before_transfer_warehouse = 0 THEN
                CONCAT(
-                   '<button class="btn btn-primary pt-0 pb-0 stocktransfer" style="background-color: white" ',
+                   '<button class="btn btn-primary pt-0 pb-0 stocktransfer" style="background-color: grey" ',
                    'data-id="', pr.name, '" ',
                    'data-pr-date="', pr.posting_date, '" ',
                    'data-item_code="', pri.item_code, '" ',
