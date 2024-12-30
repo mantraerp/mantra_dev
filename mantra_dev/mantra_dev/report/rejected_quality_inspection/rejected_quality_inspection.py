@@ -48,7 +48,7 @@ def get_data(filters):
            sed.t_warehouse AS TargetWarehouse
         FROM
            `tabQuality Inspection` qi
-        INNER JOIN
+        LEFT JOIN
            `tabStock Entry` se ON se.name = qi.custom_rejected_stock_entry
         LEFT JOIN
            `tabStock Entry Detail` sed ON se.name = sed.parent
