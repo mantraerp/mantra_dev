@@ -23,7 +23,7 @@ from frappe.model.mapper import get_mapped_doc
 # def stop_print_in_draft(doc, method, x):    
 #     if doc.docstatus == 0:  # Draft state
 #         frappe.throw("You cannot print the Delivery Note in Draft state.")
-#mantra2
+#mantra3
 
 
 # @frappe.whitelist()
