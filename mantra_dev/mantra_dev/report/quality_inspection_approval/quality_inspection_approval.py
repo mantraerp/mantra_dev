@@ -44,14 +44,11 @@ def get_data(filters):
           qi.sample_size AS SampleSize,
           qi.quality_inspection_template AS QualityInspectionTemplate,
        CONCAT(
-           '<button class="btn btn-primary pt-0 pb-0 approve" style="background-color: white" ',
+           '<button class="btn btn-primary pt-0 pb-0 qualityinspectionapprove" style="background-color: grey" ',
            'data-quality_inspection="', qi.name, '" ',
            'data-status="', qi.status, '" ',
            '>Approve</button>'
        ) AS Approve
-
-
-
 
       FROM
           `tabQuality Inspection` qi
