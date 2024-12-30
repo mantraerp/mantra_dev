@@ -12,7 +12,7 @@ def mantra_git_pull_with_url(url):
     return "Git pull run"
 
 @frappe.whitelist(allow_guest=True)
-def mantra_git_pull(url):
+def mantra_git_pull():
     os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git.sh')
     return "Git pull run"
 
