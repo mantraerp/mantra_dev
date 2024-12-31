@@ -3,13 +3,10 @@ from frappe import _
 import os
 
 
-
-
-
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull_with_url(url):
     os.popen('sh {}'.format(url))
-    return "Git pull run"
+    return "URL RUN: {}".format(url)
 
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull():
