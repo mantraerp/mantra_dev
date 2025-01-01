@@ -295,9 +295,11 @@ def delete_entry_from_error_log(doc_name):
 	return True
 
 
+@frappe.whitelist(allow_guest=True)
 def make_url_request_for_reposting():
 	"""
-	Example function to make a URL request and handle the response in ERPNext.
+	"mantra_dev.backend_code.reposting2.make_url_request_for_reposting"
+
 	"""
 	url = "http://192.168.1.38:8001/api/method/mantra_dev.backend_code.reposting2.repost_entries_without_voucher_no_process_one_entry"  # Replace with your target URL
 	headers = {
