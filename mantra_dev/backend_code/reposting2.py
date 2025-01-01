@@ -8,6 +8,8 @@ from rq.timeouts import JobTimeoutException
 from frappe.utils.background_jobs import get_jobs
 
 import erpnext
+import requests
+
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
@@ -291,6 +293,37 @@ def delete_entry_from_error_log(doc_name):
 	deleteQuery = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error`='REPOSTING'".format(doc_name)
 	temp = frappe.db.sql(deleteQuery)
 	return True
+
+
+def make_url_request_for_reposting():
+	"""
+	Example function to make a URL request and handle the response in ERPNext.
+	"""
+	url = "http://192.168.1.38:8001/api/method/mantra_dev.backend_code.reposting2.repost_entries_without_voucher_no_process_one_entry"  # Replace with your target URL
+	headers = {
+		"Content-Type": "application/json",
+	}
+	try:
+		# Make a GET request
+		response = requests.get(url, headers=headers, timeout=10)
+		
+		# Check if the request was successful
+		if response.status_code == 200:
+			# Process the JSON response
+			data = response.json()
+			# frappe.msgprint(f"Response Data: {data}")
+		else:
+			errorLog("Single repost",f"Request failed with status code {response.status_code}: {response.text}",False)
+			# frappe.throw(f"Request failed with status code {response.status_code}: {response.text}")
+
+	except requests.exceptions.RequestException as e:
+		# Log the exception and create an error log in ERPNext
+		trace = frappe.get_traceback()
+		errorLog("Single repost",str(trace),False,"Reposting")
+
+		# frappe.log_error(trace, "URL Request Error")
+		# frappe.throw(f"An error occurred: {str(e)}")
+
 
 
 
