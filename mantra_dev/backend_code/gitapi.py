@@ -1,6 +1,5 @@
 import frappe
 from frappe import _
-import os
 
 
 @frappe.whitelist(allow_guest=True)
