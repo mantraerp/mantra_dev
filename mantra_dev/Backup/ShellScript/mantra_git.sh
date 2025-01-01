@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "################  Git auto pull start $(date +'%Y-%m-%d %H:%M:%S') ###############" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+
+
 # Configuration variables
 API_URL="http://192.168.1.38:8001/api/method/mantra_dev.backend_code.gitapi.mantra_git_pull_with_url"
 
@@ -28,10 +31,12 @@ fi
 echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup
 cd /home/mantra/mantrastage-bench/GitBackup
 time_stamp=$(date +%Y-%m-%d-%T)
-echo "Git pull start $time_stamp" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+echo "Git pull start $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
 
 echo $password | sudo -S -k mkdir "${time_stamp}"
 echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup/${time_stamp}
 echo $password | sudo -S -k cp -r /home/mantra/mantrastage-bench/apps/mantra_dev "/home/mantra/mantrastage-bench/GitBackup/${time_stamp}"
 cd /home/mantra/mantrastage-bench/apps/mantra_dev
 git pull --rebase --autostash $git_url >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+
+echo "Git pull end $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
