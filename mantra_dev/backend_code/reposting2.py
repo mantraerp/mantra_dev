@@ -15,6 +15,8 @@ from erpnext.stock.stock_ledger import (
 	repost_future_sle,
 )
 
+from mantra_dev.backend_code.globle import errorLog
+
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
 
@@ -175,30 +177,6 @@ def repost_entries_single(doc_name,status):
 	reply['message']="Job is schedule in background"
 	return reply
 
-@frappe.whitelist(allow_guest=True)
-def repost_entries_query(query):
-
-	# frappe.db.commit()
-
-	# return True
-
-	if str(query.lower()).startswith("delete"):
-		return "Delete query not perform"
-
-
-	reply = {}
-	# query = "SELECT name from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation <= '{}' and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc limit 100".format(now(),'2024-11-1 00:00:52.242515')
-	# query = "SELECT creation from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc".format('2024-10-01 00:00:52.242515')
-
-	reply['query']=query
-	test= frappe.db.sql(query,as_dict=1)
-	reply['data']=test
-	reply['data_length']=len(test)
-
-	return reply
-
-
-
 
 
 def repost(doc):
@@ -248,8 +226,69 @@ def repost(doc):
 			frappe.db.commit()
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def repost_entries_query(query):
+
+	if str(query.lower()).startswith("delete"):
+		return "Delete query not perform"
+
+	reply = {}
+	# query = "SELECT name from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation <= '{}' and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc limit 100".format(now(),'2024-11-1 00:00:52.242515')
+	# query = "SELECT creation from `tabRepost Item Valuation` WHERE status in ('Queued', 'In Progress') and creation >= '{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc".format('2024-10-01 00:00:52.242515')
+
+	reply['query']=query
+	test= frappe.db.sql(query,as_dict=1)
+	reply['data']=test
+	reply['data_length']=len(test)
+
+	return reply
+
+
+@frappe.whitelist(allow_guest=True)
+def repost_entries_without_voucher_no():
+
+	reply = {}
+	query = "SELECT * from `tabRepost Item Valuation` WHERE voucher_type IS NULL and status in ('Queued') and posting_date>='2024-09-01' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc"
+	reply['query']=query
+	test= frappe.db.sql(query,as_dict=1)
+
+	for row in test:
+		errorLog(row['name'],'REPOSTING',True)
+
+	reply['data']=test
+	reply['data_length']=len(test)
+
+	return reply
+
+@frappe.whitelist(allow_guest=True)
+def repost_entries_without_voucher_no_process_one_entry():
+
+	query = "SELECT * from `tabError Log` WHERE error='{}' LIMIT 1".format('REPOSTING')
+	records = frappe.db.sql(query,as_dict=1)
+	if len(records)!=0:
+		doc = frappe.get_doc("Repost Item Valuation", records[0]['method'])
+		if doc.status not in ['Completed','Skipped']:
+			frappe.enqueue(repost,queue='long',job_name="Repost {}".format(doc.name),timeout=100000,doc=doc)
+
+		frappe.enqueue(delete_entry_from_error_log,queue='long',job_name="Delete Repost Entries {}".format(doc.name),timeout=100000,doc_name=doc.name)
+
+	return True
+
 def delete_entry_from_error_log(doc_name):
-	deleteQuery = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error`='Repost'".format(doc_name)
+	deleteQuery = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error`='REPOSTING'".format(doc_name)
 	temp = frappe.db.sql(deleteQuery)
 	return True
 
