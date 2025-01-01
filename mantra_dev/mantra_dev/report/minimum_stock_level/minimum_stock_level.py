@@ -64,11 +64,11 @@ def get_latest_stock_qty2(item_code):
 def get_latest_stock_qty():
 	bin_map = {}
 	for d in frappe.db.sql(
-		"""SELECT item_code, warehouse, stock_value as stock_value
+		"""SELECT item_code, warehouse, actual_qty as qty
 		FROM tabBin""",
 		as_dict=1,
 	):
-		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
+		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.qty))
    
 	return bin_map	
 
