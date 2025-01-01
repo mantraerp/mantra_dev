@@ -9,7 +9,7 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 
-# include js, css files in header of4 desk.html
+# include js, css files in header of0 desk.html
 # app_include_css = "/assets/mantra_dev/css/mantra_dev.css"
 app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
