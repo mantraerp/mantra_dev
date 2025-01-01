@@ -9,7 +9,7 @@ bench export-fixtures
 echo "Export Fixture done $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
 
 
-# Configuration variables
+# Configuration variables1
 API_URL="http://192.168.1.38:8001/api/method/mantra_dev.backend_code.gitapi.mantra_git_pull_with_url"
 
 # Make a REST API request
