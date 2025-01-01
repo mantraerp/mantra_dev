@@ -34,23 +34,6 @@ GIT_PAT=$(echo "$response" | jq -r '.message.GIT_PAT')
 
 
 
-
-if [ ! -d "/home/mantra/mantrastage-bench/GitBackup" ]; then
-  cd /home/mantra/mantrastage-bench/
-  mkdir GitBackup
-fi
-echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup
-cd /home/mantra/mantrastage-bench/GitBackup
-time_stamp=$(date +%Y-%m-%d-%T)
-echo "Git pull start $time_stamp" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
-
-echo $password | sudo -S -k mkdir "${time_stamp}"
-echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup/${time_stamp}
-echo $password | sudo -S -k cp -r /home/mantra/mantrastage-bench/apps/mantra_dev "/home/mantra/mantrastage-bench/GitBackup/${time_stamp}"
-
-
-
-
 COMMIT_MESSAGE="Auto-commit fixture $(date +'%Y-%m-%d %H:%M:%S')"
 
 
@@ -81,3 +64,20 @@ echo "Git Branch: $BRANCH" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>
 git push "$AUTHENTICATED_URL" "$BRANCH"
 
 echo "Git push done $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+
+
+echo "Backup start $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+
+if [ ! -d "/home/mantra/mantrastage-bench/GitBackup" ]; then
+  cd /home/mantra/mantrastage-bench/
+  mkdir GitBackup
+fi
+echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup
+cd /home/mantra/mantrastage-bench/GitBackup
+time_stamp=$(date +%Y-%m-%d-%T)
+echo "Git pull start $time_stamp" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
+
+echo $password | sudo -S -k mkdir "${time_stamp}"
+echo $password | sudo -S -k chmod 777 -R /home/mantra/mantrastage-bench/GitBackup/${time_stamp}
+echo $password | sudo -S -k cp -r /home/mantra/mantrastage-bench/apps/mantra_dev "/home/mantra/mantrastage-bench/GitBackup/${time_stamp}"
+echo "Backup end $(date +'%Y-%m-%d %H:%M:%S')" >> /home/mantra/mantrastage-bench/logs/gitauto.log 2>&1
