@@ -1,121 +1,153 @@
 {
- "_seen": "[\"Administrator\"]",
- "actions": [],
- "allow_rename": 1,
- "creation": "2024-12-17 14:45:54.943519",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "purchase_order",
-  "item_code",
-  "item_name",
-  "qty",
-  "received_qty",
-  "schedule_date",
-  "column_break_vhxw",
-  "status",
-  "expected_qty",
-  "expected_delivery_date",
-  "buffer_days",
-  "final_expected_receive_date"
- ],
- "fields": [
-  {
-   "fieldname": "purchase_order",
-   "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
-  },
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Item Code",
-   "options": "Item"
-  },
-  {
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "label": "Qty",
-   "read_only": 1
-  },
-  {
-   "fieldname": "schedule_date",
-   "fieldtype": "Date",
-   "label": "Required By",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_vhxw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "expected_qty",
-   "fieldtype": "Float",
-   "label": "Expected qty"
-  },
-  {
-   "fieldname": "expected_delivery_date",
-   "fieldtype": "Date",
-   "label": "Expected Delivery Date"
-  },
-  {
-   "fieldname": "buffer_days",
-   "fieldtype": "Int",
-   "label": "Buffer Days"
-  },
-  {
-   "fieldname": "final_expected_receive_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Final expected receive date ",
-   "read_only": 1
-  },
-  {
-   "fieldname": "received_qty",
-   "fieldtype": "Float",
-   "label": "Received Qty",
-   "read_only": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nClosed\nDelivered\nApproved\nCancelled\nReceived",
-   "read_only": 1
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2024-12-24 16:46:38.424981",
- "modified_by": "Administrator",
- "module": "Mantra Dev",
- "name": "Purchase Order Expected Date",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
-}
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "naming_series:",
+    "creation": "2024-12-17 14:45:54.943519",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+     "purchase_order",
+     "item_code",
+     "item_name",
+     "qty",
+     "received_qty",
+     "total_qty",
+     "schedule_date",
+     "naming_series",
+     "column_break_vhxw",
+     "status",
+     "expected_qty",
+     "expected_delivery_date",
+     "buffer_days",
+     "final_expected_receive_date"
+    ],
+    "fields": [
+     {
+      "fieldname": "purchase_order",
+      "fieldtype": "Link",
+      "label": "Purchase Order",
+      "options": "Purchase Order",
+      "read_only": 1
+     },
+     {
+      "fieldname": "item_code",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "label": "Item Code",
+      "options": "Item",
+      "read_only": 1
+     },
+     {
+      "fetch_from": "item_code.item_name",
+      "fieldname": "item_name",
+      "fieldtype": "Data",
+      "label": "Item Name",
+      "read_only": 1
+     },
+     {
+      "fieldname": "qty",
+      "fieldtype": "Float",
+      "label": "Qty",
+      "read_only": 1
+     },
+     {
+      "fieldname": "schedule_date",
+      "fieldtype": "Date",
+      "label": "Required By",
+      "read_only": 1
+     },
+     {
+      "fieldname": "column_break_vhxw",
+      "fieldtype": "Column Break"
+     },
+     {
+      "fieldname": "expected_qty",
+      "fieldtype": "Float",
+      "label": "Expected qty"
+     },
+     {
+      "fieldname": "expected_delivery_date",
+      "fieldtype": "Date",
+      "label": "Expected Delivery Date"
+     },
+     {
+      "default": "0",
+      "fieldname": "buffer_days",
+      "fieldtype": "Int",
+      "label": "Buffer Days"
+     },
+     {
+      "fieldname": "final_expected_receive_date",
+      "fieldtype": "Date",
+      "in_list_view": 1,
+      "label": "Final Expected Receive Date ",
+      "read_only": 1
+     },
+     {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "label": "Status",
+      "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nClosed\nDelivered\nApproved\nCancelled\nReceived",
+      "read_only": 1
+     },
+     {
+      "fieldname": "received_qty",
+      "fieldtype": "Float",
+      "label": "Received Qty",
+      "read_only": 1
+     },
+     {
+      "fieldname": "total_qty",
+      "fieldtype": "Float",
+      "label": "Total Remaining Qty",
+      "read_only": 1
+     },
+     {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "P0./FY./.#####"
+     }  
+    ],
+    "in_create": 1,
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2024-12-26 15:27:30.374494",
+    "modified_by": "Administrator",
+    "module": "Mantra Dev",
+    "name": "Purchase Order Expected Date",
+    "owner": "Administrator",
+    "permissions": [
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+     }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [
+     {
+      "color": "Green",
+      "title": "Approved"
+     },
+     {
+      "color": "Red",
+      "title": "Cancelled"
+     },
+     {
+      "color": "Blue",
+      "title": "Received"
+     }
+    ]
+   }
