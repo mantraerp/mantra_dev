@@ -11,6 +11,7 @@ def create_purchase_order_expected_date(doc,method=None):
             purchase_order.item_code = item.item_code
             purchase_order.qty = item.qty
             purchase_order.expected_qty = item.qty
+            purchase_order.total_qty = item.qty
             purchase_order.schedule_date = item.schedule_date
             purchase_order.expected_delivery_date = item.schedule_date
             purchase_order.status=doc.workflow_state 

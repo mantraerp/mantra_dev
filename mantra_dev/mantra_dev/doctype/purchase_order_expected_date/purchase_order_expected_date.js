@@ -8,7 +8,7 @@ frappe.ui.form.on("Purchase Order Expected Date", {
             frm.disable_form()
 		}
         // If the status is not 'Cancelled' and the received quantity is not equal to the expected quantity
-		if(frm.doc.status!=='Cancelled' && frm.doc.qty !== frm.doc.received_qty){
+		if(frm.doc.status!=='Cancelled' && frm.doc.total_qty !== 0){
             // Add a custom button "Split Qty" to the form
             frm.add_custom_button(__('Split Qty'), function() {
             var dialog = new frappe.ui.Dialog({
