@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-01-06 10:32:04.476780",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "system_tab",
+  "get_system_status_notification",
+  "system_status_notification_users"
+ ],
+ "fields": [
+  {
+   "fieldname": "system_tab",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "default": "0",
+   "fieldname": "get_system_status_notification",
+   "fieldtype": "Check",
+   "label": "Get system status notification"
+  },
+  {
+   "fieldname": "system_status_notification_users",
+   "fieldtype": "Data",
+   "label": "System status notification users"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-01-06 10:34:29.782316",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "ERP Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
