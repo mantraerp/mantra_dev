@@ -1387,7 +1387,7 @@ def send_icici_bank_file_error_email(error_message):
     """
     Sends an email with the error message.
     """
-    recipients = ["mailto:ravi.patel@mantratec.com","helpdesk.erp"]  # Replace with actual recipients
+    recipients = ["mailto:ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
     subject = "Error in ICICI Bank File Processing"
     message = f"""
     <p>Dear User,</p>
