@@ -1361,12 +1361,12 @@ def get_icici_bank_file(delimiter='|'):
                                     })
 
                     except KeyError as ke:
-                        error_message = f"KeyError: {ke} in file {file_name}"
-                        send_icici_bank_file_error_email(error_message)
+                        error_message = f"KeyError: {ke} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
+                        send_icici_bank_file_error_email(error_message,"KeyError line 1365")
 
                     except Exception as e:
-                        error_message = f"An error occurred while processing data_dict: {e} in file {file_name}"
-                        send_icici_bank_file_error_email(error_message)
+                        error_message = f"An error occurred while processing data_dict: {e} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
+                        send_icici_bank_file_error_email(error_message,"processing line 1369")
 
 
                 backup_file_path = os.path.join(backup_folder, file_name)
@@ -1380,15 +1380,15 @@ def get_icici_bank_file(delimiter='|'):
         get_bene_file()
 
     except Exception as e:
-        error_message = f"An error occurred in the get_icici_bank_file function: {e}"
-        send_icici_bank_file_error_email(error_message)
+        error_message = f"An error occurred in the get_icici_bank_file function: {e} <br> traceable: {str(traceback.format_exc())}"
+        send_icici_bank_file_error_email(error_message,"Exception line 1384")
 
-def send_icici_bank_file_error_email(error_message):
+def send_icici_bank_file_error_email(error_message,title=None):
     """
     Sends an email with the error message.
     """
     recipients = ["mailto:ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
-    subject = "Error in ICICI Bank File Processing"
+    subject = "Error in ICICI Bank File Processing".format(str(title))
     message = f"""
     <p>Dear User,</p>
     <p>An error occurred during the execution of the scheduled task:</p>
