@@ -320,7 +320,7 @@ def get_bene_file(delimiter='|'):
                         for line in file:
                             row = line.strip().split(delimiter)
                             if len(row) < 8:
-                                frappe.logger().warning(f"Skipping row with insufficient columns: {row}")
+                                # frappe.logger().warning(f"Skipping row with insufficient columns: {row}")
                                 frappe.sendmail(
                                     recipients=["ravi.patel@mantratec.com"],
                                     subject="Bene file row not suffcient",
@@ -348,7 +348,7 @@ def get_bene_file(delimiter='|'):
 
                                 frappe.sendmail(
                                     recipients=["ravi.patel@mantratec.com"],
-                                    subject="Bene file need to send on mefron server 3",
+                                    subject="Bene file need to send on mefron server line 351",
                                     message="This is bene file send on mefron server {}".format(file_name)
                                 )
                             return
@@ -1461,6 +1461,28 @@ def get_icici_bank_file(delimiter='|'):
             if file_name.endswith('.txt'):
                 csv_file_path = os.path.join(folder_path, file_name)
                 
+                if file_name.startswith("585730452"):
+                    #Call funcation to send in mefron server
+                    send_file(csv_file_path,file_name)
+
+                    previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Reverse MIS'],['file_name', '=', file_name]])
+                    if len(previous_file)==0:
+                        #insert bank transaction log
+                        doc = frappe.new_doc('Bank Integration Log')
+                        doc.file_from = "Mefron"
+                        doc.file_type = "Reverse MIS"
+                        doc.file_name = file_name
+                        doc.insert(ignore_permissions=True)
+
+
+                        frappe.sendmail(
+                            recipients=["ravi.patel@mantratec.com","helpdesk1.erp@mantratec.com"],
+                            subject="Bene file need to send on mefron server 5",
+                            message="This is bene file send on mefron server {}".format(file_name)
+                        )
+                    return
+                
+                
                 # Initialize an empty list to store data from the current file
                 data = []
                 
@@ -1672,7 +1694,7 @@ def send_file(file_path,file_name):
             response = requests.post(url, files=files, data=data)
             
             if response.status_code == 200:
-                print("File uploaded successfully!")
+                # print("File uploaded successfully!")
                 mefron_files = frappe.db.sql('''select file_name from `tabBank Integration Log` where file_from="Mefron"''',as_list=True)
                 count = 0
                 for i in mefron_files:
@@ -1691,7 +1713,7 @@ def send_file(file_path,file_name):
                 print(f"Failed to upload file. Status code: {response.status_code}")
                 print("Response:", response.text)
                 recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
-                subject = "Error in Beneficiary File Processing 1"
+                subject = "Error in Beneficiary File Processing 1716"
                 message = f"""
                 <p>Dear User,</p>
                 <p>An error occurred during the execution of the scheduled task:</p>
