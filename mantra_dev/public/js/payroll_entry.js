@@ -57,7 +57,7 @@ frappe.ui.form.on("Payroll Entry", {
 
     add_context_buttons(frm) {
 
-        frm.add_custom_button("Generate Salary-Slip.txt", function () {
+        frm.add_custom_button("Generate Salary-Slip", function () {
             frappe.call({
                 method: "mantra_dev.api_code.banck_transaction.generate_salary_slip",
                 args: { payroll_entry: frm.doc.name },

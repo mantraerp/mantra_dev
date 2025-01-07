@@ -51,6 +51,8 @@ doctype_js = {
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
+    "Payroll Entry": "public/js/payroll_entry.js",
+    
     # "Delivery Note": "public/js/delivery_note.js",
 }
 # doctype_js=  {"Sales Invoice" : "public/js/sales_invoice.js"}
