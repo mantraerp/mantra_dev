@@ -22,17 +22,17 @@ import traceback
 from num2words import num2words
 
 
-@frappe.whitelist(allow_guest=True)
-def bulk_upload_beneficiary_file():
+# @frappe.whitelist(allow_guest=True)
+# def bulk_upload_beneficiary_file():
     
-    directory_sql = "SELECT name FROM `tabBank Account` WHERE `custom_beneficiary_file_uploaded`=0 AND `workflow_state`='Approved' AND `is_company_account`=0 AND `modified` >= '2025-01-07 00:00:21.876091' LIMIT 200"
+#     directory_sql = "SELECT name FROM `tabBank Account` WHERE `custom_beneficiary_file_uploaded`=0 AND `workflow_state`='Approved' AND `is_company_account`=0 AND `modified` >= '2025-01-07 00:00:21.876091' LIMIT 200"
 
-    directory_list = frappe.db.sql(directory_sql, as_dict=True)
-    for rrecord in directory_list:
-        frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
+#     directory_list = frappe.db.sql(directory_sql, as_dict=True)
+#     for rrecord in directory_list:
+#         frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
 
         
-    return directory_list
+#     return directory_list
 
 
 # Upload Approved Beneficiary file on Snorkel with Indicator A
@@ -1105,7 +1105,7 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
     except Exception as e :
         return e
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 # upload salary slip.txt file on snorkel
 def generate_salary_slip(payroll_entry=None):
 # def generate_salary_slip():
@@ -1137,14 +1137,14 @@ def generate_salary_slip(payroll_entry=None):
         # directory = '/home/foramshah/Downloads/epayments/PayUpload'
         # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
         file_path = os.path.join(directory, file_name)
-        # file_path = os.path.join("/home/mantra/Desktop", file_name)
+        # file_path = os.path.join("/home/mantra/Desktop/", file_name)
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
             filters={"payroll_entry": payroll_entry} if payroll_entry else {},
             fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
         )
-        
+                
         if not salary_slips:
             frappe.throw("No Salary Slips found for the given Payroll Entry.")
 
@@ -1174,7 +1174,8 @@ def generate_salary_slip(payroll_entry=None):
             employee_account_no=""
             ifsc_code=""
             try:
-                employee_account_no, ifsc_code = frappe.db.get_value('Bank Account', {'party_type': 'Employee','party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no', 'custom_ifsc'])
+                employee_account_no = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no'])
+                ifsc_code = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['custom_ifsc'])
             except Exception as e:
                 employee_account_no=""
                 ifsc_code=""
@@ -1187,48 +1188,61 @@ def generate_salary_slip(payroll_entry=None):
             if ifsc_code in ["",None,"Null","None"]:
                 if not addedInFail:
                     rows_not_process.append(slip)
+                    addedInFail = True
 
-            rows.append([
-                debit_ac_no,
-                slip["employee"],
-                employee_account_no,
-                slip["employee_name"],
-                slip["net_pay"],
-                "N",
-                date,
-                ifsc_code,
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                slip["name"],
-                "",
-                "",
-                "",
-                "",
-                ""
-            ])
+            if not addedInFail:
+                rows.append([
+                    debit_ac_no,
+                    slip["employee"],
+                    employee_account_no,
+                    slip["employee_name"],
+                    slip["net_pay"],
+                    "N",
+                    date,
+                    ifsc_code,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    slip["name"],
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ])
 
 
         if len(rows_not_process)!=0:
             message = ""
             for slip in rows_not_process:
-                message="{}\n{}".format(message,slip["employee"])
+                message="{}<br>{}".format(message,slip["employee"])
 
+            frappe.sendmail(
+                recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
+                subject="{} - ({}) entries get issue.".format(payroll_entry,len(rows_not_process)),
+                message="Detail of issue record in payroll. It may be reject account or account not created.<br>{}".format(message),
+            )
+            
+            # return message
+            frappe.msgprint("There is issue in some record from this payroll. Administrator will get mail with all detail.")
 
-            print("Error Message","Account no or IFCF code issue with below employee code\n{}".format(message))
+            # print("Error Message","Account no or IFCF code issue with below employee code\n{}".format(message))
 
-            frappe.throw("Account no or IFCF code issue with below employee code\n{}".format(message))
-            return
+            # frappe.throw("Account no or IFCF code issue with below employee code\n{}".format(message))
+            # return
 
 
         # frappe.throw("File uploaded")
-        # return 
+        # return len(rows)
 
+        if len(rows)==0:
+            frappe.throw("Not found any entry to process")
+            return "Not found any entry to process"
 
         with open(file_path, 'w', newline='') as file:
             writer = csv.writer(file, delimiter="|")
@@ -1249,7 +1263,7 @@ def generate_salary_slip(payroll_entry=None):
         })
         file_doc.save()
 
-        print(f'File {file_name} created successfully in {directory}.')
+        # print(f'File {file_name} created successfully in {directory}.')
         frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)
         return f"File created successfully: {file_name}"
 
