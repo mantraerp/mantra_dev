@@ -1105,9 +1105,8 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
     except Exception as e :
         return e
 
-
 # upload salary slip.txt file on snorkel
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def generate_salary_slip(payroll_entry=None):
 
     try:
@@ -1133,11 +1132,10 @@ def generate_salary_slip(payroll_entry=None):
         formatted_date = current_date.strftime("%d%m%Y")
         file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
 
-        # file_name = "MANTRASH2H_MANTRASH2HUP.txt"
-        # directory = '/home/foramshah/Downloads/epayments/PayUpload'
-        # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
         file_path = os.path.join(directory, file_name)
-        # file_path = os.path.join("/home/mantra/Desktop/", file_name)
+        # file_path = os.path.join("/home/mantra/Desktop/", file_name) # Testing path
+        
+        
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
@@ -1147,6 +1145,7 @@ def generate_salary_slip(payroll_entry=None):
                 
         if not salary_slips:
             frappe.throw("No Salary Slips found for the given Payroll Entry.")
+            return "No salary slip found for given payroll entry."
 
         headers = [
             'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
@@ -1166,13 +1165,10 @@ def generate_salary_slip(payroll_entry=None):
         rows = []
         rows_not_process = []
         for slip in salary_slips:
-            # ifsc_code = frappe.db.get_value("Employee", slip["employee"], "ifsc_code") or ""
             date = datetime.today().strftime('%d-%b-%Y')
-
-            # employee_account_no = frappe.db.get_value("Bank Account", payment_account, "bank_account_no") or ""
-            # employee_account_no, ifsc_code = frappe.db.get_value('Bank Account', {'party_type': 'Employee','party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no', 'custom_ifsc'])
             employee_account_no=""
             ifsc_code=""
+            
             try:
                 employee_account_no = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no'])
                 ifsc_code = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['custom_ifsc'])
@@ -1228,22 +1224,11 @@ def generate_salary_slip(payroll_entry=None):
                 message="Detail of issue record in payroll. It may be reject account or account not created.<br>{}".format(message),
             )
             
-            # return message
-            frappe.msgprint("There is issue in some record from this payroll. Administrator will get mail with all detail.")
-
-            # print("Error Message","Account no or IFCF code issue with below employee code\n{}".format(message))
-
-            # frappe.throw("Account no or IFCF code issue with below employee code\n{}".format(message))
-            # return
-
-
-        # frappe.throw("File uploaded")
-        # return len(rows)
-
+            return message
+        
         if len(rows)==0:
-            frappe.throw("Not found any entry to process")
             return "Not found any entry to process"
-
+        
         with open(file_path, 'w', newline='') as file:
             writer = csv.writer(file, delimiter="|")
             writer.writerow(headers) 
@@ -1263,9 +1248,7 @@ def generate_salary_slip(payroll_entry=None):
         })
         file_doc.save()
 
-        # print(f'File {file_name} created successfully in {directory}.')
-        frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)
-        return f"File created successfully: {file_name}"
+        return f"Total entry {len(rows)}. File created successfully: {file_name}"
 
     except Exception as e:
         frappe.log_error(message=str(e), title="Salary Slip TXT Generation Error")
