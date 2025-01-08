@@ -36,7 +36,7 @@ from num2words import num2words
 
 
 # Upload Approved Beneficiary file on Snorkel with Indicator A
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def upload_beneficiary_file(doc_name):
     try:
 
@@ -71,8 +71,20 @@ def upload_beneficiary_file(doc_name):
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
             ]
+        
+        
+        
+        directory_sql = """
+            SELECT *
+            FROM `tabBank Account`
+            WHERE `bank_account_no` = '2046324-00-0'
+        """
 
-        bank_account = frappe.get_doc("Bank Account", doc_name)
+        directory_list = frappe.db.sql(directory_sql, as_dict=True)
+        # return directory_list
+
+        bank_account = frappe.get_doc("Bank Account", directory_list[0]['name'])
+        # return bank_account
 
         data_rows = [[
             "A",  # Indicator
@@ -471,16 +483,9 @@ def get_bene_file_test():
         errors = []
 
         for file_name in os.listdir(folder_path):
-            if file_name in ["MANTRASH2H_070125_372730331","MANTRASH2H_070125_372730331.txt"]:
-                frappe.sendmail(
-                    recipients=["ravi.patel@mantratec.com"],
-                    subject="Filename MANTRASH2H_070125_372730331",
-                    message=""
-                )
-                reply["MANTRASH2H_070125_372730331"]="yes"
-                
+     
 
-                if file_name.endswith('.txt'):
+            if file_name.endswith('.txt'):
                     csv_file_path = os.path.join(folder_path, file_name)
                     modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
                     if modification_time >= one_hour_ago:
@@ -558,27 +563,40 @@ def get_bene_file_test():
                                     return reply
                                 elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
 
+                                    reply["MANTRASH2H_MANTRABENH2HUP"]=data_dict[0]
+
                                     wantToReject = True
 
 
-                                    # if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table']:
-                                    #     wantToReject = False
-                                    #     frappe.sendmail(
-                                    #         recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
-                                    #         subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
-                                    #         message=str(data_dict)
-                                    #     )
-                                    #     return "Bank account is already uploaded on CMS."
+                                    if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
+                                        wantToReject = False
+                                        frappe.sendmail(
+                                            recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"],
+                                            subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
+                                            message=str(data_dict)
+                                        )
+                                        reply["account already"]="Bank account is already uploaded on CMS."
+
 
 
                                     bank_account_no = data_dict[5]
+                                    reply["Account_no"]=bank_account_no
+
                                     bank_account_doc = frappe.db.get_value(
                                         "Bank Account", 
                                         {"bank_account_no": bank_account_no, "docstatus": 1}, 
                                         "name"
                                     )
+                                    reply["Account"]=bank_account_doc
+
                                     if bank_account_doc:
                                         if wantToReject:
+                                            bank_account_doc = frappe.db.get_value(
+                                                "Bank Account", 
+                                                {"bank_account_no": bank_account_doc}, 
+                                                "name"
+                                            )
+                        
                                             frappe.db.set_value(
                                                 "Bank Account", bank_account_doc, {
                                                     "workflow_state": "Rejected",
@@ -586,6 +604,9 @@ def get_bene_file_test():
                                                     "custom_remark": data_dict[8]
                                                 }
                                             )
+                                            reply["process for work flow"]=bank_account_doc
+
+
                                             # frappe.db.commit()
                                             error_message = f"""
                                                 <p><strong>File:</strong> {file_name}</p>
@@ -603,11 +624,18 @@ def get_bene_file_test():
                                                 doc.file_name = data_dict[0]
                                                 doc.insert(ignore_permissions=True)
                                         else:
-                                            frappe.db.set_value(
-                                                "Bank Account", bank_account_doc, {
-                                                    "custom_remark": data_dict[8]
-                                                }
-                                            )
+                                            reply["Remark update for not reject"]=bank_account_doc
+
+                                            query = "UPDATE `tabBank Account` SET `custom_remark`='{}' WHERE `bank_account_no`='{}' AND `docstatus`=1".format(str(data_dict[8]),bank_account_no)
+                                            mdf = frappe.db.sql(query, as_dict=True)
+                                            # frappe.db.set_value( 
+                                            #     "Bank Account", bank_account_doc, {
+                                            #         "custom_remark": data_dict[8]
+                                            #     }
+                                            # )
+                                            reply["Update response"]=mdf
+
+                                            return reply
                                 # else:
                                 #     frappe.sendmail(
                                 #         recipients=["ravi.patel@mantratec.com"],

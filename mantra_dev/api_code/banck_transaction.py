@@ -375,14 +375,14 @@ def get_bene_file(delimiter='|'):
                                 wantToReject = True
 
 
-                                # if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table']:
-                                #     wantToReject = False
-                                #     frappe.sendmail(
-                                #         recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
-                                #         subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
-                                #         message=str(data_dict)
-                                #     )
-                                #     return "Bank account is already uploaded on CMS."
+                                if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
+                                    wantToReject = False
+                                    frappe.sendmail(
+                                        recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
+                                        subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
+                                        message=str(data_dict)
+                                    )
+                                    # return "Bank account is already uploaded on CMS."
 
 
                                 bank_account_no = data_dict[5]
@@ -417,11 +417,8 @@ def get_bene_file(delimiter='|'):
                                             doc.file_name = data_dict[0]
                                             doc.insert(ignore_permissions=True)
                                     else:
-                                        frappe.db.set_value(
-                                            "Bank Account", bank_account_doc, {
-                                                "custom_remark": data_dict[8]
-                                            }
-                                        )
+                                        query = "UPDATE `tabBank Account` SET `custom_remark`='{}' WHERE `bank_account_no`='{}' AND `docstatus`=1".format(str(data_dict[8]),bank_account_no)
+                                        mdf = frappe.db.sql(query, as_dict=True)
                             # else:
                             #     frappe.sendmail(
                             #         recipients=["ravi.patel@mantratec.com"],
@@ -451,201 +448,6 @@ def get_bene_file(delimiter='|'):
     except Exception as e:
         error_message = f"Unexpected error: {str(e)}"
         send_bene_file_error_email(str(traceback.format_exc()))
-
-
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def get_bene_file_test():
-    
-    reply={}
-    
-    delimiter='|'
-    try:
-        folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
-        one_hour_ago = datetime.now() - timedelta(hours=2)
-        reply["folder_path"]=folder_path
-        processed_files = []
-        errors = []
-
-        for file_name in os.listdir(folder_path):
-            if file_name in ["MANTRASH2H_070125_372730331","MANTRASH2H_070125_372730331.txt"]:
-                frappe.sendmail(
-                    recipients=["ravi.patel@mantratec.com"],
-                    subject="Filename MANTRASH2H_070125_372730331",
-                    message=""
-                )
-                reply["MANTRASH2H_070125_372730331"]="yes"
-                
-
-                if file_name.endswith('.txt'):
-                    csv_file_path = os.path.join(folder_path, file_name)
-                    modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
-                    if modification_time >= one_hour_ago:
-                        # frappe.logger().info(f"Processing file: {file_name} (Modified at {modification_time})")
-                        processed_files.append(file_name)
-                        reply["modification_time"]=modification_time
-
-                        data = []
-                        with open(csv_file_path, mode='r') as file:
-                            a=[]
-                            for line in file:
-                                a.append(line)
-                                row = line.strip().split(delimiter)
-                                if len(row) < 8:
-                                    # frappe.logger().warning(f"Skipping row with insufficient columns: {row}")
-                                    frappe.sendmail(
-                                        recipients=["ravi.patel@mantratec.com"],
-                                        subject="Bene file row not suffcient",
-                                        message=str(row)
-                                    )
-                                else:
-                                    data.append(row)
-                            
-                            reply["a"]=a
-
-                            reply["row"]=row
-                            reply["data"]=data
-
-
-                            if file_name.startswith("585730452"):
-                                #Call funcation to send in mefron server
-                                send_file(csv_file_path,file_name)
-
-                                previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene Mefron'],['file_name', '=', file_name]])
-                                if len(previous_file)==0:
-
-                                    #insert bank transaction log
-                                    doc = frappe.new_doc('Bank Integration Log')
-                                    doc.file_from = "Mefron"
-                                    doc.file_type = "Mail Send Bene Mefron"
-                                    doc.file_name = file_name
-                                    doc.insert(ignore_permissions=True)
-
-
-                                    frappe.sendmail(
-                                        recipients=["ravi.patel@mantratec.com"],
-                                        subject="Bene file need to send on mefron server 3",
-                                        message="This is bene file send on mefron server {}".format(file_name)
-                                    )
-                                return
-
-
-                        for data_dict in data:
-                            try:
-                                #If beny get sucussesful uploaded
-                                if data_dict[0] == "P" and data_dict[6] == "Added":
-                                    reply["P"]="P"
-                                    bank_account_no = data_dict[4]
-                                    bank_account_doc = frappe.db.get_value(
-                                        "Bank Account", 
-                                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
-                                        "name"
-                                    )
-                                    reply["bank_account_no"]=bank_account_no
-                                    reply["bank_account_doc"]=str(bank_account_doc)
-
-                                    if bank_account_doc:
-                                        reply["going for update"]="yes"
-
-                                        frappe.db.set_value(
-                                            "Bank Account", bank_account_doc, {"custom_remark": data_dict[7]}
-                                        )
-                                        frappe.db.commit()
-
-                                    return reply
-                                elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
-
-                                    wantToReject = True
-
-
-                                    # if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table']:
-                                    #     wantToReject = False
-                                    #     frappe.sendmail(
-                                    #         recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
-                                    #         subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
-                                    #         message=str(data_dict)
-                                    #     )
-                                    #     return "Bank account is already uploaded on CMS."
-
-
-                                    bank_account_no = data_dict[5]
-                                    bank_account_doc = frappe.db.get_value(
-                                        "Bank Account", 
-                                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
-                                        "name"
-                                    )
-                                    if bank_account_doc:
-                                        if wantToReject:
-                                            frappe.db.set_value(
-                                                "Bank Account", bank_account_doc, {
-                                                    "workflow_state": "Rejected",
-                                                    "custom_beneficiary_file_uploaded": 0,
-                                                    "custom_remark": data_dict[8]
-                                                }
-                                            )
-                                            # frappe.db.commit()
-                                            error_message = f"""
-                                                <p><strong>File:</strong> {file_name}</p>
-                                                <p><strong>Row Data:</strong> {data_dict}</p>
-                                                <p>The workflow state has been set to "Rejected" for the bank account with account number: {bank_account_no}.</p>
-                                            """
-                                            previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene'],['file_name', '=', data_dict[0]]])
-                                            if len(previous_file)==0:
-                                                send_bene_file_error_email(error_message)
-
-                                                #insert bank transaction log
-                                                doc = frappe.new_doc('Bank Integration Log')
-                                                doc.file_from = "Mantra"
-                                                doc.file_type = "Mail Send Bene"
-                                                doc.file_name = data_dict[0]
-                                                doc.insert(ignore_permissions=True)
-                                        else:
-                                            frappe.db.set_value(
-                                                "Bank Account", bank_account_doc, {
-                                                    "custom_remark": data_dict[8]
-                                                }
-                                            )
-                                # else:
-                                #     frappe.sendmail(
-                                #         recipients=["ravi.patel@mantratec.com"],
-                                #         subject="Bene file not match on any condition",
-                                #         message=str(data_dict)
-                                #     )    
-
-                            except Exception as e:
-                                frappe.logger().error(f"Error processing row {data_dict}: {e}")
-                                errors.append({"file": file_name, "row": data_dict, "error": str(e)})
-
-        if errors:
-            error_details = "".join([
-                f"""
-                <p><strong>File:</strong> {error['file']}</p>
-                <p><strong>Row:</strong> {error['row']}</p>
-                <p><strong>Error:</strong> {error['error']}</p>
-                <hr> Test
-                """ for error in errors
-            ])
-            send_bene_file_error_email(error_details)
-
-        return reply
-    except FileNotFoundError as e:
-        error_message = f"Folder path {folder_path} not found. Exception: {str(e)}"
-        send_bene_file_error_email(error_message)
-
-    except Exception as e:
-        error_message = f"Unexpected error: {str(e)}"
-        send_bene_file_error_email(str(traceback.format_exc()))
-
-
-
-
-
-
-
-
 
 
 
