@@ -190,27 +190,19 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
-	"bank": {
-        # This may be used for predefined frequencies if they fit your needs
-        "0/5 * * * *": [
-            "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
-        ]
-    },
-    
     "cron": {
+        "0/5 * * * *": [
+            #Read beny new beny file evey 5th minute
+            "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
+        ],
         "30 23 * * *": [
             "mantra_dev.backend_code.api.login_to_avdm_scheduled"
         ]
     },
- 
-    # "avdm": {
-    #     "0/5 * * * *": [
-    #         "mantra_dev.backend_code.api.login_to_avdm"
-    #     ]
-    # }
-# 	"daily": [
-# 		"mantra_dev.tasks.daily"
-# 	],
+	"daily": [
+        #This log will clear beny process files log every day at night.
+		"mantra_dev.backend_code.globle.ClearBenyFileProcessLog"
+	],
 # 	"hourly": [
 # 		"mantra_dev.tasks.hourly"
 # 	],
