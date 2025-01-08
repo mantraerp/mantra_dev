@@ -78,7 +78,7 @@ def upload_beneficiary_file(doc_name):
         directory_sql = """
             SELECT *
             FROM `tabBank Account`
-            WHERE `bank_account_no` = '202520110000345'
+            WHERE `bank_account_no` = '50200013010733' AND `workflow_state`='Approved'
         """
 
         directory_list = frappe.db.sql(directory_sql, as_dict=True)
