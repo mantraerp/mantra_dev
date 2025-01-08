@@ -414,7 +414,7 @@ def get_bene_file(delimiter='|'):
                                 doc.file_name = data_dict[0]
                                 doc.insert(ignore_permissions=True)
                         else:
-                            query = "UPDATE `tabBank Account` SET `custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1".format(str(data_dict[8]),bank_account_no)
+                            query = "UPDATE `tabBank Account` SET `custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[8]),bank_account_no)
                             mdf = frappe.db.sql(query, as_dict=True)
             except Exception as e:
                 errors.append({"file": file_name, "row": data_dict, "error": str(e)})
