@@ -377,11 +377,11 @@ def get_bene_file(delimiter='|'):
 
                                 if str(data_dict[8]) in ['CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
                                     wantToReject = False
-                                    frappe.sendmail(
-                                        recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"],
-                                        subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
-                                        message=str(data_dict)
-                                    )
+                                    # frappe.sendmail(
+                                    #     recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"],
+                                    #     subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
+                                    #     message=str(data_dict)
+                                    # )
                                     # return "Bank account is already uploaded on CMS."
 
 
