@@ -190,9 +190,9 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
+
     "cron": {
         "0/5 * * * *": [
-            #Read beny new beny file evey 5th minute
             "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
         ],
         "30 23 * * *": [

@@ -1251,8 +1251,11 @@ def get_pnb_file():
     print(parsed_data)
 
 #get revers Mis From Bank ICICI
-@frappe.whitelist()
-def get_icici_bank_file(delimiter='|'):   
+@frappe.whitelist(allow_guest=True)
+def get_icici_bank_file(delimiter='|'):
+    
+    errorLog('BENY_CRON1',"",False)
+
     try:
         # Get the path to the folder containing the files
         folder_path = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_pull_path")

@@ -4,6 +4,7 @@
 
 
 import frappe
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -18,11 +19,11 @@ def execute(filters=None):
 		columns = get_columns(filters)
 		for index,row in enumerate(data_raw):
 			current_stock = get_latest_stock_qty(row['item_code'])
-			total_quantity = current_stock + row['total_qty']
+			total_quantity = (flt(current_stock) if current_stock not in [None, 'null'] else 0) + flt(row['total_qty'])
 			data.append([
 				row['item_code'],
 				row['item_name'],
-				current_stock,
+				current_stock if current_stock not in [None,'null'] else 0,
 				row['total_qty'],
 				total_quantity
 			])
@@ -63,8 +64,8 @@ def get_columns(filters):
 	columns= []
 	columns.append({'fieldname':'item_code','label':"Item Code",'fieldtype':'Link',"options":"Item",'align':'left','width':150})
 	columns.append({'fieldname':'item_name','label':"Item Name",'fieldtype':'data','align':'left','width':200})
-	columns.append({'fieldname':'actual_stock','label':"Actual Stock",'fieldtype':'float','align':'left','width':120})
+	columns.append({'fieldname':'actual_stock','label':"Actual Qty",'fieldtype':'float','align':'left','width':120})
 	columns.append({'fieldname':'in_transit','label':"In Transit Qty",'fieldtype':'float','align':'left','width':120})
-	columns.append({'fieldname':'total_quantity','label':"Total Qty",'fieldtype':'float','align':'left','width':120})
+	columns.append({'fieldname':'total_quantity','label':"Total Projected Qty",'fieldtype':'float','align':'left','width':150})
 
 	return columns

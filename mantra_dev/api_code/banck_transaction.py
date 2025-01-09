@@ -301,6 +301,9 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 # get reverse MIS of Beneficiary File
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
+    
+    errorLog('BENY_CRON',"",False)
+    
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
         one_hour_ago = datetime.now() - timedelta(hours=1)
