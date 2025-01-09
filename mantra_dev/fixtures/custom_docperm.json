@@ -2150,7 +2150,7 @@
   "name": "9tndm1svu5",
   "parent": "Delivery Note",
   "permlevel": 0,
-  "print": 0,
+  "print": 1,
   "read": 1,
   "report": 1,
   "role": "SCM - Manager",
