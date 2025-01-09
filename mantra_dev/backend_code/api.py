@@ -63,35 +63,31 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 #     print(target_dir)
 
 
+@frappe.whitelist()
+def fetch_company_account():
+    doc = frappe.db.get_list('Bank Account',
+    filters={
+        'is_company_account': 1,
+        'is_default': 1
+    },
+    fields=['name'],
+    as_list=True
+    )
+    return doc
+    
 
 
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull():
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/storescreate.sh')
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git.sh')
-    return "Git pull run"
-
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull_migrate():
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_migrate.sh')
-    return "Git pull run with build"
-
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull_export_fixture():
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_export_fixture.sh')
-    return "Git pull run with export fixture"
-
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull_bench_build_erpnext():
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_build_erpnext.sh')
-    return "Git pull run with bench build errpnext"
-
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull_bench_build_frappe():
-    os.popen('sh /home/mantra/mantrastage-bench/ShellScript/mantra_git_build_frappe.sh')
-    return "Git pull run with bench build frappe"
-
-
+@frappe.whitelist()
+def fetch_party_account(party):
+    doc = frappe.db.get_list('Bank Account',
+    filters={
+        'party': party,
+        'is_default': 1
+    },
+    fields=['name'],
+    as_list=True
+    )
+    return doc
 
 
 @frappe.whitelist()

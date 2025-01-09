@@ -302,7 +302,7 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
     
-    errorLog('BENY_CRON',"",False)
+    # errorLog('BENY_CRON',"",False)
     
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
@@ -1254,7 +1254,16 @@ def get_pnb_file():
 
 #get revers Mis From Bank ICICI
 @frappe.whitelist()
-def get_icici_bank_file(delimiter='|'):   
+def get_icici_bank_file(delimiter='|'):
+    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+    frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
+    return True
+    
+@frappe.whitelist()
+def get_icici_bank_file_background(delimiter='|'):
+    
+    # errorLog('BENY_CRON2',"",False)
+
     try:
         # Get the path to the folder containing the files
         folder_path = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_pull_path")
@@ -1262,168 +1271,173 @@ def get_icici_bank_file(delimiter='|'):
         # Specify the path to the backup folder
         backup_folder = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_backup_path")
         # /home/mantra/ICICI_Bank_Backup
-        print("Folder path:", folder_path)
-        print("Backup folder:", backup_folder)
-          
-        # Iterate over each file in the specified folder
+        # print("Folder path:", folder_path)
+        # print("Backup folder:", backup_folder)
+
+
+
+        filersreturn = []
         for file_name in os.listdir(folder_path):
             if file_name.endswith('.txt'):
-                csv_file_path = os.path.join(folder_path, file_name)
-                
-                if file_name.startswith("585730452"):
-                    #Call funcation to send in mefron server
-                    send_file(csv_file_path,file_name)
+                if not errorLogExites('PAYMENTPROCESSFILE',file_name):
+                    filersreturn.append(file_name)
+                    errorLog('PAYMENTPROCESSFILE',file_name,True)
 
-                    previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Reverse MIS'],['file_name', '=', file_name]])
-                    if len(previous_file)==0:
-                        #insert bank transaction log
-                        doc = frappe.new_doc('Bank Integration Log')
-                        doc.file_from = "Mefron"
-                        doc.file_type = "Reverse MIS"
-                        doc.file_name = file_name
-                        doc.insert(ignore_permissions=True)
+        if len(filersreturn)==0:
+            return "No files found."
 
 
-                        frappe.sendmail(
-                            recipients=["ravi.patel@mantratec.com","helpdesk1.erp@mantratec.com"],
-                            subject="Bene file need to send on mefron server 5",
-                            message="This is bene file send on mefron server {}".format(file_name)
-                        )
-                    return
-                
-                
-                # Initialize an empty list to store data from the current file
-                data = []
-                
+        data = []
+        for file_name in filersreturn:
+            csv_file_path = os.path.join(folder_path, file_name)
+
+            if file_name.startswith("585730452"):
+
+                #Call funcation to send in mefron server
+                send_file(csv_file_path,file_name)
+
+                previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Reverse MIS'],['file_name', '=', file_name]])
+                if len(previous_file)==0:
+                    #insert bank transaction log
+                    doc = frappe.new_doc('Bank Integration Log')
+                    doc.file_from = "Mefron"
+                    doc.file_type = "Reverse MIS"
+                    doc.file_name = file_name
+                    doc.insert(ignore_permissions=True)
+                    frappe.sendmail(
+                        recipients=["ravi.patel@mantratec.com","helpdesk1.erp@mantratec.com"],
+                        subject="Bene file need to send on mefron server 5",
+                        message="This is bene file send on mefron server {}".format(file_name)
+                    )
+            else:
                 # Open the CSV file and read its contents
                 with open(csv_file_path, mode='r') as file:
                     for line in file:
                         row = line.strip().split(delimiter)
-                        # print(row)
                         data.append(row)
-                
-                for data_dict in data:
-                    if len(data_dict)>15:
-                        try:
-                            if frappe.db.exists("Payment Entry", data_dict[15]):
-                                print("Payment : ",data_dict[15])
 
-                                ERP_status = ""
-                                rejection_reason = ""
+            backup_file_path = os.path.join(backup_folder, file_name)
+            shutil.move(csv_file_path, backup_file_path)
 
 
-                                if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                                    if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                                        ERP_status = "Fail"
-                                        rejection_reason = "Rejected"
-
-                                        frappe.db.set_value("Payment Entry", data_dict[15], {
-                                        "workflow_state": "Cancelled",
-                                        })
-                                        
-                                    else:
-                                        if data_dict[22] == "Paid":
-                                            ERP_status = "Success"
-                                            document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
-                                            if document.custom_sent_payment_advice == 1:
-                                                send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
-                                        else:
-                                            ERP_status = "Authorization Pending"
-                                        
-                                    frappe.db.set_value("Payment Entry", data_dict[15], {
-                                        "custom_payment_status_": ERP_status,
-                                        "custom_payment_ref_no": data_dict[21],
-                                        "custom_customer_ref_no": data_dict[24],
-                                        "custom_instrument_no": data_dict[26],
-                                        "custom_instrument_ref_no": data_dict[25],
-                                        "custom_liquidation_date": data_dict[23],
-                                        "custom_utr_no":  data_dict[27],
-                                        "custom_rejection_reason":rejection_reason,
-                                        # "docstatus": docstatus
-                                    })
-                                    # frappe.db.commit()
+        if len(data)==0:
+            return "No row found to process"
 
 
-                            elif frappe.db.exists("Salary Slip", data_dict[15]):
-                                print("Salary : ",data_dict[15])
+        for data_dict in data:
+            if len(data_dict)>15:
+                try:
+                    if frappe.db.exists("Payment Entry", data_dict[15]):
+                        print("Payment : ",data_dict[15])
 
-                                ERP_status = ""
-                                rejection_reason = ""
+                        ERP_status = ""
+                        rejection_reason = ""
 
-                                if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                                    if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
-                                        ERP_status = "Fail"
-                                        rejection_reason = "Rejected"
-                            
-                                    else:
-                                        if data_dict[22] == "Paid":
-                                            ERP_status = "Success"
-                                        else:
-                                            ERP_status = "Authorization Pending"
 
-                                # Update Salary Slip
-                                    frappe.db.set_value("Salary Slip", data_dict[15], {
-                                        "custom_payment_status": ERP_status,
-                                        "custom_payment_ref_no": data_dict[21],
-                                        "custom_customer_ref_no": data_dict[24],
-                                        "custom_instrument_no": data_dict[26],
-                                        "custom_instrument_ref_no": data_dict[25],
-                                        "custom_liquidation_date": data_dict[23],
-                                        "custom_utr_no":  data_dict[28],
-                                        "custom_rejection_reason":rejection_reason,
-                                    })
+                        if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                            if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                ERP_status = "Fail"
+                                rejection_reason = "Rejected"
+
+                                frappe.db.set_value("Payment Entry", data_dict[15], {
+                                "workflow_state": "Cancelled",
+                                })
+                                
+                            else:
+                                if data_dict[22] == "Paid":
+                                    ERP_status = "Success"
+                                    document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
+                                    if document.custom_sent_payment_advice == 1:
+                                        send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
+                                else:
+                                    ERP_status = "Authorization Pending"
+                                
+                            frappe.db.set_value("Payment Entry", data_dict[15], {
+                                "custom_payment_status_": ERP_status,
+                                "custom_payment_ref_no": data_dict[21],
+                                "custom_customer_ref_no": data_dict[24],
+                                "custom_instrument_no": data_dict[26],
+                                "custom_instrument_ref_no": data_dict[25],
+                                "custom_liquidation_date": data_dict[23],
+                                "custom_utr_no":  data_dict[27],
+                                "custom_rejection_reason":rejection_reason,
+                                # "docstatus": docstatus
+                            })
+                            # frappe.db.commit()
+
+
+                    elif frappe.db.exists("Salary Slip", data_dict[15]):
+                        print("Salary : ",data_dict[15])
+
+                        ERP_status = ""
+                        rejection_reason = ""
+
+                        if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                            if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
+                                ERP_status = "Fail"
+                                rejection_reason = "Rejected"
+                    
+                            else:
+                                if data_dict[22] == "Paid":
+                                    ERP_status = "Success"
+                                else:
+                                    ERP_status = "Authorization Pending"
+
+                        # Update Salary Slip
+                            frappe.db.set_value("Salary Slip", data_dict[15], {
+                                "custom_payment_status": ERP_status,
+                                "custom_payment_ref_no": data_dict[21],
+                                "custom_customer_ref_no": data_dict[24],
+                                "custom_instrument_no": data_dict[26],
+                                "custom_instrument_ref_no": data_dict[25],
+                                "custom_liquidation_date": data_dict[23],
+                                "custom_utr_no":  data_dict[28],
+                                "custom_rejection_reason":rejection_reason,
+                            })
+                        # frappe.db.commit()
+
+                    else:
+                        if frappe.db.exists("Payment Entry", data_dict[17]):
+                            print("Payment : ",data_dict[17]) 
+
+                            if data_dict[24]=="P":
+                                frappe.db.set_value("Payment Entry", data_dict[17], {
+                                    "custom_rejection_reason":data_dict[25],
+                                    "custom_payment_status_": "Fail",
+                                    "workflow_state": "Cancelled",
+                                })
+                                # frappe.db.commit()
+                            else:
+                                frappe.db.set_value("Payment Entry", data_dict[17], {
+                                    "custom_payment_status_": "Fail",
+                                    "workflow_state": "Cancelled",
+                                })
                                 # frappe.db.commit()
 
+                        elif frappe.db.exists("Salary Slip", data_dict[17]):
+                            print("Salary : ",data_dict[17])
+
+                            if data_dict[24]=="P":
+                                frappe.db.set_value("Salary Slip", data_dict[17], {
+                                    "custom_rejection_reason":data_dict[25],
+                                    "custom_payment_status": "Fail",
+                                })
                             else:
-                                if frappe.db.exists("Payment Entry", data_dict[17]):
-                                    print("Payment : ",data_dict[17]) 
+                                frappe.db.set_value("Salary Slip", data_dict[17], {
+                                    "custom_payment_status": "Fail",
+                                })
 
-                                    if data_dict[24]=="P":
-                                        frappe.db.set_value("Payment Entry", data_dict[17], {
-                                            "custom_rejection_reason":data_dict[25],
-                                            "custom_payment_status_": "Fail",
-                                            "workflow_state": "Cancelled",
-                                        })
-                                        # frappe.db.commit()
-                                    else:
-                                        frappe.db.set_value("Payment Entry", data_dict[17], {
-                                            "custom_payment_status_": "Fail",
-                                            "workflow_state": "Cancelled",
-                                        })
-                                        # frappe.db.commit()
+                except KeyError as ke:
+                    error_message = f"KeyError: {ke} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
+                    send_icici_bank_file_error_email(error_message,"KeyError line 1365")
 
-                                elif frappe.db.exists("Salary Slip", data_dict[17]):
-                                    print("Salary : ",data_dict[17])
-
-                                    if data_dict[24]=="P":
-                                        frappe.db.set_value("Salary Slip", data_dict[17], {
-                                            "custom_rejection_reason":data_dict[25],
-                                            "custom_payment_status": "Fail",
-                                        })
-                                    else:
-                                        frappe.db.set_value("Salary Slip", data_dict[17], {
-                                            "custom_payment_status": "Fail",
-                                        })
-
-                        except KeyError as ke:
-                            error_message = f"KeyError: {ke} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
-                            send_icici_bank_file_error_email(error_message,"KeyError line 1365")
-
-                        except Exception as e:
-                            error_message = f"An error occurred while processing data_dict: {e} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
-                            send_icici_bank_file_error_email(error_message,"processing line 1369")
+                except Exception as e:
+                    error_message = f"An error occurred while processing data_dict: {e} <br> traceable: {str(traceback.format_exc())} in file {file_name}"
+                    send_icici_bank_file_error_email(error_message,"processing line 1369")
 
 
-                backup_file_path = os.path.join(backup_folder, file_name)
-                shutil.move(csv_file_path, backup_file_path)
-                print(f"File '{file_name}' has been moved to the backup folder.")
-                # Move the file to the backup folder after processing
-                
-        get_bene_result = get_bene_file(delimiter=delimiter)
-        print("Beneficiary file processing result:", get_bene_result)     
-
-        get_bene_file()
-
+        # errorLog('BENY_CRON3',"",False)
+        
     except Exception as e:
         error_message = f"An error occurred in the get_icici_bank_file function: {e} <br> traceable: {str(traceback.format_exc())}"
         send_icici_bank_file_error_email(error_message,"Exception line 1384")
