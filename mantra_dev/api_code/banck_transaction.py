@@ -931,8 +931,8 @@ def generate_salary_slip(payroll_entry=None):
         # file_name = "MANTRASH2H_MANTRASH2HUP.txt"
         # directory = '/home/foramshah/Downloads/epayments/PayUpload'
         # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
-        file_path = os.path.join(directory, file_name)
-        # file_path = os.path.join("/home/mantra/Desktop/", file_name)
+        # file_path = os.path.join(directory, file_name)
+        file_path = os.path.join("/home/mantra/Desktop/", file_name)
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
@@ -1039,24 +1039,24 @@ def generate_salary_slip(payroll_entry=None):
             frappe.throw("Not found any entry to process")
             return "Not found any entry to process"
 
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(headers) 
-            writer.writerows(rows)  
+        # with open(file_path, 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter="|")
+        #     writer.writerow(headers) 
+        #     writer.writerows(rows)  
 
-        with open(file_path, 'rb') as file:
-            file_content = file.read()
+        # with open(file_path, 'rb') as file:
+        #     file_content = file.read()
 
-        file_doc = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "file_size": len(file_content),
-            "attached_to_doctype": "Payroll Entry",
-            "attached_to_name": payroll_entry,
-            "content": file_content,
-            "is_private": True  # Set this to True if you want it to be private
-        })
-        file_doc.save()
+        # file_doc = frappe.get_doc({
+        #     "doctype": "File",
+        #     "file_name": file_name,
+        #     "file_size": len(file_content),
+        #     "attached_to_doctype": "Payroll Entry",
+        #     "attached_to_name": payroll_entry,
+        #     "content": file_content,
+        #     "is_private": True  # Set this to True if you want it to be private
+        # })
+        # file_doc.save()
 
         # print(f'File {file_name} created successfully in {directory}.')
         frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)

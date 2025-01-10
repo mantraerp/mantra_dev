@@ -62,6 +62,63 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 #     target_dir = doc.beneficiary_file_upload_path
 #     print(target_dir)
 
+@frappe.whitelist()
+def bank_acc(mode_of_payment):
+    #Call from payment_entry.js
+    #Get data from payment entry (mode_of_payment). check into Mode of payment list.
+    #If data found then return company bank account
+    #If not found then send blank
+    if mode_of_payment:
+        doc1 = frappe.get_doc("Mode of Payment",mode_of_payment)
+        if doc1.accounts:
+            for row in doc1.accounts:
+                if row.default_account:
+                    set_acc = frappe.db.get_list('Bank Account',
+                        filters={
+                            'is_company_account':1
+                        },
+                        or_filters=[
+                            ['account', '=', row.default_account],  # OR condition 1
+                            ['name', '=', row.default_account]   # OR condition 2
+                        ],
+                        fields=['name', 'account'],
+                        as_list=True
+                    )
+                    if set_acc:
+                        for i in set_acc:
+                            return i[0]
+                    else:
+                        return ""
+                else:
+                    return ""
+        else:
+            return ""
+
+    # else:
+    #     doc1 = frappe.get_doc("Mode of Payment","NEFT - H2H")
+    #     if doc1.accounts:
+    #         for row in doc1.accounts:
+    #             if row.default_account:
+    #                 set_acc = frappe.db.get_list('Bank Account',
+    #                     filters={
+    #                         'is_company_account':1
+    #                     },
+    #                     or_filters=[
+    #                         ['account', '=', row.default_account],  # OR condition 1
+    #                         ['name', '=', row.default_account]   # OR condition 2
+    #                     ],
+    #                     fields=['name', 'account'],
+    #                     as_list=True
+    #                 )
+    #                 if set_acc:
+    #                     for i in set_acc:
+    #                         return i[0]
+    #                 else:
+    #                     return ""
+    #             else:
+    #                 return ""
+    #     else:
+    #         return ""
 
 @frappe.whitelist()
 def fetch_company_account():

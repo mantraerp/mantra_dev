@@ -182,17 +182,15 @@ def repost_entries_single(doc_name,status):
 	return reply
 
 
-
+@frappe.whitelist(allow_guest=True)
 def repost(doc):
-
 	try:
+		frappe.flags.through_repost_item_valuation = True
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
-			delete_entry_from_error_log(doc.name)
 			return
 
-		if doc.status not in ("Failed"):
-			delete_entry_from_error_log(doc.name)
-			return
+		# This is to avoid TooManyWritesError in case of large reposts
+		frappe.db.MAX_WRITES_PER_TRANSACTION *= 6
 
 		doc.set_status("In Progress")
 		if not frappe.flags.in_test:
@@ -202,9 +200,8 @@ def repost(doc):
 		repost_gl_entries(doc)
 
 		doc.set_status("Completed")
-
-		doc.deduplicate_similar_repost()
-		delete_entry_from_error_log(doc.name)
+		doc.db_set("reposting_data_file", None)
+		remove_attached_file(doc.name)
 
 	except Exception as e:
 		if frappe.flags.in_test:
@@ -213,23 +210,49 @@ def repost(doc):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback()
+		traceback = frappe.get_traceback(with_context=True)
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""
-		if traceback:
-			message += "<br>" + "Traceback: <br>" + traceback
-		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
+		if isinstance(message, dict):
+			message = message.get("message")
 
-		if not isinstance(e, RecoverableErrors):
-			# notify_error_to_stock_managers(doc, message)
+		status = "Failed"
+		# If failed because of timeout, set status to In Progress
+		if traceback and "timeout" in traceback.lower():
+			status = "In Progress"
+
+		if traceback:
+			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
+
+
+		message = "{} <br><br> {}".format(message,str(traceback.format_exc()))
+
+		# frappe.db.set_value(
+		# 	doc.doctype,
+		# 	doc.name,
+		# 	{
+		# 		"error_log": message,
+		# 		"status": status,
+		# 	},
+		# )
+
+		outgoing_email_account = frappe.get_cached_value(
+			"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
+		)
+
+		if outgoing_email_account and not isinstance(e, RecoverableErrors):
+			notify_error_to_stock_managers(doc, message)
 			doc.set_status("Failed")
 	finally:
-
 		if not frappe.flags.in_test:
 			frappe.db.commit()
 
-
+def remove_attached_file(docname):
+	if file_name := frappe.db.get_value(
+		"File", {"attached_to_name": docname, "attached_to_doctype": "Repost Item Valuation"}, "name"
+	):
+		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
 
 
 
@@ -288,16 +311,22 @@ def repost_entries_without_voucher_no():
 @frappe.whitelist(allow_guest=True)
 def repost_entries_without_voucher_no_process_one_entry():
 
+	reply={}
 	query = "SELECT * from `tabError Log` WHERE error='{}' LIMIT 1".format('REPOSTING')
 	records = frappe.db.sql(query,as_dict=1)
+	reply['record_process']=records
 	if len(records)!=0:
 		doc = frappe.get_doc("Repost Item Valuation", records[0]['method'])
+		reply['doc_process']=doc
+
 		if doc.status not in ['Completed','Skipped']:
+			reply['process_start_reposting']=doc.status
+			# return repost(doc)
 			frappe.enqueue(repost,queue='long',job_name="Repost {}".format(doc.name),timeout=100000,doc=doc)
 
 		frappe.enqueue(delete_entry_from_error_log,queue='long',job_name="Delete Repost Entries {}".format(doc.name),timeout=100000,doc_name=doc.name)
 
-	return True
+	return reply
 
 def delete_entry_from_error_log(doc_name):
 	deleteQuery = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error`='REPOSTING'".format(doc_name)
@@ -418,7 +447,8 @@ def notify_error_to_stock_managers(doc, traceback):
 	if not recipients:
 		get_users_with_role("System Manager")
 
-	subject = _("Error while reposting item valuation")
+	recipients = ['ravi.patel@mantratec.com']
+	subject = _("Error while reposting item valuation - UAT Cron")
 	message = (
 		_("Hi,")
 		+ "<br>"

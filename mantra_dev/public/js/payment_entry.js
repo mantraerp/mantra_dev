@@ -56,14 +56,14 @@ frappe.ui.form.on("Payment Entry", {
     //   },
     //   __("Actions")
     // );
-  if(frm.is_new()){
-    frm.set_value('bank_account', "")
-  }
+    // if(frm.is_new()){
+    //   frm.set_value('bank_account', "")
+    // }
   },
 
 
   before_save(frm) {
-    
+
     if (!frm.doc.mode_of_payment) {
 
     }
@@ -77,46 +77,30 @@ frappe.ui.form.on("Payment Entry", {
     }
   },
 
-  party(frm){
-    if(frm.doc.party){
+  party(frm) {
+    if (frm.doc.party) {
       frappe.call({
-          method: "mantra_dev.backend_code.api.fetch_party_account",
-          args: {
-            party: frm.doc.party,
-          },
-          callback: function (r) {
-            // console.log(r);
-            if (r.message.length === 1) {
-              console.log(r.message[0][0]);
-              frm.set_value("party_bank_account",r.message[0][0]);
-            }
-            else{
-              frm.set_value("party_bank_account","");
-            }
+        method: "mantra_dev.backend_code.api.fetch_party_account",
+        args: {
+          party: frm.doc.party,
+        },
+        callback: function (r) {
+          if (r.message.length === 1) {
+            console.log(r.message[0][0]);
+            frm.set_value("party_bank_account", r.message[0][0]);
           }
-        });
-      frappe.call({
-          method: "mantra_dev.backend_code.api.fetch_company_account",
-          args: {
-          },
-          callback: function (r) {
-            // console.log(r);
-            if (r.message.length === 1) {
-              console.log(r.message[0][0]);
-              frm.set_value("bank_account",r.message[0][0]);
-            }
-            else{
-              frm.set_value("bank_account","");
-            }
+          else {
+            frm.set_value("party_bank_account", "");
           }
-        });
+        }
+      });
     }
   },
   onload: function (frm) {
 
 
-    if(frm.doc.party){
-      if(frm.is_new()){
+    if (frm.doc.party) {
+      if (frm.is_new()) {
         frappe.call({
           method: "mantra_dev.backend_code.api.fetch_party_account",
           args: {
@@ -126,33 +110,32 @@ frappe.ui.form.on("Payment Entry", {
             // console.log(r);
             if (r.message.length === 1) {
               console.log(r.message[0][0]);
-              frm.set_value("party_bank_account",r.message[0][0]);
+              frm.set_value("party_bank_account", r.message[0][0]);
             }
-            else{
-              frm.set_value("party_bank_account","");
-            }
-          }
-        });
-      frappe.call({
-          method: "mantra_dev.backend_code.api.fetch_company_account",
-          args: {
-          },
-          callback: function (r) {
-            // console.log(r);
-            if (r.message.length === 1) {
-              console.log(r.message[0][0]);
-              frm.set_value("bank_account",r.message[0][0]);
-            }
-            else{
-              frm.set_value("bank_account","");
+            else {
+              frm.set_value("party_bank_account", "");
             }
           }
         });
       }
-
-    }else{
-      frm.set_value("bank_account","")
-      frm.set_value("party_bank_account","")
+    } else {
+      frm.set_value("party_bank_account", "")
+    }
+    if (frm.doc.mode_of_payment) {
+      if (frm.is_new()) {
+        frappe.call({
+          method: "mantra_dev.backend_code.api.bank_acc",
+          args: {
+            mode_of_payment: frm.doc.mode_of_payment
+          },
+          callback: function (r) {
+            console.log(r.message);
+            frm.set_value("bank_account", r.message);
+          }
+        });
+      }
+    } else {
+      frm.set_value("bank_account", "")
     }
 
 
@@ -171,6 +154,18 @@ frappe.ui.form.on("Payment Entry", {
       });
     }, 1000);
   },
+  mode_of_payment(frm) {
+    frappe.call({
+      method: "mantra_dev.backend_code.api.bank_acc",
+      args: {
+        mode_of_payment: frm.doc.mode_of_payment
+      },
+      callback: function (r) {
+        console.log(r.message);
+        frm.set_value("bank_account", r.message);
+      }
+    });
+  },
   after_workflow_action: function (frm) {
 
     if (frm.doc.workflow_state == "Approved") {
@@ -181,33 +176,28 @@ frappe.ui.form.on("Payment Entry", {
 
     }
   },
-  before_workflow_action(frm){
-    if(frm.doc.workflow_state === 'Pending')
-    {
-      if(!frm.doc.bank_account)
-      {
+  before_workflow_action(frm) {
+    if (frm.doc.workflow_state === 'Pending') {
+      if (!frm.doc.bank_account) {
         frappe.dom.unfreeze();
         frappe.throw("Company bank account not found");
         return false;
       }
-      if(String(frm.doc.bank_account)==="undefined")
-      {
-          frappe.dom.unfreeze();
-          frappe.throw("Company bank account not found")
-          return false;
+      if (String(frm.doc.bank_account) === "undefined") {
+        frappe.dom.unfreeze();
+        frappe.throw("Company bank account not found")
+        return false;
       }
 
-      if(!frm.doc.party_bank_account)
-      {
+      if (!frm.doc.party_bank_account) {
         frappe.dom.unfreeze();
         frappe.throw("Party bank account not found");
         return false;
       }
-      if(String(frm.doc.party_bank_account)==="undefined")
-      {
-          frappe.dom.unfreeze();
-          frappe.throw("Party bank account not found")
-          return false;
+      if (String(frm.doc.party_bank_account) === "undefined") {
+        frappe.dom.unfreeze();
+        frappe.throw("Party bank account not found")
+        return false;
       }
       // alert(frm.doc.bank_account)
       // frappe.throw("There is no Bank Account for this Supplier")
@@ -218,7 +208,7 @@ frappe.ui.form.on("Payment Entry", {
     //         frappe.throw("There is no Bank Account for this Supplier")
     //     }   
     // }
-}
+  }
 });
 
 frappe.listview_settings["Payment Entry"] = {
@@ -226,7 +216,7 @@ frappe.listview_settings["Payment Entry"] = {
     $(".layout-side-section").hide();
 
   },
-  primary_action(){
+  primary_action() {
     frappe.throw("Company bank account not found");
     console.log("***************Test")
   },
@@ -386,10 +376,6 @@ function selectPaymentEntry(bank_account) {
                     else {
                       // window.location.reload()
                     }
-
-
-
-
                   }
                 },
               });

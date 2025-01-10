@@ -94,3 +94,9 @@ def ClearBenyFileProcessLog():
 	query = "DELETE FROM `tabError Log` WHERE `method`='PAYMENTPROCESSFILE'"
 	test= frappe.db.sql(query,as_dict=1) 
 	return "Record deleted"
+
+@frappe.whitelist(allow_guest=True)
+def ClearBenyFileProcessLog_withTitle(title):
+	query = "DELETE FROM `tabError Log` WHERE `method` like '{}%'".format(title)
+	test= frappe.db.sql(query,as_dict=1)
+	return "Record deleted"

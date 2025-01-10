@@ -1,5 +1,15 @@
 frappe.ui.form.on('Purchase Invoice', {
     onload (frm){
+
+// This added due to space not allow in supplier invoice number Jira - 343
+        frm.fields_dict.bill_no.$wrapper.find('input').on('keypress', function(event) {
+
+            if (event.which === 32) { // ASCII code for space
+                event.preventDefault();
+            }
+        });
+///////////////////////////////////
+
         if(frm.is_new()){
             frm.set_query('custom_invoice_type', () => {
                 return {
