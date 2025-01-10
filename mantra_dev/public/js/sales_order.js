@@ -57,7 +57,6 @@ frappe.ui.form.on('Sales Order', {
         refresh_field("items")
         
     },
-    
     before_submit: function (frm) {
         var items = frm.doc.items.length
         var item_code = []
@@ -77,6 +76,36 @@ frappe.ui.form.on('Sales Order', {
         }
         
     },
+	after_save(frm){
+		if (frm.doc.items){
+		new_delivered_qty = 0
+		for(i=0; i<frm.doc.items.length; i++){
+			console.log(frm.doc.items[i].custom_is_service_item);
+			if (frm.doc.items[i].custom_is_service_item){
+			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+			}
+			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
+		}
+		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
+		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
+		// cur_frm.refresh_fields('per_delivered');
+				// frm.refresh();
+		}
+	},
+	after_workflow_action(frm){
+		if (frm.doc.items){
+		new_delivered_qty = 0
+		for(i=0; i<frm.doc.items.length; i++){
+			console.log(frm.doc.items[i].custom_is_service_item);
+			if (frm.doc.items[i].custom_is_service_item){
+			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+			}
+			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
+		}
+		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
+		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
+		}
+	},
     refresh: function (frm) {
         // Check if the document is in draft (docstatus 0) and not new
         if (frm.doc.docstatus == 0 && !frm.is_new()) {

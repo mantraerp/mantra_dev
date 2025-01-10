@@ -14,12 +14,13 @@ from frappe.core.doctype.activity_log.activity_log import add_authentication_log
 from frappe.auth import LoginManager
 import string
 import ast
+import traceback
 from cryptography.fernet import Fernet
 import requests
 from frappe.model.mapper import get_mapped_doc
 from collections import defaultdict
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
-
+from mantra_dev.backend_code.globle import errorLog,errorLogExites
 
 # frappe.whitelist()
 # def stop_print_in_draft(doc, method, x):    
@@ -1177,7 +1178,11 @@ def login_to_avdm_scheduled():
 
 @frappe.whitelist()
 def login_to_avdm():
+    
+    errorLog('AVDM',"Cron call",False)
+    
     if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
+        try:
             username = frappe.db.get_single_value("AVDM Setting", "username")
             password = frappe.db.get_single_value("AVDM Setting", "password")
             print(f"Password: {password}")  # For debugging; remove in production
@@ -1210,7 +1215,7 @@ def login_to_avdm():
             api_token = details["_APIToken"]
             print(f"API Token: {api_token}")
             
-            creating_url = "https://erptoavdm.aadhaardevice.com/"
+            creating_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM"
             headers = {
                 "accept": "application/json",
                 "Authorization": f"Bearer {api_token}"
@@ -1244,11 +1249,11 @@ def login_to_avdm():
                                     "subModelType": 0
                                 }
                                 body.append(data)
+            
             print(body)
             response1 = requests.post(creating_url, headers=headers, json=body)
             print(response1.status_code)
             if response1.status_code==200:
-                print("ifff")
                 dc_response_content = response1.content
                 print(dc_response_content)
                 if isinstance(dc_response_content, bytes):
@@ -1291,27 +1296,33 @@ def login_to_avdm():
 
                     # Output the final result
                     print(result)
-                    
+                                        
                     for i in result:
                         for key, values in i.items():
                             # print(key, values)
                             for j in values:
                                 if j in response_serial_no:
-                                    frappe.db.set_value('Serial No', j, 'custom_marked_in_avdm', 1)
-                                    
+                                    # frappe.db.set_value('Serial No', j, 'custom_marked_in_avdm', 1)
+                                    frappe.enqueue(update_serial_no_field,queue='long',job_name="Update serial no {}".format(serial_no),timeout=100000,serial_no=j)
+
                                 else:
                                     count = count + 1
                         if count == 0:
-                            frappe.db.set_value('Delivery Note', key, 'custom_marked_in_avdm', 1)
+                            # frappe.db.set_value('Delivery Note', key, 'custom_marked_in_avdm', 1)
+                            frappe.enqueue(update_delivery_field,queue='long',job_name="Update delivery note {}".format(key),timeout=100000,dc_no=key)
+
                             # frappe.db.commit()
                         else:
                             pass
-                    frappe.db.commit()
-                
-                
+                    # frappe.db.commit()
             else :
                 print("else")
                 dc_response_json=response1.status_code
+                frappe.sendmail(
+                    recipients=["ravi.patel@mantratec.com"],
+                    subject="AVDM not process due to issue",
+                    message="Line 1462 api.py"
+                )
             # dc_details = dc_response_json["details"]
             # print(f"Details :{ dc_details }")
             # details_json = json.loads(details)
@@ -1320,7 +1331,23 @@ def login_to_avdm():
             # return body
             return dc_response_json 
             # return "jfgh", response_content
-        
+        except Exception as e:
+            mssage = str(traceback.format_exc())
+            frappe.sendmail(
+                recipients=["ravi.patel@mantratec.com"],
+                subject="AVDM not process due to issue",
+                message="Line 1462 api.py <br>{}".format(mssage)
+            )
+            
+ 
+def update_serial_no_field(serial_no):
+    frappe.db.set_value('Serial No', serial_no, 'custom_marked_in_avdm', 1)
+    return True
+ 
+def update_delivery_field(dc_no):
+    frappe.db.set_value('Delivery Note', dc_no, 'custom_marked_in_avdm', 1)
+    return True
+
 # @frappe.whitelist()
 # def getl_serial_no():
 #     creating_url = "http://192.168.6.111:5050/ErptoAVDM"
