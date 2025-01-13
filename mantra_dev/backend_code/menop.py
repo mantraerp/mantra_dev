@@ -5,18 +5,22 @@ import json
 
 
 
-@frappe.whitelist(allow_guest=True)
-def employee_remain_bankaccount(**kwargs):
+
+@frappe.whitelist()
+def employee_remain_bank_account():
+    #This method is call from cron every day to remain remain bank account list of employee.
+    frappe.enqueue(employee_remain_bank_account_background, queue='long', timeout=10000)
+    return True
+
+@frappe.whitelist()
+def employee_remain_bank_account_background(**kwargs):
     
 	query = "SELECT * from `tabEmployee` WHERE `status`='Active'"
 	employee_list= frappe.db.sql(query,as_dict=1)
  
-
 	query = "SELECT party,name from `tabBank Account` WHERE `party_type`='Employee' AND `is_default`=1 AND `disabled`=0 AND `workflow_state`='Approved'"
 	bankaccount_list= frappe.db.sql(query,as_dict=1)
- 
-	# return bankaccount_list
- 
+  
 	account_not_found = []
 	for employee in employee_list:
 		account_found = False
@@ -28,7 +32,7 @@ def employee_remain_bankaccount(**kwargs):
 		if not account_found:
 			account_not_found.append(employee)
  
- 
+
 	if len(account_not_found)>0:
 		message = ""
 		message = "{}<b>The list of employees whose bank accounts have been disabled, denied approval, or not created.<br><br>Total : {}</b>".format(message,len(account_not_found))

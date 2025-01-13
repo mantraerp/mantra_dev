@@ -89,6 +89,14 @@ def create_notification_log(
 
 @frappe.whitelist(allow_guest=True)
 def ClearBenyFileProcessLog():
+	frappe.enqueue(clear_beny_file_process_log, queue='long', timeout=10000)
+	return True
+
+    
+ 
+@frappe.whitelist()
+def clear_beny_file_process_log():   
+    
 	query = "DELETE FROM `tabError Log` WHERE `method`='BENYPROCESSFILE'"
 	test= frappe.db.sql(query,as_dict=1)
 	query = "DELETE FROM `tabError Log` WHERE `method`='PAYMENTPROCESSFILE'"

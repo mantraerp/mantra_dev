@@ -203,11 +203,14 @@ scheduler_events = {
         ],
         "30 23 * * *": [
             "mantra_dev.backend_code.api.login_to_avdm_scheduled"
+        ],
+        "0 8 * * *": [
+            "mantra_dev.backend_code.menop.employee_remain_bank_account"
         ]
     },
 	"daily": [
         #This log will clear beny process files log every day at night.
-		"mantra_dev.backend_code.globle.ClearBenyFileProcessLog"
+		"mantra_dev.backend_code.globle.clear_beny_file_process_log"
 	],
 # 	"hourly": [
 # 		"mantra_dev.tasks.hourly"
