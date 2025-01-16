@@ -7,12 +7,12 @@ import json
 
 
 @frappe.whitelist()
-def employee_remain_bank_account():
+def employee_remain_bank_account(allow_guest=True):
     #This method is call from cron every day to remain remain bank account list of employee.
     frappe.enqueue(employee_remain_bank_account_background, queue='long', timeout=10000)
     return True
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def employee_remain_bank_account_background(**kwargs):
     
 	query = "SELECT * from `tabEmployee` WHERE `status`='Active'"
