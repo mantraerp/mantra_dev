@@ -202,7 +202,7 @@ scheduler_events = {
             "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
         ],
         "30 23 * * *": [
-            "mantra_dev.backend_code.api.login_to_avdm_scheduled"
+            "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"
         ],
         "0 8 * * *": [
             "mantra_dev.backend_code.minop.employee_remain_bank_account",

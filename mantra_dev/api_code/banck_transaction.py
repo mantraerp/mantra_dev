@@ -1069,6 +1069,177 @@ def generate_salary_slip(payroll_entry=None):
         # return str(traceback.format_exc())
         # return str(e)
 
+
+
+# upload salary slip.txt file on snorkel
+@frappe.whitelist()
+def generate_salary_slip_test(payroll_entry=None):
+
+    try:
+
+        directory_sql = """
+            SELECT file_upload_path
+            FROM `tabBank Integration`
+        """
+
+        directory_list = frappe.db.sql(directory_sql, as_dict=True) 
+
+        if not directory_list:
+            frappe.throw("Payment File Upload Path not set in 'Bank Integration'")
+
+        directory = directory_list[0].get("file_upload_path")
+
+        if not directory:
+            frappe.throw("Payment File Upload Path not set in 'Bank Integration'")
+
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+        file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        # file_name = "MANTRASH2H_MANTRASH2HUP.txt"
+        # directory = '/home/foramshah/Downloads/epayments/PayUpload'
+        # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
+        # file_path = os.path.join(directory, file_name)
+        file_path = os.path.join("/home/mantra/Desktop/", file_name)
+        # Fetch Salary Slip details based on Payroll Entry
+        salary_slips = frappe.get_all(
+            "Salary Slip",
+            filters={"payroll_entry": payroll_entry} if payroll_entry else {},
+            fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
+        )
+                
+        if not salary_slips:
+            frappe.throw("No Salary Slips found for the given Payroll Entry.")
+
+        headers = [
+            'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
+            'Amt', 'Pay Mod', 'Date', 'IFSC', 'Payable Location name', 'Print Location',
+            'Bene Mobile no', 'Bene email id', 'Ben add1', 'Ben add2', 'Ben add3',
+            'Ben add4', 'Add details 1', 'Add details 2', 'Add details 3',
+            'Add details 4', 'Add details 5', 'Remarks'
+        ]
+
+        payment_account = frappe.db.get_value("Payroll Entry", payroll_entry, "bank_account") or ""
+        debit_ac_no = frappe.db.get_value("Bank Account", payment_account, "bank_account_no") or ""
+        
+        if debit_ac_no=="":
+            frappe.throw("Debit account not found.")
+
+
+        rows = []
+        rows_not_process = []
+        for slip in salary_slips:
+            # ifsc_code = frappe.db.get_value("Employee", slip["employee"], "ifsc_code") or ""
+            date = datetime.today().strftime('%d-%b-%Y')
+
+            # employee_account_no = frappe.db.get_value("Bank Account", payment_account, "bank_account_no") or ""
+            # employee_account_no, ifsc_code = frappe.db.get_value('Bank Account', {'party_type': 'Employee','party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no', 'custom_ifsc'])
+            employee_account_no=""
+            ifsc_code=""
+            try:
+                employee_account_no = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['bank_account_no'])
+                ifsc_code = frappe.db.get_value('Bank Account', {'party': slip["employee"],'workflow_state': 'Approved','docstatus': 1}, ['custom_ifsc'])
+            except Exception as e:
+                employee_account_no=""
+                ifsc_code=""
+
+            addedInFail = False
+            if employee_account_no in ["",None,"Null","None"]:
+                rows_not_process.append(slip)
+                addedInFail = True
+
+            if ifsc_code in ["",None,"Null","None"]:
+                if not addedInFail:
+                    rows_not_process.append(slip)
+                    addedInFail = True
+
+            if not addedInFail:
+                rows.append([
+                    debit_ac_no,
+                    slip["employee"],
+                    employee_account_no,
+                    slip["employee_name"],
+                    slip["net_pay"],
+                    "N",
+                    date,
+                    ifsc_code,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    slip["name"],
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ])
+
+
+        if len(rows_not_process)!=0:
+            message = ""
+            for slip in rows_not_process:
+                message="{}<br>{}".format(message,slip["employee"])
+
+            frappe.sendmail(
+                recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
+                subject="{} - ({}) entries get issue.".format(payroll_entry,len(rows_not_process)),
+                message="Detail of issue record in payroll. It may be reject account or account not created.<br>{}".format(message),
+            )
+            
+            # return message
+            frappe.msgprint("There is issue in some record from this payroll. Administrator will get mail with all detail.")
+
+            # print("Error Message","Account no or IFCF code issue with below employee code\n{}".format(message))
+
+            # frappe.throw("Account no or IFCF code issue with below employee code\n{}".format(message))
+            # return
+
+
+        # frappe.throw("File uploaded")
+        # return len(rows)
+
+        if len(rows)==0:
+            frappe.throw("Not found any entry to process")
+            return "Not found any entry to process"
+
+        # with open(file_path, 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter="|")
+        #     writer.writerow(headers) 
+        #     writer.writerows(rows)  
+
+        # with open(file_path, 'rb') as file:
+        #     file_content = file.read()
+
+        # file_doc = frappe.get_doc({
+        #     "doctype": "File",
+        #     "file_name": file_name,
+        #     "file_size": len(file_content),
+        #     "attached_to_doctype": "Payroll Entry",
+        #     "attached_to_name": payroll_entry,
+        #     "content": file_content,
+        #     "is_private": True  # Set this to True if you want it to be private
+        # })
+        # file_doc.save()
+
+        # print(f'File {file_name} created successfully in {directory}.')
+        frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)
+        return f"File created successfully: {file_name}"
+
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Salary Slip TXT Generation Error")
+        frappe.throw("Error\n{}".format(str(traceback.format_exc())))
+        return False
+        # return str(traceback.format_exc())
+        # return str(e)
+
+
 #this function is use for a pnb file creation
 def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
     try:

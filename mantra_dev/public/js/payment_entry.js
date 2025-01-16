@@ -242,6 +242,55 @@ frappe.listview_settings["Payment Entry"] = {
         // });
       });
     }
+
+    if (frappe.user.has_role("Account Manager")){
+      frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+          doctype: "Mode of Payment",
+          fields: ["name"],
+        },
+        callback: function (response) {
+          if (response.message) {
+            for (i = 0; i < response.message.length; i++) {
+              // console.log("Fetched Records with OR Filters:", response.message[i].name);
+              const modeOfPayment = response.message[i].name;
+              listview.page.add_inner_button((modeOfPayment), function () {
+  
+                // Get the selected items in the ListView
+                const selectedItems = listview.get_checked_items();
+  
+                if (selectedItems.length === 0) {
+                  frappe.msgprint(
+                    ("Please select at least one record to change the Mode of Payment.")
+                  );
+                  return;
+                }else{
+                // Process the selected records
+                frappe.call({
+                  method: "mantra_dev.backend_code.api.change_mode_of_payment",
+                  args: {
+                    selected_records: selectedItems.map((item) => item.name),
+                    new_mode_of_payment: modeOfPayment,
+                  },
+                  callback: function (res) {
+                    if (res.message) {
+                      frappe.msgprint(
+                        (res.message)
+                      );
+                      // listview.refresh();
+                      console.log(res.message)
+                    }
+                  },
+                });
+                }
+
+              }, "Change Mode Of Payment");
+            }
+          }
+        }
+      });
+    }
   },
 };
 

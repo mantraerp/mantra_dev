@@ -147,6 +147,52 @@ def fetch_party_account(party):
     )
     return doc
 
+@frappe.whitelist()
+def change_mode_of_payment(selected_records,new_mode_of_payment):
+    selected_records = json.loads(selected_records)
+    doc1 = frappe.get_doc("Mode of Payment",new_mode_of_payment)
+    if doc1.accounts:
+        for row in doc1.accounts:
+            if row.default_account:
+                set_acc = frappe.db.get_list('Bank Account',
+                    filters={
+                        'is_company_account':1
+                    },
+                    or_filters=[
+                        ['account', '=', row.default_account],  # OR condition 1
+                        ['name', '=', row.default_account]   # OR condition 2
+                    ],
+                    fields=['name', 'account'],
+                    as_list=True
+                )
+                if set_acc:
+                    acc = ""
+                    for i in set_acc:
+                        acc = i[0]
+                    for j in selected_records:
+                        frappe.db.set_value("Payment Entry",j,"mode_of_payment",new_mode_of_payment)         
+                        frappe.db.set_value("Payment Entry",j,"bank_account",acc)        
+                    return "Mode of Payment and bank account updated for selected records."
+                else:
+                    return "There is no Bank Account set for this particular mode of payment"
+            else:
+                return "There is no default internal account set for this mode of payment"
+    else:
+        return "There is no internal account set for this mode of payment"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
