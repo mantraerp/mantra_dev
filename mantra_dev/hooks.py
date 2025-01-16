@@ -205,7 +205,7 @@ scheduler_events = {
             "mantra_dev.backend_code.api.login_to_avdm_scheduled"
         ],
         "0 8 * * *": [
-            "mantra_dev.backend_code.menop.employee_remain_bank_account"
+            "mantra_dev.backend_code.minop.employee_remain_bank_account"
         ]
     },
 	"daily": [

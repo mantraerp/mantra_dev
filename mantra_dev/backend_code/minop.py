@@ -46,8 +46,14 @@ def employee_remain_bank_account_background(**kwargs):
 
 		message = '{}</tbody></table>'.format(message)
 	
+		recipient_text = frappe.get_doc("ERP Settings").email_recipients_employee_bank_account_not_created
+		recipients = recipient_text.split(',')
+
+		if len(recipients)==0:
+			return "No email recipients is found."
+
 		frappe.sendmail(
-			recipients=["ravi.patel@mantratec.com"],
+			recipients=recipients,
 			subject="{} employees whose bank accounts have been disabled, denied approval, or not created".format(len(account_not_found)),
 			message=message
 		)
