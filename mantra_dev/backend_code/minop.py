@@ -12,7 +12,7 @@ def employee_remain_bank_account():
     frappe.enqueue(employee_remain_bank_account_background, queue='long', timeout=10000)
     return True
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def employee_remain_bank_account_background(**kwargs):
     
 	query = "SELECT * from `tabEmployee` WHERE `status`='Active'"
@@ -46,11 +46,14 @@ def employee_remain_bank_account_background(**kwargs):
 
 		message = '{}</tbody></table>'.format(message)
 	
-		recipient_text = frappe.get_doc("ERP Settings").email_recipients_employee_bank_account_not_created
-		recipients = recipient_text.split(',')
+		# recipient_text = frappe.get_doc("ERP Settings").email_recipients_employee_bank_account_not_created
+		# recipients = recipient_text.split(',')
 
-		if len(recipients)==0:
-			return "No email recipients is found."
+		# if len(recipients)==0:
+		# 	return "No email recipients is found."
+
+		recipients=['hrops@mantratec.com','anil.vadhel@mantratec.com','mukund.kotadia@mantratec.com','anurag@mantratec.com','ravi.patel@mantratec.com']
+
 
 		frappe.sendmail(
 			recipients=recipients,
@@ -58,7 +61,7 @@ def employee_remain_bank_account_background(**kwargs):
 			message=message
 		)
  
-	return "Mail send for employee account not found data."
+	return "Mail send for employee account not found data to respective users."
 
 
 

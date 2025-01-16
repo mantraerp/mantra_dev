@@ -1,7 +1,53 @@
 import frappe
 from frappe import _
 import traceback
+import json
+import requests
 
+
+@frappe.whitelist(allow_guest=True)
+def check_system_status():
+
+	reply={}
+	reply['UAT']="Not working"
+
+	reply['message']=""
+
+
+	reply = system_call(reply,"http://192.168.5.56:8003/#login",'Mefron')
+	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
+	reply = system_call(reply,"http://192.168.5.56:8002/#login",'Mewruk')
+	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global')
+	reply = system_call(reply,"http://192.168.5.56:8001/#login",'UAT')
+
+	keys = reply.keys()
+	email_message_body=""
+	for ky in keys:
+		if ky != 'message':
+			email_message_body = "{}<b>{}</b>: {}<br>".format(email_message_body,ky,reply[ky])
+ 
+ 
+	email_message_body = "<br><br><br><br>{}<b>{}</b>: {}".format(email_message_body,'message',reply['message'])
+
+	frappe.sendmail(
+		recipients=['ravi.patel@mantratec.com'],
+		subject="System status {}".format(frappe.utils.nowdate()),
+		message=email_message_body
+	)
+ 
+	return reply
+
+def system_call(reply,url,key):
+	reply[key]="Not working"
+	try:
+		response = requests.post(url)
+		if response.status_code == 200:
+			reply[key]="Working"
+	except Exception as e:
+		reply[key]="Not working"
+		reply['message'] = "{}<br><br><b>{} traceable error</b>:<br>{}".format(reply['message'],key,str(traceback.format_exc()))
+ 
+	return reply
 
 
 #To create entry in erro log
