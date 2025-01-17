@@ -243,7 +243,7 @@ frappe.listview_settings["Payment Entry"] = {
       });
     }
 
-    if (frappe.user.has_role("Account Manager")){
+   // if (frappe.user.has_role("Account Manager")){
       frappe.call({
         method: "frappe.client.get_list",
         args: {
@@ -290,7 +290,7 @@ frappe.listview_settings["Payment Entry"] = {
           }
         }
       });
-    }
+    //}
   },
 };
 

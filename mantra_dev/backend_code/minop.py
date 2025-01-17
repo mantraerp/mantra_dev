@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 import traceback
 import json
+from mantra_dev.backend_code.globle import errorLog,errorLogExites
 
 
 
@@ -70,9 +71,10 @@ def employee_remain_bank_account_background(**kwargs):
 #To create entry in erro log
 @frappe.whitelist(allow_guest=True)
 def minop_hook(**kwargs):
-# def minop_hook(): 
-    # return "ravi"  
-	parameters=frappe._dict(kwargs)
+
+	parameters=frappe._dict(kwargs) 
+	parameters['status_code']=200
+	parameters['sucessfull']=True
 	return parameters
 		# query = "SELECT * from `tabError Log` WHERE error='{}' AND method='{}'".format(error,title)
 		# test= frappe.db.sql(query,as_dict=1)
