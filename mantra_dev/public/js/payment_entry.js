@@ -214,7 +214,6 @@ frappe.ui.form.on("Payment Entry", {
 frappe.listview_settings["Payment Entry"] = {
   refresh: function (listview) {
     $(".layout-side-section").hide();
-
   },
   primary_action() {
     frappe.throw("Company bank account not found");

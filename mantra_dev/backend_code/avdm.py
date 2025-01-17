@@ -108,8 +108,8 @@ def login_to_avdm(transaction_date):
                     response_serial_no = []
                     count = 0
                     for i in dc_response_json:
-                        print("serial_no: ", i['devicesr'])
-                        response_serial_no.append(i['devicesr'])
+                        if int(i['errorCode'])==0:
+                            response_serial_no.append(i['devicesr'])
     
 
                     result = []

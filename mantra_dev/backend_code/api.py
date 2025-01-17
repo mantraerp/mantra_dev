@@ -170,8 +170,14 @@ def change_mode_of_payment(selected_records,new_mode_of_payment):
                     for i in set_acc:
                         acc = i[0]
                     for j in selected_records:
-                        frappe.db.set_value("Payment Entry",j,"mode_of_payment",new_mode_of_payment)         
-                        frappe.db.set_value("Payment Entry",j,"bank_account",acc)        
+                        if "H2H" in new_mode_of_payment:
+                            frappe.db.set_value("Payment Entry",j,"mode_of_payment",new_mode_of_payment)         
+                            frappe.db.set_value("Payment Entry",j,"bank_account",acc)        
+                            frappe.db.set_value("Payment Entry",j,"custom_unique_batch_number","")
+                        else:        
+                            frappe.db.set_value("Payment Entry",j,"mode_of_payment",new_mode_of_payment)         
+                            frappe.db.set_value("Payment Entry",j,"bank_account",acc)        
+                            frappe.db.set_value("Payment Entry",j,"custom_unique_batch_number","Not Available")     
                     return "Mode of Payment and bank account updated for selected records."
                 else:
                     return "There is no Bank Account set for this particular mode of payment"
