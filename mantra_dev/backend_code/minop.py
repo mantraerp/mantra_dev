@@ -11,6 +11,8 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites
 def employee_remain_bank_account(allow_guest=True):
     #This method is call from cron every day to remain remain bank account list of employee.
     frappe.enqueue(employee_remain_bank_account_background, queue='long', timeout=10000)
+    frappe.enqueue(employee_remain_email_id_background, queue='long', timeout=10000)
+    
     return True
 
 @frappe.whitelist()
@@ -64,6 +66,48 @@ def employee_remain_bank_account_background(**kwargs):
  
 	return "Mail send for employee account not found data to respective users."
 
+@frappe.whitelist()
+def employee_remain_email_id_background(**kwargs):
+    
+	query = "SELECT * from `tabEmployee` WHERE `status`='Active'"
+	employee_list= frappe.db.sql(query,as_dict=1)
+  
+	account_not_found = []
+	for employee in employee_list:
+		if employee['prefered_email'] in [None,'',"None"]:
+			account_not_found.append(employee)
+ 
+
+	if len(account_not_found)>0:
+		message = ""
+		message = "{}<b>The list of employees whose prefered Email is not found. This email ID is use to send salary slip.<br><br>Total : {}</b>".format(message,len(account_not_found))
+		
+		message = '{}<br><br><table style="width: 100%;"><tbody><tr><td style="width: 50.0000%;"><strong>Employee Code</strong></td><td style="width: 50.0000%;"><strong>Employee Name</strong></td></tr>'.format(message)
+	
+		for employee in account_not_found:
+
+			message = '{}<tr><td style="width: 50.0000%;">{}</td><td style="width: 50.0000%;">{}</td></tr>'.format(message,employee['name'],employee['employee_name'])
+
+
+		message = '{}</tbody></table>'.format(message)
+	
+		# recipient_text = frappe.get_doc("ERP Settings").email_recipients_employee_bank_account_not_created
+		# recipients = recipient_text.split(',')
+
+		# if len(recipients)==0:
+		# 	return "No email recipients is found."
+
+		# recipients=['hrops@mantratec.com','anil.vadhel@mantratec.com','mukund.kotadia@mantratec.com','anurag@mantratec.com','ravi.patel@mantratec.com']
+		recipients=['ravi.patel@mantratec.com']
+
+
+		frappe.sendmail(
+			recipients=recipients,
+			subject="{} employees whose prefered Email is not found.".format(len(account_not_found)),
+			message=message
+		)
+ 
+	return "Mail send for prefered Email not found to respective employee."
 
 
 
