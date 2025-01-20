@@ -1,5 +1,104 @@
 frappe.ui.form.on("Payroll Entry", {
-    // refresh(frm) {
+    refresh(frm) {
+
+        frm.add_custom_button(("Send salary slip mail"), () => {
+            frappe.call({
+                method: "mantra_dev.backend_code.salary_slip.email_payroll_salary_slip",
+                args: { payroll_no: frm.doc.name },
+                freeze: true,
+                freeze_message: "finding data...",
+                callback: function (r) {
+                    if(r.message.status_code===200)
+                    {
+                        frappe.confirm(r.message.message,
+                            () => {
+                                // action to perform if Yes is selected
+                                frappe.msgprint("Email sending process start in background.");
+                                frappe.call({
+                                    method: "mantra_dev.backend_code.salary_slip.email_payroll_salary_slip_back",
+                                    args: { payroll_no: frm.doc.name },
+                                    callback: function (r) {
+                                    }
+                                });
+
+                            }, () => {
+                                // action to perform if No is selected
+                            })
+                    }
+                    else{
+                        frappe.msgprint(r.message.message);
+                        // frappe.msgprint('ravi');
+                    }
+                }
+            });
+        },('Utility'));
+
+        frm.add_custom_button(("Create payment entry file"), () => {
+
+            var d = new frappe.ui.Dialog({
+                title: __("Payroll payment entry"),
+                primary_action_label: __("Process for payment"),
+                primary_action: () => {
+
+                    frappe.warn('Are you sure you want to proceed?',
+                        'This will create payroll payment entry in bank.',
+                        () => {
+                            // action to perform if Continue is selected
+                            frappe.call({
+                                method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
+                                args: { 
+                                    payroll_entry: frm.doc.name,
+                                    create_only_file:0
+                                },
+                                freeze: true,
+                                freeze_message: "Please wait...",
+                                callback: function (r) {
+                
+                                    if(r.message.status_code===200)
+                                    {
+                                        frm.reload_doc();
+                                    }
+                                    
+                                    frappe.msgprint(r.message.message);
+                                }
+                            });
+                        },
+                        'Continue',
+                        true // Sets dialog as minimizable
+                    )
+                    d.hide();
+                },
+                secondary_action_label: __("Check payment file"),
+                secondary_action: () => {
+                    frappe.call({
+                        method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
+                        args: { 
+                            payroll_entry: frm.doc.name,
+                            create_only_file:1
+                        },
+                        freeze: true,
+                        freeze_message: "Please wait...",
+                        callback: function (r) {
+        
+                            if(r.message.status_code===200)
+                            {
+                                frm.reload_doc()
+                            }
+                            
+                            frappe.msgprint(r.message.message);
+                        }
+                    });
+                    d.hide();
+                }
+            });
+               
+            d.$body.append(`<p class="frappe-confirm-message">${'Are you sure you want to process for payment entry or check payment file first ?'}</p>`);
+            d.show();
+            return
+
+        },('Utility'));
+
+
 
     //     return;
 
@@ -55,7 +154,7 @@ frappe.ui.form.on("Payroll Entry", {
     //             }
     //         }
     //     });
-    // },
+    },
 
     // add_context_buttons(frm) {
 

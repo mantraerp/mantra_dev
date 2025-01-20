@@ -13,9 +13,6 @@ if TYPE_CHECKING:
 	from frappe.model.document import Document
 	from frappe.workflow.doctype.workflow.workflow import Workflow
 
-# apps/frappe/frappe/model
-# Path of file
-
 
 class WorkflowStateError(frappe.ValidationError):
 	pass
@@ -233,19 +230,19 @@ def get_workflow_field_value(workflow_name, field):
 @frappe.whitelist()
 def bulk_workflow_approval(docnames, doctype, action):
 
-######################################Core Changes###########################3
+
 	if doctype=="Payment Entry":
-		docnames = json.loads(docnames)
-		for idx, docname in enumerate(docnames, 1):
-			doc = frappe.get_doc("Payment Entry",docname)
+		docnames_temp = json.loads(docnames)
+		for idx, doc_name in enumerate(docnames_temp, 1):
+			doc = frappe.get_doc("Payment Entry",doc_name)
 			if not doc.bank_account:
-				frappe.throw(_("Company bank account not found in {}".format(docname)), title=_("Error"))
+				frappe.throw(_("Company bank account not found in {}".format(doc_name)), title=_("Error"))
 				return
 			if not doc.party_bank_account:
-				frappe.throw(_("Party bank account not found in {}".format(docname)), title=_("Error"))
+				frappe.throw(_("Party bank account not found in {}".format(doc_name)), title=_("Error"))
 				return			
 
-###############################################################################################################
+
 
 	docnames = json.loads(docnames)
 	if len(docnames) < 20:
