@@ -240,7 +240,31 @@ def bulk_workflow_approval(docnames, doctype, action):
 				return
 			if not doc.party_bank_account:
 				frappe.throw(_("Party bank account not found in {}".format(doc_name)), title=_("Error"))
-				return			
+				return
+
+	if doctype=="Bank Account":
+		dds = json.loads(docnames)
+		for idx, acc in enumerate(dds):
+			doc = frappe.get_doc("Bank Account",acc)
+			if doc.account_name in [None,"",'None']:
+				frappe.throw(_("{} account name not found.".format(acc)), title=_("Error"))
+				return
+			if doc.bank in [None,"",'None']:
+				frappe.throw(_("{} bank name not found.".format(acc)), title=_("Error"))
+				return
+			if doc.party in [None,"",'None']:
+				frappe.throw(_("{} party not found.".format(acc)), title=_("Error"))
+				return     
+			if doc.custom_ifsc in [None,"",'None']:
+				frappe.throw(_("{} IFSC not found.".format(acc)), title=_("Error"))
+				return   
+			if doc.custom_branch_location in [None,"",'None']:
+				frappe.throw(_("{} branch location not found.".format(acc)), title=_("Error"))
+				return
+			if doc.bank_account_no in [None,"",'None']:
+				frappe.throw(_("{} bank account number not found.".format(acc)), title=_("Error"))
+				return 	
+		frappe.enqueue("mantra_dev.api_code.banck_transaction.bulk_upload_beneficiary_file",queue='long',job_name="Bank approve",timeout=100000,bank_account_list=dds)
 
 
 

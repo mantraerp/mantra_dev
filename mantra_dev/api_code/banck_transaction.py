@@ -35,12 +35,18 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites
         
 #     return directory_list
 
+@frappe.whitelist(allow_guest=True)
+def bulk_upload_beneficiary_file(bank_account_list):
+    # errorLog("Bene bulk upload")
+    for rrecord in bank_account_list:
+        frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord)
+    return True
 
 # Upload Approved Beneficiary file on Snorkel with Indicator A
 @frappe.whitelist()
 def upload_beneficiary_file(doc_name):
     try:
-
+        errorLog("Bene upload",doc_name,False)
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
