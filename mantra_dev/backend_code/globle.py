@@ -13,7 +13,16 @@ def check_system_status():
 
 	reply['message']=""
 
+	if not frappe.db.get_single_value("ERP Settings", "get_system_status_notification"):
+		return "System status not on"
 
+	email_list = frappe.db.get_single_value("ERP Settings", "system_status_notification_users").replace("\n", ",")
+	email_receipient = email_list.split(",")
+
+	if len(email_receipient)==0:
+		return "No email found"
+
+# check_system_status
 	reply = system_call(reply,"http://192.168.5.56:8003/#login",'Mefron')
 	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
 	reply = system_call(reply,"http://192.168.5.56:8002/#login",'Mewruk')
@@ -25,16 +34,16 @@ def check_system_status():
 	for ky in keys:
 		if ky != 'message':
 			email_message_body = "{}<b>{}</b>: {}<br>".format(email_message_body,ky,reply[ky])
- 
- 
+
 	email_message_body = "<br><br><br><br>{}<b>{}</b>: {}".format(email_message_body,'message',reply['message'])
 
 	frappe.sendmail(
-		recipients=['ravi.patel@mantratec.com'],
+		recipients=email_receipient,
 		subject="System status {}".format(frappe.utils.nowdate()),
 		message=email_message_body
 	)
- 
+
+	frappe.enqueue(permission_count, queue='long', timeout=10000)
 	return reply
 
 def system_call(reply,url,key):
@@ -49,6 +58,21 @@ def system_call(reply,url,key):
  
 	return reply
 
+
+
+
+def permission_count():
+	query = "SELECT * from `tabCustom DocPerm`"
+	test= frappe.db.sql(query,as_dict=1)
+	
+	frappe.sendmail(
+		recipients=["ravi.patel@mantratec.com","abhishek.jain@mantratec.com"],
+		subject="Document Permission Count {}".format(len(test)),
+		message="This is to track permission count"
+	)
+
+	return "Mail send for permission count"
+    
 
 #To create entry in erro log
 @frappe.whitelist(allow_guest=True)
