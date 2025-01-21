@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-01-21 12:15:27.779450",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-01-21 12:15:27.779450",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "stock-calculation",
+ "owner": "Administrator",
+ "page_name": "stock-calculation",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Bom Stock Calculation Tool"
+}

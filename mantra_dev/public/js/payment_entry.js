@@ -215,10 +215,10 @@ frappe.listview_settings["Payment Entry"] = {
   refresh: function (listview) {
     $(".layout-side-section").hide();
   },
-  primary_action() {
-    frappe.throw("Company bank account not found");
-    console.log("***************Test")
-  },
+  // primary_action() {
+  //   frappe.throw("Company bank account not found");
+  //   console.log("***************Test")
+  // },
   onload: function (listview) {
     if (frappe.user.has_role("Make Payment")) {
       listview.page.add_inner_button(__("Make Payment"), function () {
