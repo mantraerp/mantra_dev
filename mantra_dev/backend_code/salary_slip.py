@@ -21,7 +21,8 @@ def email_payroll_salary_slip(payroll_no):
  
 
 	salary_slip_list = frappe.get_all("Salary Slip", filters={
-		# 'status': 'Submitted',
+		'status': 'Submitted',
+  		'custom_email_send':False,
 		'payroll_entry':payroll_no
     }, fields=['name','status'])
   
@@ -65,6 +66,7 @@ def email_payroll_salary_slip_back(payroll_no):
 
 	salary_slip_list = frappe.get_all("Salary Slip", filters={
 		'status': 'Submitted',
+		'custom_email_send':False,
 		'payroll_entry':payroll_no
     }, fields=['name'],as_list=True)
  
@@ -110,6 +112,10 @@ def email_salary_slip(salary_slip_no):
 			)
 			return "docstatus error"
 		
+  
+		if salary_slip_detail[0]['custom_email_send'] in [1,True]:
+			return "Salary slip is already send"
+
 
 		employee_code = salary_slip_detail[0]['employee']
 
@@ -144,6 +150,9 @@ def email_salary_slip(salary_slip_no):
 				message = frappe.render_template(email_template.response_, doc_args)
 				subject = frappe.render_template(email_template.subject, doc_args)
 
+
+
+			frappe.db.set_value("Salary Slip", salary_slip_no, "custom_email_send", 1)
 			frappe.sendmail(
 				recipients = [receiver],
 				message = message,
@@ -189,6 +198,7 @@ def not_sent_slip(payroll_no):
     
 	doc = frappe.get_all("Salary Slip", filters={
 		'status': 'Submitted',
+		'custom_email_send':False,
 		'payroll_entry':payroll_no
     },
     fields=['name'],

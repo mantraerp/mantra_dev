@@ -30,6 +30,7 @@ def execute(filters=None):
 							"100%",
 
 							row['status'],
+							row['owner'],
 							row['supplier'],
 							row['supplier_name'],
 
@@ -48,6 +49,7 @@ def execute(filters=None):
 							
 
 							row['status'],
+							row['owner'],       
 							row['supplier'],
 							row['supplier_name'],
 
@@ -73,19 +75,14 @@ def dividation_value(v1,v2):
 
 def check_created_status(pr_no,grand_total):
 
-	query = """SELECT pii.qty,pii.name as docname,pi.name,pii.amount,pi.grand_total FROM `tabPurchase Invoice Item` AS pii INNER JOIN `tabPurchase Invoice` AS pi ON pi.name=pii.parent WHERE pi.status NOT IN ('Cancelled') AND pii.purchase_receipt='"""+str(pr_no)+"""'"""
+	query = """SELECT pii.qty,pii.name as docname,pi.name,pii.amount,pi.grand_total FROM `tabPurchase Invoice Item` AS pii INNER JOIN `tabPurchase Invoice` AS pi ON pi.name=pii.parent WHERE pi.status NOT IN ('Cancelled') AND pi.workflow_state NOT IN ('Rejected') AND pii.purchase_receipt='"""+str(pr_no)+"""'"""
 	data_raw = frappe.db.sql(query,as_dict=1)
 
 	nameProcess = []
 	amount = 0.0
 
 	for index, row in enumerate(data_raw):
-		# if pr_no=="PR-24-00049":
-		# 	frappe.msgprint(str(row['docname']))
 		if row['docname'] not in nameProcess:
-			# if pr_no=="PR-24-00049":
-			# 	frappe.msgprint(str(row['amount']))
-
 			nameProcess.append(row['docname'])
 			amount += row['qty']
 
@@ -136,26 +133,29 @@ def check_created_status_amount(pr_no,grand_total):
 def getProcessData(filters):
 
 	# yearDetail = frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE name=%s""",year,as_dict=1)
-	return frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE `status` NOT IN ('Completed','Cancelled','Closed') AND `is_return`=0""",as_dict=1)
+	# return frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE `status` NOT IN ('Completed','Cancelled','Closed') AND `is_return`=0""",as_dict=1)
+	return frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE `status` IN ('To Bill') AND `is_return`=0""",as_dict=1)
 
 
 def get_columns(filters):
 	
 
 	columns= []
-	columns.append({'fieldname':'pr','label':"Purchase Receipt",'fieldtype':'Link',"options":"Purchase Receipt",'align':'left','width':230})
+	columns.append({'fieldname':'pr','label':"Purchase Receipt",'fieldtype':'Link',"options":"Purchase Receipt",'align':'left','width':225})
 	columns.append({'fieldname':'pr_date','label':"Date",'fieldtype':'data','align':'left','width':120})
 
 	
-	columns.append({'fieldname':'pr_total','label':"Total",'fieldtype':'data','align':'left','width':100})
-	columns.append({'fieldname':'pr__bill_create_remain','label':"Bill Create",'fieldtype':'data','align':'left','width':100})
+	columns.append({'fieldname':'pr_total','label':"Total",'fieldtype':'data','align':'left','width':90})
+	columns.append({'fieldname':'pr__bill_create_remain','label':"Bill Create",'fieldtype':'data','align':'left','width':90})
 
-	columns.append({'fieldname':'pr_create_remain','label':"Remain",'fieldtype':'data','align':'left','width':100})
-	columns.append({'fieldname':'pr_create_remain_per','label':"Remain %",'fieldtype':'data','align':'left','width':100})
+	columns.append({'fieldname':'pr_create_remain','label':"Remain",'fieldtype':'data','align':'left','width':90})
+	columns.append({'fieldname':'pr_create_remain_per','label':"Remain %",'fieldtype':'data','align':'left','width':90})
 
 	# columns.append({'fieldname':'pr_bill_completed','label':"Bill Completed",'fieldtype':'data','align':'left','width':100})
 
 	columns.append({'fieldname':'pr_status','label':"Status",'fieldtype':'data','align':'left','width':100})
+	columns.append({'fieldname':'pr_owner','label':"PR Created By",'fieldtype':'data','align':'left','width':140})
+	
 	columns.append({'fieldname':'pr_supplier','label':"Supplier",'fieldtype':'data','align':'left','width':100})
 	columns.append({'fieldname':'pr_supplier_name','label':"Supplier Name",'fieldtype':'data','align':'left','width':150})
 

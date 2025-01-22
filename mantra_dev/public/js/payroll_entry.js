@@ -33,22 +33,52 @@ frappe.ui.form.on("Payroll Entry", {
             });
         },('Utility'));
 
-        frm.add_custom_button(("Create payment entry file"), () => {
+        if (frappe.user.has_role("Accounts - Banking Manager")) {
+            frm.add_custom_button(("Create payment entry file"), () => {
 
-            var d = new frappe.ui.Dialog({
-                title: __("Payroll payment entry"),
-                primary_action_label: __("Process for payment"),
-                primary_action: () => {
-
-                    frappe.warn('Are you sure you want to proceed?',
-                        'This will create payroll payment entry in bank.',
-                        () => {
-                            // action to perform if Continue is selected
+                
+                    
+                    
+                    var d = new frappe.ui.Dialog({
+                        title: __("Payroll payment entry"),
+                        primary_action_label: __("Process for payment"),
+                        primary_action: () => {
+        
+                            frappe.warn('Are you sure you want to proceed?',
+                                'This will create payroll payment entry in bank.',
+                                () => {
+                                    // action to perform if Continue is selected
+                                    frappe.call({
+                                        method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
+                                        args: { 
+                                            payroll_entry: frm.doc.name,
+                                            create_only_file:0
+                                        },
+                                        freeze: true,
+                                        freeze_message: "Please wait...",
+                                        callback: function (r) {
+                        
+                                            if(r.message.status_code===200)
+                                            {
+                                                frm.reload_doc();
+                                            }
+                                            
+                                            frappe.msgprint(r.message.message);
+                                        }
+                                    });
+                                },
+                                'Continue',
+                                true // Sets dialog as minimizable
+                            )
+                            d.hide();
+                        },
+                        secondary_action_label: __("Check payment file"),
+                        secondary_action: () => {
                             frappe.call({
                                 method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
                                 args: { 
                                     payroll_entry: frm.doc.name,
-                                    create_only_file:0
+                                    create_only_file:1
                                 },
                                 freeze: true,
                                 freeze_message: "Please wait...",
@@ -56,47 +86,26 @@ frappe.ui.form.on("Payroll Entry", {
                 
                                     if(r.message.status_code===200)
                                     {
-                                        frm.reload_doc();
+                                        frm.reload_doc()
                                     }
                                     
                                     frappe.msgprint(r.message.message);
                                 }
                             });
-                        },
-                        'Continue',
-                        true // Sets dialog as minimizable
-                    )
-                    d.hide();
-                },
-                secondary_action_label: __("Check payment file"),
-                secondary_action: () => {
-                    frappe.call({
-                        method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
-                        args: { 
-                            payroll_entry: frm.doc.name,
-                            create_only_file:1
-                        },
-                        freeze: true,
-                        freeze_message: "Please wait...",
-                        callback: function (r) {
-        
-                            if(r.message.status_code===200)
-                            {
-                                frm.reload_doc()
-                            }
-                            
-                            frappe.msgprint(r.message.message);
+                            d.hide();
                         }
                     });
-                    d.hide();
-                }
-            });
-               
-            d.$body.append(`<p class="frappe-confirm-message">${'Are you sure you want to process for payment entry or check payment file first ?'}</p>`);
-            d.show();
-            return
+                    
+                    d.$body.append(`<p class="frappe-confirm-message">${'Are you sure you want to process for payment entry or check payment file first ?'}</p>`);
+                    d.show();
+                    return;
+                
 
-        },('Utility'));
+
+                
+
+            },('Utility'));
+        }
 
 
 
