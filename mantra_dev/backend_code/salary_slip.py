@@ -192,6 +192,56 @@ def generate_password_for_pdf(policy_template, employee):
 	return policy_template.format(**employee.as_dict())
 
 
+
+
+
+#######################  UTILITY  ######################################
+@frappe.whitelist()
+def create_bank_account(account_name, bank_name, account_type, party_type, party, custom_branch_location, bank_account_no,custom_ifsc):
+	reply={}
+	reply['message']=""
+	reply['status_code']=500
+	try:
+     
+		query = "SELECT * FROM `tabBank Account` WHERE `party_type`='{}' AND `party`='{}' AND `bank_account_no`='{}' AND `workflow_state` in ('Approved','Pending')".format(party_type,party,bank_account_no)
+		bank_account_list = frappe.db.sql(query,as_dict=1)
+		if len(bank_account_list)!=0:
+			reply['message']="Same bank account with {} is found. If need to create new then cancelled previous created bank account.".format(bank_account_list[0]['workflow_state'])
+			reply['status_code']=500
+			return reply
+     
+     
+		# Create a new Bank Account record
+		bank_account = frappe.get_doc({
+			"doctype": "Bank Account",
+			"account_name": account_name,
+			"bank": bank_name,
+			"account_type": account_type,
+			"party_type":party_type,
+			"party":party,
+			"custom_branch_location":custom_branch_location,
+			"bank_account_no":bank_account_no,
+			"custom_ifsc":custom_ifsc
+		})
+		# Insert the document into the database
+		bank_account.insert()
+		# frappe.db.commit()  # Commit changes to the database
+		reply['message']=f"Bank Account '{account_name}' created successfully."
+		reply['status_code']=200
+		return reply
+	except frappe.ValidationError as e:
+		reply['message']=f"Validation Error: {str(e)}"
+		reply['status_code']=500
+	except Exception as e:
+		error = '{} <br><br> {}'.format(str(e),str(traceback.format_exc()))
+		reply['message']=error
+		reply['status_code']=500
+  
+	return reply
+
+
+
+
 #To check email is send or not
 # @frappe.whitelist(allow_guest=True)
 def not_sent_slip(payroll_no):
