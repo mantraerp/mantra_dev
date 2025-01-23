@@ -124,13 +124,11 @@ class MaterialRequest(BuyingController):
 				"Received",
 			],
 		)
-  		# frappe,msgprint("hello")
-		if self.material_request_type=="Purchase":
-			print("hello")
+		if not self.material_request_type=="Purchase":
+			validate_for_items(self)
 			# validate_for_items(self)	
-		else:
-			# frappe.msgprint("Else called")
-			validate_for_items(self)	
+		# else:
+		# 	validate_for_items(self)	
 		self.set_title()
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated

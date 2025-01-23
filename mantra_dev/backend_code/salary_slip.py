@@ -4,7 +4,7 @@ from frappe import _
 import traceback
 # import frappe
 from frappe.utils import today
-
+import requests
 
 @frappe.whitelist(allow_guest=True)
 # @frappe.whitelist()
@@ -239,7 +239,19 @@ def create_bank_account(account_name, bank_name, account_type, party_type, party
   
 	return reply
 
-
+@frappe.whitelist(allow_guest=True)
+def branch_name_using_ifsc(ifsc):
+    
+	branch_name = ""
+	
+	try:
+		url = "https://ifsc.razorpay.com/{}".format(ifsc)
+		response = requests.get(url)
+		if response.status_code == 200:
+			branch_name = response.json()['BRANCH']
+	except Exception as e:
+		branch_name = ""
+	return branch_name
 
 
 #To check email is send or not

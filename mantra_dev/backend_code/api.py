@@ -826,7 +826,7 @@ def purchase_receipt_check_box_v1(invoice_name,checkvalue):
     # print(purchase_receipt_list1)
 
     for i in purchase_receipt_list1:
-        print(i,checkvalue)
+        # print(i,checkvalue)
         frappe.db.set_value('Purchase Receipt',i, 'custom_processed', checkvalue)
     frappe.db.commit()
 
@@ -932,13 +932,11 @@ def create_shipment(values, delivery_note_id):
         # Fetch the Delivery Note document
         dc = frappe.get_doc("Delivery Note", delivery_note_id)
         data_dict = json.loads(values)
-        print(dc.set_warehouse)
         wm = frappe.db.sql("select warehouse_manager from `tabWarehouse Manager` where parent = %s",dc.set_warehouse,as_dict=True)
         cc_email=[]
         if wm:
             for i in wm:
                 cc_email.append(i["warehouse_manager"])
-        print(cc_email)
         # return w_nm
 
             
@@ -1237,8 +1235,8 @@ def login_to_avdm():
         try:
             username = frappe.db.get_single_value("AVDM Setting", "username")
             password = frappe.db.get_single_value("AVDM Setting", "password")
-            print(f"Password: {password}")  # For debugging; remove in production
-            print(f"Username: {username}")
+            # print(f"Password: {password}")  # For debugging; remove in production
+            # print(f"Username: {username}")
 
             login_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/Login"
             login_headers = {
@@ -1251,21 +1249,17 @@ def login_to_avdm():
         
         
             response = requests.post(login_url, headers=login_headers, json=login_body)
-            print(f"Response: {response}")
+            # print(f"Response: {response}")
 
             # Check if the response content is in bytes and decode it
             response_content = response.content
             if isinstance(response_content, bytes):
                 response_content = response_content.decode('utf-8')
             
-            print(f"Response Content: {response_content}")
             response_json = json.loads(response_content)
-            print(f"Response JSON: {response_json}")
             details = response_json["details"]
-            print(f"Details :{ details }")
             # details_json = json.loads(details)
             api_token = details["_APIToken"]
-            print(f"API Token: {api_token}")
             
             creating_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM"
             headers = {
@@ -1277,9 +1271,7 @@ def login_to_avdm():
             # login_body=[] /
             dc_list = frappe.get_list("Delivery Note", filters={"posting_date": nowdate(), "docstatus": 1})
             dc_response_json=''
-            print(dc_list)
             for dc in dc_list:
-                print(dc)
                 dc_doc = frappe.get_doc("Delivery Note", dc)
                 dc_item = dc_doc.items
                 for i in dc_item:
@@ -1290,7 +1282,6 @@ def login_to_avdm():
                             serial_no_list = serial_no.split(",")
 
                             for s_no in serial_no_list:
-                                print(s_no)
                                 data = {
                                     "mastCode": 0,
                                     "serialNo": s_no,
@@ -1302,25 +1293,18 @@ def login_to_avdm():
                                 }
                                 body.append(data)
             
-            print(body)
             response1 = requests.post(creating_url, headers=headers, json=body)
-            print(response1.status_code)
             if response1.status_code==200:
                 dc_response_content = response1.content
-                print(dc_response_content)
                 if isinstance(dc_response_content, bytes):
                     dc_response_content = dc_response_content.decode('utf-8')
-                    print(dc_response_content)
-                print(f"Response Content: {dc_response_content}")
                 dc_response_json = json.loads(dc_response_content)
-                print(f"Response JSON: {dc_response_json}")
                 
                 
                 if dc_response_json:
                     response_serial_no = []
                     count = 0
                     for i in dc_response_json:
-                        print("serial_no: ", i['devicesr'])
                         response_serial_no.append(i['devicesr'])
     
                     
@@ -1347,11 +1331,9 @@ def login_to_avdm():
                         result.append({key: value})
 
                     # Output the final result
-                    print(result)
                                         
                     for i in result:
                         for key, values in i.items():
-                            # print(key, values)
                             for j in values:
                                 if j in response_serial_no:
                                     # frappe.db.set_value('Serial No', j, 'custom_marked_in_avdm', 1)
@@ -1368,7 +1350,6 @@ def login_to_avdm():
                             pass
                     # frappe.db.commit()
             else :
-                print("else")
                 dc_response_json=response1.status_code
                 frappe.sendmail(
                     recipients=["ravi.patel@mantratec.com"],
@@ -1376,10 +1357,8 @@ def login_to_avdm():
                     message="Line 1462 api.py"
                 )
             # dc_details = dc_response_json["details"]
-            # print(f"Details :{ dc_details }")
             # details_json = json.loads(details)
             # dc_api_token = dc_details["_APIToken"]
-            # print(f"API Token: {dc_api_token}")        
             # return body
             return dc_response_json 
             # return "jfgh", response_content

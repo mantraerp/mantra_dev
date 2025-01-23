@@ -15,6 +15,7 @@ def employee_remain_bank_account(allow_guest=True):
     
     return True
 
+# @frappe.whitelist(allow_guest=True)
 @frappe.whitelist()
 def employee_remain_bank_account_background(**kwargs):
     
@@ -44,7 +45,7 @@ def employee_remain_bank_account_background(**kwargs):
 	
 		for employee in account_not_found:
 
-			message = '{}<tr><td style="width: 50.0000%;">{}</td><td style="width: 50.0000%;">{}</td></tr>'.format(message,employee['name'],employee['employee_name'])
+			message = '{}<tr><td style="width: 50.0000%;"><a href="https://mantratec.milaap.ai/app/employee/{}">{}</a></td><td style="width: 50.0000%;">{}</td></tr>'.format(message,employee['name'],employee['name'],employee['employee_name'])
 
 
 		message = '{}</tbody></table>'.format(message)
@@ -56,6 +57,7 @@ def employee_remain_bank_account_background(**kwargs):
 		# 	return "No email recipients is found."
 
 		recipients=['hrops@mantratec.com','anil.vadhel@mantratec.com','mukund.kotadia@mantratec.com','anurag@mantratec.com','ravi.patel@mantratec.com']
+		# recipients=['ravi.patel@mantratec.com','anil.vadhel@mantratec.com']
 
 
 		frappe.sendmail(
@@ -86,7 +88,7 @@ def employee_remain_email_id_background(**kwargs):
 	
 		for employee in account_not_found:
 
-			message = '{}<tr><td style="width: 50.0000%;">{}</td><td style="width: 50.0000%;">{}</td></tr>'.format(message,employee['name'],employee['employee_name'])
+			message = '{}<tr><td style="width: 50.0000%;"><a href="https://mantratec.milaap.ai/app/employee/{}">{}</td><td style="width: 50.0000%;">{}</td></tr>'.format(message,employee['name'],employee['name'],employee['employee_name'])
 
 
 		message = '{}</tbody></table>'.format(message)

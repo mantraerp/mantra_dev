@@ -117,7 +117,6 @@ def upload_beneficiary_file(doc_name):
         doc.insert(ignore_permissions=True)
 
 
-        print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
     except Exception as e :
@@ -210,7 +209,6 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
 
 
 
-        print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
     except Exception as e :
@@ -296,7 +294,6 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
         doc.insert(ignore_permissions=True)
 
 
-        # print(f'File {file_name} created successfully in {directory}.')
         return f"File created successfully: {file_name}"
 
     except Exception as e :
@@ -471,10 +468,8 @@ def send_bene_file_error_email(error_message):
             message=message
         )
         send = flush()
-        print(f"Error email sent to: {recipients}")
         frappe.logger().info(f"Error email sent to: {recipients}")
     except Exception as email_error:
-        print(f"Failed to send error email: {email_error}")
         frappe.logger().error(f"Failed to send error email: {email_error}")
 
 
@@ -488,7 +483,6 @@ def send_otp(email):
     }
     #check user are exists or not
     userexists = frappe.db.exists("User", filters)
-    print(userexists,"\n\n\n\n\n\n")
     # If record exists, return True
     if userexists:
         otpsend = frappe.db.exists("Email OTP", {"email_id":email})
@@ -579,7 +573,6 @@ def verify_otp(email,otp):
     start_date = dt_object - timedelta(hours=0, minutes=10)
     #check Otp
     if start_date < ck_time:
-        print("if")
         if check_otp==otp:
             #enquiry(mobile,equipment_id)
             # user=email
@@ -668,7 +661,6 @@ def encoded_code():
 
     # Decrypt the OTP (for demonstration purposes)
     # decrypted_message = cipher_suite.decrypt(encrypted_otp).decode()
-    print(otp1)
     # Print results (for debugging purposes)
    
 
@@ -707,7 +699,6 @@ def select_payment_entry(bank_account):
     
     # Execute the query and fetch results as dictionaries
     payment_entry = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)       
-    print(payment_entry)
     amount=0
     if payment_entry:
         unique_code=0
@@ -731,16 +722,14 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
         else :
             frappe.throw("Worng Bank Selected")          
     except Exception as e:
-        print(e)
+        return "expenses"
     
-    # print(type(list_items))
     
 #this function is use for a push file in icici snorken folder 
 def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
     try :
         numeric_characters = string.digits
         directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
-        print(directory)
         
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
         list_items = ast.literal_eval(payment_entry_list)
@@ -751,7 +740,6 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
         file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
         file_path = os.path.join(directory, file_name)
         # file_path2 = os.path.join('/home/mantra/Desktop/Payments', file_name)
-        print("\n\n",file_path,"\n\n")
         total_amount = 0
         
         header = [
@@ -816,7 +804,6 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             frappe.db.set_value("Payment Entry", i, "custom_unique_batch_number", unique_batch_number)
             frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
             frappe.db.commit()
-            print(f'Data added to {file_path} successfully.')
             entry_type=frappe.db.get_value("Payment Request",payment_entry.reference_no,"custom_payment_type")
             approval_type=frappe.db.get_value("Payment Request",payment_entry.reference_no,"custom_approval_type")
             maker=frappe.db.get_value("Payment Request",payment_entry.reference_no,"owner")
@@ -863,10 +850,10 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             for i in rec:
                 recipients.append(i["user"])
         
-        print("Recipients:", recipients)
-        
+
+        test1=""        
         if not recipients:
-            print("No recipients found")
+            test1=""
         else:
             try:
                 frappe.sendmail(
@@ -897,11 +884,9 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                     attachments=attachments
                 )
                 send=flush()
-                print(f'File {file_name} created and email sent successfully.')
                 return file_path
             except Exception as e:
-                print(e)
-        print(f'File {file_name} created successfully in {directory}.')
+                return ""
         return "Done"
     except Exception as e :
         return e
@@ -1477,7 +1462,6 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
         # Define the directory and file name
         numeric_characters = string.digits
         directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
-        print(directory)
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
         list_items = eval(payment_entry_list)  # Be cautious with eval; prefer using json.loads if possible
         file_name = "MANTRAS_MANTRASDNLD_" + str(unique_batch_number) + ".csv"
@@ -1495,7 +1479,6 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
         sr_no = 0
         data_rows = []
         total_amount = 0
-        print(list_items)
         for i in list_items:
             payment_entry = frappe.get_doc("Payment Entry", i)
             mdf = frappe.db.sql("SELECT mode_of_payment, abbrivation FROM `tabMode of Payment Setting` WHERE parent=%s AND mode_of_payment=%s", (bank_account, payment_entry.mode_of_payment), as_dict=True)
@@ -1522,7 +1505,6 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
             email_row=[sr_no+1,beneficiary_code,beneficiary_name,amt,entry_type,"",approval_type,"",remarks,maker,bane_add3]
             email_data.append(email_row)
         
-        print(data_rows)
         with open(file_path, 'a', newline='') as file:
             writer = csv.writer(file, delimiter=",")
             writer.writerows(data_rows)
@@ -1534,7 +1516,6 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
             writer = csv.writer(file, delimiter=",")
             writer.writerow(email_header)
             writer.writerows(email_data)    
-        print(f'Data added to {file_path} successfully.')
         with open(file_path, 'rb') as file:
             file_content = file.read()
         with open(email_path, 'rb') as file:
@@ -1554,11 +1535,9 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
             for i in rec:
                 recipients.append(i["user"])
 
-        # Debug: Print the recipients list
-        print("Recipients:", recipients)
-
+        test1233=""
         if not recipients:
-            print("No recipients found")
+            test1233="123"
         else:
             # Send the email
             try:
@@ -1592,22 +1571,21 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
                 send=flush()
                 return file_path
             except Exception as e :
-                print(e)
+                return str(e)
      
     except Exception as e:
-        print("Error sending email:", e)
+        return str(e)
+
 #get revers Mis From Bank PNB
 @frappe.whitelist()
 def get_pnb_file():
     # Specify the path to your CSV file
     # folder_path = '/home/mantra/Documents/PNB/recive_file'
     bank_list = frappe.db.get_list("Bank Integration", filters={"bank": "Punjab National Bank"}, fields=["name", "bank", "file_pull_path"])
-    print(bank_list)
     all_data = []
     for i in bank_list:
     # Initialize an empty list to store data from all files
         folder_path = i["file_pull_path"]
-        print(folder_path)
         
 
         # Iterate over each file in the specified folder
@@ -1639,7 +1617,6 @@ def get_pnb_file():
     combined_json_data = json.dumps(all_data, indent=4)
     parsed_data = json.loads(combined_json_data)
     for data_dict in parsed_data:
-            print(data_dict,"\n\n\n")
             if data_dict["Transaction Status"]=="Successful":
                     # pay_entry=frappe.get_doc("Payment Entery")
                     frappe.db.set_value("Payment Entry",data_dict["Transaction Reference No."],"custom_payment_status_","Successful")
@@ -1650,7 +1627,6 @@ def get_pnb_file():
                     frappe.db.set_value("Payment Entry",data_dict["Transaction Reference No."],"custom_utr_no",data_dict["UTR No"])
                     frappe.db.set_value("Payment Entry",data_dict["Transaction Reference No."],"docstatus",2)
                     frappe.db.commit()
-    print(parsed_data)
 
 #get revers Mis From Bank ICICI
 @frappe.whitelist()
@@ -1728,7 +1704,6 @@ def get_icici_bank_file_background(delimiter='|'):
             if len(data_dict)>15:
                 try:
                     if frappe.db.exists("Payment Entry", data_dict[15]):
-                        print("Payment : ",data_dict[15])
 
                         ERP_status = ""
                         rejection_reason = ""
@@ -1767,7 +1742,6 @@ def get_icici_bank_file_background(delimiter='|'):
 
 
                     elif frappe.db.exists("Salary Slip", data_dict[15]):
-                        print("Salary : ",data_dict[15])
 
                         ERP_status = ""
                         rejection_reason = ""
@@ -1798,7 +1772,6 @@ def get_icici_bank_file_background(delimiter='|'):
 
                     else:
                         if frappe.db.exists("Payment Entry", data_dict[17]):
-                            print("Payment : ",data_dict[17]) 
 
                             if data_dict[24]=="P":
                                 frappe.db.set_value("Payment Entry", data_dict[17], {
@@ -1815,7 +1788,6 @@ def get_icici_bank_file_background(delimiter='|'):
                                 # frappe.db.commit()
 
                         elif frappe.db.exists("Salary Slip", data_dict[17]):
-                            print("Salary : ",data_dict[17])
 
                             if data_dict[24]=="P":
                                 frappe.db.set_value("Salary Slip", data_dict[17], {
@@ -1861,9 +1833,8 @@ def send_icici_bank_file_error_email(error_message,title=None):
             message=message
         )
         send = flush()
-        print(f"Error email sent to: {recipients}")
     except Exception as email_error:
-        print(f"Failed to send error email: {email_error}")
+        return str(email_error)
  
 
 
@@ -1933,8 +1904,7 @@ def send_file(file_path,file_name):
                     doc.file_name = file_name
                     doc.insert(ignore_permissions=True)
             else:
-                print(f"Failed to upload file. Status code: {response.status_code}")
-                print("Response:", response.text)
+
                 recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
                 subject = "Error in Beneficiary File Processing 1716"
                 message = f"""
@@ -1949,7 +1919,6 @@ def send_file(file_path,file_name):
                     message="{}<br>{}".format(message,str(traceback.format_exc()))
                 )
     except Exception as e:
-        print("An error occurred:", e)
         recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
         subject = "Error in Beneficiary File Processing : Using send file"
         message = f"""
