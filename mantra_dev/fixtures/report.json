@@ -1662,162 +1662,6 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
-  "letter_head": "Salary Slip",
-  "modified": "2024-12-17 12:59:12.652825",
-  "module": "Mantra Dev",
-  "name": "Minimum Stock Level",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Item",
-  "reference_report": null,
-  "report_name": "Minimum Stock Level",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Maintenance User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Manufacturing User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Item Manager"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Desk User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User (Internal)"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "SCM - Manager"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "SCM - Manager"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User (Internal)"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Executive"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Executive"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Item Creator"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Item Creator"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Executive"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "All"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
   "letter_head": "",
   "modified": "2024-12-24 15:43:31.152201",
   "module": "Mantra Dev",
@@ -2263,10 +2107,10 @@
   "javascript": null,
   "json": null,
   "letter_head": "Salary Slip",
-  "modified": "2025-01-23 13:47:46.596096",
+  "modified": "2025-01-23 18:26:17.002722",
   "module": "Mantra Dev",
   "name": "Workflow TAT Report",
-  "prepared_report": 0,
+  "prepared_report": 1,
   "query": null,
   "ref_doctype": "Version",
   "reference_report": null,
@@ -2285,6 +2129,162 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Administrator"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2024-12-17 12:59:12.652825",
+  "module": "Mantra Dev",
+  "name": "Minimum Stock Level",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item",
+  "reference_report": null,
+  "report_name": "Minimum Stock Level",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Minimum Stock Level",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "All"
    }
   ]
  }

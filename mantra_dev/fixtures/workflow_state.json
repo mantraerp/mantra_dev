@@ -102,19 +102,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:05:19.885801",
-  "name": "Reviewed",
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
   "style": "",
-  "workflow_state_name": "Reviewed"
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
+  "modified": "2024-02-08 15:05:19.885801",
+  "name": "Reviewed",
   "style": "",
-  "workflow_state_name": "BU Approval"
+  "workflow_state_name": "Reviewed"
  },
  {
   "docstatus": 0,

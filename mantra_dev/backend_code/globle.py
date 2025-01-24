@@ -3,6 +3,7 @@ from frappe import _
 import traceback
 import json
 import requests
+from frappe.utils import get_url
 
 
 @frappe.whitelist(allow_guest=True)
@@ -60,6 +61,13 @@ def system_call(reply,url,key):
 
 
 
+
+def site_base_url():
+	siteurl = get_url()
+	if "http://192.168.1.38:8001":
+		siteurl = "https://mantratec.milaap.ai"
+  
+	return siteurl
 
 def permission_count():
 	query = "SELECT * from `tabCustom DocPerm`"
