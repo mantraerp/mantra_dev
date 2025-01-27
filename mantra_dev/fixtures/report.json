@@ -2133,6 +2133,102 @@
   ]
  },
  {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2025-01-27 12:36:34.908459",
+  "module": "Mantra Dev",
+  "name": "Material Request Tracking",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Material Request",
+  "reference_report": null,
+  "report_name": "Material Request Tracking",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Requester"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Material Request Tracking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR OPS User"
+   }
+  ]
+ },
+ {
   "add_total_row": 0,
   "columns": [],
   "disabled": 0,

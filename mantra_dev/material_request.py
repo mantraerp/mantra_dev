@@ -19,6 +19,11 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 
+from mantra_dev.backend_code.globle import create_notification_log
+# from mantra_dev.mantra_dev.report.material_request_tracking.material_request_tracking import create_material_request_mail_content, send_material_request_submit_mail_content
+
+
+
 form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"}
 
 
@@ -159,6 +164,40 @@ class MaterialRequest(BuyingController):
 			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
 		):
 			self.validate_budget()
+   
+		# if (self.custom_approval_from_warehouse_manager == 1 and self.material_request_type == "Material Transfer"):
+		# 	# Automatically Create Stock Entry When a Material Request of Type "Material Transfer" is Generated from the Material Request Tracking Report
+		# 	stock_entry = make_stock_entry(self.name)
+		# 	stock_entry.save()
+		# 	create_notification_log(
+		# 		subject= f"{self.name} Material Requested Material Dispatched",
+		# 		content= f"{self.name} Material Requested Material Dispatched",
+		# 		document_type= "Material Request",
+		# 		document_name= self.name,
+		# 		for_user= self.owner
+		# 	)
+		# 	subject, content = send_material_request_submit_mail_content(self)
+		# 	frappe.sendmail(recipients=self.owner, subject=subject, content=content, now=True)
+
+	# def after_insert(self):
+	# 	# Automatically notify and send an email to the Warehouse Manager of the source warehouse
+	# 	# when a Material Transfer Request is created through the Material Request Tracking Report
+	# 	# and requires approval from the Warehouse Manager.
+	# 	if (self.custom_approval_from_warehouse_manager == 1  and self.material_request_type == "Material Transfer"):
+	# 		warehouse_manager_list = frappe.db.get_all("Warehouse Manager", {'parent': self.set_from_warehouse}, pluck="warehouse_manager")
+	# 		for user in warehouse_manager_list:
+	# 			create_notification_log(
+	# 				subject= f"Approval Request for {self.name} Material Transfer to Employee",
+	# 				content= f"Approval Request for {self.name} Material Transfer to Employee",
+	# 				document_type= "Material Request",
+	# 				document_name= self.name,
+	# 				for_user= user
+	# 			)
+	# 		subject, content = create_material_request_mail_content(self)
+	# 		frappe.sendmail(recipients=warehouse_manager_list, subject=subject, content=content, now=True)
+
+
+
 
 	def before_save(self):
 		self.set_status(update=True)
