@@ -189,6 +189,9 @@ doc_events = {
     "Purchase Receipt": {
         "on_submit": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_purchase_order_expected_date",
         "on_cancel": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_cancel_purchase_order_expected_date" 
+    },
+    "Purchase Invoice":{
+        "on_update": "mantra_dev.purchase_invoice.override_validate_due_date",
     }
 }
 

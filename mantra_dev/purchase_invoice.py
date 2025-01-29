@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form,add_months, getdate,date_diff,get_last_day, nowdate, add_days
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -1876,3 +1876,80 @@ def make_purchase_receipt(source_name, target_doc=None):
 	)
 
 	return doc
+
+
+@frappe.whitelist()
+def get_due_date_from_template(template_name,posting_date, bill_date=None):
+	"""
+	Inspects all `Payment Term`s from the a `Payment Terms Template` and returns the due
+	date after considering all the `Payment Term`s requirements.
+	:param template_name: Name of the `Payment Terms Template`
+	:return: String representing the calculated due date
+	"""
+	due_date = getdate(bill_date or posting_date)
+	acc_date = getdate(posting_date)
+
+	template = frappe.get_doc("Payment Terms Template", template_name)
+
+	for term in template.terms:
+		payment_term = frappe.get_doc("Payment Term",term.payment_term)
+		if payment_term.custom_calculate_from_the_account_date:
+			if term.due_date_based_on == "Day(s) after invoice date":
+				acc_date = max(acc_date, add_days(acc_date, term.credit_days))
+			elif term.due_date_based_on == "Day(s) after the end of the invoice month":
+				acc_date = max(acc_date, add_days(get_last_day(acc_date), term.credit_days))
+			else:
+				acc_date = max(acc_date, get_last_day(add_months(acc_date, term.credit_months)))
+			return acc_date
+		else:
+			if term.due_date_based_on == "Day(s) after invoice date":
+				due_date = max(due_date, add_days(due_date, term.credit_days))
+			elif term.due_date_based_on == "Day(s) after the end of the invoice month":
+				due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
+			else:
+				due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
+			return due_date
+
+def override_validate_due_date(doc, method=None):
+	if doc.doctype == "Purchase Invoice":
+		import erpnext.accounts.party
+		erpnext.accounts.party.validate_due_date = custom_validate_due_date
+
+def custom_validate_due_date(posting_date, due_date, bill_date=None, template_name=None):
+	if getdate(due_date) < getdate(posting_date):
+		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
+	else:
+		if not template_name:
+			return
+		
+		use_acc_date_flag = False
+
+		if template_name:
+			template = frappe.get_doc("Payment Terms Template", template_name)
+			for term in template.terms:
+				payment_term = frappe.get_doc("Payment Term", term.payment_term)
+				if payment_term.custom_calculate_from_the_account_date:
+					use_acc_date_flag = True
+					break
+
+		default_due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime(
+			"%Y-%m-%d"
+		)
+
+		if not default_due_date:
+			return
+		if not use_acc_date_flag:
+			if default_due_date != posting_date and getdate(due_date) > getdate(default_due_date):
+				is_credit_controller = (
+					frappe.db.get_single_value("Accounts Settings", "credit_controller") in frappe.get_roles()
+				)
+				if is_credit_controller:
+					frappe.msgprint(
+						_("Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)").format(
+							date_diff(due_date, default_due_date)
+						)
+					)
+				else:
+					frappe.throw(
+						_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date))
+					)

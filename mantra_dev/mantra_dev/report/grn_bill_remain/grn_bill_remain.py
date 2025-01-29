@@ -1,12 +1,15 @@
 # Copyright (c) 2024, Foram Shah and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe # type: ignore
 import traceback
+from frappe import _ # type: ignore
 
 
 def execute(filters=None):
 	columns, data = [], []
+	total_qty = 0
+	total_supplier = []
 
 	try:
 		columns = get_columns(filters)
@@ -17,9 +20,13 @@ def execute(filters=None):
 		for index, row in enumerate(data_raw):
 			if row['name'] not in nameProcess:
 				nameProcess.append(row['name'])
+    
+				if row['supplier_name'] not in total_supplier:
+					total_supplier.append(row['supplier_name'])
 
 				if row['docstatus']!=2:
 					if row['custom_processed']==0:
+						total_qty += row['total_qty']
 						data.append([
 							row['name'],
 							row['posting_date'],
@@ -31,7 +38,7 @@ def execute(filters=None):
 
 							row['status'],
 							row['owner'],
-							get_purchase_order_from_receipt(row['name']),
+							row['po_owner'],
 							row['supplier'],
 							row['supplier_name'],
 
@@ -41,7 +48,10 @@ def execute(filters=None):
 						total_remaining = row['total_qty']-bill_created
 
 						if not filters.get("remove_created_bill"):
-      
+							total_qty += row['total_qty']
+							if row['supplier_name'] not in total_supplier:
+								total_supplier.append(row['supplier_name'])
+       
 							data.append([
 								row['name'],
 								row['posting_date'],
@@ -54,7 +64,7 @@ def execute(filters=None):
 
 								row['status'],
 								row['owner'],
-								get_purchase_order_from_receipt(row['name']),
+								row['po_owner'],
 								row['supplier'],
 								row['supplier_name'],
 							])
@@ -62,8 +72,33 @@ def execute(filters=None):
 	except Exception as e:
 		error = '{} - {}'.format(str(e),str(traceback.format_exc()))
 		frappe.msgprint(str(error))
-		
-	return columns, data
+	
+ 
+	report_summary = [
+        {
+            "label": _("Total Remain"),
+            "value": len(data),
+            "indicator": "Green",  # Optional: Can be "Red", "Green", "Blue", etc.
+        },
+        {
+            "label": _("Total Qty"),
+            "value": total_qty,
+            "indicator": "Green",  # Optional: Can be "Red", "Green", "Blue", etc.
+        },
+        {
+            "label": _("Total Supplier"),
+            "value": len(total_supplier),
+            "indicator": "Green",  # Optional: Can be "Red", "Green", "Blue", etc.
+        }
+    ]
+ 
+ 
+ 
+ 	
+	# return columns, data
+	return columns, data, None, None, report_summary
+
+
 
 def get_purchase_order_from_receipt(receipt_name):
     
@@ -150,7 +185,6 @@ def check_created_status_amount(pr_no,grand_total):
 
 
 # Purchase Receipt
-
 def getProcessData(filters):
 
 	sorting = "ASC"
@@ -159,7 +193,21 @@ def getProcessData(filters):
 	# yearDetail = frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE name=%s""",year,as_dict=1)
 	# return frappe.db.sql("""SELECT * FROM `tabPurchase Receipt` WHERE `status` NOT IN ('Completed','Cancelled','Closed') AND `is_return`=0""",as_dict=1)
 	query = "SELECT * FROM `tabPurchase Receipt` WHERE `status` IN ('To Bill') AND `is_return`=0 ORDER BY `posting_date` {}".format(sorting)
-	return frappe.db.sql(query,as_dict=1)
+	pr_list = frappe.db.sql(query,as_dict=1)
+
+
+	pr_new_list = []
+	po_created = filters.get("po_created_user")
+	for index, pr in enumerate(pr_list):
+		own = get_purchase_order_from_receipt(pr['name'])
+		pr['po_owner']=own
+		if po_created not in [None,'None',"","All"]:
+			if own == po_created:
+				pr_new_list.append(pr)
+		else:
+			pr_new_list.append(pr)
+
+	return pr_new_list
 
 
 def get_columns(filters):
@@ -190,3 +238,19 @@ def get_columns(filters):
 	# columns.append({'fieldname':'s_c_type','label':"Supplier Group/Customer Type",'fieldtype':'data','align':'right','width':270})
 
 	return columns
+
+#Js Query 
+@frappe.whitelist(allow_guest=True)
+def get_dynamic_filter_options():
+	# Query to fetch the required options
+	query = " SELECT DISTINCT email FROM `tabUser` WHERE enabled = 1"
+	options = frappe.db.sql(query,as_dict=False)
+
+	# Return the list of options
+ 
+	list_of_users = []
+	list_of_users.append("All")
+	for opt in options:
+		list_of_users.append(opt)
+
+	return list_of_users

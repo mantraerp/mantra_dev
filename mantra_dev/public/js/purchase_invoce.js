@@ -87,6 +87,37 @@ frappe.ui.form.on('Purchase Invoice', {
                 }
             });
         }
+
+        if(frm.doc.payment_terms_template){
+            frappe.call({
+                method : 'mantra_dev.purchase_invoice.get_due_date_from_template',
+                args:{
+                    posting_date : frm.doc.posting_date,
+                    bill_date : frm.doc.bill_date,
+                    template_name: frm.doc.payment_terms_template
+                },
+                callback : function(r){
+                    if(r.message){
+                        let due_date = r.message
+                        const payment_terms = cur_frm.doc.payment_schedule || [];
+                        const promise = []
+                        
+                        payment_terms.forEach(row => {
+                            promise.push(
+                                frappe.db.set_value(row.doctype, row.name, "due_date", due_date)
+                            );
+                        });
+
+                        Promise.all(promise).then(() => {
+                            cur_frm.refresh_field("payment_terms");
+                            frm.reload_doc();
+                        }).catch(error => {
+                            console.error("Error updating due dates:", error);
+                        });
+                    }
+                }
+            })
+        }
     },
     after_workflow_action: function(frm) {
 
