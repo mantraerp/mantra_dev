@@ -66,7 +66,7 @@ frappe.pages['stock-calculation'].on_page_load = function(wrapper) {
                     <td width="1%"><input type="checkbox" class="row-checkbox"></td>
                     <td width="25%"><select class="form-control item-link"></select></td>
                     <td width="25%"><select type="text" class="form-control bom-link" placeholder="Select BOM"></td>
-                    <td width="24%"><input type="number" class="form-control qty" placeholder="Enter Qty"></td>
+                    <td width="24%"><input type="number" class="form-control qty" value="1" placeholder="Enter Qty"></td>
                 </tr>
             </tbody>
         </table>
@@ -103,7 +103,7 @@ frappe.pages['stock-calculation'].on_page_load = function(wrapper) {
                 <td><input type="checkbox" class="row-checkbox"></td>
                 <td><select class="form-control item-link"></select></td>
                 <td><select type="text" class="form-control bom-link" placeholder="Select BOM"></td>
-                <td><input type="number" class="form-control qty" placeholder="Enter Qty"></td>
+                <td><input type="number" class="form-control qty" value="1" placeholder="Enter Qty"></td>
             </tr>`;
         // Append the new row to the table body
         $('#bom_stock_table tbody').append(newRow);
@@ -131,6 +131,18 @@ frappe.pages['stock-calculation'].on_page_load = function(wrapper) {
                     itemSelect.append('<option value="' + item.item_name + '">' + item.item_name + '</option>');
                 });}});
     });
+    $('#bom_stock_table tbody').on('click', '.bom-link', function() {
+        var bomField = $(this);
+        var selectedItem = $(this).closest('tr').find('.item-link').val(); // Get the selected item for the current row
+    
+        if (!selectedItem) {
+            // If no item is selected, show a message and prevent further action
+            frappe.msgprint(__('Please select an Item before choosing a BOM.'));
+            bomField.blur(); // Remove focus from the BOM field
+            return false; // Prevent the default click action
+        }
+    });
+    
     $('#bom_stock_table tbody').on('change', '.item-link', function() {
         var selectedItem = $(this).val(); // Get the selected item
         // Find the BOM field for the current row
@@ -144,7 +156,7 @@ frappe.pages['stock-calculation'].on_page_load = function(wrapper) {
                 method: 'frappe.client.get_list',
                 args: {
                     doctype: "BOM",
-                    filters: { 'item_name': selectedItem }, // Filter BOMs by selected item
+                    filters: { 'item_name': selectedItem , docstatus:["!=",2] }, // Filter BOMs by selected item
                     fields: ['name']
                 },
                 callback: function(response) {

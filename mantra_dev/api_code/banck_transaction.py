@@ -46,7 +46,7 @@ def bulk_upload_beneficiary_file(bank_account_list):
 @frappe.whitelist()
 def upload_beneficiary_file(doc_name):
     try:
-        errorLog("Bene upload",doc_name,False)
+        # errorLog("Bene upload",doc_name,False)
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 

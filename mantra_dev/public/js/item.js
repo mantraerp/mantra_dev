@@ -100,6 +100,83 @@ frappe.ui.form.on('Item', {
         $(document).on("click", function () {
             $(".dropdown-menu").remove();
         });
+
+        frm.add_custom_button(("Used as Raw Material in BOM"), () => {
+            frappe.call({
+                method: "mantra_dev.backend_code.item.item.fetch_item_used_as_raw_material_in_bom",
+                args: { item_code: frm.doc.name },
+                callback: function (r) {
+                    console.log(r.message);
+                    if (r.message.length > 0){
+                        var data_list = r.message;
+                        var d = new frappe.ui.Dialog({
+                            title: __("Used as Raw Material in BOM"),
+                            size: "large",
+                            fields: [
+                                {
+                                    "fieldname": "bom_details",
+                                    "fieldtype": "Table",
+                                    "label": "Item Details",
+                                    "cannot_add_rows": 1,
+                                    "cannot_delete_rows": 1,
+                                    "fields": [
+                                        {
+                                            "fieldname": "item_code",
+                                            "fieldtype": "Link",
+                                            "label": "Item Code",
+                                            "options": "Item",
+                                            "read_only": 1,
+                                            "in_list_view": 1,
+                                            "columns": 5
+                                        },
+                                        {
+                                            "fieldname": "bom",
+                                            "fieldtype": "Link",
+                                            "label": "BOM",
+                                            "options": "BOM",
+                                            "read_only": 1,
+                                            "in_list_view": 1,
+                                            "columns": 2
+                                        },
+                                        {
+                                            "fieldname": "qty",
+                                            "fieldtype": "Float",
+                                            "label": "Qty Used",
+                                            "read_only": 1,
+                                            "in_list_view": 1,
+                                            "columns": 1
+                                        },
+                                        {
+                                            "fieldname": "uom",
+                                            "fieldtype": "Link",
+                                            "options": "UOM",
+                                            "label": "UOM",
+                                            "read_only": 1,
+                                            "in_list_view": 1,
+                                            "columns": 1
+                                        },
+                                        {
+                                            "fieldname": "is_default_bom",
+                                            "fieldtype": "Check",
+                                            "label": "Is Default BOM",
+                                            "read_only": 1,
+                                            "in_list_view": 1,
+                                            "columns": 1
+                                        },
+                                    ],
+                                    "data": data_list
+                                }
+                            ]
+                        })
+                        d.show();
+                    }else{
+                        frappe.msgprint("This item has not been used in any BOM")
+                    }
+                }
+            })
+        },('Utility'))
+
+
     },
 
 
