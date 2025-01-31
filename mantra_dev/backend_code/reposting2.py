@@ -261,8 +261,14 @@ def remove_attached_file(docname):
 
 
 
+@frappe.whitelist(allow_guest=True)
+def GLEntry_update():
+	query = "UPDATE `tabGL Entry` SET `debit`='299.99', `debit_in_account_currency`='299.99' WHERE `name`='ACC-GLE-2024-25153'" 
+	# query = "UPDATE `tabGL Entry` SET `debit`='0.01', `debit_in_account_currency`='0.01' WHERE `name`='ACC-GLE-2024-25155'" 
 
-
+	test= frappe.db.sql(query,as_dict=1)
+	frappe.db.commit()
+	return True
 
 
 

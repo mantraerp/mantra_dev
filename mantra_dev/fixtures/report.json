@@ -2142,8 +2142,8 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
-  "letter_head": "Salary Slip",
-  "modified": "2025-01-27 12:36:34.908459",
+  "letter_head": "",
+  "modified": "2025-01-29 11:13:24.404017",
   "module": "Mantra Dev",
   "name": "Material Request Tracking",
   "prepared_report": 0,
@@ -2213,18 +2213,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Stock User (Internal)"
-   },
-   {
-    "parent": "Material Request Tracking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Material Request Tracking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "HR OPS User"
    }
   ]
  },

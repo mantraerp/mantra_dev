@@ -77,6 +77,75 @@ def email_payroll_salary_slip_back(payroll_no):
 	return reply
 
 
+@frappe.whitelist(allow_guest=True)
+def salary_slip_date_range(employee_id,from_date,to_date):
+    
+	reply={}
+	reply['message']=""
+	reply['status_code']=500
+ 
+	salary_slip_list = frappe.get_all(
+		"Salary Slip",
+		filters={
+			"employee": employee_id,
+			"start_date": [">=", from_date],
+			"end_date": ["<=", to_date],
+			"docstatus": 1  # Ensure only submitted salary slips
+		},
+		fields=['name','status']
+	)
+
+	submitted = []
+	for salary_slip in salary_slip_list:
+		if salary_slip['status']=="Submitted":
+			submitted.append(salary_slip)
+
+	if len(salary_slip_list)==0:
+		reply['message']="No submitted salary slip is found."
+		return reply
+	else:
+		if len(submitted)==0:
+			reply['message']="No submitted salary slip is found."
+			return reply
+		
+		reply['status_code']=200
+
+		query = "SELECT name FROM `tabEmployee` WHERE `name` = '{}' AND (`prefered_email`='' OR `prefered_email` IS NULL)".format(employee_id)
+		employee_list_without_email = frappe.db.sql(query, as_dict=True)
+		if len(employee_list_without_email)!=0:
+			reply['message']="Prefered email address is not found."
+			return reply
+
+
+		reply['message']="Total {} salary slip found. Do you want to send mail to submitted salary slip ?".format(len(salary_slip_list))
+		return reply
+
+
+@frappe.whitelist()
+def salary_slip_date_range_back(employee_id,from_date,to_date):
+    
+	reply={}
+	reply['message']=""
+	reply['status_code']=500
+
+	salary_slip_list = frappe.get_all(
+        "Salary Slip",
+        filters={
+            "employee": employee_id,
+            "start_date": [">=", from_date],
+            "end_date": ["<=", to_date],
+            "docstatus": 1  # Ensure only submitted salary slips
+        },
+        fields=['name'],as_list=True
+    )
+ 
+
+	for i in salary_slip_list:
+		email_salary_slip(i[0])
+	
+	return reply
+
+
 @frappe.whitelist()
 # @frappe.whitelist(allow_guest=True)
 def email_salary_slip(salary_slip_no):
