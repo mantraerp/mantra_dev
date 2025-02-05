@@ -1,9 +1,8 @@
-import frappe
-from frappe import _
+import frappe # type: ignore
+from frappe import _ # type: ignore
 import traceback
-import json
-import requests
-from frappe.utils import get_url
+import requests # type: ignore
+from frappe.utils import get_url # type: ignore
 
 
 @frappe.whitelist(allow_guest=True)
@@ -84,7 +83,7 @@ def permission_count():
 
 #To create entry in erro log
 @frappe.whitelist(allow_guest=True)
-def errorLog(title,error,duplicate_check,reference_doctype=None,reference_name=None):
+def errorLog(title,error,duplicate_check=False,reference_doctype=None,reference_name=None):
 
 
 	if duplicate_check:

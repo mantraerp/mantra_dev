@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
-import frappe
-from frappe import _
+import frappe # type: ignore
+from frappe import _ # type: ignore
 import traceback
 # import frappe
-from frappe.utils import today
-import requests
+from frappe.utils import today # type: ignore
+import requests # type: ignore
 
 @frappe.whitelist(allow_guest=True)
 # @frappe.whitelist()

@@ -61,24 +61,24 @@ def get_columns(filters):
                 "fieldtype": "Data",
                 "width": 200,
             },
-            {
-                "label": _("Default Time"),
-                "fieldname": "default_time",
-                "fieldtype": "Duration",
-                "width": 120,
-            },
-            {
-                "label": _("Time Taken"),
-                "fieldname": "diff",
-                "fieldtype": "Duration",
-                "width": 120,
-            },
-            {
-                "label": _("Time Variance"),
-                "fieldname": "time_variance",
-                "fieldtype": "Duration",
-                "width": 120,
-            },
+            # {
+            #     "label": _("Default Time"),
+            #     "fieldname": "default_time",
+            #     "fieldtype": "Duration",
+            #     "width": 120,
+            # },
+            # {
+            #     "label": _("Time Taken1"),
+            #     "fieldname": "diff",
+            #     "fieldtype": "Duration",
+            #     "width": 120,
+            # },
+            # {
+            #     "label": _("Time Variance"),
+            #     "fieldname": "time_variance",
+            #     "fieldtype": "Duration",
+            #     "width": 120,
+            # },
         ]
     )
     return columns
@@ -149,9 +149,9 @@ def get_data(filters):
             row_data["user"] = row.owner
             row_data["state_two"] = row.content
             default_time = frappe.db.get_value('Workflow Transition',{'parent':workflow.name,"state":previous_state,"next_state":row.content},"custom_default_time") or 0
-            row_data["default_time"] = default_time
-            row_data["time_variance"] = time_diff(get_hms(submition_date, row.creation),default_time)
-            row_data["diff"] =  get_hms(submition_date, row.creation)
+            # row_data["default_time"] = default_time
+            # row_data["time_variance"] = time_diff(get_hms(submition_date, row.creation),default_time)
+            # row_data["diff"] =  get_hms(submition_date, row.creation)
 
             if not check_exempted(previous_state,row.content,exempted):
                 flag = True
