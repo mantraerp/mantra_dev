@@ -112,7 +112,10 @@ def get_data(filters):
             "docname": name.name,
             "state_one": "Draft",
             "date_sub": format_datetime(name.creation, "MMM dd, yyyy hh:mm:ss a"),
-            "user": name.owner
+            "user": name.owner,
+            # "default_time": "",
+            # "diff": "",
+            # "time_variance": ""
         }
 
         row_list = frappe.db.sql(
@@ -171,7 +174,11 @@ def get_data(filters):
                     blank_flag = True
             previous_state = row.content
             submition_date = row.creation
-        data.append({})
+        data.append({
+            # "default_time": "",
+            # "diff": "",
+            # "time_variance": ""
+        })
 
     return data
 

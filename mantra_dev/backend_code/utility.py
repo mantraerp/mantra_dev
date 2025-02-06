@@ -18,9 +18,10 @@ def sales_order_auto_close():
 	
 	for index, record in enumerate(sales_order_item):
 		# if index<10:
-		if record['so_name'] not in ['SO/23-24/03/0033642','SO/23-24/03/0033783','SO/24-25/06/0006691']:
-# 		# errorLog("Sales order",record['so_name'])
-			frappe.enqueue(sales_order_auto_close_update_delivered_qty,queue='long',job_name="So Process",timeout=100000,record=record)
+		# if record['so_name'] not in ['SO/23-24/03/0033642','SO/23-24/03/0033783','SO/24-25/06/0006691']:
+		# if record['so_name'] in ['SO/24-25/07/0004572']:
+		# errorLog("Sales order",record['so_name'])
+		frappe.enqueue(sales_order_auto_close_update_delivered_qty,queue='long',job_name="So Process",timeout=100000,record=record)
 
 	return reply
 
@@ -28,7 +29,8 @@ def sales_order_auto_close():
 @frappe.whitelist(allow_guest=True)
 def sales_order_auto_close_update_delivered_qty_value(so_no):
 
-
+	doc = frappe.get_doc("Sales Order", so_no)
+	# return doc
 	query = """SELECT 
 				so.name AS sales_order,
 				si.name AS sales_invoice,
@@ -45,17 +47,19 @@ def sales_order_auto_close_update_delivered_qty_value(so_no):
 				si.docstatus = 1
 				AND so.name = '{}'
 			GROUP BY 
-				sii.parent
+				si.name
 			ORDER BY 
 				si.posting_date""".format(so_no)
 	sales_order_item_update = frappe.db.sql(query, as_dict=True)
-	# return sales_order_item_update
  
-	if len(sales_order_item_update)!=0:
-		return sales_order_item_update[0]['invoiced_amount']
+	si_process = []
+	total_invoice_amount = 0
+	for siprocess in sales_order_item_update:
+		if siprocess['sales_invoice'] not in si_process:
+			si_process.append(siprocess['sales_invoice'])
+			total_invoice_amount += float(siprocess['invoiced_amount'])
  
-	return 0
-
+	return round(total_invoice_amount,2)
 
 @frappe.whitelist(allow_guest=True)
 def sales_order_auto_close_update_delivered_qty(record):
@@ -79,16 +83,19 @@ def sales_order_auto_close_update_delivered_qty(record):
 			# errorLog("Sales order",'Sart matching')
 			# errorLog("Sales order",round(doc.per_billed, 2))
 			# errorLog("Sales order",round(doc.per_billed, 2))
-			if round(doc.per_billed, 2) == 100 and round(doc.per_billed, 2)==100:
+			if doc.per_billed == 100 and doc.per_billed==100:
 				# errorLog("Sales order",'match with 100')
 				if doc.grand_total == sales_order_auto_close_update_delivered_qty_value(record['so_name']):
 					doc.update_status("Completed")
+				else:
+					errorLog("Sales order- amount and delivery is 100 but grand total not match",record['so_name'])
+
 					# errorLog("Sales order",'completed')
 
 	except Exception as e:
 		frappe.sendmail(
 			recipients=["ravi.patel@mantratec.com"],
-			subject="Sales order auto close : {}".format(record['name']),
+			subject="Sales order auto close : {}".format(record['so_name']),
 			message="{}<br>{}".format(str(record),str(e))
 		)
 	return True

@@ -6,6 +6,90 @@
   "docstatus": 0,
   "doctype": "Report",
   "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": "DC Invoice",
+  "modified": "2025-02-05 12:26:00.094583",
+  "module": "Mantra Dev",
+  "name": "LIst Of Pending Shipment",
+  "prepared_report": 0,
+  "query": "SELECT\n            name AS delivery_note_no,\n            custom_sales_invoice_no AS custom_sales_invoice_no,\n            customer_name AS customer_name,\n            posting_date AS posting_date,\n            docstatus AS docstatus,\n            shipping_address_name AS shipping_address_name,\n            shipping_address AS shipping_address,\n            dispatch_address_name AS dispatch_address_name,\n            dispatch_address AS dispatch_address\n        FROM\n            `tabDelivery Note` \n        WHERE\n            docstatus = 1 and custom_shipment_createed=0",
+  "ref_doctype": "Delivery Note",
+  "reference_report": null,
+  "report_name": "LIst Of Pending Shipment",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery User"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Delivery Manager"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "LIst Of Pending Shipment",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Sales Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
@@ -2107,7 +2191,7 @@
   "javascript": null,
   "json": null,
   "letter_head": "Salary Slip",
-  "modified": "2025-01-23 18:26:17.002722",
+  "modified": "2025-02-05 16:50:43.782330",
   "module": "Mantra Dev",
   "name": "Workflow TAT Report",
   "prepared_report": 1,

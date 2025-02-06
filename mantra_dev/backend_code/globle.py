@@ -23,11 +23,13 @@ def check_system_status():
 		return "No email found"
 
 # check_system_status
-	reply = system_call(reply,"http://192.168.5.56:8003/#login",'Mefron')
+	reply = system_call(reply,"http://192.168.5.78:8000/login#login",'UAT')
 	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
+	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global') 
 	reply = system_call(reply,"http://192.168.5.56:8002/#login",'Mewruk')
-	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global')
-	reply = system_call(reply,"http://192.168.5.56:8001/#login",'UAT')
+	reply = system_call(reply,"http://192.168.5.56:8003/#login",'Mefron')
+	reply = system_call(reply,"http://192.168.5.56:8004/#login",'Servico')
+
 
 	keys = reply.keys()
 	email_message_body=""

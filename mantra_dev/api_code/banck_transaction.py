@@ -1874,7 +1874,7 @@ def send_frappe_mail():
 def send_file(file_path,file_name):
     
     # URL to send the POST request
-    url = "http://192.168.5.56:8003/api/method/mefron_dev.backend_code.api.recive_file"
+    url = "http://192.168.5.56:8007/api/method/mefron_dev.backend_code.api.recive_file"
 
     # Path to the file to be uploaded
 

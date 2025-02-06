@@ -8,7 +8,7 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites
 
 
 delivery_note_number_proccess = []
-email_send = False
+# email_send = False
 
 @frappe.whitelist()
 def login_to_avdm_scheduled():
@@ -131,6 +131,8 @@ def login_to_avdm(transaction_date):
  
 def send_serial_no_to_server(body,creating_url,headers):
 
+	return
+
 	reply={}
 	try:
 		process_dc_of_serial={}
@@ -173,14 +175,14 @@ def send_serial_no_to_server(body,creating_url,headers):
 			reply['message']="Exception"
 			reply['message_traceback']=str(traceback.format_exc())
 			mssage = str(traceback.format_exc())
-
-			if not email_send:
-				frappe.sendmail(
-					recipients=["ravi.patel@mantratec.com"],
-					subject="AVDM not process due to issue",
-					message="Line 181 avdm.py <br>{}".format(mssage)
-				)
-			email_send = True
+			errorLog("AVDM",mssage)
+			# if not email_send:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com"],
+				subject="AVDM not process due to issue",
+				message="Line 181 avdm.py <br>{}".format(mssage)
+			)
+			# email_send = True
 			
 	return reply
 

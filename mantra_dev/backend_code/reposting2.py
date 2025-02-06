@@ -302,7 +302,7 @@ def repost_entries_without_voucher_no():
 	d = datetime.today()
 	finalDate = d - timedelta(1)
  
-	query = "SELECT * from `tabRepost Item Valuation` WHERE voucher_type IS NULL and status in ('Queued','Failed','In Progress') and posting_date>='2024-06-01' and posting_date<='{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc".format(str(finalDate))
+	query = "SELECT * from `tabRepost Item Valuation` WHERE voucher_type IS NULL and status in ('Queued','Failed','In Progress') and posting_date>='2024-08-01' and posting_date<='{}' and docstatus = 1 ORDER BY timestamp(posting_date, posting_time) asc, creation asc, status asc".format(str(finalDate))
 	reply['query']=query
 	test= frappe.db.sql(query,as_dict=1)
 
