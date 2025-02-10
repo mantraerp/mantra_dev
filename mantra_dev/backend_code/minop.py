@@ -1,8 +1,38 @@
-import frappe
-from frappe import _
+import frappe # type: ignore
+from frappe import _ # type: ignore
 import traceback
 import json
-from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url
+from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url # type: ignore
+
+
+
+
+
+
+#To create entry in erro log
+@frappe.whitelist(allow_guest=True)
+def minop_hook(**kwargs):
+
+	parameters=frappe._dict(kwargs) 
+	query = "SELECT * from `tabError Log` WHERE method='Minop Punch'"
+	previous_log = frappe.db.sql(query,as_dict=1)
+	if len(previous_log)<=10:
+		errorLog("Minop Punch",str(parameters))
+
+
+
+	parameters['status_code']=200
+	parameters['sucessfull']=True
+	return parameters
+		# query = "SELECT * from `tabError Log` WHERE error='{}' AND method='{}'".format(error,title)
+		# test= frappe.db.sql(query,as_dict=1)
+
+
+
+
+
+
+
 
 
 
@@ -132,17 +162,3 @@ def employee_remain_email_id_background(**kwargs):
 		)
  
 	return "Mail send for prefered Email not found to respective employee."
-
-
-
-
-#To create entry in erro log
-@frappe.whitelist(allow_guest=True)
-def minop_hook(**kwargs):
-
-	parameters=frappe._dict(kwargs) 
-	parameters['status_code']=200
-	parameters['sucessfull']=True
-	return parameters
-		# query = "SELECT * from `tabError Log` WHERE error='{}' AND method='{}'".format(error,title)
-		# test= frappe.db.sql(query,as_dict=1)
