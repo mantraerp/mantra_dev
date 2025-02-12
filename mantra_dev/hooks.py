@@ -53,7 +53,7 @@ doctype_js = {
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
     "Item": "public/js/item.js",
-
+    "Project":"public/js/project.js"
     # "Delivery Note": "public/js/delivery_note.js",
 }
 # doctype_js=  {"Sales Invoice" : "public/js/sales_invoice.js"}
@@ -145,21 +145,13 @@ doctype_list_js = {
 # }
 
 # Override standard doctype classes
-
-# override_doctype_class = {
-# 	"Sales Order": "mantra_dev.backend_code.sales_orders.sales_orders.SalesOrder"
-# }
-
-
-
 override_doctype_class = {
-	# "Purchase Invoice": "mantra_dev.purchase_invoice.PurchaseInvoice",
-    # "Purchase Receipt": "mantra_dev.purchase_receipt.PurchaseReceipt",
     "Material Request": "mantra_dev.material_request.MaterialRequest",
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
-    "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction"
-
+    "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
+    # "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
+    # "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
 }
 
 # Document Events

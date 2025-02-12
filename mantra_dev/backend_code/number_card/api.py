@@ -1,9 +1,9 @@
-import frappe
+import frappe # type: ignore
 import json
 from datetime import datetime, timedelta
-from frappe.utils import format_duration, flt, fmt_money
-from mantra_dev.mantra_dev.report.workflow_tat_report.workflow_tat_report import time_diff, get_hms
-from frappe.utils.nestedset import get_descendants_of
+from frappe.utils import format_duration, flt, fmt_money # type: ignore
+from mantra_dev.mantra_dev.report.workflow_tat_report.workflow_tat_report import time_diff, get_hms # type: ignore
+from frappe.utils.nestedset import get_descendants_of # type: ignore
 
 @frappe.whitelist(allow_guest=True)
 def get_average_time_of_workflow_transition(filters):

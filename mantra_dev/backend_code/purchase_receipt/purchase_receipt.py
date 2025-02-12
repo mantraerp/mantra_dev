@@ -1,5 +1,5 @@
 import frappe
-from datetime import datetime
+from datetime import datetime,date
 from frappe.utils import flt
 
 @frappe.whitelist()
@@ -33,14 +33,16 @@ def update_purchase_order_expected_date(doc, method=None):
                     elif purchase_order_expected_list_3:
                         all_purchase_order_expected = purchase_order_expected_list_3
                     all_purchase_order_expected = (
-                            purchase_order_expected_list_1 if not len(purchase_order_expected_list_1) > 1 else sorted(purchase_order_expected_list_1, key=lambda x: x['creation'])
-                        ) + (
-                            purchase_order_expected_list_2 if not len(purchase_order_expected_list_2) > 1 else sorted(purchase_order_expected_list_2, key=lambda x: x['creation'])
-                        ) + (
-                            purchase_order_expected_list_3 if not len(purchase_order_expected_list_3) > 1 else sorted(purchase_order_expected_list_3, key=lambda x: x['creation'])
-                        )
-                    unique_purchase_orders = {item['name']: item for item in all_purchase_order_expected}.values()
-
+                        purchase_order_expected_list_1 if not len(purchase_order_expected_list_1) > 1 else 
+                        sorted(purchase_order_expected_list_1, key=lambda x: x['final_expected_receive_date'])
+                    ) + (
+                        purchase_order_expected_list_2 if not len(purchase_order_expected_list_2) > 1 else 
+                        sorted(purchase_order_expected_list_2, key=lambda x: x['final_expected_receive_date'])
+                    ) + (
+                        purchase_order_expected_list_3 if not len(purchase_order_expected_list_3) > 1 else 
+                        sorted(purchase_order_expected_list_3, key=lambda x: x['final_expected_receive_date'])
+                    )
+                    unique_purchase_orders = sorted({item['name']: item for item in all_purchase_order_expected}.values(), key=lambda x: x['final_expected_receive_date'])
                     # Convert back to a list
                     all_purchase_order_expected = list(unique_purchase_orders)
                     # Convert back to a list and sort by 'creation'

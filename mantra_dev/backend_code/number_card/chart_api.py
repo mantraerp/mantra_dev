@@ -1,7 +1,8 @@
-import frappe
-from frappe import _
+import frappe # type: ignore
+from frappe import _ # type: ignore
 
 
+#Chart method to use in Inventory dashboard
 @frappe.whitelist()
 def get_top_items_by_value(from_date,to_date,limit=10):
     # Getting Top Items Of Out Qty Of Stock Ledger By Value With Limited Records
@@ -13,10 +14,12 @@ def get_top_items_by_value(from_date,to_date,limit=10):
         limit = 10
     items = """
         SELECT
-           sle.item_code,
+           it.item_name,
            SUM(sle.actual_qty * -1 * sle.valuation_rate) AS total_value
         FROM
             `tabStock Ledger Entry` AS sle
+        LEFT JOIN
+            `tabItem` as it ON it.name=sle.item_code
         WHERE
             sle.posting_date BETWEEN %s AND %s
             AND sle.actual_qty < 0
@@ -34,6 +37,7 @@ def get_top_items_by_value(from_date,to_date,limit=10):
     return data
 
 
+#Chart method to use in Inventory dashboard
 @frappe.whitelist()
 def get_top_items_by_qty(from_date=None,to_date=None,limit=10):
     # Getting Top Items Of Out Qty Of Stock Ledger By Qty With Limited Records
@@ -45,10 +49,12 @@ def get_top_items_by_qty(from_date=None,to_date=None,limit=10):
         limit = 10
     items = """
         SELECT
-            sle.item_code,
+            it.item_name,
             SUM(sle.actual_qty * -1) AS total_qty
         FROM
             `tabStock Ledger Entry` AS sle
+        LEFT JOIN
+            `tabItem` as it ON it.name=sle.item_code            
         WHERE
             sle.posting_date BETWEEN %s AND %s
             AND sle.actual_qty < 0

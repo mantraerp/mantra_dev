@@ -509,7 +509,7 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
+	from erpnext.stock.doctype.batch.batch import get_batch_qty # type: ignore
 
 	if batch_no:
 		return get_batch_qty(
@@ -517,7 +517,7 @@ def get_available_qty_to_reserve(
 		)
 
 	available_qty = get_stock_balance(item_code, warehouse)
-	print(available_qty)
+	# print(available_qty)
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		query = (
@@ -548,7 +548,7 @@ def get_available_serial_nos_to_reserve(
 ) -> list[tuple]:
 	"""Returns Available Serial Nos to Reserve (Available Serial Nos - Reserved Serial Nos)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import ( # type: ignore
 		get_available_serial_nos,
 	)
 
@@ -882,7 +882,7 @@ def create_stock_reservation_entries_for_so_items(
 ) -> None:
 	"""Creates Stock Reservation Entries for Sales Order Items."""
 
-	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty
+	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty # type: ignore
 
 	if not from_voucher_type and (
 		sales_order.get("_action") == "submit"
@@ -902,10 +902,9 @@ def create_stock_reservation_entries_for_so_items(
 	items = []
 	if items_details:
 		for item in items_details:
-			if item.get('delivery_date'):
-				print("delivery date added")
-			else:
+			if not item.get('delivery_date'):
 				frappe.msgprint(_("Please Enter Delivey Date Row #{0}").format(item.get("idx")))
+
 			so_item = frappe.get_doc("Sales Order Item", item.get("sales_order_item"))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (

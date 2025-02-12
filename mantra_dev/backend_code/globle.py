@@ -60,9 +60,6 @@ def system_call(reply,url,key):
  
 	return reply
 
-
-
-
 def site_base_url():
 	siteurl = get_url()
 	if "http://192.168.1.38:8001":
@@ -82,6 +79,71 @@ def permission_count():
 
 	return "Mail send for permission count"
     
+@frappe.whitelist(allow_guest=True)
+def order_status():
+	query = """
+ 				SELECT status, COUNT(name) AS order_count, SUM(grand_total) AS grand_total_value, SUM(net_total) AS net_total_value
+				FROM `tabSales Order`
+				WHERE docstatus < 2
+				GROUP BY status;
+			"""
+	data_list = frappe.db.sql(query,as_dict=1)	
+ 
+	html = """
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Order Status</title>
+				<style>
+					th {
+						padding: 15px;
+						text-align: left;
+					}
+				</style>    
+			</head>
+			<body>
+
+				<h2>All Order Status</h2>
+
+				<table>
+					<thead>
+						<tr style="text-align: left;">
+							<th>Status</th>
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody id="order-table-body">
+ 			"""
+ 
+ 
+	for data in data_list:
+		html = """{}
+			<tr>
+				<th>{}</th>
+				<th>{}</th>
+			</tr>
+  		""".format(html,data['status'],data['order_count'],data['grand_total_value'],data['net_total_value'])
+
+ 
+ 
+	end_html = """{}
+					</tbody>
+				</table>
+			</body>
+			</html>
+		""".format(html)
+ 
+	frappe.sendmail(
+		recipients=["ravi.patel@mantratec.com"],
+		subject="All Order Status",
+		message=html,
+		as_markdown=False,
+		delayed=False
+	)
+
+	return "Mail send for permission count"
+
+
 
 #To create entry in erro log
 @frappe.whitelist(allow_guest=True)
