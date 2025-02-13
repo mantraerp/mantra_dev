@@ -33,4 +33,26 @@ def cancel_purchase_order_expected_date(doc,method=None):
 
 
 
+@frappe.whitelist()
+def get_stock_details(item_code, warehouse):
+    """
+    Fetch available stock quantity for an item in a given warehouse
+    and total stock across all warehouses.
+    """
+    stock_data = {"available_qty_in_target": 0, "total_available_stock": 0}
+
+    # Fetch available qty in the specified warehouse
+    if warehouse:
+        stock_data["available_qty_in_target"] = frappe.db.get_value(
+            "Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+        ) or 0
+
+    # Fetch total available stock across all warehouses
+    total_stock = frappe.db.sql(
+        """SELECT SUM(actual_qty) FROM `tabBin` WHERE item_code=%s""",
+        (item_code,),
+    )
+    stock_data["total_available_stock"] = total_stock[0][0] if total_stock and total_stock[0][0] else 0
+
+    return stock_data
             

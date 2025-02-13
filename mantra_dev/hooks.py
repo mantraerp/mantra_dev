@@ -194,7 +194,8 @@ scheduler_events = {
 
     "cron": {
         "0/5 * * * *": [
-            "mantra_dev.api_code.banck_transaction.get_icici_bank_file"
+            "mantra_dev.api_code.banck_transaction.get_icici_bank_file",
+            "mantra_dev.backend_code.avdm.process_one_record"
         ],
         "30 23 * * *": [
             "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"

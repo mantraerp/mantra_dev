@@ -1711,42 +1711,6 @@
   "javascript": null,
   "json": null,
   "letter_head": "",
-  "modified": "2024-08-08 16:40:02.511150",
-  "module": "Mantra Dev",
-  "name": "BOM Stock Calculated with Valuation rate",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "BOM",
-  "reference_report": null,
-  "report_name": "BOM Stock Calculated with Valuation rate",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "BOM Stock Calculated with Valuation rate",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Manufacturing Manager"
-   },
-   {
-    "parent": "BOM Stock Calculated with Valuation rate",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Manufacturing User"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "",
   "modified": "2024-12-24 15:43:31.152201",
   "module": "Mantra Dev",
   "name": "QC Request",
@@ -2453,6 +2417,42 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "All"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2025-02-12 15:35:39.525242",
+  "module": "Mantra Dev",
+  "name": "BOM Stock Calculated with Valuation rate",
+  "prepared_report": 1,
+  "query": null,
+  "ref_doctype": "BOM",
+  "reference_report": null,
+  "report_name": "BOM Stock Calculated with Valuation rate",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "BOM Stock Calculated with Valuation rate",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing Manager"
+   },
+   {
+    "parent": "BOM Stock Calculated with Valuation rate",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
    }
   ]
  }

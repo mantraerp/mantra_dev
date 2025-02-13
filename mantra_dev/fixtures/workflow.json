@@ -1085,7 +1085,7 @@
   "doctype": "Workflow",
   "document_type": "Item",
   "is_active": 1,
-  "modified": "2025-01-20 18:59:48.684022",
+  "modified": "2025-02-13 12:38:33.004328",
   "name": "Item Master",
   "override_status": 0,
   "send_email_alert": 0,

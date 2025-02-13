@@ -172,7 +172,7 @@ def email_salary_slip(salary_slip_no):
 			)
 			return "Employee code not found"
 		
-		if salary_slip_detail[0]['docstatus'] in [0,2]:	
+		if salary_slip_detail[0]['docstatus'] in [2]:	
 			frappe.sendmail(
 				recipients = ['ravi.patel@mantratec.com'],
 				subject = "Salary slip docstatus error: {}".format(salary_slip_no),

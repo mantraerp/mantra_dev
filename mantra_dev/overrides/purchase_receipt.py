@@ -12,6 +12,7 @@ from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accoun
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
@@ -21,7 +22,7 @@ import json
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
-class CustomPurchaseReceipt(BuyingController):
+class CustomPurchaseReceipt(PurchaseReceipt):
 	def on_submit(self):
 		super().on_submit()
 
@@ -48,92 +49,6 @@ class CustomPurchaseReceipt(BuyingController):
 		self.reserve_stock_for_sales_order()
 		if self.is_subcontracted:
 			self.bom_stock_validation()
-
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self.status_updater = [
-			{
-				"target_dt": "Purchase Order Item",
-				"join_field": "purchase_order_item",
-				"target_field": "received_qty",
-				"target_parent_dt": "Purchase Order",
-				"target_parent_field": "per_received",
-				"target_ref_field": "qty",
-				"source_dt": "Purchase Receipt Item",
-				"source_field": "received_qty",
-				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": "received_qty",
-				"second_join_field": "po_detail",
-				"percent_join_field": "purchase_order",
-				"overflow_type": "receipt",
-				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
-				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
-			},
-			{
-				"source_dt": "Purchase Receipt Item",
-				"target_dt": "Material Request Item",
-				"join_field": "material_request_item",
-				"target_field": "received_qty",
-				"target_parent_dt": "Material Request",
-				"target_parent_field": "per_received",
-				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
-				"percent_join_field": "material_request",
-			},
-			{
-				"source_dt": "Purchase Receipt Item",
-				"target_dt": "Purchase Invoice Item",
-				"join_field": "purchase_invoice_item",
-				"target_field": "received_qty",
-				"target_parent_dt": "Purchase Invoice",
-				"target_parent_field": "per_received",
-				"target_ref_field": "qty",
-				"source_field": "received_qty",
-				"percent_join_field": "purchase_invoice",
-				"overflow_type": "receipt",
-			},
-			{
-				"source_dt": "Purchase Receipt Item",
-				"target_dt": "Delivery Note Item",
-				"join_field": "delivery_note_item",
-				"source_field": "received_qty",
-				"target_field": "received_qty",
-				"target_parent_dt": "Delivery Note",
-				"target_ref_field": "qty",
-				"overflow_type": "receipt",
-			},
-		]
-
-		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Order Item",
-						"join_field": "purchase_order_item",
-						"target_field": "returned_qty",
-						"source_field": "-1 * qty",
-						"second_source_dt": "Purchase Invoice Item",
-						"second_source_field": "-1 * qty",
-						"second_join_field": "po_detail",
-						"extra_cond": """ and exists (select name from `tabPurchase Receipt`
-						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
-						where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Receipt Item",
-						"join_field": "purchase_receipt_item",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Purchase Receipt",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "received_stock_qty",
-						"source_field": "-1 * received_stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
 	
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
@@ -190,6 +105,15 @@ class CustomPurchaseReceipt(BuyingController):
 					from_voucher_type="Purchase Receipt",
 					notify=True,
 				)
+	
+	def enable_recalculate_rate_in_sles(self):
+		sle_table = frappe.qb.DocType("Stock Ledger Entry")
+		(
+			frappe.qb.update(sle_table)
+			.set(sle_table.recalculate_rate, 1)
+			.where(sle_table.voucher_no == self.name)
+			.where(sle_table.voucher_type == "Purchase Receipt")
+		).run()
 
 	def bom_stock_validation(self):
 		"""
@@ -388,11 +312,3 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 	)
 
 	return target_doc
-
-@frappe.whitelist()
-def is_subcontracting_order_created(po_name) -> bool:
-	return (
-		True
-		if frappe.db.exists("Subcontracting Order", {"purchase_order": po_name, "docstatus": ["=", 1]})
-		else False
-	)
