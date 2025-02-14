@@ -7,140 +7,83 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils.data import comma_and
 from frappe.utils import flt
 
+
 def execute(filters=None):
-    """
-    This function generates a report based on the provided filters, primarily focusing on raw materials required 
-    for specific items (as per their BOM - Bill of Materials) and the stock availability and valuation rates in a 
-    specific warehouse.
+    data = []
+    columns = []
+    route_data = frappe.parse_json(filters.get("route_data", "[]"))
+    warehouse_list = frappe.parse_json(filters.get("warehouse", "[]"))
+    from_date = filters.get("from_date")
 
-    Parameters:
-    - filters (dict): A dictionary containing filter options, specifically:
-        - route_data: A JSON string representing the selected items, their BOM, and required quantities.
-        - warehouse: The name of the warehouse to fetch stock information from.
+    if not route_data:
+        return columns, data
 
-    Returns:
-    - columns (list): A list of columns for the report, dynamically generated based on the selected items.
-    - data (list): A list of dictionaries containing details of raw materials, their required quantities, 
-      stock availability, and valuation rates.
-
-    Key Steps:
-    1. Extracts the route data and warehouse information from the filters.
-    2. Parses the `route_data` to retrieve item details such as item code, BOM, and required quantity.
-    3. For each item, fetches the raw materials required based on the BOM and calculates the total quantity 
-       required for each raw material.
-    4. Fetches the latest stock quantity and valuation rate for each raw material from the database.
-    5. Aggregates the raw material data (e.g., quantities required for multiple items) into a consolidated row.
-    6. Appends the consolidated data to the report.
-
-    Detailed Explanation:
-    - `get_columns(selected_items)`: Dynamically generates the columns for the report based on the selected items.
-    - `get_raw_materials_for_bom(bom_code)`: Retrieves the list of raw materials and their quantities for a specific BOM.
-    - `get_latest_stock_qty2(material_item_code, warehouse)`: Fetches the latest stock quantity for a raw material 
-       in the specified warehouse.
-    - SQL-like query (via Frappe Query Builder):
-        - Calculates the latest valuation rate for a raw material based on its stock ledger entries.
-        - Filters out cancelled entries and optionally filters by warehouse.
-
-    Row Data Fields:
-    - 'raw_material_item': The code of the raw material.
-    - 'item_code': The code of the raw material (redundant for now).
-    - '<item_code>': The quantity of the raw material required for a specific item.
-    - 'qty': The total quantity of the raw material required.
-    - 'valuation_rate': The latest valuation rate of the raw material.
-    - 'available_qty': The available stock quantity of the raw material in the specified warehouse.
-    - 'total_qty': The total quantity required across all items.
-
-    Additional Features:
-    - Avoids duplication: Consolidates data for raw materials already present in the report.
-    - Dynamically updates existing rows if new quantities are added.
-    """
-    data=[]
-    columns=[]
-    route_data = filters.get("route_data")
-    warehouses = filters.get("warehouse")
-    warehouse_list = frappe.parse_json(warehouses) if warehouses else []
-    from_date = filters.get("from_date") 
+    columns = get_columns(route_data)
     
-    if route_data:
-        selected_items = frappe.parse_json(route_data)
-        columns = get_columns(selected_items)
-        for item_data in selected_items:
-            item_code = item_data.get('item')
-            bom_code = item_data.get('bom')
-            qty = item_data.get('qty')
-            raw_materials = get_raw_materials_for_bom(bom_code)
-            row_data={}
-            total_qty = 0
-            for material in raw_materials:
-                material_item_code = material.get('item_code')
-                bom_qty = frappe.db.get_value("BOM", material.get('parent'), 'quantity') or 1
-                material_qty = round((flt(material.get('qty'), 2) / flt(bom_qty, 2)) * qty, 2)
-              # Determine warehouse condition
-                if warehouse_list:
-                    if len(warehouse_list) > 1:
-                        warehouse_condition = "AND warehouse IN ({})".format(", ".join(["%s"] * len(warehouse_list)))
-                        args = (material_item_code,) + tuple(warehouse_list)  # Pass tuple for multiple warehouses
-                    else:
-                        warehouse_condition = "AND warehouse = %s"
-                        args = (material_item_code, warehouse_list[0])  # Pass single warehouse
-                else:
-                    warehouse_condition = ""  # No warehouse filter
-                    args = (material_item_code,)  # Only material_item_code is passed if no warehouse filter
-                ready_stock = get_stock_qty_by_category(material_item_code, "Ready Stock", warehouse_list)
-                faulty_stock = get_stock_qty_by_category(material_item_code, "Faulty", warehouse_list)
-                qc_stock = get_stock_qty_by_category(material_item_code, "QC", warehouse_list)
-                actual_qty = get_latest_stock_qty2(material_item_code, warehouse_list)
-                # Execute the SQL query
-                valuation_rate = frappe.db.sql(
-                    """
-                    SELECT SUM(stock_value_difference) / SUM(actual_qty)
-                    FROM `tabStock Ledger Entry`
-                    WHERE item_code = %s
-                    {warehouse_condition}
-                    AND is_cancelled = 0
-                    """.format(warehouse_condition=warehouse_condition),
-                    args,
-                )[0][0] or 0
-                transit_qty = get_in_transit_qty(material_item_code, from_date)
-                shortage_qty = actual_qty + transit_qty - material_qty
-                if shortage_qty > 0:
-                    shortage_qty = 0
-                else:
-                    shortage_qty = abs(shortage_qty)
-                row_data = {
-                        'raw_material_item': material_item_code,
-                        'item_code': material_item_code,  
-                        item_code: material_qty,  
-                        'available_qty': actual_qty if actual_qty  else 0,
-                        'transit_qty': transit_qty,
-                        'shortage_qty': shortage_qty,
-                        'ready_stock': ready_stock,
-                        'faulty': faulty_stock,
-                        'qc': qc_stock
-                    }
-                total_qty = sum([value for key, value in row_data.items() if key not in  ['raw_material_item','valuation_rate','item_code','available_qty','transit_qty','shortage_qty','qc','ready_stock','faulty'] and isinstance(value, (int, float))])
-               
-                row_data['total_qty'] = total_qty
-                row_data['valuation_rate'] = valuation_rate * total_qty
-                existing_row = None
-                if len(data) > 1:
-                    existing_row = next((row for row in data if row['raw_material_item'] == material_item_code), None)
-                if existing_row:
-                    if item_code in existing_row:
-                        existing_row[item_code] += material_qty
-                    else:
-                        existing_row[item_code] = material_qty 
-                    existing_row['total_qty'] += material_qty
-                    existing_row['valuation_rate'] = valuation_rate * existing_row['total_qty']
-                    existing_row['transit_qty'] = transit_qty
-                    existing_row['shortage_qty'] = existing_row['available_qty'] + existing_row['transit_qty'] - existing_row['total_qty']
-                    if existing_row['shortage_qty'] > 0:
-                        existing_row['shortage_qty'] = 0  
-                    else:
-                        existing_row['shortage_qty'] = abs(existing_row['shortage_qty'])
-                else:
-                    data.append(row_data)
+    for item_data in route_data:
+        item_code, bom_code, qty = item_data.get('item'), item_data.get('bom'), item_data.get('qty')
+        
+        if bom_code:
+            bom_exists = frappe.db.exists("BOM", bom_code)
+            if not bom_exists:
+                continue
+            
+        materials = get_raw_materials_for_bom(bom_code) if bom_code else [{'item_code': item_code, 'qty': qty, 'parent': None}]
+
+        for material in materials:
+            material_item_code = material.get('item_code')
+            bom_qty = frappe.db.get_value("BOM", material.get('parent'), 'quantity') or 1
+            material_qty = round((flt(material.get('qty'), 2) / flt(bom_qty, 2)) * qty, 2) if bom_code else qty
+            
+            warehouse_condition, args = get_warehouse_conditions(material_item_code, warehouse_list)
+            valuation_rate = frappe.db.sql(
+                """
+                SELECT SUM(stock_value_difference) / SUM(actual_qty)
+                FROM `tabStock Ledger Entry`
+                WHERE item_code = %s {warehouse_condition} AND is_cancelled = 0
+                """.format(warehouse_condition=warehouse_condition), args
+            )[0][0] or 0
+
+            stock_data = get_stock_data(material_item_code, warehouse_list, from_date)
+            shortage_qty = max(0, material_qty - (stock_data['available_qty'] + stock_data['transit_qty']))
+
+            row_data = {
+                'raw_material_item': material_item_code,
+                'item_code': material_item_code,
+                item_code: material_qty,
+                **stock_data,
+                'shortage_qty': shortage_qty,
+                'total_qty': material_qty,
+                'valuation_rate': valuation_rate * material_qty
+            }
+
+            existing_row = next((row for row in data if row['raw_material_item'] == material_item_code), None)
+            if existing_row:
+                existing_row[item_code] = existing_row.get(item_code, 0) + material_qty
+                existing_row['total_qty'] += material_qty
+                existing_row['valuation_rate'] = valuation_rate * existing_row['total_qty']
+                existing_row['shortage_qty'] = max(0, existing_row['total_qty'] - (existing_row['available_qty'] + existing_row['transit_qty']))
+            else:
+                data.append(row_data)
+    
     return columns, data
+
+def get_warehouse_conditions(item_code, warehouse_list):
+    if warehouse_list:
+        warehouse_condition = "AND warehouse IN ({})".format(", ".join(["%s"] * len(warehouse_list)))
+        args = (item_code,) + tuple(warehouse_list)
+    else:
+        warehouse_condition, args = "", (item_code,)
+    return warehouse_condition, args
+
+def get_stock_data(item_code, warehouse_list, from_date):
+    return {
+        'available_qty': get_latest_stock_qty2(item_code, warehouse_list) or 0,
+        'transit_qty': get_in_transit_qty(item_code, from_date),
+        'ready_stock': get_stock_qty_by_category(item_code, "Ready Stock", warehouse_list),
+        'faulty': get_stock_qty_by_category(item_code, "Faulty", warehouse_list),
+        'qc': get_stock_qty_by_category(item_code, "QC", warehouse_list)
+    }
 
 
 def get_in_transit_qty(item_code, date_filter=None):
@@ -265,7 +208,7 @@ def get_columns(items):
         },
         {
             "fieldname": "valuation_rate",
-            "label": _("Valuation Rate"),
+            "label": _("Valuation"),
             "fieldtype": "Currency",
             "width": 150
         },

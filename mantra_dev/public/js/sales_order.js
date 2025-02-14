@@ -23,90 +23,33 @@ frappe.ui.form.on('Sales Order', {
             }, 0);
         }
     },
-    before_save(frm){
-        frm.doc.items.forEach((item) => {
-            if(item.custom_is_service_item==1){
-                item.delivered_qty=item.qty
-            }
-            if (item.item_code) {
-                frappe.call({
-                    method: "frappe.client.get_value",
-                    args: {
-                        doctype: "Item",
-                        fieldname: ["custom_sales_item_name", "item_name"],
-                        filters: {
-                            name: item.item_code
-                        },
-                    },
-                    callback: function (r) {
-                        var po_code = r.message.custom_sales_item_name;
-                        // Set the sales person field in the Lead form
-                        if(item.custom_item_description== undefined || item.custom_item_description==""){
-                            if (po_code) {
-                                item.custom_item_description = po_code
-                            }
-                            else {
-                                item.custom_item_description = r.message.item_name
-                            }
-                        }
-                    },
-                });
-
-            }
-        })
-        refresh_field("items")
-        
-    },
-    before_submit: function (frm) {
-        var items = frm.doc.items.length
-        var item_code = []
-        frm.doc.items.forEach((item) => {
-            if (item.item_code) {
-                item_code.push(item.item_code)
-            }
-        })
-        console.log(item_code)
-        console.log(items)
-        if (items != item_code.length) {
-            frappe.throw("Please enter vaild Item Code")
-            // validate:false
-        }
-        if (frm.doc.total == 0) {
-            frm.set_value("per_billed", 100)
-        }
-        
-    },
-	after_save(frm){
-		if (frm.doc.items){
-		new_delivered_qty = 0
-		for(i=0; i<frm.doc.items.length; i++){
-			console.log(frm.doc.items[i].custom_is_service_item);
-			if (frm.doc.items[i].custom_is_service_item){
-			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
-			}
-			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
-		}
-		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
-		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
-		// cur_frm.refresh_fields('per_delivered');
-				// frm.refresh();
-		}
-	},
-	after_workflow_action(frm){
-		if (frm.doc.items){
-		new_delivered_qty = 0
-		for(i=0; i<frm.doc.items.length; i++){
-			console.log(frm.doc.items[i].custom_is_service_item);
-			if (frm.doc.items[i].custom_is_service_item){
-			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
-			}
-			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
-		}
-		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
-		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
-		}
-	},
     refresh: function (frm) {
+
+		if(frm.doc.docstatus !== 2){
+			frm.add_custom_button(__('Calculate Project Qty'), function() {
+	
+				frappe.call({
+					method: "mantra_dev.backend_code.project.project.get_sales_order_items",
+					args: {
+						sales_order: frm.doc.name
+					},
+					callback: function(response) {
+						if (response.message && response.message.length === 2) {
+							let aggregated_items = response.message[0]; 
+							let warehouse_list = response.message[1];
+							if (aggregated_items.length > 0) {
+								frappe.route_options = {
+									data: JSON.stringify(aggregated_items),  
+									warehouse: JSON.stringify(warehouse_list)  
+								}   
+							frappe.open_in_new_tab = true;
+							frappe.set_route('query-report', 'BOM Stock Calculated with Valuation rate');
+						}}  
+				}
+				});
+			}, __('Utility'));
+		}
+
         // Check if the document is in draft (docstatus 0) and not new
         if (frm.doc.docstatus == 0 && !frm.is_new()) {
             // Check if the user does not have the "Item Requester" role
@@ -195,7 +138,90 @@ frappe.ui.form.on('Sales Order', {
                 frm.set_df_property("reserve_stock", "description", null);
             }
         }
+    },	
+    before_save(frm){
+        frm.doc.items.forEach((item) => {
+            if(item.custom_is_service_item==1){
+                item.delivered_qty=item.qty
+            }
+            if (item.item_code) {
+                frappe.call({
+                    method: "frappe.client.get_value",
+                    args: {
+                        doctype: "Item",
+                        fieldname: ["custom_sales_item_name", "item_name"],
+                        filters: {
+                            name: item.item_code
+                        },
+                    },
+                    callback: function (r) {
+                        var po_code = r.message.custom_sales_item_name;
+                        // Set the sales person field in the Lead form
+                        if(item.custom_item_description== undefined || item.custom_item_description==""){
+                            if (po_code) {
+                                item.custom_item_description = po_code
+                            }
+                            else {
+                                item.custom_item_description = r.message.item_name
+                            }
+                        }
+                    },
+                });
+
+            }
+        })
+        refresh_field("items")
+        
     },
+    before_submit: function (frm) {
+        var items = frm.doc.items.length
+        var item_code = []
+        frm.doc.items.forEach((item) => {
+            if (item.item_code) {
+                item_code.push(item.item_code)
+            }
+        })
+        console.log(item_code)
+        console.log(items)
+        if (items != item_code.length) {
+            frappe.throw("Please enter vaild Item Code")
+            // validate:false
+        }
+        if (frm.doc.total == 0) {
+            frm.set_value("per_billed", 100)
+        }
+        
+    },
+	after_save(frm){
+		if (frm.doc.items){
+		new_delivered_qty = 0
+		for(i=0; i<frm.doc.items.length; i++){
+			console.log(frm.doc.items[i].custom_is_service_item);
+			if (frm.doc.items[i].custom_is_service_item){
+			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+			}
+			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
+		}
+		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
+		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
+		// cur_frm.refresh_fields('per_delivered');
+				// frm.refresh();
+		}
+	},
+	after_workflow_action(frm){
+		if (frm.doc.items){
+		new_delivered_qty = 0
+		for(i=0; i<frm.doc.items.length; i++){
+			console.log(frm.doc.items[i].custom_is_service_item);
+			if (frm.doc.items[i].custom_is_service_item){
+			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+			}
+			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
+		}
+		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
+		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
+		}
+	},
     create_stock_reservation_entries(frm) {
         
         const dialog = new frappe.ui.Dialog({

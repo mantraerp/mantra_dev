@@ -150,8 +150,8 @@ override_doctype_class = {
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
     "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
-    # "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
-    # "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
+    "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
+    "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
 }
 
 # Document Events
@@ -193,9 +193,11 @@ doc_events = {
 scheduler_events = {
 
     "cron": {
+        "0/2 * * * *": [
+            "mantra_dev.backend_code.avdm.process_one_record"
+        ],        
         "0/5 * * * *": [
             "mantra_dev.api_code.banck_transaction.get_icici_bank_file",
-            "mantra_dev.backend_code.avdm.process_one_record"
         ],
         "30 23 * * *": [
             "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"

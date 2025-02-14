@@ -28,7 +28,7 @@ def login_to_avdm(transaction_date):
     
 	delivery_note_number_proccess = [] #reset globle variable
  
-	errorLog('AVDM',transaction_date,False)
+	errorLog('AVDM-Start',transaction_date,False)
 	reply={}
 
 	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
@@ -134,7 +134,7 @@ def process_dc_list(dc_list):
 								}
 								body.append(data)
 
-			cunk_size = 250
+			cunk_size = 100
 
 			body_send = []
 			record_found = False
@@ -185,9 +185,14 @@ def process_dc_list(dc_list):
 @frappe.whitelist(allow_guest=True)
 def process_one_record():
 
+	frappe.enqueue(process_one_record_background, queue='long', timeout=3600)
+	return "process start in background"
+
+@frappe.whitelist(allow_guest=True)
+def process_one_record_background():
 	reply= {}
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 5".format(key_body_process)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 3".format(key_body_process)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 	
 		#If all body process then start update serial no in DB
@@ -211,8 +216,9 @@ def process_one_record():
 					return "All task are done cron stop call"
 
 			return "All body are process"
-  
-  
+		else:
+			frappe.enqueue(update_serial_no_records, queue='long', timeout=3600)
+
   
 		creating_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM"
 	

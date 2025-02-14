@@ -30,26 +30,9 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		frappe.get_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
 		)
-
-		self.update_prevdoc_status()
-		if flt(self.per_billed) < 100:
-			self.update_billing_status()
-		else:
-			self.db_set("status", "Completed")
-
-		self.make_bundle_for_sales_purchase_return()
-		self.make_bundle_using_old_serial_batch_fields()
-		# Updating stock ledger should always be called after updating prevdoc status,
-		# because updating ordered qty, reserved_qty_for_subcontract in bin
-		# depends upon updated ordered qty in PO
-		self.update_stock_ledger()
-		self.make_gl_entries()
-		self.repost_future_sle_and_gle()
-		self.set_consumed_qty_in_subcontract_order()
-		self.reserve_stock_for_sales_order()
 		if self.is_subcontracted:
 			self.bom_stock_validation()
-	
+
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		po_details = []

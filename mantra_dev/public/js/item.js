@@ -32,7 +32,7 @@ frappe.ui.form.on('Item', {
 
                             // If there are suggestions, create a dropdown
                             if (suggestions.length > 0) {
-                                dropdown = $("<ul class='dropdown-menu' style='display: block; position: absolute;'></ul>");
+                                dropdown = $("<ul class='dropdown-menu custom-class' style='display: block; position: absolute;'></ul>");
                                 suggestions.forEach((item_name, index) => {
                                     let list_item = $("<li class='dropdown-item'></li>").text(item_name);
 
@@ -46,19 +46,19 @@ frappe.ui.form.on('Item', {
                                 });
 
                                 // Remove existing dropdown if present
-                                $(".dropdown-menu").remove();
+                                $(".custom-class").remove();
 
                                 // Attach dropdown to the field
                                 frm.fields_dict.item_name.$wrapper.append(dropdown);
                             } else {
-                                $(".dropdown-menu").remove(); // Remove dropdown if no suggestions
+                                $(".custom-class").remove(); // Remove dropdown if no suggestions
                             }
                         }
                     }
                 });
             } else {
                 // Remove dropdown if input is empty
-                $(".dropdown-menu").remove();
+                $(".custom-class").remove();
             }
         });
 
@@ -98,7 +98,7 @@ frappe.ui.form.on('Item', {
 
         // Remove dropdown if the user clicks outside
         $(document).on("click", function () {
-            $(".dropdown-menu").remove();
+            $(".custom-class").remove();
         });
 
         frm.add_custom_button(("Used as Raw Material in BOM"), () => {
