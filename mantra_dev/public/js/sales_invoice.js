@@ -30,7 +30,7 @@ frappe.ui.form.on('Sales Invoice', {
                 data: frm.doc,
             },
             callback: function(r) {
-                console.log('lllllllllllll');
+                // console.log('lllllllllllll');
             }
         });
     },

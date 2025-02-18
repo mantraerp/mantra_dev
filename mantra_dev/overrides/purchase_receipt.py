@@ -213,22 +213,22 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		se.submit()
 	
 	def auto_create_subcontracting_receipt(self):
-		override_make_subcontracting_receipt(self.name, save=True,submit=True)
+		override_make_subcontracting_receipt(self.name, save=True)
 
 @frappe.whitelist()
-def override_make_subcontracting_receipt(source_name, target_doc=None, save=False,submit=False):
+def override_make_subcontracting_receipt(source_name, target_doc=None, save=False):
 	target_doc = make_subcontracting_receipt(source_name, target_doc)
 	if not target_doc:
 		return
 	
-	if (save or submit) and frappe.has_permission(target_doc.doctype, "create"):
+	if (save) and frappe.has_permission(target_doc.doctype, "create"):
 		target_doc.save()
 
-		if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
-			try:
-				target_doc.submit()
-			except Exception as e:
-				target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
+	# 	if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+	# 		try:
+	# 			target_doc.submit()
+	# 		except Exception as e:
+	# 			target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 		
 	
 

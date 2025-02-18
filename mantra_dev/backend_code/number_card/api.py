@@ -212,7 +212,8 @@ def get_current_total_value_of_stock_based_on_stock_category(filters):
 
         result = frappe.db.sql(query, {"conditions": conditions}, as_dict=1)
         if result:
-            return fmt_money(result[0].get("valuation_rate"), currency="INR")
+            # return fmt_money(result[0].get("valuation_rate"), currency="INR")
+            return {'value': result[0].get("valuation_rate"), "fieldtype" : "Currency", "options" : "Currency"}
         else:
             return None
 
@@ -250,7 +251,8 @@ def get_current_total_value_of_stock_based_on_item_group(filters):
 
         result = frappe.db.sql(query, {"conditions": conditions}, as_dict=1)
         if result:
-            return fmt_money(result[0].get("valuation_rate"), currency="INR")
+            # return fmt_money(result[0].get("valuation_rate"), currency="INR")
+            return {'value': result[0].get("valuation_rate"), "fieldtype" : "Currency", "options" : "Currency"}
         else:
             return None
 
