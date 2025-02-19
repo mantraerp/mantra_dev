@@ -126,6 +126,27 @@ frappe.ui.form.on("Purchase Order", {
             d.show();
         });
 
+        frm.add_custom_button(
+            __("Rate Comparison"),
+            function () {
+                // Collect all item codes from the child table, ensuring valid values
+                let item_codes = frm.doc.items.map(item => item.item_code).filter(Boolean);
+
+                // Construct the report URL
+                let report_url = "/app/query-report/Purchase Insight Report";
+
+                if (item_codes.length > 0) {
+                    // Convert the item list to a format recognized by multi-select filters
+                    let item_filter = JSON.stringify(item_codes); 
+                    report_url += "?item=" + encodeURIComponent(item_filter);
+                }
+
+                // Open the report in a new tab with the applied filters
+                window.open(frappe.urllib.get_full_url(report_url), "_blank");
+            },
+            __('Utility') // Placing under Utility
+        );
+
         if(frm.doc.docstatus !== 2){
             frm.add_custom_button(__('Calculate Project Qty'), function() {
     
@@ -180,5 +201,150 @@ frappe.ui.form.on("Purchase Order", {
             }
             // frm.save()
         });
-    }
+
+
+        if(!frm.doc.custom_expense_grouping){
+            frappe.throw("Please Select Department and Expense Grouping if it is not present Then tell Admin to Create Expense Grouping for that Department.")
+        }
+        if(!frm.doc.custom_department){
+            frappe.throw("Please Select the Department")
+        }
+    },
+    
+    after_save(frm){
+
+
+        let approvers = [
+            frm.doc.custom_approver_1,
+            frm.doc.custom_approver_2,
+            frm.doc.custom_approver_3,
+            frm.doc.custom_approver_4,
+            frm.doc.custom_approver_5
+        ].filter(approver => approver)
+        console.log("----->",approvers);
+        
+        if(approvers){
+
+            frappe.call({
+                method: "mantra_dev.backend_code.api.share_document",
+                args: {
+                    doctype: "Purchase Order",
+                    name: frm.doc.name,
+                    users: approvers,
+                    read: 1,
+                    write: 1,
+                    share: 0,
+                    everyone: 0
+                },
+                callback(r) {
+                    if(r.message) {
+                        console.log(r.message);
+                        frm.reload_doc()
+                        // document is shared with user
+                    }
+                }
+            })
+        }
+    },
+
+
+
+
+    custom_department(frm){
+        frm.set_value("custom_expense_grouping","")
+        frm.fields_dict["custom_expense_grouping"].get_query = function () {
+            let selected_department = frm.doc.custom_department;
+            if (!selected_department) {
+                return {};
+            }
+            return {
+                filters: {
+                    name: ["in", get_selected_values(selected_department)]
+                }
+            };
+        };
+    },
+    validate(frm){
+        frappe.call({
+            method: "mantra_dev.backend_code.api.get_verification_users",
+            args: {
+                expense_grouping_master: frm.doc.custom_expense_grouping,
+                department: frm.doc.custom_department
+            },
+            callback: function(r) {
+                if (r.message) {
+                // Fill approver fields only if they are empty
+                if (!frm.doc.custom_approver_1 || ""){
+                    frm.set_value("custom_approver_1", r.message[0][0] || "");
+                    frm.set_value("custom_approver_2", r.message[0][1] || "");
+                    frm.set_value("custom_approver_3", r.message[0][2] || "");
+                    frm.set_value("custom_approver_4", r.message[0][3] || "");
+                    frm.set_value("custom_approver_5", r.message[0][4] || "");
+                } 
+                // Find the last non-empty approver from the document fields
+                let approvers = [
+                    frm.doc.custom_approver_1,
+                    frm.doc.custom_approver_2,
+                    frm.doc.custom_approver_3,
+                    frm.doc.custom_approver_4,
+                    frm.doc.custom_approver_5
+                ];
+
+                let last_approver = "";
+                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+                    if (approvers[i]) {
+                        last_approver = approvers[i];
+                        break;
+                    }
+                }
+
+                frm.set_value("custom_final_approver", last_approver);
+                }else{
+                    // Find the last non-empty approver from the document fields
+                let approvers = [
+                    frm.doc.custom_approver_1,
+                    frm.doc.custom_approver_2,
+                    frm.doc.custom_approver_3,
+                    frm.doc.custom_approver_4,
+                    frm.doc.custom_approver_5
+                ];
+
+                if(approvers=[] || !approvers){
+                    frappe.throw("There is no approver in verification flow and you have also not selected any approver.")
+                    return
+                }
+
+                let last_approver = "";
+                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+                    if (approvers[i]) {
+                        last_approver = approvers[i];
+                        break;
+                    }
+                }
+
+                frm.set_value("custom_final_approver", last_approver);
+
+                }
+            }
+        });
+    },
 });
+
+function get_selected_values(department) {
+    let selected_values = [];
+    frappe.call({
+        method: "frappe.client.get_list",
+        async: false,
+        args: {
+            doctype: "Expense Verification Flow",
+            filters: { select_department: department }, // Filter by selected department
+            fields: ["select_expense_grouping"]
+        },
+        callback: function (r) {
+            if (r.message) {
+                selected_values = r.message.map(row => row.select_expense_grouping);
+            }
+        }
+    });
+    return selected_values;
+}

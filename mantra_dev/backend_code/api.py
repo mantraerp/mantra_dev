@@ -22,6 +22,246 @@ from collections import defaultdict
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from mantra_dev.backend_code.globle import errorLog,errorLogExites
 
+from frappe.utils import today, get_link_to_form
+
+
+
+
+
+# "mantra_dev.backend_code.api.notify_purchase_managers"
+@frappe.whitelist()
+def notify_purchase_managers():
+    """Send email to Purchase Managers for Purchase Orders without any Purchase Receipt."""
+
+    # Fetch overdue POs that have no linked PR at all
+    overdue_pos = frappe.db.sql("""
+        SELECT po.name, po.supplier, po.schedule_date 
+        FROM `tabPurchase Order` po
+        WHERE po.schedule_date < %s 
+        AND po.docstatus = 1
+        AND NOT EXISTS (
+            SELECT 1 FROM `tabPurchase Receipt Item` pri
+            JOIN `tabPurchase Receipt` pr ON pr.name = pri.parent
+            WHERE pri.purchase_order = po.name
+        )
+    """, (today(),), as_dict=True)
+
+    # return overdue_pos
+    if not overdue_pos:
+        return  # No overdue POs found, exit early
+
+    # Get active Purchase Managers
+    purchase_managers = frappe.get_all(
+        "Has Role",
+        filters={"role": "Purchase Manager"},
+        fields=["parent"]
+    )
+
+    recipients = [
+        user["parent"]
+        for user in purchase_managers
+        if frappe.db.get_value("User", user["parent"], "enabled")
+    ]
+
+    if not recipients:
+        return  # No active Purchase Managers found
+
+    # Generate Email Message
+    message = "<h3>Overdue Purchase Orders</h3><p>The following POs are overdue and have no Purchase Receipt created:</p><ul>"
+    for po in overdue_pos:
+        message += f"<li>{get_link_to_form('Purchase Order', po['name'])} - {po['supplier']} (Scheduled: {po['schedule_date']})</li>"
+    message += "</ul>"
+
+    # Send Email
+    frappe.sendmail(
+        recipients=recipients,
+        subject="Overdue Purchase Orders - Action Required",
+        message=message
+    )
+
+    frappe.log_error(f"Sent overdue PO notification to: {', '.join(recipients)}", "Purchase Order Reminder")
+
+@frappe.whitelist()
+def get_user_expense_claims(user):
+    """Fetch expense claims where the given user is the next approver"""
+    
+    # Define workflow states corresponding to each approver position
+    x=[]
+    doc = frappe.get_doc("Workflow","Expense Claim Workflow")
+    for i in doc.states:
+        x.append(i.state)
+    # approver_conditions = {
+    #     "custom_approver_1": "Draft",
+    #     "custom_approver_2": "Pending",
+    #     "custom_approver_3": "Checked",
+    #     "custom_approver_4": "Reviewed",
+    #     "custom_approver_5": "Account Approve"
+    # }
+    approver_conditions = {
+        "custom_approver_1": "",
+        "custom_approver_2": "",
+        "custom_approver_3": "",
+        "custom_approver_4": "",
+        "custom_approver_5": ""
+    }
+    keys = list(approver_conditions.keys())  # Get dictionary keys
+    for i in range(len(keys)):  # Iterate only up to the dictionary's length
+        approver_conditions[keys[i]] = x[i]  # Assign corresponding value from x
+    
+    conditions = []
+    for field, state in approver_conditions.items():
+        conditions.append(f"({field} = '{user}' AND workflow_state = '{state}')")
+    
+    # Construct the final SQL WHERE condition using OR
+    condition_str = " OR ".join(conditions)
+
+    if condition_str:
+        query = f"""
+            SELECT name FROM `tabExpense Claim`
+            WHERE {condition_str}
+        """
+        result = frappe.db.sql(query, as_dict=True)
+        return [row["name"] for row in result]
+    
+    return []
+
+@frappe.whitelist()
+def get_user_purchase_order(user):
+    """Fetch Purchase Order where the given user is the next approver"""
+    
+    # Define workflow states corresponding to each approver position
+    x=[]
+    doc = frappe.get_doc("Workflow","Purchase Order Workflow (Expense Grouping)")
+    for i in doc.states:
+        x.append(i.state)
+    # approver_conditions = {
+    #     "custom_approver_1": "Draft",
+    #     "custom_approver_2": "Pending",
+    #     "custom_approver_3": "Checked",
+    #     "custom_approver_4": "Reviewed",
+    #     "custom_approver_5": "Account Approve"
+    # }
+    approver_conditions = {
+        "custom_approver_1": "",
+        "custom_approver_2": "",
+        "custom_approver_3": "",
+        "custom_approver_4": "",
+        "custom_approver_5": ""
+    }
+    keys = list(approver_conditions.keys())  # Get dictionary keys
+    for i in range(len(keys)):  # Iterate only up to the dictionary's length
+        approver_conditions[keys[i]] = x[i]  # Assign corresponding value from x
+
+    conditions = []
+    for field, state in approver_conditions.items():
+        conditions.append(f"({field} = '{user}' AND workflow_state = '{state}')")
+    
+    # Construct the final SQL WHERE condition using OR
+    condition_str = " OR ".join(conditions)
+
+    if condition_str:
+        query = f"""
+            SELECT name FROM `tabPurchase Order`
+            WHERE {condition_str}
+        """
+        result = frappe.db.sql(query, as_dict=True)
+        return [row["name"] for row in result]
+    
+    return []
+
+
+@frappe.whitelist()
+def get_user_purchase_invoice(user):
+    """Fetch Purchase Order where the given user is the next approver"""
+    
+    # Define workflow states corresponding to each approver position
+    x=[]
+    doc = frappe.get_doc("Workflow","Purchase Invoice New Workflow")
+    for i in doc.states:
+        x.append(i.state)
+    # approver_conditions = {
+    #     "custom_approver_1": "Draft",
+    #     "custom_approver_2": "Pending",
+    #     "custom_approver_3": "Checked",
+    #     "custom_approver_4": "Reviewed",
+    #     "custom_approver_5": "Account Approve"
+    # }
+    approver_conditions = {
+        "custom_approver_1": "",
+        "custom_approver_2": "",
+        "custom_approver_3": "",
+        "custom_approver_4": "",
+        "custom_approver_5": ""
+    }
+    keys = list(approver_conditions.keys())  # Get dictionary keys
+    for i in range(len(keys)):  # Iterate only up to the dictionary's length
+        approver_conditions[keys[i]] = x[i]  # Assign corresponding value from x
+
+    conditions = []
+    for field, state in approver_conditions.items():
+        conditions.append(f"({field} = '{user}' AND workflow_state = '{state}')")
+    
+    # Construct the final SQL WHERE condition using OR
+    condition_str = " OR ".join(conditions)
+
+    if condition_str:
+        query = f"""
+            SELECT name FROM `tabPurchase Invoice`
+            WHERE {condition_str}
+        """
+        result = frappe.db.sql(query, as_dict=True)
+        return [row["name"] for row in result]
+    
+    return []
+
+
+
+
+@frappe.whitelist()
+def create_new_expense_type(name):
+    get_all_expense = frappe.get_all("Expense Claim Type", fields=['name'], as_list=True)
+    x = []
+    for i in get_all_expense:        
+        x.append(i[0])
+    if name in x:
+        return "Expense Type already Exists."
+    else:
+        new_expense_type_doc = frappe.new_doc("Expense Claim Type")
+        new_expense_type_doc.expense_type = name
+        new_expense_type_doc.save()
+        return "New Expense Type created."
+
+@frappe.whitelist()
+def expense_reject_status(doc_name,status):
+    frappe.db.set_value("Expense Claim",doc_name,"approval_status",status)
+    return "Success"
+
+@frappe.whitelist()
+def share_document(doctype,name,users,read,write,share,everyone):
+    users = json.loads(users)
+    for i in users:
+        frappe.share.add_docshare(
+            doctype, name, i, read=read, write=write, share=share, everyone=everyone, flags={"ignore_share_permission": True}
+        )
+    return "Successfully shared this expense claim with the approvers."
+
+@frappe.whitelist()
+def get_verification_users(expense_grouping_master=None,department=None):
+    # if expense_grouping_master==None or department == None:
+    #     return "No Department or expense Groping"
+    doc = frappe.get_all("Expense Verification Flow",filters={
+        'select_department': department,
+        'select_expense_grouping':expense_grouping_master
+    },
+    fields=['verifier', 'approver','validation_1','validation_2','auditor'],
+    as_list=True)
+
+    return doc
+
+
+
+
+
 # frappe.whitelist()
 # def stop_print_in_draft(doc, method, x):    
 #     if doc.docstatus == 0:  # Draft state

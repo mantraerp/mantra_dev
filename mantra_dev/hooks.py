@@ -39,7 +39,9 @@ doctype_js = {
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
     "Item": "public/js/item.js",
-    "Project":"public/js/project.js"
+    "Project":"public/js/project.js",
+    "Expense Claim": "public/js/expense_claim.js",
+
     # "Delivery Note": "public/js/delivery_note.js",
 }
 doctype_list_js = {
@@ -47,6 +49,10 @@ doctype_list_js = {
     "Payment Entry": "public/js/payment_entry.js",
     "Delivery Note": "public/js/delivery_note.js",
     "Item" : "public/js/item_list.js",
+    "Purchase Order": "public/js/purchase_order_list.js",
+    "Purchase Invoice": "public/js/purchase_invoice_list.js",
+
+    
     }
 
 

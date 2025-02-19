@@ -19,7 +19,29 @@ frappe.ui.form.on('Sales Invoice', {
                     }
                 };
             });
+
+            if (frm.doc.custom_sales_person) 
+            {
+                // alert('call');
+
+                frappe.call({
+                    method: 'frappe.client.get_value',
+                    args: {
+                        doctype: 'Sales Person',
+                        name: frm.doc.custom_sales_person,
+                        fieldname: 'custom_bank_account'
+                    },
+                    callback: function(r){ 
+                        frm.set_value("custom_bank_account", r.message.custom_bank_account);
+                    }
+                });
+            }
         }
+
+
+        
+
+        // alert('temp');
     },
 
     

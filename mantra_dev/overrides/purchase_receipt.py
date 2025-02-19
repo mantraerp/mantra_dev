@@ -202,13 +202,15 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		
 
 		for mt in items:
-			se_item = frappe.new_doc("Stock Entry Detail")
-			se_item.s_warehouse = po.custom_set_reserve_warehouse
-			se_item.t_warehouse = self.supplier_warehouse
-			se_item.item_code = mt['raw_material']
-			se_item.qty = mt['required_qty']
-			se_item.uom = frappe.db.get_value("Item", mt['raw_material'], "stock_uom")
-			se.append("items", se_item)
+			for i in po.items:
+				se_item = frappe.new_doc("Stock Entry Detail")
+				se_item.s_warehouse = po.custom_set_reserve_warehouse
+				se_item.t_warehouse = self.supplier_warehouse
+				se_item.item_code = mt['raw_material']
+				se_item.qty = mt['required_qty']
+				se_item.uom = frappe.db.get_value("Item", mt['raw_material'], "stock_uom")
+				se_item.cost_center = i.cost_center
+				se.append("items", se_item)
 		se.save()
 		se.submit()
 	

@@ -1,0 +1,100 @@
+{
+ "_seen": "[\"Administrator\"]",
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{select_department}-{select_expense_grouping}",
+ "creation": "2025-02-18 17:28:26.283072",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "select_department",
+  "select_expense_grouping",
+  "verifier",
+  "approver",
+  "validation_1",
+  "validation_2",
+  "auditor"
+ ],
+ "fields": [
+  {
+   "fieldname": "select_department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Select Department",
+   "no_copy": 1,
+   "options": "Department",
+   "reqd": 1
+  },
+  {
+   "depends_on": "select_department",
+   "fieldname": "select_expense_grouping",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Select Expense Grouping",
+   "no_copy": 1,
+   "options": "Expense Grouping Master",
+   "reqd": 1
+  },
+  {
+   "depends_on": "select_department",
+   "fieldname": "verifier",
+   "fieldtype": "Link",
+   "label": "Verifier",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "depends_on": "verifier",
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User"
+  },
+  {
+   "depends_on": "approver",
+   "fieldname": "validation_1",
+   "fieldtype": "Link",
+   "label": "Validation 1",
+   "options": "User"
+  },
+  {
+   "depends_on": "validation_1",
+   "fieldname": "validation_2",
+   "fieldtype": "Link",
+   "label": "Validation 2",
+   "options": "User"
+  },
+  {
+   "depends_on": "validation_2",
+   "fieldname": "auditor",
+   "fieldtype": "Link",
+   "label": "Auditor",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-18 17:37:59.145003",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Expense Verification Flow",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
