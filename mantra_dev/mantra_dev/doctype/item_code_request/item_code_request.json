@@ -98,16 +98,6 @@
    "label": "Doument Attachment"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Item Code Request",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "form_type",
    "fieldtype": "Link",
    "label": "Form Type",
