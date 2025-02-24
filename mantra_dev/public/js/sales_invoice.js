@@ -10,8 +10,10 @@ frappe.ui.form.on('Sales Invoice', {
             });
         }, 1000); // 1000 milliseconds = 1 second              
     },
-    onload (frm){
-        if(frm.is_new()){
+    onload (frm)
+    {
+        if(frm.is_new())
+        {
             frm.set_query('custom_invoice_type', () => {
                 return {
                     filters: {
@@ -22,29 +24,18 @@ frappe.ui.form.on('Sales Invoice', {
 
             if (frm.doc.custom_sales_person) 
             {
-                // alert('call');
-
                 frappe.call({
-                    method: 'frappe.client.get_value',
+                    method: 'mantra_dev.backend_code.api.sales_invoice_get_account',
                     args: {
-                        doctype: 'Sales Person',
-                        name: frm.doc.custom_sales_person,
-                        fieldname: 'custom_bank_account'
+                        custom_sales_person: frm.doc.custom_sales_person,
                     },
-                    callback: function(r){ 
-                        frm.set_value("custom_bank_account", r.message.custom_bank_account);
+                    callback: function(r){
+                        frm.set_value("custom_bank_account", r.message);
                     }
                 });
             }
         }
-
-
-        
-
-        // alert('temp');
     },
-
-    
     on_submit(frm){
         frappe.call({
             method: "mantra_dev.backend_code.api.create_delivery_note",
@@ -56,8 +47,6 @@ frappe.ui.form.on('Sales Invoice', {
             }
         });
     },
-
-    
     einvoice_status(frm){
         frappe.call({
             method: "mantra_dev.backend_code.api.create_delivery_note",
@@ -69,8 +58,6 @@ frappe.ui.form.on('Sales Invoice', {
             }
         });
     },
-
-    
 });
 
 // frappe.ui.form.on("Sales Invoice Item", "items", function(frm, cdt, cdn) {

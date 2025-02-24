@@ -27,10 +27,12 @@ def check_system_status():
 	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
 	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global') 
 	reply = system_call(reply,"http://192.168.5.56:8002/#login",'Mewruk')
-	reply = system_call(reply,"http://192.168.5.56:8003/#login",'Mefron')
+	reply = system_call(reply,"http://192.168.5.56:8007/#login",'Mefron')
 	reply = system_call(reply,"http://192.168.5.56:8004/#login",'Servico')
-
-
+	reply = system_call(reply,"http://192.168.5.56:8005/#login",'Mocula')
+	reply = system_call(reply,"http://192.168.5.56:8006/#login",'Mupizo')
+ 
+ 
 	keys = reply.keys()
 	email_message_body=""
 	for ky in keys:

@@ -38,6 +38,7 @@ frappe.ui.form.on("Purchase Order", {
         }
     },
     refresh: function (frm) {
+        // To show details
         frm.add_custom_button(("Details"), async () => {
             let po = frm.doc;
     
@@ -103,6 +104,28 @@ frappe.ui.form.on("Purchase Order", {
                         </tbody>
                     </table>
                 </div>`;
+
+            let po_form_details = await new Promise((resolve, reject) => {
+                frappe.call({
+                    method: "mantra_dev.backend_code.purchase_order.purchase_order.get_po_form_details",
+                    args: {
+                        purchase_order_id: frm.doc.name
+                    },
+                    callback: function (r) {
+                        if (!r.exc) {
+                            resolve(r.message);
+                        } else {
+                            reject("Error fetching po form details");
+                        }
+                    }
+                });
+            });
+
+            if (po_form_details){
+                po_form_details['total_stock'] = itemsWithStock.reduce((sum, item) => sum + (item.total_available_stock || 0), 0);
+                // Fetch PO Form Details And Showcase in Purchase Order Details Dailog
+                html += createPoDetailsHTML(po_form_details);
+            }
     
             var d = new frappe.ui.Dialog({
                 title: __("Purchase Order Details"),
@@ -113,6 +136,7 @@ frappe.ui.form.on("Purchase Order", {
                         options: html
                     }
                 ],
+                size: 'extra-large',
                 primary_action_label: __("Process"),
                 primary_action: () => {
                     d.hide();
@@ -125,6 +149,7 @@ frappe.ui.form.on("Purchase Order", {
     
             d.show();
         });
+
 
         frm.add_custom_button(
             __("Rate Comparison"),
@@ -170,7 +195,19 @@ frappe.ui.form.on("Purchase Order", {
                 }
                 });
             }, __('Utility'));
+
+
+            frm.add_custom_button(
+                __("Add PO Form Approval"),
+                () => frappe.model.open_mapped_doc({
+                    method: "mantra_dev.backend_code.purchase_order.purchase_order.make_po_form_approval",
+                    frm: frm,
+                }),
+                __("Utility")
+            );
         }
+
+        
     },    
     before_save: function (frm) {
         frm.doc.items.forEach((item) => {
@@ -203,130 +240,130 @@ frappe.ui.form.on("Purchase Order", {
         });
 
 
-        if(!frm.doc.custom_expense_grouping){
-            frappe.throw("Please Select Department and Expense Grouping if it is not present Then tell Admin to Create Expense Grouping for that Department.")
-        }
-        if(!frm.doc.custom_department){
-            frappe.throw("Please Select the Department")
-        }
+        // if(!frm.doc.custom_expense_grouping){
+        //     frappe.throw("Please Select Department and Expense Grouping if it is not present Then tell Admin to Create Expense Grouping for that Department.")
+        // }
+        // if(!frm.doc.custom_department){
+        //     frappe.throw("Please Select the Department")
+        // }
     },
     
     after_save(frm){
 
 
-        let approvers = [
-            frm.doc.custom_approver_1,
-            frm.doc.custom_approver_2,
-            frm.doc.custom_approver_3,
-            frm.doc.custom_approver_4,
-            frm.doc.custom_approver_5
-        ].filter(approver => approver)
-        console.log("----->",approvers);
+        // let approvers = [
+        //     frm.doc.custom_approver_1,
+        //     frm.doc.custom_approver_2,
+        //     frm.doc.custom_approver_3,
+        //     frm.doc.custom_approver_4,
+        //     frm.doc.custom_approver_5
+        // ].filter(approver => approver)
+        // console.log("----->",approvers);
         
-        if(approvers){
+        // if(approvers){
 
-            frappe.call({
-                method: "mantra_dev.backend_code.api.share_document",
-                args: {
-                    doctype: "Purchase Order",
-                    name: frm.doc.name,
-                    users: approvers,
-                    read: 1,
-                    write: 1,
-                    share: 0,
-                    everyone: 0
-                },
-                callback(r) {
-                    if(r.message) {
-                        console.log(r.message);
-                        frm.reload_doc()
-                        // document is shared with user
-                    }
-                }
-            })
-        }
+        //     frappe.call({
+        //         method: "mantra_dev.backend_code.api.share_document",
+        //         args: {
+        //             doctype: "Purchase Order",
+        //             name: frm.doc.name,
+        //             users: approvers,
+        //             read: 1,
+        //             write: 1,
+        //             share: 0,
+        //             everyone: 0
+        //         },
+        //         callback(r) {
+        //             if(r.message) {
+        //                 console.log(r.message);
+        //                 frm.reload_doc()
+        //                 // document is shared with user
+        //             }
+        //         }
+        //     })
+        // }
     },
 
 
 
 
     custom_department(frm){
-        frm.set_value("custom_expense_grouping","")
-        frm.fields_dict["custom_expense_grouping"].get_query = function () {
-            let selected_department = frm.doc.custom_department;
-            if (!selected_department) {
-                return {};
-            }
-            return {
-                filters: {
-                    name: ["in", get_selected_values(selected_department)]
-                }
-            };
-        };
+        // frm.set_value("custom_expense_grouping","")
+        // frm.fields_dict["custom_expense_grouping"].get_query = function () {
+        //     let selected_department = frm.doc.custom_department;
+        //     if (!selected_department) {
+        //         return {};
+        //     }
+        //     return {
+        //         filters: {
+        //             name: ["in", get_selected_values(selected_department)]
+        //         }
+        //     };
+        // };
     },
     validate(frm){
-        frappe.call({
-            method: "mantra_dev.backend_code.api.get_verification_users",
-            args: {
-                expense_grouping_master: frm.doc.custom_expense_grouping,
-                department: frm.doc.custom_department
-            },
-            callback: function(r) {
-                if (r.message) {
-                // Fill approver fields only if they are empty
-                if (!frm.doc.custom_approver_1 || ""){
-                    frm.set_value("custom_approver_1", r.message[0][0] || "");
-                    frm.set_value("custom_approver_2", r.message[0][1] || "");
-                    frm.set_value("custom_approver_3", r.message[0][2] || "");
-                    frm.set_value("custom_approver_4", r.message[0][3] || "");
-                    frm.set_value("custom_approver_5", r.message[0][4] || "");
-                } 
-                // Find the last non-empty approver from the document fields
-                let approvers = [
-                    frm.doc.custom_approver_1,
-                    frm.doc.custom_approver_2,
-                    frm.doc.custom_approver_3,
-                    frm.doc.custom_approver_4,
-                    frm.doc.custom_approver_5
-                ];
+        // frappe.call({
+        //     method: "mantra_dev.backend_code.api.get_verification_users",
+        //     args: {
+        //         expense_grouping_master: frm.doc.custom_expense_grouping,
+        //         department: frm.doc.custom_department
+        //     },
+        //     callback: function(r) {
+        //         if (r.message) {
+        //         // Fill approver fields only if they are empty
+        //         if (!frm.doc.custom_approver_1 || ""){
+        //             frm.set_value("custom_approver_1", r.message[0][0] || "");
+        //             frm.set_value("custom_approver_2", r.message[0][1] || "");
+        //             frm.set_value("custom_approver_3", r.message[0][2] || "");
+        //             frm.set_value("custom_approver_4", r.message[0][3] || "");
+        //             frm.set_value("custom_approver_5", r.message[0][4] || "");
+        //         } 
+        //         // Find the last non-empty approver from the document fields
+        //         let approvers = [
+        //             frm.doc.custom_approver_1,
+        //             frm.doc.custom_approver_2,
+        //             frm.doc.custom_approver_3,
+        //             frm.doc.custom_approver_4,
+        //             frm.doc.custom_approver_5
+        //         ];
 
-                let last_approver = "";
-                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
-                    if (approvers[i]) {
-                        last_approver = approvers[i];
-                        break;
-                    }
-                }
+        //         let last_approver = "";
+        //         for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+        //             if (approvers[i]) {
+        //                 last_approver = approvers[i];
+        //                 break;
+        //             }
+        //         }
 
-                frm.set_value("custom_final_approver", last_approver);
-                }else{
-                    // Find the last non-empty approver from the document fields
-                let approvers = [
-                    frm.doc.custom_approver_1,
-                    frm.doc.custom_approver_2,
-                    frm.doc.custom_approver_3,
-                    frm.doc.custom_approver_4,
-                    frm.doc.custom_approver_5
-                ];
+        //         frm.set_value("custom_final_approver", last_approver);
+        //         }else{
+        //             // Find the last non-empty approver from the document fields
+        //         let approvers = [
+        //             frm.doc.custom_approver_1,
+        //             frm.doc.custom_approver_2,
+        //             frm.doc.custom_approver_3,
+        //             frm.doc.custom_approver_4,
+        //             frm.doc.custom_approver_5
+        //         ];
 
-                if(approvers=[] || !approvers){
-                    frappe.throw("There is no approver in verification flow and you have also not selected any approver.")
-                    return
-                }
+        //         if(approvers=[] || !approvers){
+        //             frappe.throw("There is no approver in verification flow and you have also not selected any approver.")
+        //             return
+        //         }
 
-                let last_approver = "";
-                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
-                    if (approvers[i]) {
-                        last_approver = approvers[i];
-                        break;
-                    }
-                }
+        //         let last_approver = "";
+        //         for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+        //             if (approvers[i]) {
+        //                 last_approver = approvers[i];
+        //                 break;
+        //             }
+        //         }
 
-                frm.set_value("custom_final_approver", last_approver);
+        //         frm.set_value("custom_final_approver", last_approver);
 
-                }
-            }
-        });
+        //         }
+        //     }
+        // });
     },
 });
 
@@ -347,4 +384,181 @@ function get_selected_values(department) {
         }
     });
     return selected_values;
+}
+
+
+function createPoDetailsHTML(po_form_details){
+    html = `
+        <style>
+            .po-form-approval td div {
+                text-align: left !important;
+            }
+            .po-form-approval td {
+                width: 16.66%;
+            }
+        </style>
+        <h4>PO Form Approval Details:</h4>
+        <table class="table table-bordered po-form-approval">
+            <tbody>
+                <tr>
+                    <td>Project Code:</td>
+                    <td colspan="2">${po_form_details.project || ''}</td>
+                    <td>Project Name:</td>
+                    <td colspan="2">${po_form_details.project_name || ''}</td>
+                </tr>
+                <tr>
+                    <td>Sales Order No:</td>
+                    <td colspan="2">${po_form_details.sales_order || ''}</td>
+                    <td>Customer PO No:</td>
+                    <td colspan="2">${po_form_details.po_no || ''}</td>
+                </tr>
+                <tr>
+                    <td>Customer Code:</td>
+                    <td colspan="2">${po_form_details.customer || ''}</td>
+                    <td>Customer Name:</td>
+                    <td colspan="2">${po_form_details.customer_name || ''}</td>
+                </tr>
+                <tr>
+                    <td>Business Unit Name:</td>
+                    <td colspan="2">${po_form_details.business_unit_name || ''}</td>
+                    <td>Business Unit Email:</td>
+                    <td colspan="2">${po_form_details.business_unit_email || ''}</td>
+                </tr>
+                <tr>
+                    <td>Purpose:</td>
+                    <td colspan="5">${po_form_details.purpose || ''}</td>
+                </tr>
+                <tr>
+                    <td>Cost Center/Profit Center:</td>
+                    <td colspan="5">${po_form_details.cost_center || ''}</td>
+                </tr>
+                <tr>
+                    <td>Requester:</td>
+                    <td colspan="2">${po_form_details.requester || ''}</td>
+                    <td>Approved By:</td>
+                    <td colspan="2">${po_form_details.approved_by || ''}</td>
+                </tr>
+                <tr>
+                    <td>Material Request:</td>
+                    <td colspan="5">${po_form_details.material_request || ''}</td>
+                </tr>
+                <tr>
+                    <td>Approval Link:</td>
+                    <td colspan="5">
+                        ${po_form_details.approval_link ? `
+                        <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.approval_link}', '_blank')">
+                        View Approval </button>` : ""}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Overall Profit in case if Project:</td>
+                    <td colspan="5">${frappe.format(po_form_details.overall_profit_in_case_if_project, { fieldtype: "Currency" }) || ''}</td>
+                </tr>
+                <tr>
+                    <td>Last Lowest Price:</td>
+                    <td colspan="5">${frappe.format(po_form_details.last_lowest_price, { fieldtype: "Currency" }) || ''}</td>
+                </tr>
+                <tr>
+                    <td>Final Supplier Quotation Link:</td>
+                    <td colspan="5">
+                        ${po_form_details.final_supplier_quotation_link ? `
+                        <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.final_supplier_quotation_link}', '_blank')">
+                        View Quotation </button>` : ""}
+                    </td>
+                </tr>
+                <tr>
+                    <td>NDA:</td>
+                    <td colspan="5">
+                        ${po_form_details.nda ? `
+                        <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.nda}', '_blank')" >
+                        NDA </button>` : ""}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Current Stock:</td>
+                    <td>${frappe.format(po_form_details.current_stock, { fieldtype: "Float" }) || ''}</td>
+                    <td>Demand:</td>
+                    <td>${frappe.format(po_form_details.demand, { fieldtype: "Float" }) || ''}</td>
+                    <td>Additional:</td>
+                    <td>${frappe.format(po_form_details.additional, { fieldtype: "Float" }) || ''}</td>
+                </tr>
+                <tr>
+                    <td>Comments:</td>
+                    <td colspan="3">${po_form_details.comment || ''}</td>
+                    <td>Physical Stock</td>
+                    <td>${frappe.format(po_form_details.total_stock, { fieldtype: "Float" }) || ''}</td>
+                </tr>`
+    
+    if (po_form_details.price_comparison.length > 0){
+        html += `<tr>
+            <td colspan="6" style="text-align: center;"><h3>Price Comparison</h3></td>
+        </tr>`
+
+        tableHTML = `<tr>
+            <td></td>`
+
+        for (let i = 0; i < po_form_details.price_comparison.length; i++) {
+            tableHTML += `<td>L${i + 1}</td>`;
+        }
+
+        tableHTML += `</tr>`
+        fields_dict = {
+            'supplier_name': 'Supplier Name',
+            'quote_price_to_the_customer': 'Quote Price to the Customer',
+            'total_purchase_price': 'Total Purchase Price',
+            'supplier_quoted_price': 'Supplier Quoted Price',
+            'nagotiated': 'Nagotiated',
+            'warranty_foc_spares': 'Warranty / FOC Spares (%)',
+            'lead_time': 'Lead Time',
+            'freight': 'Freight',
+            'rate_contract': 'Rate Contract',
+            'compliance__certificates_in_case_of_import': 'Compliance / Certificates (In case of IMPORT)',
+            'incoterms_shipping_terms': 'Incoterms/ Shipping Terms',
+            'payment_terms': 'Payment Terms'
+        }
+
+        let currency_fields = [
+            'quote_price_to_the_customer', 
+            'total_purchase_price', 
+            'supplier_quoted_price', 
+            'nagotiated', 
+            'freight', 
+            'rate_contract'
+        ];
+
+        for (let key in fields_dict) {
+            tableHTML += `<tr>
+                <td><b>${fields_dict[key]}</b></td>`;
+    
+            po_form_details.price_comparison.forEach(row => {
+                let value = row[key] || '';
+
+                if (currency_fields.includes(key) && value !== '') {
+                    value = frappe.format(value, { fieldtype: "Currency" });
+                }
+
+                if (key == 'compliance__certificates_in_case_of_import'){
+                    if (value){
+                        value = `<button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${value}', '_blank')">
+                            View Certificate</button>`
+                    } else {
+                        value = ''
+                    }
+                }
+
+                tableHTML += `<td>${value}</td>`;
+            });
+
+            tableHTML += `</tr>`;
+        }
+
+        html += tableHTML;
+    }
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    return html
 }

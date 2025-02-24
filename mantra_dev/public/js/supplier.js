@@ -7,8 +7,8 @@ frappe.ui.form.on("Supplier", {
     },
     
     refresh(frm){
-        if(frm.is_new()){
-
+        if(frm.is_new())
+        {
             frm.set_df_property('custom_add_bank_account', 'hidden', 1);
             frm.set_df_property('custom_bank_account_table', 'read_only', 0);
         }else{            
@@ -21,7 +21,6 @@ frappe.ui.form.on("Supplier", {
         .each(function (i, item) {
             let field = $(item).find('[data-fieldname="change_status"]');
             field.empty();
-    
             let container = $('<div class="reconcile-btn-container"></div>').css({
                 display: "flex",
                 justifyContent: "center",
@@ -176,8 +175,13 @@ frappe.ui.form.on('Bank Account Table', {
 });
 
 function showBankAccountDialog(account_table, name1, frm) {
+
+
+    var title = "Create supplier bank account<br>Supplier Code: ".concat(frm.doc.name,'<br>Supplier Name: ',frm.doc.supplier_name);
+
+
     let d = new frappe.ui.Dialog({
-      title: "Add New Bank Account",
+      title: title,
       fields: [
         {
           label: "Bank",

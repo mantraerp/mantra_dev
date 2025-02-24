@@ -1900,7 +1900,7 @@ def get_due_date_from_template(template_name,posting_date, bill_date=None):
 				acc_date = max(acc_date, add_days(get_last_day(acc_date), term.credit_days))
 			else:
 				acc_date = max(acc_date, get_last_day(add_months(acc_date, term.credit_months)))
-			return acc_date
+			return getdate(acc_date)
 		else:
 			if term.due_date_based_on == "Day(s) after invoice date":
 				due_date = max(due_date, add_days(due_date, term.credit_days))
@@ -1908,7 +1908,7 @@ def get_due_date_from_template(template_name,posting_date, bill_date=None):
 				due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 			else:
 				due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
-			return due_date
+			return getdate(due_date)
 
 def override_validate_due_date(doc, method=None):
 	if doc.doctype == "Purchase Invoice":

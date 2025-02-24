@@ -47,27 +47,27 @@ frappe.ui.form.on('Purchase Invoice', {
     },
 
     custom_department(frm){
-        frm.set_value("custom_expense_grouping","")
-        frm.fields_dict["custom_expense_grouping"].get_query = function () {
-            let selected_department = frm.doc.custom_department;
-            if (!selected_department) {
-                return {};
-            }
-            return {
-                filters: {
-                    name: ["in", get_selected_values(selected_department)]
-                }
-            };
-        };
+        // frm.set_value("custom_expense_grouping","")
+        // frm.fields_dict["custom_expense_grouping"].get_query = function () {
+        //     let selected_department = frm.doc.custom_department;
+        //     if (!selected_department) {
+        //         return {};
+        //     }
+        //     return {
+        //         filters: {
+        //             name: ["in", get_selected_values(selected_department)]
+        //         }
+        //     };
+        // };
     },
     before_save(frm) {
 
-        if(!frm.doc.custom_expense_grouping){
-            frappe.throw("Please Select Department and Expense Grouping if it is not present Then tell Admin to Create Expense Grouping for that Department.")
-        }
-        if(!frm.doc.custom_department){
-            frappe.throw("Please Select the Department")
-        }
+        // if(!frm.doc.custom_expense_grouping){
+        //     frappe.throw("Please Select Department and Expense Grouping if it is not present Then tell Admin to Create Expense Grouping for that Department.")
+        // }
+        // if(!frm.doc.custom_department){
+        //     frappe.throw("Please Select the Department")
+        // }
 
 
 
@@ -146,37 +146,37 @@ frappe.ui.form.on('Purchase Invoice', {
 
 
         
-        let approvers = [
-            frm.doc.custom_approver_1,
-            frm.doc.custom_approver_2,
-            frm.doc.custom_approver_3,
-            frm.doc.custom_approver_4,
-            frm.doc.custom_approver_5
-        ].filter(approver => approver)
-        console.log("----->",approvers);
+        // let approvers = [
+        //     frm.doc.custom_approver_1,
+        //     frm.doc.custom_approver_2,
+        //     frm.doc.custom_approver_3,
+        //     frm.doc.custom_approver_4,
+        //     frm.doc.custom_approver_5
+        // ].filter(approver => approver)
+        // console.log("----->",approvers);
         
-        if(approvers){
+        // if(approvers){
 
-            frappe.call({
-                method: "mantra_dev.backend_code.api.share_document",
-                args: {
-                    doctype: "Purchase Invoice",
-                    name: frm.doc.name,
-                    users: approvers,
-                    read: 1,
-                    write: 1,
-                    share: 0,
-                    everyone: 0
-                },
-                callback(r) {
-                    if(r.message) {
-                        console.log(r.message);
-                        frm.reload_doc()
-                        // document is shared with user
-                    }
-                }
-            })
-        }
+        //     frappe.call({
+        //         method: "mantra_dev.backend_code.api.share_document",
+        //         args: {
+        //             doctype: "Purchase Invoice",
+        //             name: frm.doc.name,
+        //             users: approvers,
+        //             read: 1,
+        //             write: 1,
+        //             share: 0,
+        //             everyone: 0
+        //         },
+        //         callback(r) {
+        //             if(r.message) {
+        //                 console.log(r.message);
+        //                 frm.reload_doc()
+        //                 // document is shared with user
+        //             }
+        //         }
+        //     })
+        // }
     },
     after_workflow_action: function(frm) {
 
@@ -194,68 +194,68 @@ frappe.ui.form.on('Purchase Invoice', {
         }
     },
     validate(frm){
-        frappe.call({
-            method: "mantra_dev.backend_code.api.get_verification_users",
-            args: {
-                expense_grouping_master: frm.doc.custom_expense_grouping,
-                department: frm.doc.custom_department
-            },
-            callback: function(r) {
-                if (r.message) {
-                // Fill approver fields only if they are empty
-                if (!frm.doc.custom_approver_1 || ""){
-                    frm.set_value("custom_approver_1", r.message[0][0] || "");
-                    frm.set_value("custom_approver_2", r.message[0][1] || "");
-                    frm.set_value("custom_approver_3", r.message[0][2] || "");
-                    frm.set_value("custom_approver_4", r.message[0][3] || "");
-                    frm.set_value("custom_approver_5", r.message[0][4] || "");
-                } 
-                // Find the last non-empty approver from the document fields
-                let approvers = [
-                    frm.doc.custom_approver_1,
-                    frm.doc.custom_approver_2,
-                    frm.doc.custom_approver_3,
-                    frm.doc.custom_approver_4,
-                    frm.doc.custom_approver_5
-                ];
+        // frappe.call({
+        //     method: "mantra_dev.backend_code.api.get_verification_users",
+        //     args: {
+        //         expense_grouping_master: frm.doc.custom_expense_grouping,
+        //         department: frm.doc.custom_department
+        //     },
+        //     callback: function(r) {
+        //         if (r.message) {
+        //         // Fill approver fields only if they are empty
+        //         if (!frm.doc.custom_approver_1 || ""){
+        //             frm.set_value("custom_approver_1", r.message[0][0] || "");
+        //             frm.set_value("custom_approver_2", r.message[0][1] || "");
+        //             frm.set_value("custom_approver_3", r.message[0][2] || "");
+        //             frm.set_value("custom_approver_4", r.message[0][3] || "");
+        //             frm.set_value("custom_approver_5", r.message[0][4] || "");
+        //         } 
+        //         // Find the last non-empty approver from the document fields
+        //         let approvers = [
+        //             frm.doc.custom_approver_1,
+        //             frm.doc.custom_approver_2,
+        //             frm.doc.custom_approver_3,
+        //             frm.doc.custom_approver_4,
+        //             frm.doc.custom_approver_5
+        //         ];
 
-                let last_approver = "";
-                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
-                    if (approvers[i]) {
-                        last_approver = approvers[i];
-                        break;
-                    }
-                }
+        //         let last_approver = "";
+        //         for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+        //             if (approvers[i]) {
+        //                 last_approver = approvers[i];
+        //                 break;
+        //             }
+        //         }
 
-                frm.set_value("custom_final_approver", last_approver);
-                }else{
-                    // Find the last non-empty approver from the document fields
-                let approvers = [
-                    frm.doc.custom_approver_1,
-                    frm.doc.custom_approver_2,
-                    frm.doc.custom_approver_3,
-                    frm.doc.custom_approver_4,
-                    frm.doc.custom_approver_5
-                ];
+        //         frm.set_value("custom_final_approver", last_approver);
+        //         }else{
+        //             // Find the last non-empty approver from the document fields
+        //         let approvers = [
+        //             frm.doc.custom_approver_1,
+        //             frm.doc.custom_approver_2,
+        //             frm.doc.custom_approver_3,
+        //             frm.doc.custom_approver_4,
+        //             frm.doc.custom_approver_5
+        //         ];
 
-                if(approvers=[] || !approvers){
-                    frappe.throw("There is no approver in verification flow and you have also not selected any approver.")
-                    return
-                }
+        //         if(approvers=[] || !approvers){
+        //             frappe.throw("There is no approver in verification flow and you have also not selected any approver.")
+        //             return
+        //         }
 
-                let last_approver = "";
-                for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
-                    if (approvers[i]) {
-                        last_approver = approvers[i];
-                        break;
-                    }
-                }
+        //         let last_approver = "";
+        //         for (let i = approvers.length - 1; i >= 0; i--) { // Start from custom_approver_5 and go backwards
+        //             if (approvers[i]) {
+        //                 last_approver = approvers[i];
+        //                 break;
+        //             }
+        //         }
 
-                frm.set_value("custom_final_approver", last_approver);
+        //         frm.set_value("custom_final_approver", last_approver);
 
-                }
-            }
-        });
+        //         }
+        //     }
+        // });
     },
 
 });

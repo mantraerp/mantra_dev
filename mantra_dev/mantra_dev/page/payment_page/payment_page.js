@@ -4,27 +4,30 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
 		title: 'Payment Page',
 		single_column: true
 	});
+   
     let filterContainer = $('<div class="filter-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: space-between;"></div>').appendTo(page.body);
+    
     let transaction_summary_table = $(`<table id="transaction-summary-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;">
         <thead>
             <tr>
-                <th style="background-color: #007cc3; color:black;padding:10px; text-align: center;">Total Transactions</th>
-                <th style="background-color: #007cc3; color:black;padding:10px; text-align: center;">Total Amount (₹)</th>
-                <th style="background-color: #007cc3; color:black;padding:10px; text-align: center;">Selected Transactions</th>
-                <th style="background-color: #007cc3; color:black;padding:10px; text-align: center;">Total Selected Transcation Amount (₹)</th>
+                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Transactions</th>
+                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Amount (₹)</th>
+                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Selected Transactions</th>
+                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Selected Transcation Amount (₹)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="text-align:center; padding:10px;"><span id="total-transactions">0</span></td>
-                <td style="text-align:center; padding:10px;"><span id="total-amount">${(format_currency(0, 'INR'))}</span></td>
-                <td style="text-align:center; padding:10px;"><span id="selected-count">0</span></td>
-                <td style="text-align:center; padding:10px;"><span id="selected-amount">${(format_currency(0, 'INR'))}</span></td>
+                <td style="text-align:center; padding:10px;font-size:16px;"><span id="total-transactions">0</span></td>
+                <td style="text-align:center; padding:10px;font-size:16px;"><span id="total-amount">${(format_currency(0, 'INR'))}</span></td>
+                <td style="text-align:center; padding:10px;font-size:16px;"><span id="selected-count">0</span></td>
+                <td style="text-align:center; padding:10px;font-size:16px;"><span id="selected-amount">${(format_currency(0, 'INR'))}</span></td>
             </tr>
         </tbody>
-    </table>`).appendTo(page.body);
+    </table>`).appendTo(page.body); 
 
-    let tableContainer = $('<div id="payment-table-container" style="display: none;"></div>').appendTo(page.body);
+    let tableContainer = $(`<div id="group-table-container" style="max-height:500px; overflow-y:auto; scrollbar-width: none;">
+  </div>`).appendTo(page.body);
 
     this.form = new frappe.ui.FieldGroup({
         fields: [
@@ -36,6 +39,7 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                 reqd:1,
                 change: () => {
                     let selectedBank = this.form.get_value("bank");
+                    bank=selectedBank;
                     if(!selectedBank){
                         this.form.set_value("bank_account", ""); 
                         this.form.refresh();
@@ -77,6 +81,7 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                 change: () => {
                     let selectedBank = this.form.get_value("bank");
                     let selectedBankAccount = this.form.get_value("bank_account");
+                    bankAccount=selectedBankAccount;
                     if (selectedBankAccount && !selectedBank) {
                         frappe.msgprint(__('Please select a bank before selecting a bank account.'));
                         this.form.set_value("bank_account", ""); 
@@ -106,6 +111,14 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
         body: filterContainer 
     });
     this.form.make();
+   
+    $(document).on("change", ".select-all", function () {
+        let isChecked = $(this).prop("checked");
+        $(".group-checkbox").prop("checked", isChecked).trigger("change");
+        $(".entry-checkbox").prop("checked", isChecked);
+        updateTransactionSummary();
+    });
+    
     $("input").css({"width": "auto"});
     $(".form-layout").css({"width": "490px"});
     this.fetchPaymentEntries = function(selectedBank) {
@@ -116,6 +129,13 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
             },
             callback: function(response) {
                 let data = response.message;
+                if (!data || data.length === 0) {
+                    $(tableContainer).html('<p style="text-align: center; font-size: 16px; color: red;">No Payment Entry Found</p>');
+                    $("#total-transactions").text(0);
+                    $("#total-amount").text(format_currency(0, 'INR'));
+                    $("#export-to-excel").attr("hidden", true);
+                    return;
+                }
                 let groupedData = {};
                 data.forEach(row => {
                     let groupKey = row.party || row.party_name; 
@@ -132,9 +152,8 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                 <head>
                 <style>
                     table { width: 100%; border-collapse: collapse; }
-                    th, td { padding: 10px; text-align: center; vertical-align: middle; }
-                    thead { background-color: #007cc3; color: black; }
-                    tbody tr:hover { background-color: #f2f2f2; }
+                    th, td { padding: 10px; text-align: center; vertical-align: middle;font-size:15px; }
+                    thead { background-color: #007cc3; color: white; }
                     .toggle-arrow { cursor: pointer; font-size: 18px; }
                     .hidden-row { display: none; }
                     .indent { text-align: left;}
@@ -145,16 +164,17 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
                 </head>
                 <table class="no-hover-effect">
-                    <thead>
+                      <thead style="position: sticky; top: 0; z-index: 2;">
                         <tr>
                             <th style="text-align:left;"></th>
-                            <th style="text-align:left;"></th>
+                            <th style="text-align:left;"><input type="checkbox" class="select-all"></th>
                             <th style="text-align:left;">ID</th>              
                             <th style="text-align:left;">Party</th>
                             <th style="text-align:left;">Reference No</th>
                             <th style="text-align:left;">Total Paid Amount</th>
                             <th style="text-align:left;">Status</th>
                             <th style="text-align:left;">Action</th>
+                            <th style="text-align:left;">Details</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -200,6 +220,7 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                                 Reject
                             </button>
                         </td>
+                        
                     </tr>`;
     
                     // CHILD ROWS (Hidden by Default)
@@ -221,11 +242,17 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                                 </span>
                             </td>
                             <td style="text-align:left;">
-                                <button style="background-color:red; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                <button style="background-color:red; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
                                     class="cancel-btn" data-id="${row.name}">
                                     Reject
                                 </button>
                             </td>
+                             <td style="text-align:left;">
+                            <button style="background-color:blue; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
+                                class="get-details">
+                                Get Details
+                            </button>
+                        </td>
                         </tr>`;
                     });
                     totalTransactions += count;
@@ -297,6 +324,120 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
             }
         });
     };
+
+    
+    $(document).on('click', '.get-details', function() {
+        let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
+    
+        if (!paymentEntryId) {
+            frappe.msgprint(__('Payment Entry ID not found.'));
+            return;
+        }
+    
+        frappe.call({
+            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.get_payment_entry_reference_details",
+            args: { payment_entry: paymentEntryId },
+            callback: function(r) {
+                if (r.message) {
+                    if (r.message.error) {
+                        frappe.msgprint(r.message.error);
+                        return;
+                    }
+                    let referenceDetails = r.message.reference_details || [];
+                    let customDetails = r.message.custom_details || {};
+    
+                    let referenceTableRows = referenceDetails.map(item => `
+                        <tr>
+                            <td>${(item["Reference ID"] || "N/A").split(",").join("<br>")}</td>
+                            <td>${(item["Doctype"] || "N/A").split(",").join("<br>")}</td>
+                            <td>${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
+                            <td>${(item["Approver Names"] || "N/A").split(",").join("<br>")}</td>
+
+                        </tr>
+                    `).join("");
+    
+                    let customDetailsTable = `
+                        
+                        <table class="custom-details-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Project Type</th>
+                                    <th>Approved By</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${customDetails.custom_type || "N/A"}</td>
+                                    <td>${customDetails.custom_project_type || "N/A"}</td>
+                                    <td>${customDetails.custom_approved_by || "N/A"}</td>
+                                    <td>${customDetails.remarks || "N/A"}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+    
+                    let d = new frappe.ui.Dialog({
+                        title: __("Reference Details"),
+                        size: "extra-large",
+                        fields: [{
+                            fieldtype: "HTML",
+                            options: `
+                                <style>
+                                    .reference-data, .custom-details-table {
+                                        border-collapse: collapse;
+                                        width: 100%;
+                                        font-size: 14px;
+                                        
+                                    }
+                                    .reference-data th, .reference-data td, 
+                                    .custom-details-table th, .custom-details-table td {
+                                        padding: 10px;
+                                        border: 1px solid #ddd;
+                                        text-align: center;
+                                    }
+                                    .reference-data thead {
+                                        font-weight: bold;    
+                                    }
+                                    .section-title {
+                                        font-weight: bold;
+                                        font-size: 16px;
+                                        margin-top: 10px;
+                                        margin-bottom: 5px;
+                                    }
+                                </style>
+    
+                                <div class="section-title"></div>
+                                <table class="reference-data">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference ID</th>
+                                            <th>Doctype</th>
+                                            <th>Approvers</th>
+                                            <th>Approver Names</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${referenceTableRows || `<tr><td colspan="4">No Reference Details Found</td></tr>`}
+                                    </tbody>
+                                </table>
+    
+                                <div class="section-title"></div>
+                                ${customDetailsTable}
+                            `
+                        }]
+                    });
+    
+                    d.$wrapper.find('.modal-content').css("width", "110%");
+                    d.show();
+                }
+            }
+        });
+    });
+    
+    
+      
     $(document).off("change", ".entry-checkbox").on("change", ".entry-checkbox", function() {
         let partyId = $(this).data("party");
         let allChecked = $(`.party-${partyId} .entry-checkbox`).length === $(`.party-${partyId} .entry-checkbox:checked`).length;
@@ -357,9 +498,10 @@ function generateExcelAndSend(selectedUser) {
         let tableClone = $('.no-hover-effect').clone();
         tableClone.find('th:first-child, td:first-child').remove();
         tableClone.find('th:nth-child(1), td:nth-child(1)').remove();
+        tableClone.find('th:nth-child(5), td:nth-child(5)').remove();
+        tableClone.find('th:nth-child(6), td:nth-child(6)').remove();
         tableClone.find('th:last-child, td:last-child').remove();
-        tableClone.find('th:nth-last-child(1), td:nth-last-child(1)').remove();
-    
+        
         let rows = tableClone.find('tr');
         let wb = XLSX.utils.book_new();
         let ws_data = [];
@@ -367,6 +509,7 @@ function generateExcelAndSend(selectedUser) {
         let lastParty = null;
         let partyTotal = 0;
         let outputRows = [];
+       
         rows.each(function (index, row) {
             let rowData = [];
             let paidAmountText = $(row).find('td').last().text().trim();
@@ -376,7 +519,10 @@ function generateExcelAndSend(selectedUser) {
             });
             let currentParty = rowData[1]; 
             if (lastParty !== null && currentParty !== lastParty) {
-                outputRows.push(["", "", "", "₹ " + partyTotal.toFixed(2)]);
+
+                 if (partyTotal !== 0) {
+                    outputRows.push(["", "", "", "" + format_currency(partyTotal.toFixed(2), 'INR')]);
+                 }
                 partyTotal = 0;
             }
             if (rowData[0] !== "") {
@@ -386,9 +532,10 @@ function generateExcelAndSend(selectedUser) {
             lastParty = currentParty;
         });
         if (lastParty !== null) {
-            outputRows.push(["", "", "", "₹ " + partyTotal.toFixed(2)]);
+            outputRows.push(["", "", "", "" + format_currency(partyTotal.toFixed(2), 'INR')]);
         }
         ws_data = ws_data.concat(outputRows); 
+      
         let ws = XLSX.utils.aoa_to_sheet(ws_data);
         ws['!cols'] = [
             { wch: 20 },  // width for ID column
@@ -408,7 +555,7 @@ function generateExcelAndSend(selectedUser) {
                 user_email: selectedUser,
                 filename: "payment_data.xlsx",
                 filedata: base64File,
-                subject: "Payment Data Excel File - " + frappe.datetime.get_today()
+                subject: "Payment Entry Details"
             },
             callback: function(response) {
                 if (response.message === "Email Sent") {
@@ -424,7 +571,8 @@ function updateGroupPaidAmount(partyId) {
     let totalPaidAmount = 0;
     $(`.party-${partyId} .entry-checkbox`).each(function () {
         let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-        let amount = parseFloat(amountText.replace('₹', '').trim());
+        // Remove the currency symbol, commas, and any extra spaces
+        let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
         if (!isNaN(amount)) {
             totalPaidAmount += amount;
         }
@@ -432,6 +580,7 @@ function updateGroupPaidAmount(partyId) {
     let groupRow = $(`.group-row[data-party="${partyId}"]`);
     groupRow.find(".group-paid-amount").text(format_currency(totalPaidAmount.toFixed(2), 'INR')); 
 }
+
 function getBadgeStyle(status) {
         if (status === "approved") {
             return "background-color: green; color: white;";
@@ -468,6 +617,8 @@ function showBankAccountDialog() {
                 fieldtype: "Link",
                 options: "Bank",
                 reqd: 1,
+                default:$('.frappe-control[data-fieldname="bank"] input').val()
+               
             },
             {
                 label: "Bank Account",
@@ -475,6 +626,8 @@ function showBankAccountDialog() {
                 fieldtype: "Link",
                 options: "Bank Integration",
                 reqd: 1,
+                default:$('.frappe-control[data-fieldname="bank_account"] input').val(),
+               
                 get_query: () => {
                     return {
                         filters: [
@@ -497,6 +650,7 @@ function showBankAccountDialog() {
 }
 
 function sendOTP(bank_account) {
+    frappe.dom.freeze("Please wait... Sending OTP");
     frappe.call({
         method: "mantra_dev.api_code.banck_transaction.send_otp",
         args: {
@@ -504,6 +658,7 @@ function sendOTP(bank_account) {
         },
         callback: function (r) {
             if (r.message) {
+                frappe.dom.unfreeze();
                 showOTPDIalog(bank_account);
             }
         },
@@ -555,8 +710,14 @@ function verifyotp(otp, bank_account) {
   }
 
 function selectPaymentEntry(data,bank_account) {   
-    frappe.confirm("Transaction Details:".concat("<br>", "Total transaction: ", parseInt($("#selected-count").text()) || 0, "<br>", "Total amount: ", parseFloat($("#selected-amount").text().replace('₹', '').trim()) || 0),
+    frappe.confirm(
+        "Transaction Details:".concat(
+            "<br>",
+            "Total transaction: ", parseInt($("#selected-count").text()) || 0, "<br>",
+            "Total amount: ", format_currency(parseFloat($("#selected-amount").text().replace('₹', '').replace(/,/g, '').trim()) || 0, 'INR')
+        ),
         function() {
+           
             frappe.call({
                 method: "mantra_dev.api_code.banck_transaction.upload_file",
                 args: {
@@ -569,6 +730,16 @@ function selectPaymentEntry(data,bank_account) {
                             // If success, open the external URL
                             removeSelectedRows();
                             updateTransactionSummary()
+                            let selectedPartyIds = [];
+                            $(".group-row").each(function() {
+                                let partyId = $(this).data("party"); 
+                                if (partyId && !selectedPartyIds.includes(partyId)) {
+                                    selectedPartyIds.push(partyId);  
+                                }
+                            });
+                            selectedPartyIds.forEach(function(partyId) {
+                                updateGroupPaidAmount(partyId);
+                            });
                             window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
                         } else {
                             // If not done, you can reload or take another action
@@ -583,51 +754,52 @@ function selectPaymentEntry(data,bank_account) {
 function removeSelectedRows() {
     $("input[type='checkbox']:checked").closest("tr").remove();
 }
-
 function updateTransactionSummary() {
-        let selectedCount = 0;
-        let selectedAmount = 0;
-        let totalTransactionCount = 0;
-        let totalTransactionAmount = 0;
-        $(".group-row").each(function() {
-            let partyId = $(this).data("party");
-            let groupChildren = $(`.party-${partyId} .entry-checkbox`);
-            totalTransactionCount += groupChildren.length;
-            groupChildren.each(function() {
-                let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-                let amount = parseFloat(amountText.replace('₹', '').trim());
+    let selectedCount = 0;
+    let selectedAmount = 0;
+    let totalTransactionCount = 0;
+    let totalTransactionAmount = 0;
+    $(".group-row").each(function() {
+        let partyId = $(this).data("party");
+        let groupChildren = $(`.party-${partyId} .entry-checkbox`);
+        totalTransactionCount += groupChildren.length;
+        groupChildren.each(function() {
+            let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
+            // Remove ₹, commas, and trim
+            let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
     
-                if (!isNaN(amount)) {
-                    totalTransactionAmount += amount;
-                }
-            });
-            if ($(`.group-checkbox[data-party="${partyId}"]`).prop("checked")) {
-                selectedCount += groupChildren.length;
-                groupChildren.each(function() {
-                    let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-                    let amount = parseFloat(amountText.replace('₹', '').trim());
-    
-                    if (!isNaN(amount)) {
-                        selectedAmount += amount;
-                    }
-                });
-            } else {
-                $(`.party-${partyId} .entry-checkbox:checked`).each(function() {
-                    selectedCount++;
-                    let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-                    let amount = parseFloat(amountText.replace('₹', '').trim());
-    
-                    if (!isNaN(amount)) {
-                        selectedAmount += amount;
-                    }
-                });
+            if (!isNaN(amount)) {
+                totalTransactionAmount += amount;
             }
         });
-        $("#selected-count").text(selectedCount);
-        $("#selected-amount").text(format_currency(selectedAmount.toFixed(2), 'INR'));
-        $("#total-transactions").text(totalTransactionCount);
-        $("#total-amount").text(format_currency(totalTransactionAmount.toFixed(2), 'INR'));
+        if ($(`.group-checkbox[data-party="${partyId}"]`).prop("checked")) {
+            selectedCount += groupChildren.length;
+            groupChildren.each(function() {
+                let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
+                let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
+    
+                if (!isNaN(amount)) {
+                    selectedAmount += amount;
+                }
+            });
+        } else {
+            $(`.party-${partyId} .entry-checkbox:checked`).each(function() {
+                selectedCount++;
+                let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
+                let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
+    
+                if (!isNaN(amount)) {
+                    selectedAmount += amount;
+                }
+            });
+        }
+    });
+    $("#selected-count").text(selectedCount);
+    $("#selected-amount").text(format_currency(selectedAmount.toFixed(2), 'INR'));
+    $("#total-transactions").text(totalTransactionCount);
+    $("#total-amount").text(format_currency(totalTransactionAmount.toFixed(2), 'INR'));
 }
+
 function getSelectedEntries() {
         let selectedEntries = new Set();
         $(".group-row").each(function () {

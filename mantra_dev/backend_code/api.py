@@ -27,6 +27,15 @@ from frappe.utils import today, get_link_to_form
 
 
 
+# Use in sales invoice to fetch new account from sales person.
+@frappe.whitelist(allow_guest=True)
+def sales_invoice_get_account(custom_sales_person):
+    query = " SELECT custom_bank_account FROM `tabSales Person` WHERE `name` = '{}'".format(custom_sales_person)
+    overdue_pos = frappe.db.sql(query, as_dict=True)
+    if len(overdue_pos)==0:
+        return ""
+    return overdue_pos[0]['custom_bank_account']
+
 
 # "mantra_dev.backend_code.api.notify_purchase_managers"
 @frappe.whitelist()
@@ -160,10 +169,14 @@ def get_user_purchase_order(user):
     condition_str = " OR ".join(conditions)
 
     if condition_str:
+        # query = f"""
+        #     SELECT name FROM `tabPurchase Order`
+        #     WHERE {condition_str}
+        # """
+        
         query = f"""
             SELECT name FROM `tabPurchase Order`
-            WHERE {condition_str}
-        """
+        """        
         result = frappe.db.sql(query, as_dict=True)
         return [row["name"] for row in result]
     

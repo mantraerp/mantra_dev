@@ -45,7 +45,6 @@ def bulk_upload_beneficiary_file(bank_account_list):
 # Upload Approved Beneficiary file on Snorkel with Indicator A
 @frappe.whitelist()
 def upload_beneficiary_file(doc_name):
-    
     try:
         # errorLog("Bene upload",doc_name,False)
         numeric_characters = string.digits
@@ -128,7 +127,6 @@ def upload_beneficiary_file(doc_name):
 # Upload Modified Approved Beneficiary file on Snorkel with Indicator M
 @frappe.whitelist()
 def upload_beneficiary_file_for_modified_doc(doc_name):
-    
     try:
 
         bank_account = frappe.get_doc("Bank Account", doc_name)
@@ -307,6 +305,8 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
     
+    # errorLog('BENY_CRON',"",False)
+    
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
         one_hour_ago = datetime.now() - timedelta(hours=1)
@@ -325,7 +325,7 @@ def get_bene_file(delimiter='|'):
             return "No files found."
 
 
-  #Start file reading 
+#Start file reading 
         processed_files = []
         errors = []
         data = []
@@ -355,6 +355,7 @@ def get_bene_file(delimiter='|'):
                             )
                         else:
                             data.append(row)
+
 
         if len(data)==0:
             return "No row found to process"
@@ -522,44 +523,43 @@ def send_otp(email):
  # this function for a email formate  
 
 def send_email(email,email_otp,full_name):
-    
     frappe.sendmail(
         recipients=email,
         subject="OTP Verification for Payments",
         message=f"""
         <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Document</title>
-            </head>
-            <body>
-            <div style="padding: 1%;background-color: #f4f5f6">
-                <div class="box" style="  background-color: #fff;
-                    padding: 25px;
-                    border-radius:15px;        
-                    width: 60%;
-                    align-items: center;
-                    margin-top: 100px;
-                    margin-bottom: 100px;
-                    margin-left: auto;
-                    margin-right: auto;">
-                    <h2>Dear {full_name},</h2>
-                    <p>Please use the verification code below to complete the Payment Entry Transactions.</p>
-                    <p>Payment Entry Attempted at {now()}</p>
-                    <h1>{email_otp}</h1>
-                    <h4>OTP will expire in 10 minutes.</h4>
-                    <p>Thank You</p>
-                    <img src="https://mantratec.milaap.ai/files/Mantra-Logo_1.png">
-                </div>
-                </div>
-            </body>
-        </html>""" 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<div style="padding: 1%;background-color: #f4f5f6">
+    <div class="box" style="  background-color: #fff;
+        padding: 25px;
+        border-radius:15px;        
+        width: 60%;
+        align-items: center;
+        margin-top: 100px;
+        margin-bottom: 100px;
+        margin-left: auto;
+        margin-right: auto;">
+        <h2>Dear {full_name},</h2>
+        <p>Please use the verification code below to complete the Payment Entry Transactions.</p>
+        <p>Payment Entry Attempted at {now()}</p>
+        <h1>{email_otp}</h1>
+        <h4>OTP will expire in 10 minutes.</h4>
+        <p>Thank You</p>
+        <img src="https://mantratec.milaap.ai/files/Mantra-Logo_1.png">
+    </div>
+    </div>
+</body>
+</html>""" 
     )
     send = flush()
-
-#yhis function for verify a otp
+    
 @frappe.whitelist(allow_guest=True)
+#yhis function for verify a otp
 def verify_otp(email,otp):
     r_send = frappe.get_doc("Email OTP",email)	
     check_otp = r_send.email_otp
@@ -571,12 +571,6 @@ def verify_otp(email,otp):
 
     dt_object = datetime.strptime(end_date , date_format)
     start_date = dt_object - timedelta(hours=0, minutes=10)
-
-    # if check_otp==otp:
-    #     return "Done"
-
-    # return "Error"
-
     #check Otp
     if start_date < ck_time:
         if check_otp==otp:
@@ -589,8 +583,8 @@ def verify_otp(email,otp):
         return "Expired"
 	
 
-# this function for ligin
 @frappe.whitelist(allow_guest=True)
+# this function for ligin
 def login_user(user):
     # frappe.msgprint("Test login_user")
     number = frappe.db.get_value("User", user, ['phone'])
@@ -672,8 +666,6 @@ def encoded_code():
 
     return encrypted_otp.decode()
 #this function find out payment entry which is ready to push in icici portal
-
-
 @frappe.whitelist()
 def select_payment_entry(bank_account):
     # frappe.msgprint(bank_account)
@@ -722,13 +714,8 @@ def select_payment_entry(bank_account):
 def upload_file(payment_entry_list,bank_account, delimiter=','):
     try :
         if frappe.db.get_value("Bank Integration", bank_account, "bank")=="ICICI Bank Limited":
-
-            if isinstance(payment_entry_list, str):
-                payment_entry_list = json.loads(payment_entry_list)
-
-
-            icici_file_create(bank_account,payment_entry_list,delimiter=',')
-            return "Done"
+           icici_file_create(bank_account,payment_entry_list,delimiter=',')
+           return "Done"
            
         elif frappe.db.get_value("Bank Integration", bank_account, "bank")=="Punjab National Bank":
             pnb_file_create(bank_account,payment_entry_list,delimiter=',')  
@@ -740,12 +727,21 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
     
 #this function is use for a push file in icici snorken folder 
 def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
-    
     try :
-        
+        numeric_characters = string.digits
         directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
-        # directory = '/home/mantra/Desktop/TestPayment'
-
+        
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+        list_items = ast.literal_eval(payment_entry_list)
+        
+        # file_name = f"MANTRAS_MANTRASDNLD_{unique_batch_number}.txt"
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+        file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+        file_path = os.path.join(directory, file_name)
+        # file_path2 = os.path.join('/home/mantra/Desktop/Payments', file_name)
+        total_amount = 0
+        
         header = [
             'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
             'Amt', 'Pay Mod', 'Date', 'IFSC', 'Payable Location name', 'Print Location',
@@ -754,118 +750,146 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             'Add details 4', 'Add details 5', 'Remarks'
         ]
         
-        #distribute payment entry based on vendor code
-        vendor_payment_entry={}
-        for i in payment_entry_list:
+        data_rows = []
+        email_data= []
+        sr_no=0
+        for i in list_items:
             payment_entry = frappe.get_doc("Payment Entry", i)
-            all_vendor = vendor_payment_entry.keys()
+            mdf = frappe.db.sql("""
+                SELECT mode_of_payment, abbrivation 
+                FROM `tabMode of Payment Setting` 
+                WHERE parent=%s AND mode_of_payment=%s
+            """, (bank_account, payment_entry.mode_of_payment), as_dict=True)
             
-            if payment_entry.party in all_vendor:
-                party_payment_list = vendor_payment_entry[payment_entry.party]
-                party_payment_list.append(payment_entry)
-            else:
-                vendor_payment_entry[payment_entry.party] = [payment_entry]
-
-
-        all_vendor = vendor_payment_entry.keys()
-        for vendor in all_vendor:
-            party_payment_list = vendor_payment_entry[vendor]
+            frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
             
-            total_amount = 0
-            data_rows = []
-            for payment_entry in party_payment_list:
-                mdf = frappe.db.sql("""
-                    SELECT mode_of_payment, abbrivation 
-                    FROM `tabMode of Payment Setting` 
-                    WHERE parent=%s AND mode_of_payment=%s
-                """, (bank_account, payment_entry.mode_of_payment), as_dict=True)
+            debit_ac_no = frappe.db.get_value("Bank Account", payment_entry.bank_account, "bank_account_no") or ""
+            beneficiary_code = payment_entry.party or ""
+            beneficiary_ac_no = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "bank_account_no") or ""
+            beneficiary_name = payment_entry.party_name or ""
+            amt = payment_entry.base_paid_amount_after_tax
+            pay_mod = mdf[0]["abbrivation"] if mdf else ""
+            payable_location_name = ""
+            print_location = ""
+            input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
+            date = datetime.today().strftime('%d-%b-%Y')
+            # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
+            remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
+            ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
+
+            total_amount += amt
+            
+            bane_mobile_no = ""
+            bane_email_id = ""
+            bane_add1 = ""
+            bane_add2 = ""
+            bane_add3 = ""
+            bane_add4 = ""
+
+            # bane_add_detail_1 = unique_batch_number
+            bane_add_detail_1 = payment_entry.name
+            bane_add_detail_2 = ""
+            bane_add_detail_3 = ""
+            bane_add_detail_4 = ""
+            bane_add_detail_5 = ""
+
+            new_row = [
+                debit_ac_no, beneficiary_code, beneficiary_ac_no, beneficiary_name,
+                amt, pay_mod, date, ifsc, payable_location_name, print_location,
+                bane_mobile_no, bane_email_id, bane_add1, bane_add2, bane_add3,
+                bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks
+            ]
+            data_rows.append(new_row)
+            
+            frappe.db.set_value("Payment Entry", i, "custom_unique_batch_number", unique_batch_number)
+            frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
+            frappe.db.commit()
+            entry_type=frappe.db.get_value("Payment Request",payment_entry.reference_no,"custom_payment_type")
+            approval_type=frappe.db.get_value("Payment Request",payment_entry.reference_no,"custom_approval_type")
+            maker=frappe.db.get_value("Payment Request",payment_entry.reference_no,"owner")
+            email_row=[sr_no+1,beneficiary_code,beneficiary_name,amt,entry_type,"",approval_type,"",remarks,maker,bane_add3]
+            email_data.append(email_row)
+
+        with open(file_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(header)
+            writer.writerows(data_rows)
+        # with open(file_path2, 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter="|")
+        #     writer.writerow(header)
+        #     writer.writerows(data_rows)
+        email_file_path='/home/mantra/Documents/email_file_folder/ICICI'
+        email_file_name=f"MANTRAS_{unique_batch_number}.csv"
+        email_path=os.path.join(email_file_path, email_file_name)
+        email_header=["Sr.No","Code",'Beneficiary','Amount',' Type','Approval','Approval type','Tally Entry','Remarks','Maker','Checker ']
+        with open(email_path, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=",")
+            writer.writerow(email_header)
+            writer.writerows(email_data)
 
 
-                debit_ac_no = frappe.db.get_value("Bank Account", payment_entry.bank_account, "bank_account_no") or ""
-                beneficiary_code = payment_entry.party or ""
-                beneficiary_ac_no = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "bank_account_no") or ""
-                beneficiary_name = payment_entry.party_name or ""
-                amt = payment_entry.base_paid_amount_after_tax
-                pay_mod = mdf[0]["abbrivation"] if mdf else ""
-                payable_location_name = ""
-                print_location = ""
-                input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
-                date = datetime.today().strftime('%d-%b-%Y')
-                # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
-                remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
-                ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
+        with open(file_path, 'rb') as file:
+            file_content = file.read()
+        # with open(file_path2, 'rb') as file:
+        #     file_content = file.read()
 
-                total_amount += amt
-                
-                bane_mobile_no = ""
-                bane_email_id = ""
-                bane_add1 = ""
-                bane_add2 = ""
-                bane_add3 = ""
-                bane_add4 = ""
-                
-                # bane_add_detail_1 = unique_batch_number
-                bane_add_detail_1 = payment_entry.name
-                bane_add_detail_2 = ""
-                bane_add_detail_3 = ""
-                bane_add_detail_4 = ""
-                bane_add_detail_5 = ""
-                
-                new_row = [
-                    debit_ac_no, beneficiary_code, beneficiary_ac_no, beneficiary_name,
-                    amt, pay_mod, date, ifsc, payable_location_name, print_location,
-                    bane_mobile_no, bane_email_id, bane_add1, bane_add2, bane_add3,
-                    bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks
-                ]
-                data_rows.append(new_row)
+        with open(email_path, 'rb') as file:
+            email_file_content = file.read()
+            
+        attachments = [{
+            'fname': file_name,
+            'fcontent': file_content
+        },{
+            'fname': email_file_name,
+            'fcontent': email_file_content
+        }]
+        
+        recipients = []
+        rec = frappe.db.sql('select user from `tabBank User` where parent=%s', bank_account, as_dict=True)
+        if rec:
+            for i in rec:
+                recipients.append(i["user"])
+        
 
-                if total_amount <= 500000:
-
-                    numeric_characters = string.digits
-                    unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
-
-                    current_date = datetime.now()
-                    formatted_date = current_date.strftime("%d%m%Y")
-                    file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
-                    file_path = os.path.join(directory, file_name)
-
-
-                    for payment_entry in party_payment_list:
-
-                        #Update value in payment entry
-                        update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
-                        # update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
-
-                        update_query_run = frappe.db.sql(update_query,as_dict=1)
-                        # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
-                        # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
-
-
-
-
-                    # list_items = ast.literal_eval(party_payment_list)
-
-
-                    #Write file in bank folder
-                    with open(file_path, 'w', newline='') as file:
-                        writer = csv.writer(file, delimiter="|")
-                        writer.writerow(header)
-                        writer.writerows(data_rows)
-
-
-
-        frappe.db.commit()
+        test1=""        
+        if not recipients:
+            test1=""
+        else:
+            try:
+                frappe.sendmail(
+                    recipients=recipients,
+                    subject='ICICI Payment Entry',
+                    message=f'''
+                        <html>
+                        <head>
+                            <title>ICICI Payment Entry</title>
+                        </head>
+                        <body>
+                            <p>Hello,</p>
+                            <p>Please find attached the payment file sent to ICICI.</p>
+                            <p>Below are the details of the transaction:</p>
+                            <ul>
+                                <li>Total amount: {total_amount}</li>
+                                <li>Total number of transactions: {len(list_items)}</li>
+                                <li>Unique batch number: {unique_batch_number}</li>
+                                <li>Time : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</li>
+                                <li>Current User : {frappe.session.user}</li>
+                            </ul>
+                            <br><br>
+                            <p>Regards,</p>
+                            <p>Account Manager</p>
+                        </body>
+                        </html>
+                    ''',
+                    attachments=attachments
+                )
+                send=flush()
+                return file_path
+            except Exception as e:
+                return ""
         return "Done"
     except Exception as e :
-        frappe.sendmail(
-            recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
-            subject="Payment file create error",
-            message="File name : banck_transaction Method Name: icici_file_create <br><br>{}".format(str(traceback.format_exc())),
-        )
-        return str(traceback.format_exc())
-
-
-
+        return e
 
 
 # upload salary slip.txt file on snorkel
@@ -1167,7 +1191,6 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
 
 
         account_error = ""
-        message = ""
         if len(rows_not_process)!=0:
             message = ""
             for slip in rows_not_process:
@@ -1608,7 +1631,6 @@ def get_pnb_file():
 #get revers Mis From Bank ICICI
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
-    
     frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
@@ -1915,7 +1937,6 @@ def send_file(file_path,file_name):
 
 @frappe.whitelist()
 def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry):
-    
     email = ""
     if amount:
         rupees, paise = divmod(round(float(amount) * 100), 100)
@@ -1977,25 +1998,25 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     
 
     payment_data = {
-        # "customer_ref_no": instrument_ref_no,
-        "company_logo": "/path/to/abc_company_logo.png",  # Path to the ABC Limited Group logo
-        "bank_logo": "/path/to/icici_bank_logo.png",  # Path to the ICICI Bank logo
-        "account_no": debit_account_no if debit_account_no else "-",
-        "value_date": date if date else "-",
-        "beneficiary_code": benifecery_code if benifecery_code else "-",
-        "beneficiary_name": benifecery_name if benifecery_name else "-",
-        "beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
-        "payment_doc_no": payment_entry,
-        "payment_mode": payment_mode if payment_mode else "-",
-        "bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
-        "utr_no": utr_no if utr_no else "-",
-        "remarks": remarks if remarks else "-",
-        "additional_details": "1000.00 Advance amount",
-        "ifsc_code": ifsc_code if ifsc_code else "-",
-        "amount": amount,  # Total payment amount
-        "amount_words": amount_words if amount_words else "-",
-        "invoices": invoices if invoices else "-"
-    }
+    # "customer_ref_no": instrument_ref_no,
+    "company_logo": "/path/to/abc_company_logo.png",  # Path to the ABC Limited Group logo
+    "bank_logo": "/path/to/icici_bank_logo.png",  # Path to the ICICI Bank logo
+    "account_no": debit_account_no if debit_account_no else "-",
+    "value_date": date if date else "-",
+    "beneficiary_code": benifecery_code if benifecery_code else "-",
+    "beneficiary_name": benifecery_name if benifecery_name else "-",
+    "beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
+    "payment_doc_no": payment_entry,
+    "payment_mode": payment_mode if payment_mode else "-",
+    "bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
+    "utr_no": utr_no if utr_no else "-",
+    "remarks": remarks if remarks else "-",
+    "additional_details": "1000.00 Advance amount",
+    "ifsc_code": ifsc_code if ifsc_code else "-",
+    "amount": amount,  # Total payment amount
+    "amount_words": amount_words if amount_words else "-",
+    "invoices": invoices if invoices else "-"
+}
 
     # Step 1: Prepare the exact HTML layout
     html_content = f"""
@@ -2065,78 +2086,78 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             color: #555;
         }}
         </style>
-        </head>
-        <body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
+    </head>
+    <body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
+    
+    <table style="border-collapse: collapse; width: 100%;" border="0px">
+    <tbody>
+    <tr>
+    <td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8000/files/images.png" alt="" width="188" height="97" /></td>
+    <td style="width: 33.3333%; border-style: none;">
+    <h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech INDIA Pvt Ltd</h4>
+    <p style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
+HIGHWAY SOLA, AHMEDABAD, GUJARAT, 380060</p>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    </td>
+    <td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" /></td>
+    </tr>
+    </tbody>
+    </table>
+
+
+        <!-- Payment Advice Title -->
+        <h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
         
-        <table style="border-collapse: collapse; width: 100%;" border="0px">
-        <tbody>
-        <tr>
-        <td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8000/files/images.png" alt="" width="188" height="97" /></td>
-        <td style="width: 33.3333%; border-style: none;">
-        <h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech INDIA Pvt Ltd</h4>
-        <p style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
-    HIGHWAY SOLA, AHMEDABAD, GUJARAT, 380060</p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        </td>
-        <td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" /></td>
-        </tr>
-        </tbody>
+        <!-- Details Table -->
+        <table class="details" style="border : 1px solid black">
+            <tr>
+                <th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
+                <th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
+                <th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
+            </tr>
         </table>
-
-
-            <!-- Payment Advice Title -->
-            <h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
-            
-            <!-- Details Table -->
-            <table class="details" style="border : 1px solid black">
+        <table class="details">
+            <tr>
+                <td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
+                <td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
+            </tr>
+            <tr>
+                <td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
+                <td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
+            </tr>
+            <tr>
+                <td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
+                <td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
+            </tr>
+            <tr>
+                <td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
+                <td>Remarks</td><td>:</td><td>{payment_data['remarks']}</td>
+            </tr>
+        </table>
+        
+        <!-- Message Section -->
+        <p>
+            Dear Sir/Madam,<br>
+            We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
+            {payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
+            ({payment_data['amount_words']}) for the services rendered as mentioned below.
+        </p>
+        
+        <!-- Summary Table -->
+        <table class="summary">
+            <thead>
                 <tr>
-                    <th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
-                    <th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
-                    <th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
+                    <th>Document No.</th>
+                    <th>Invoice No.</th>
+                    <th>Invoice Date</th>
+                    <th>Paid Amount</th>
                 </tr>
-            </table>
-            <table class="details">
-                <tr>
-                    <td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
-                    <td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
-                </tr>
-                <tr>
-                    <td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
-                    <td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
-                </tr>
-                <tr>
-                    <td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
-                    <td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
-                </tr>
-                <tr>
-                    <td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
-                    <td>Remarks</td><td>:</td><td>{payment_data['remarks']}</td>
-                </tr>
-            </table>
-            
-            <!-- Message Section -->
-            <p>
-                Dear Sir/Madam,<br>
-                We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
-                {payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
-                ({payment_data['amount_words']}) for the services rendered as mentioned below.
-            </p>
-            
-            <!-- Summary Table -->
-            <table class="summary">
-                <thead>
-                    <tr>
-                        <th>Document No.</th>
-                        <th>Invoice No.</th>
-                        <th>Invoice Date</th>
-                        <th>Paid Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
+            </thead>
+            <tbody>
+    """
 
     # Add dynamic rows for invoices
     for invoice in payment_data['invoices']:

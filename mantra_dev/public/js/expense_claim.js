@@ -1,141 +1,137 @@
 
 frappe.ui.form.on("Expense Claim", {
     onload: function(frm) {
-        frm.set_df_property('expense_approver', 'read_only', 1)
-        frm.set_df_property('approval_status', 'hidden', 1)
-        make_expense_type_read_only(frm);
-        // disable_add_row(frm);
+        // frm.set_df_property('expense_approver', 'read_only', 1)
+        // frm.set_df_property('approval_status', 'hidden', 1)
+        // make_expense_type_read_only(frm);
         
     },
     refresh(frm){
-        frm.set_df_property('expense_approver', 'read_only', 1)
-        frm.set_df_property('approval_status', 'hidden', 1)
-        make_expense_type_read_only(frm);
-        // disable_add_row(frm);
-
+        // frm.set_df_property('expense_approver', 'read_only', 1)
+        // frm.set_df_property('approval_status', 'hidden', 1)
+        // make_expense_type_read_only(frm);
     },
     department(frm){
-        frm.fields_dict["custom_expense_grouping"].get_query = function () {
-            let selected_department = frm.doc.department;
-            if (!selected_department) {
-                return {};
-            }
-            return {
-                filters: {
-                    name: ["in", get_selected_values(selected_department)]
-                }
-            };
-        };
+        // frm.fields_dict["custom_expense_grouping"].get_query = function () {
+        //     let selected_department = frm.doc.department;
+        //     if (!selected_department) {
+        //         return {};
+        //     }
+        //     return {
+        //         filters: {
+        //             name: ["in", get_selected_values(selected_department)]
+        //         }
+        //     };
+        // };
     },
 
     before_save(frm){
-        if (frm.doc.workflow_state !== "Rejected" && frm.doc.workflow_state !== "Cancelled"){
-            frm.set_value("approval_status","Approved")
-        }
-        if(!frm.doc.department){
-            frappe.throw("Please Select Employee or set the Department for the Employee")
-        }
-        if(!frm.doc.custom_expense_grouping){
-            frappe.throw("Please Set the Expense Verification Flow for this Department")
-        }
-        frappe.call({
-            method: "mantra_dev.backend_code.api.get_verification_users",
-            args: {
-                expense_grouping_master: frm.doc.custom_expense_grouping,
-                department: frm.doc.department
-            },
-            callback: function(r) {
-                if (r.message) {
-                    // console.log('---------------->',r.message);
-                    if(!frm.doc.custom_approver_1){
-                        frm.set_value("custom_approver_1", r.message[0][0]);
-                    }
-                    if(!frm.doc.custom_approver_2){
-                        frm.set_value("custom_approver_2", r.message[0][1]);
-                    }
-                    if(!frm.doc.custom_approver_3){
-                        frm.set_value("custom_approver_3", r.message[0][2]);
-                    }
-                    if(!frm.doc.custom_approver_4){
-                        frm.set_value("custom_approver_4", r.message[0][3]);
-                    }
-                    if(!frm.doc.custom_approver_5){
-                        frm.set_value("custom_approver_5", r.message[0][4]);
-                    }
-                    let a1 = r.message[0].filter(function (e) {
-                        return e; // Returns only the truthy values
-                    });
-                    x = a1.length
-                    frm.set_value("expense_approver", a1[x-1]);
-                }
-            }
-        });
+        // if (frm.doc.workflow_state !== "Rejected" && frm.doc.workflow_state !== "Cancelled"){
+        //     frm.set_value("approval_status","Approved")
+        // }
+        // if(!frm.doc.department){
+        //     frappe.throw("Please Select Employee or set the Department for the Employee")
+        // }
+        // if(!frm.doc.custom_expense_grouping){
+        //     frappe.throw("Please Set the Expense Verification Flow for this Department")
+        // }
+        // frappe.call({
+        //     method: "mantra_dev.backend_code.api.get_verification_users",
+        //     args: {
+        //         expense_grouping_master: frm.doc.custom_expense_grouping,
+        //         department: frm.doc.department
+        //     },
+        //     callback: function(r) {
+        //         if (r.message) {
+        //             // console.log('---------------->',r.message);
+        //             if(!frm.doc.custom_approver_1){
+        //                 frm.set_value("custom_approver_1", r.message[0][0]);
+        //             }
+        //             if(!frm.doc.custom_approver_2){
+        //                 frm.set_value("custom_approver_2", r.message[0][1]);
+        //             }
+        //             if(!frm.doc.custom_approver_3){
+        //                 frm.set_value("custom_approver_3", r.message[0][2]);
+        //             }
+        //             if(!frm.doc.custom_approver_4){
+        //                 frm.set_value("custom_approver_4", r.message[0][3]);
+        //             }
+        //             if(!frm.doc.custom_approver_5){
+        //                 frm.set_value("custom_approver_5", r.message[0][4]);
+        //             }
+        //             let a1 = r.message[0].filter(function (e) {
+        //                 return e; // Returns only the truthy values
+        //             });
+        //             x = a1.length
+        //             frm.set_value("expense_approver", a1[x-1]);
+        //         }
+        //     }
+        // });
     },
 
     after_save(frm){
-        let approvers = [
-            frm.doc.custom_approver_1,
-            frm.doc.custom_approver_2,
-            frm.doc.custom_approver_3,
-            frm.doc.custom_approver_4,
-            frm.doc.custom_approver_5
-        ].filter(approver => approver)
-        console.log("----->",approvers);
+        // let approvers = [
+        //     frm.doc.custom_approver_1,
+        //     frm.doc.custom_approver_2,
+        //     frm.doc.custom_approver_3,
+        //     frm.doc.custom_approver_4,
+        //     frm.doc.custom_approver_5
+        // ].filter(approver => approver)
+        // console.log("----->",approvers);
         
-        if(approvers){
+        // if(approvers){
 
-            frappe.call({
-                method: "mantra_dev.backend_code.api.share_document",
-                args: {
-                    doctype: "Expense Claim",
-                    name: frm.doc.name,
-                    users: approvers,
-                    read: 1,
-                    write: 1,
-                    share: 0,
-                    everyone: 0
-                },
-                callback(r) {
-                    if(r.message) {
-                        console.log(r.message);
-                        frm.reload_doc()
-                        // document is shared with user
-                    }
-                }
-            })
-        }
+        //     frappe.call({
+        //         method: "mantra_dev.backend_code.api.share_document",
+        //         args: {
+        //             doctype: "Expense Claim",
+        //             name: frm.doc.name,
+        //             users: approvers,
+        //             read: 1,
+        //             write: 1,
+        //             share: 0,
+        //             everyone: 0
+        //         },
+        //         callback(r) {
+        //             if(r.message) {
+        //                 console.log(r.message);
+        //                 frm.reload_doc()
+        //                 // document is shared with user
+        //             }
+        //         }
+        //     })
+        // }
 
     },
 
     before_workflow_action(frm){
-        if (frm.selected_workflow_action === 'Approve'){
+        // if (frm.selected_workflow_action === 'Approve'){
             
-        }else{
-            frappe.call({
-                method: "mantra_dev.backend_code.api.expense_reject_status",
-                args: {
-                    doc_name: frm.doc.name,
-                    status: "Rejected"
-                },
-                callback: function(r) {
-                    if (r.message) {
-                       console.log(r.message);
+        // }else{
+        //     frappe.call({
+        //         method: "mantra_dev.backend_code.api.expense_reject_status",
+        //         args: {
+        //             doc_name: frm.doc.name,
+        //             status: "Rejected"
+        //         },
+        //         callback: function(r) {
+        //             if (r.message) {
+        //                console.log(r.message);
                        
-                    }
-                }
-            });
-        }
-        // frappe.set_route("List", "Expense Claim");
+        //             }
+        //         }
+        //     });
+        // }
     },
     after_workflow_action(frm){
         // frappe.set_route("List", "Expense Claim");
     },
     custom_expense_grouping(frm){
 
-        frm.doc.expenses.forEach(row => {
-            row.expense_type = frm.doc.custom_expense_grouping;
-        });
-        frm.refresh_field("expenses");
+        // frm.doc.expenses.forEach(row => {
+        //     row.expense_type = frm.doc.custom_expense_grouping;
+        // });
+        // frm.refresh_field("expenses");
     },
 
 

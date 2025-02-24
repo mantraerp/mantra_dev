@@ -9,6 +9,7 @@ from frappe.utils.background_jobs import get_jobs
 
 import erpnext
 import requests
+import traceback
 
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
@@ -210,7 +211,7 @@ def repost(doc):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback(with_context=True)
+		traceback1 = frappe.get_traceback(with_context=True)
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""
@@ -219,23 +220,14 @@ def repost(doc):
 
 		status = "Failed"
 		# If failed because of timeout, set status to In Progress
-		if traceback and "timeout" in traceback.lower():
+		if traceback1 and "timeout" in traceback1.lower():
 			status = "In Progress"
 
-		if traceback:
-			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
+		if traceback1:
+			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback1
 
 
 		message = "{} <br><br> {}".format(message,str(traceback.format_exc()))
-
-		# frappe.db.set_value(
-		# 	doc.doctype,
-		# 	doc.name,
-		# 	{
-		# 		"error_log": message,
-		# 		"status": status,
-		# 	},
-		# )
 
 		outgoing_email_account = frappe.get_cached_value(
 			"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"

@@ -1,26 +1,33 @@
-import frappe
-import num2words
+import frappe # type: ignore
+import num2words # type: ignore
 import random
 import shutil
-from frappe.email.email_body import get_pdf
-from frappe.utils import flt, nowdate
+from frappe.email.email_body import get_pdf  # type: ignore
 import os
 import csv
-import glob
 import json
-from frappe.utils import now
-from frappe.email.queue import flush
+from frappe.utils import now # type: ignore
+from frappe.email.queue import flush # type: ignore
 from datetime import datetime, timedelta
-from frappe.core.doctype.activity_log.activity_log import add_authentication_log
-from frappe.auth import LoginManager
+from frappe.core.doctype.activity_log.activity_log import add_authentication_log # type: ignore
+from frappe.auth import LoginManager # type: ignore
 import string
 import ast
-from cryptography.fernet import Fernet
-import requests
+from cryptography.fernet import Fernet # type: ignore
+import requests # type: ignore
 from datetime import datetime
 import traceback
-from num2words import num2words
-from mantra_dev.backend_code.globle import errorLog,errorLogExites
+from num2words import num2words # type: ignore
+from mantra_dev.backend_code.globle import errorLog,errorLogExites # type: ignore
+
+
+
+#get revers Mis From Bank ICICI
+@frappe.whitelist()
+def get_icici_bank_file(delimiter='|'):
+    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+    frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
+    return True
 
 
 # @frappe.whitelist(allow_guest=True)
@@ -136,9 +143,6 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
             upload_beneficiary_file(doc_name)
             return
 
-
-
-
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
@@ -221,8 +225,8 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
 # Upload Approved Beneficiary file on Snorkel with Indicator D
 @frappe.whitelist()
 def upload_beneficiary_file_for_cancelled_doc(doc_name):
+    
     try:
-
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
@@ -303,152 +307,8 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
         return str(e)
 
 
-# get reverse MIS of Beneficiary File
-@frappe.whitelist()
-def get_bene_file(delimiter='|'):
-    
-    try:
-        folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
-        one_hour_ago = datetime.now() - timedelta(hours=1)
-
-        filersreturn = []        
-        for file_name in os.listdir(folder_path):
-            csv_file_path = os.path.join(folder_path, file_name)
-            modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
-            if modification_time >= one_hour_ago:
-                if file_name.endswith('.txt'):
-                    if not errorLogExites('BENYPROCESSFILE',file_name):
-                        filersreturn.append(file_name)
-                        errorLog('BENYPROCESSFILE',file_name,True)
-
-        if len(filersreturn)==0:
-            return "No files found."
-
-
-  #Start file reading 
-        processed_files = []
-        errors = []
-        data = []
-        
-        for file_name in filersreturn:
-            
-            if file_name.startswith("585730452"):
-                #Call funcation to send in mefron server
-                send_file(csv_file_path,file_name)
-                frappe.sendmail(
-                    recipients=["ravi.patel@mantratec.com"],
-                    subject="Bene file need to send on mefron server line 329",
-                    message="This is bene file send on mefron server {}".format(file_name)
-                )
-            else:
-                csv_file_path = os.path.join(folder_path, file_name)
-                processed_files.append(file_name)
-                
-                with open(csv_file_path, mode='r') as file:
-                    for line in file:
-                        row = line.strip().split(delimiter)
-                        if len(row) < 8:
-                            frappe.sendmail(
-                                recipients=["ravi.patel@mantratec.com"],
-                                subject="Bene file row not suffcient 347",
-                                message=str(row)
-                            )
-                        else:
-                            data.append(row)
-
-        if len(data)==0:
-            return "No row found to process"
-
-        for data_dict in data:
-            try:
-                #If beny get sucussesful uploaded
-                if data_dict[0] == "P" and data_dict[6] == "Added":
-                    bank_account_no = data_dict[4]
-                    bank_account_doc = frappe.db.get_value(
-                        "Bank Account", 
-                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
-                        "name"
-                    )
-                    if bank_account_doc:
-                        frappe.db.set_value(
-                            "Bank Account", bank_account_doc, {"custom_remark": data_dict[7]}
-                        )
-                        frappe.db.commit()
-
-                elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
-
-                    wantToReject = True
-                    if str(data_dict[8]) in ['Field code Beneficiary Account No Already exists in buyer Mst Tmp Table','CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
-                        wantToReject = False
-                        # frappe.sendmail(
-                        #     recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"],
-                        #     subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
-                        #     message=str(data_dict)
-                        # )
-                        # return "Bank account is already uploaded on CMS."
-
-                    bank_account_no = data_dict[5]
-                    bank_account_doc = frappe.db.get_value(
-                        "Bank Account", 
-                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
-                        "name"
-                    )
-                    if bank_account_doc:
-                        if wantToReject:
-                            frappe.db.set_value(
-                                "Bank Account", bank_account_doc, {
-                                    "workflow_state": "Rejected",
-                                    "custom_beneficiary_file_uploaded": 0,
-                                    "custom_remark": data_dict[8]
-                                }
-                            )
-                            # frappe.db.commit()
-                            error_message = f"""
-                                <p><strong>File:</strong> {file_name}</p>
-                                <p><strong>Row Data:</strong> {data_dict}</p>
-                                <p>The workflow state has been set to "Rejected" for the bank account with account number: {bank_account_no}.</p>
-                            """
-                            previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene'],['file_name', '=', data_dict[0]]])
-                            if len(previous_file)==0:
-                                send_bene_file_error_email(error_message)
-
-                                #insert bank transaction log
-                                doc = frappe.new_doc('Bank Integration Log')
-                                doc.file_from = "Mantra"
-                                doc.file_type = "Mail Send Bene"
-                                doc.file_name = data_dict[0]
-                                doc.insert(ignore_permissions=True)
-                        else:
-                            query = "UPDATE `tabBank Account` SET `custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[8]),bank_account_no)
-                            mdf = frappe.db.sql(query, as_dict=True)
-            except Exception as e:
-                errors.append({"file": file_name, "row": data_dict, "error": str(e)})
-
-        if errors:
-            error_details = "".join([
-                f"""
-                <p><strong>File:</strong> {error['file']}</p>
-                <p><strong>Row:</strong> {error['row']}</p>
-                <p><strong>Error:</strong> {error['error']}</p>
-                <hr> Test
-                """ for error in errors
-            ])
-            send_bene_file_error_email(error_details)
-
-        return "Total process row {}".format(len(data))
-    except FileNotFoundError as e:
-        error_message = f"Folder path {folder_path} not found. Exception: {str(e)}"
-        send_bene_file_error_email(error_message)
-
-    except Exception as e:
-        error_message = f"Unexpected error: {str(e)}"
-        send_bene_file_error_email(str(traceback.format_exc()))
-
-
-
-
-
 def send_bene_file_error_email(error_message):
+    
     """
     Sends an email with the error message.
     """
@@ -475,6 +335,7 @@ def send_bene_file_error_email(error_message):
 # Check User & then end Otp On Email
 @frappe.whitelist(allow_guest=True)
 def send_otp(email):
+    
     # frappe.msgprint(email)
     filters = {
         "name": email,
@@ -521,46 +382,10 @@ def send_otp(email):
         return "Error"
  # this function for a email formate  
 
-def send_email(email,email_otp,full_name):
-    
-    frappe.sendmail(
-        recipients=email,
-        subject="OTP Verification for Payments",
-        message=f"""
-        <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Document</title>
-            </head>
-            <body>
-            <div style="padding: 1%;background-color: #f4f5f6">
-                <div class="box" style="  background-color: #fff;
-                    padding: 25px;
-                    border-radius:15px;        
-                    width: 60%;
-                    align-items: center;
-                    margin-top: 100px;
-                    margin-bottom: 100px;
-                    margin-left: auto;
-                    margin-right: auto;">
-                    <h2>Dear {full_name},</h2>
-                    <p>Please use the verification code below to complete the Payment Entry Transactions.</p>
-                    <p>Payment Entry Attempted at {now()}</p>
-                    <h1>{email_otp}</h1>
-                    <h4>OTP will expire in 10 minutes.</h4>
-                    <p>Thank You</p>
-                    <img src="https://mantratec.milaap.ai/files/Mantra-Logo_1.png">
-                </div>
-                </div>
-            </body>
-        </html>""" 
-    )
-    send = flush()
-
-#yhis function for verify a otp
+#This function for verify a otp
 @frappe.whitelist(allow_guest=True)
 def verify_otp(email,otp):
+    
     r_send = frappe.get_doc("Email OTP",email)	
     check_otp = r_send.email_otp
     check_time = r_send.datetime
@@ -571,12 +396,6 @@ def verify_otp(email,otp):
 
     dt_object = datetime.strptime(end_date , date_format)
     start_date = dt_object - timedelta(hours=0, minutes=10)
-
-    # if check_otp==otp:
-    #     return "Done"
-
-    # return "Error"
-
     #check Otp
     if start_date < ck_time:
         if check_otp==otp:
@@ -587,11 +406,11 @@ def verify_otp(email,otp):
             return "Error"
     else:
         return "Expired"
-	
 
 # this function for ligin
 @frappe.whitelist(allow_guest=True)
 def login_user(user):
+    
     # frappe.msgprint("Test login_user")
     number = frappe.db.get_value("User", user, ['phone'])
     frappe.local.login_manager.user = user
@@ -622,6 +441,7 @@ def login_user(user):
 #login with otp
 @frappe.whitelist(allow_guest=True)
 def login_via_token(login_token: str, number,user):
+    
     sid = frappe.cache().get_value(f"login_token:{login_token}", expires=True)
     if not sid:
         frappe.respond_as_web_page(("Invalid Request"), (
@@ -637,6 +457,7 @@ def login_via_token(login_token: str, number,user):
 
 @frappe.whitelist()
 def get_opration_approver(department):
+    
     doc=frappe.get_doc("Department",department)
     dep_approver=[]
     if doc.custom_opration_approver:
@@ -671,11 +492,11 @@ def encoded_code():
    
 
     return encrypted_otp.decode()
+
 #this function find out payment entry which is ready to push in icici portal
-
-
 @frappe.whitelist()
 def select_payment_entry(bank_account):
+    
     # frappe.msgprint(bank_account)
     # Retrieve the encrypted OTP and key from the single document
     doc1 = frappe.get_single("Bank Authentication")
@@ -718,17 +539,67 @@ def select_payment_entry(bank_account):
     else:
         return {"payment_entry_list":[],"amount":0}
      
+
+@frappe.whitelist(allow_guest=True)
+def select_payment_entry_test():
+    
+    bank_account = "Mantra - ICICI Bank Limited - 018951000027"
+    # frappe.msgprint(bank_account)
+    # Retrieve the encrypted OTP and key from the single document
+    doc1 = frappe.get_single("Bank Authentication")
+    # encrypted_otp = doc1.encrypted_otp.encode()  # Convert back to bytes
+    # key = doc1.required_key.encode()  # Convert back to bytes
+
+    # Reconstruct the Fernet object from the key
+    # cipher_suite = Fernet(key)
+    
+    # Decrypt the OTP
+    # decrypted_message = cipher_suite.decrypt(encrypted_otp).decode()
+    
+    mdf=frappe.db.sql("select mode_of_payment,abbrivation from `tabMode of Payment Setting` where parent=%s",bank_account,as_dict=True)
+    mode_of_payment=[]
+    for i in mdf:
+        mode_of_payment.append(i["mode_of_payment"])
+    # Verify the OTP
+    # if decrypted_message == otp:
+        # get payment reqest id
+    sql_query = """
+        SELECT name, base_paid_amount_after_tax
+        FROM `tabPayment Entry`
+        WHERE custom_unique_batch_number IS NULL
+        AND docstatus=1
+        AND payment_type='Pay'
+        AND bank_account=%s
+        AND mode_of_payment IN %s
+    """
+    
+    # Execute the query and fetch results as dictionaries
+    payment_entry = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)
+ 
+    amount=0
+    if payment_entry:
+        unique_code=0
+        payment_entry_list=[]
+        for i in payment_entry:
+            payment_entry_list.append(i['name'])
+
+        if frappe.db.get_value("Bank Integration", bank_account, "bank")=="ICICI Bank Limited":
+            return icici_file_create(bank_account,payment_entry_list)
+
+
+        return "Bank not found"
+    else:
+        return {"payment_entry_list":[],"amount":0}
+
+
+
 @frappe.whitelist()
 def upload_file(payment_entry_list,bank_account, delimiter=','):
+    
     try :
         if frappe.db.get_value("Bank Integration", bank_account, "bank")=="ICICI Bank Limited":
-
-            if isinstance(payment_entry_list, str):
-                payment_entry_list = json.loads(payment_entry_list)
-
-
-            icici_file_create(bank_account,payment_entry_list,delimiter=',')
-            return "Done"
+           icici_file_create(bank_account,payment_entry_list)
+           return "Done"
            
         elif frappe.db.get_value("Bank Integration", bank_account, "bank")=="Punjab National Bank":
             pnb_file_create(bank_account,payment_entry_list,delimiter=',')  
@@ -739,12 +610,12 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
     
     
 #this function is use for a push file in icici snorken folder 
-def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
+def icici_file_create(bank_account, payment_entry_list):
     
     try :
         
-        directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
-        # directory = '/home/mantra/Desktop/TestPayment'
+        # directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
+        directory = '/home/mantra/Desktop/TestPayment'
 
         header = [
             'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
@@ -819,38 +690,39 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                 ]
                 data_rows.append(new_row)
 
-                if total_amount <= 500000:
-
-                    numeric_characters = string.digits
-                    unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
-
-                    current_date = datetime.now()
-                    formatted_date = current_date.strftime("%d%m%Y")
-                    file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
-                    file_path = os.path.join(directory, file_name)
+            if total_amount <= 500000:
 
 
-                    for payment_entry in party_payment_list:
+                numeric_characters = string.digits
+                unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
-                        #Update value in payment entry
-                        update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
-                        # update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
-
-                        update_query_run = frappe.db.sql(update_query,as_dict=1)
-                        # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
-                        # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
+                current_date = datetime.now()
+                formatted_date = current_date.strftime("%d%m%Y")
+                file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+                file_path = os.path.join(directory, file_name)
 
 
+                for payment_entry in party_payment_list:
+
+                    #Update value in payment entry
+                    # update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
+                    update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
+
+                    update_query_run = frappe.db.sql(update_query,as_dict=1)
+                    # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
+                    # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
 
 
-                    # list_items = ast.literal_eval(party_payment_list)
 
 
-                    #Write file in bank folder
-                    with open(file_path, 'w', newline='') as file:
-                        writer = csv.writer(file, delimiter="|")
-                        writer.writerow(header)
-                        writer.writerows(data_rows)
+                # list_items = ast.literal_eval(party_payment_list)
+
+
+                #Write file in bank folder
+                with open(file_path, 'w', newline='') as file:
+                    writer = csv.writer(file, delimiter="|")
+                    writer.writerow(header)
+                    writer.writerows(data_rows)
 
 
 
@@ -863,9 +735,6 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
             message="File name : banck_transaction Method Name: icici_file_create <br><br>{}".format(str(traceback.format_exc())),
         )
         return str(traceback.format_exc())
-
-
-
 
 
 # upload salary slip.txt file on snorkel
@@ -1036,9 +905,6 @@ def generate_salary_slip(payroll_entry=None):
         # return str(traceback.format_exc())
         # return str(e)
 
-
-
-
 @frappe.whitelist()
 def generate_payroll_payment_file(payroll_entry,create_only_file=None):
 
@@ -1167,7 +1033,6 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
 
 
         account_error = ""
-        message = ""
         if len(rows_not_process)!=0:
             message = ""
             for slip in rows_not_process:
@@ -1260,7 +1125,6 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
         )
 
     return reply
-
 
 # upload salary slip.txt file on snorkel
 @frappe.whitelist()
@@ -1433,6 +1297,7 @@ def generate_salary_slip_test(payroll_entry=None):
 
 #this function is use for a pnb file creation
 def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
+    
     try:
         header = ["Payment Method", "Transaction Reference No.", "Value Date", "Debit A/C no", "Debit A/c Currency", "Beneficiary A/c no", "Beneficiary Code", "Bene Name", "Amount Payable", "Beneficiary Bank BIC Code", "Print Branch", "Transaction Status", "Verified By", "UTR No"]
 
@@ -1556,6 +1421,7 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
 #get revers Mis From Bank PNB
 @frappe.whitelist()
 def get_pnb_file():
+    
     # Specify the path to your CSV file
     # folder_path = '/home/mantra/Documents/PNB/recive_file'
     bank_list = frappe.db.get_list("Bank Integration", filters={"bank": "Punjab National Bank"}, fields=["name", "bank", "file_pull_path"])
@@ -1605,14 +1471,153 @@ def get_pnb_file():
                     frappe.db.set_value("Payment Entry",data_dict["Transaction Reference No."],"docstatus",2)
                     frappe.db.commit()
 
-#get revers Mis From Bank ICICI
+
+
+# get reverse MIS of Beneficiary File
 @frappe.whitelist()
-def get_icici_bank_file(delimiter='|'):
+def get_bene_file(delimiter='|'):
     
-    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
-    frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
-    return True
+    # errorLog('BENY_CRON',"",False)
     
+    try:
+        folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
+        one_hour_ago = datetime.now() - timedelta(hours=1)
+
+        filersreturn = []        
+        for file_name in os.listdir(folder_path):
+            csv_file_path = os.path.join(folder_path, file_name)
+            modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
+            if modification_time >= one_hour_ago:
+                if file_name.endswith('.txt'):
+                    if not errorLogExites('BENYPROCESSFILE',file_name):
+                        filersreturn.append(file_name)
+                        errorLog('BENYPROCESSFILE',file_name,True)
+
+        if len(filersreturn)==0:
+            return "No files found."
+
+
+ #Start file reading 
+        processed_files = []
+        errors = []
+        data = []
+        
+        for file_name in filersreturn:
+            
+            if file_name.startswith("585730452"):
+                #Call funcation to send in mefron server
+                send_file(csv_file_path,file_name)
+                frappe.sendmail(
+                    recipients=["ravi.patel@mantratec.com"],
+                    subject="Bene file need to send on mefron server line 329",
+                    message="This is bene file send on mefron server {}".format(file_name)
+                )
+            else:
+                csv_file_path = os.path.join(folder_path, file_name)
+                processed_files.append(file_name)
+                
+                with open(csv_file_path, mode='r') as file:
+                    for line in file:
+                        row = line.strip().split(delimiter)
+                        if len(row) < 8:
+                            frappe.sendmail(
+                                recipients=["ravi.patel@mantratec.com"],
+                                subject="Bene file row not suffcient 347",
+                                message=str(row)
+                            )
+                        else:
+                            data.append(row)
+
+
+        if len(data)==0:
+            return "No row found to process"
+
+        for data_dict in data:
+            try:
+                #If beny get sucussesful uploaded
+                if data_dict[0] == "P" and data_dict[6] == "Added":
+                    bank_account_no = data_dict[4]
+                    bank_account_doc = frappe.db.get_value(
+                        "Bank Account", 
+                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
+                        "name"
+                    )
+                    if bank_account_doc:
+                        frappe.db.set_value(
+                            "Bank Account", bank_account_doc, {"custom_remark": data_dict[7]}
+                        )
+                        frappe.db.commit()
+
+                elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
+
+                    wantToReject = True
+                    if str(data_dict[8]) in ['Field code Beneficiary Account No Already exists in buyer Mst Tmp Table','CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
+                        wantToReject = False
+                        # frappe.sendmail(
+                        #     recipients=["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"],
+                        #     subject="Bank account is already uploaded on CMS. {}".format(str(data_dict[2])),
+                        #     message=str(data_dict)
+                        # )
+                        # return "Bank account is already uploaded on CMS."
+
+                    bank_account_no = data_dict[5]
+                    bank_account_doc = frappe.db.get_value(
+                        "Bank Account", 
+                        {"bank_account_no": bank_account_no, "docstatus": 1}, 
+                        "name"
+                    )
+                    if bank_account_doc:
+                        if wantToReject:
+                            frappe.db.set_value(
+                                "Bank Account", bank_account_doc, {
+                                    "workflow_state": "Rejected",
+                                    "custom_beneficiary_file_uploaded": 0,
+                                    "custom_remark": data_dict[8]
+                                }
+                            )
+                            # frappe.db.commit()
+                            error_message = f"""
+                                <p><strong>File:</strong> {file_name}</p>
+                                <p><strong>Row Data:</strong> {data_dict}</p>
+                                <p>The workflow state has been set to "Rejected" for the bank account with account number: {bank_account_no}.</p>
+                            """
+                            previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene'],['file_name', '=', data_dict[0]]])
+                            if len(previous_file)==0:
+                                send_bene_file_error_email(error_message)
+
+                                #insert bank transaction log
+                                doc = frappe.new_doc('Bank Integration Log')
+                                doc.file_from = "Mantra"
+                                doc.file_type = "Mail Send Bene"
+                                doc.file_name = data_dict[0]
+                                doc.insert(ignore_permissions=True)
+                        else:
+                            query = "UPDATE `tabBank Account` SET `custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[8]),bank_account_no)
+                            mdf = frappe.db.sql(query, as_dict=True)
+            except Exception as e:
+                errors.append({"file": file_name, "row": data_dict, "error": str(e)})
+
+        if errors:
+            error_details = "".join([
+                f"""
+                <p><strong>File:</strong> {error['file']}</p>
+                <p><strong>Row:</strong> {error['row']}</p>
+                <p><strong>Error:</strong> {error['error']}</p>
+                <hr> Test
+                """ for error in errors
+            ])
+            send_bene_file_error_email(error_details)
+
+        return "Total process row {}".format(len(data))
+    except FileNotFoundError as e:
+        error_message = f"Folder path {folder_path} not found. Exception: {str(e)}"
+        send_bene_file_error_email(error_message)
+
+    except Exception as e:
+        error_message = f"Unexpected error: {str(e)}"
+        send_bene_file_error_email(str(traceback.format_exc()))
+
+
 @frappe.whitelist()
 def get_icici_bank_file_background(delimiter='|'):
     
@@ -1852,7 +1857,7 @@ def send_frappe_mail():
 def send_file(file_path,file_name):
     
     # URL to send the POST request
-    url = "http://192.168.5.56:8007/api/method/mefron_dev.backend_code.api.recive_file"
+    url = "http://192.168.5.56:8003/api/method/mefron_dev.backend_code.api.recive_file"
 
     # Path to the file to be uploaded
 
@@ -1913,9 +1918,13 @@ def send_file(file_path,file_name):
 
 
 
-@frappe.whitelist()
+
+#https://mantratec.milaap.ai/api/method/mantra_dev.api_code.banck_transaction_3.send_payment_advice_email?debit_account_no=123123&amount=100&date=2024-02-22&remarks=remarktext&benfiecery_account_no=123321&utr_no='wersdf&payment_mode=modepayment&ifsc_code=icicic&benifecery_code=testbeny&benifecery_name=Parth&instrument_ref_no=rrr&payment_entry=ACC-PAY-2025-03193
+
+@frappe.whitelist(allow_guest=True)
 def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry):
-    
+        
+
     email = ""
     if amount:
         rupees, paise = divmod(round(float(amount) * 100), 100)
@@ -1952,10 +1961,14 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     if document.references:
         for i in document.references:
             d = frappe.get_doc(i.reference_doctype, i.reference_name)
+
+            # if i.reference_doctype in ['Purchase Invoice']
+
+
             x = {
                 "document_no": i.reference_name,
                 "invoice_no": i.bill_no if i.bill_no else "-",
-                "invoice_date": d.transaction_date,
+                "invoice_date": d.posting_date,
                 "paid_amount":i.allocated_amount
             }
             email = d.contact_email if d.contact_email else ""
@@ -1977,25 +1990,25 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     
 
     payment_data = {
-        # "customer_ref_no": instrument_ref_no,
-        "company_logo": "/path/to/abc_company_logo.png",  # Path to the ABC Limited Group logo
-        "bank_logo": "/path/to/icici_bank_logo.png",  # Path to the ICICI Bank logo
-        "account_no": debit_account_no if debit_account_no else "-",
-        "value_date": date if date else "-",
-        "beneficiary_code": benifecery_code if benifecery_code else "-",
-        "beneficiary_name": benifecery_name if benifecery_name else "-",
-        "beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
-        "payment_doc_no": payment_entry,
-        "payment_mode": payment_mode if payment_mode else "-",
-        "bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
-        "utr_no": utr_no if utr_no else "-",
-        "remarks": remarks if remarks else "-",
-        "additional_details": "1000.00 Advance amount",
-        "ifsc_code": ifsc_code if ifsc_code else "-",
-        "amount": amount,  # Total payment amount
-        "amount_words": amount_words if amount_words else "-",
-        "invoices": invoices if invoices else "-"
-    }
+    # "customer_ref_no": instrument_ref_no,
+    "company_logo": "/path/to/abc_company_logo.png",  # Path to the ABC Limited Group logo
+    "bank_logo": "/path/to/icici_bank_logo.png",  # Path to the ICICI Bank logo
+    "account_no": debit_account_no if debit_account_no else "-",
+    "value_date": date if date else "-",
+    "beneficiary_code": benifecery_code if benifecery_code else "-",
+    "beneficiary_name": benifecery_name if benifecery_name else "-",
+    "beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
+    "payment_doc_no": payment_entry,
+    "payment_mode": payment_mode if payment_mode else "-",
+    "bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
+    "utr_no": utr_no if utr_no else "-",
+    "remarks": remarks if remarks else "-",
+    "additional_details": "1000.00 Advance amount",
+    "ifsc_code": ifsc_code if ifsc_code else "-",
+    "amount": amount,  # Total payment amount
+    "amount_words": amount_words if amount_words else "-",
+    "invoices": invoices if invoices else "-"
+}
 
     # Step 1: Prepare the exact HTML layout
     html_content = f"""
@@ -2065,78 +2078,78 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             color: #555;
         }}
         </style>
-        </head>
-        <body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
+    </head>
+    <body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
+    
+    <table style="border-collapse: collapse; width: 100%;" border="0px">
+    <tbody>
+    <tr>
+    <td style="width: 27.5%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8001/files/images.png" alt="" width="188" height="97" /></td>
+    <td style="width: 45%; border-style: none;">
+    <h4 style="text-align: center; margin-bottom: 20px;">MANTRA SOFTECH INDIA PRIVATE LIMITED</h5>
+    <h4 style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
+    HIGHWAY SOLA, AHMEDABAD, GUJARAT, 380060</h5>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    <p style="text-align: center;"></p>
+    </td>
+    <td style="width: 27.5%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" /></td>
+    </tr>
+    </tbody>
+    </table>
+
+
+        <!-- Payment Advice Title -->
+        <h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
         
-        <table style="border-collapse: collapse; width: 100%;" border="0px">
-        <tbody>
-        <tr>
-        <td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8000/files/images.png" alt="" width="188" height="97" /></td>
-        <td style="width: 33.3333%; border-style: none;">
-        <h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech INDIA Pvt Ltd</h4>
-        <p style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
-    HIGHWAY SOLA, AHMEDABAD, GUJARAT, 380060</p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        <p style="text-align: center;"></p>
-        </td>
-        <td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" /></td>
-        </tr>
-        </tbody>
+        <!-- Details Table -->
+        <table class="details" style="border : 1px solid black">
+            <tr>
+                <th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
+                <th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
+                <th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
+            </tr>
         </table>
-
-
-            <!-- Payment Advice Title -->
-            <h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
-            
-            <!-- Details Table -->
-            <table class="details" style="border : 1px solid black">
+        <table class="details">
+            <tr>
+                <td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
+                <td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
+            </tr>
+            <tr>
+                <td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
+                <td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
+            </tr>
+            <tr>
+                <td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
+                <td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
+            </tr>
+            <tr>
+                <td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
+                <td>Remarks</td><td>:</td><td>{payment_data['remarks']}</td>
+            </tr>
+        </table>
+        
+        <!-- Message Section -->
+        <p>
+            Dear Sir/Madam,<br>
+            We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
+            {payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
+            ({payment_data['amount_words']}) references as below.
+        </p>
+        
+        <!-- Summary Table -->
+        <table class="summary">
+            <thead>
                 <tr>
-                    <th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
-                    <th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
-                    <th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
+                    <th>Document No.</th>
+                    <th>Invoice No.</th>
+                    <th>Invoice Date</th>
+                    <th>Paid Amount</th>
                 </tr>
-            </table>
-            <table class="details">
-                <tr>
-                    <td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
-                    <td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
-                </tr>
-                <tr>
-                    <td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
-                    <td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
-                </tr>
-                <tr>
-                    <td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
-                    <td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
-                </tr>
-                <tr>
-                    <td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
-                    <td>Remarks</td><td>:</td><td>{payment_data['remarks']}</td>
-                </tr>
-            </table>
-            
-            <!-- Message Section -->
-            <p>
-                Dear Sir/Madam,<br>
-                We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
-                {payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
-                ({payment_data['amount_words']}) for the services rendered as mentioned below.
-            </p>
-            
-            <!-- Summary Table -->
-            <table class="summary">
-                <thead>
-                    <tr>
-                        <th>Document No.</th>
-                        <th>Invoice No.</th>
-                        <th>Invoice Date</th>
-                        <th>Paid Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
+            </thead>
+            <tbody>
+    """
 
     # Add dynamic rows for invoices
     for invoice in payment_data['invoices']:
@@ -2173,10 +2186,17 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     pdf_data = get_pdf(html_content)
 
     # Step 3: Send email with PDF attachment
+
+
+
+
+    email_list = ['ravi.patel@mantratec.com','abhishek.jain@mantratec.com','helpdesk1.erp@mantratec.com']
+    # email_list = [email]
+
     try:
         if email:
             frappe.sendmail(
-                recipients=[email],
+                recipients=email_list,
                 subject="Payment Advice",
                 message="Please find the attached payment advice.",
                 attachments=[{
@@ -2188,7 +2208,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             frappe.msgprint(f"Payment advice email sent successfully to {email}.")
         else:
             frappe.sendmail(
-                recipients="abhishek.jain@mantratec.com",
+                recipients=['ravi.patel@mantratec.com','abhishek.jain@mantratec.com','helpdesk1.erp@mantratec.com'],
                 subject="supplier email not found for Payment Advice",
                 message="Please find the attached payment advice.",
                 attachments=[{
@@ -2198,5 +2218,14 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             )
             send = flush()
     except Exception as e:
+        frappe.sendmail(
+            recipients="ravi.patel@mantratec.com",
+            subject="Issue to send Payment Advice",
+            message="Please find the attached payment advice. {}".formate(e),
+            attachments=[{
+                    'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
+                    'fcontent': pdf_data
+                }]
+        )
         frappe.log_error(f"Error sending payment advice email: {str(e)}", "Email Sending Error")
-        frappe.throw(f"Failed to send email to {email}. Please try again.")
+        frappe.throw(f"Failed to send email to {e}. Please try again.")

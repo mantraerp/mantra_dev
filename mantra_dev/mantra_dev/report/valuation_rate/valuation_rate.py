@@ -61,12 +61,11 @@ def get_data(filters):
 						'balance_value': 0
 					}
 				
-				item_wise_stock_balance[stock.item_code]['valuation_rate'] += stock.val_rate
 				item_wise_stock_balance[stock.item_code]['balance_qty'] += stock.bal_qty
 				item_wise_stock_balance[stock.item_code]['balance_value'] += stock.bal_val
 
 			if count > 0:
-				item_wise_stock_balance[stock_balance_data[1][0].item_code]['valuation_rate'] = flt(item_wise_stock_balance[stock_balance_data[1][0].item_code]['valuation_rate']/count)
+				item_wise_stock_balance[stock_balance_data[1][0].item_code]['valuation_rate'] = flt(item_wise_stock_balance[stock_balance_data[1][0].item_code]['balance_value']/item_wise_stock_balance[stock_balance_data[1][0].item_code]['balance_qty'])
 				data.append(item_wise_stock_balance[stock_balance_data[1][0].item_code])
 
 	return data

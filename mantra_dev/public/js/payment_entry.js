@@ -129,7 +129,6 @@ frappe.ui.form.on("Payment Entry", {
             mode_of_payment: frm.doc.mode_of_payment
           },
           callback: function (r) {
-            console.log(r.message);
             frm.set_value("bank_account", r.message);
           }
         });
@@ -212,33 +211,24 @@ frappe.ui.form.on("Payment Entry", {
 });
 
 frappe.listview_settings["Payment Entry"] = {
+
   refresh: function (listview) {
     $(".layout-side-section").hide();
   },
-  // primary_action() {
-  //   frappe.throw("Company bank account not found");
-  //   console.log("***************Test")
-  // },
   onload: function (listview) {
-    if (frappe.user.has_role("Make Payment")) {
-      listview.page.add_inner_button(__("Make Payment"), function () {
-        // Fetch current user's mobile number
-        // const current_user = frappe.session.user;
-        // frappe.call({
-        //     method: 'frappe.client.get',
-        //     args: {
-        //         doctype: 'User',
-        //         name: current_user
-        //     },
-        //     callback: function(r) {
-        //         if (r.message && r.message.mobile_no) {
-        //             const user_mobile = r.message.mobile_no;
 
+    // if (frappe.user.has_role("Make Payment")) {
+    if (frappe.session.user==="hiren@mantratec.com") {      
+      listview.page.add_inner_button(__("Make Payment"), function () {
         // Dialog to select bank account
         showBankAccountDialog();
-        //         }
-        //     }
-        // });
+      });
+    }
+
+    if (frappe.session.user==="bhavyen@mantratec.com") {      
+      listview.page.add_inner_button(__("Make Payment"), function () {
+        // Dialog to select bank account
+        showBankAccountDialog();
       });
     }
 
@@ -371,14 +361,16 @@ function showOTPDIalog(bank_account) {
 function verifyotp(otp, bank_account) {
   frappe.call({
     method: "mantra_dev.api_code.banck_transaction.verify_otp",
-    args: {
+    args: 
+    {
       email: frappe.session.user,
       otp: otp,
     },
-    callback: function (r) {
+    callback: function (r) 
+    {
       if (r.message) {
-        if (r.message == "Done") {
-          // console.log("ngjnj c fngjg ");
+        if (r.message == "Done") 
+        {
           selectPaymentEntry(bank_account);
         }
         if (r.message == "Error") {
@@ -422,7 +414,7 @@ function selectPaymentEntry(bank_account) {
                       window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
                     }
                     else {
-                      // window.location.reload()
+                      frappe.msgprint('Payment file not uploaded');
                     }
                   }
                 },

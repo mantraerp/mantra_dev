@@ -4,13 +4,17 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2025-02-17 17:30:03.995013",
+ "modified": "2025-02-20 17:08:13.972048",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "payment-page",
  "owner": "Administrator",
  "page_name": "payment-page",
- "roles": [],
+ "roles": [
+  {
+   "role": "Bank Checker"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,

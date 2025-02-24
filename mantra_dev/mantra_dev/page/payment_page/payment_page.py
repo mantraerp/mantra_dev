@@ -19,7 +19,8 @@ def select_payment_entry(bank_account):
             paid_amount, 
             party, 
             reference_no, 
-            workflow_state
+            workflow_state,
+            party_name
         FROM `tabPayment Entry`
         WHERE custom_unique_batch_number IS NULL
         AND docstatus = 1
@@ -29,22 +30,6 @@ def select_payment_entry(bank_account):
     """
     
     payment_entries = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)
-
-    # Fetch the party name separately
-    for entry in payment_entries:
-        party = entry["party"]
-        party_name = None
-
-        # Check if the party exists in Supplier
-        if frappe.db.exists("Supplier", party):
-            party_name = frappe.db.get_value("Supplier", party, "supplier_name")
-        
-        # Check if the party exists in Customer (if not found in Supplier)
-        if not party_name and frappe.db.exists("Customer", party):
-            party_name = frappe.db.get_value("Customer", party, "customer_name")
-
-        # Assign the party name to the entry
-        entry["party_name"] = party_name if party_name else "Unknown"
 
     return payment_entries
 
@@ -84,14 +69,11 @@ def send_excel_email(user_email, filename, filedata, subject):
     try:
         # Decode the base64 file data
         decoded_file = base64.b64decode(filedata)
-        error_log=frappe.new_doc("Error Log")
-        error_log.error=frappe.as_json({'1':'clcijed'})
-        error_log.save()
         # Send the email using frappe.sendmail with a proper subject
         frappe.sendmail(
             recipients=[user_email],
             subject=subject,
-            message="Please find attached the Excel file containing the payment data.",
+            message="Please find attached the Excel file containing the payment entry data.",
             attachments=[{
                 "fname": filename,
                 "fcontent": decoded_file
@@ -101,3 +83,127 @@ def send_excel_email(user_email, filename, filedata, subject):
         return "Email Sent"
     except Exception as e:
         frappe.throw("Failed to send email: " + str(e))
+
+
+from frappe import _
+@frappe.whitelist()
+def get_payment_entry_reference_details(payment_entry):
+    try:
+        payment_entry_doc = frappe.get_doc("Payment Entry", payment_entry)
+
+        if not payment_entry_doc.references:
+            return {"error": _("No reference details found in Payment Entry.")}
+
+        def get_approvers(doctype, docname):
+            """Fetch unique approvers (emails) from Workflow or Version"""
+            workflow_exists = frappe.db.exists("Workflow", {"document_type": doctype})
+            approvers = set()
+
+            if workflow_exists:
+                approvers.update([
+                    row[0] for row in frappe.db.sql(
+                        """SELECT DISTINCT comment_email
+                        FROM `tabComment`
+                        WHERE reference_doctype = %(doctype)s
+                        AND reference_name = %(docname)s
+                        AND comment_type = 'Workflow'""",
+                        {"doctype": doctype, "docname": docname},
+                        as_list=True
+                    ) if row[0]
+                ])
+            else:
+                approvers.update([
+                    row[0] for row in frappe.db.sql(
+                        """SELECT DISTINCT modified_by
+                        FROM `tabVersion`
+                        WHERE ref_doctype = %(doctype)s
+                        AND docname = %(docname)s""",
+                        {"doctype": doctype, "docname": docname},
+                        as_list=True
+                    ) if row[0]
+                ])
+
+            return approvers
+
+        def get_all_parents(ref_doctype, ref_docname):
+            """Get all linked parent documents and their approvers"""
+            parents = [(ref_doctype, ref_docname)]
+            checked = set()
+            approvers_map = {}
+            reference_hierarchy = []
+            doctype_list = []
+
+            while parents:
+                current_doctype, current_docname = parents.pop()
+
+                if (current_doctype, current_docname) in checked:
+                    continue   
+                checked.add((current_doctype, current_docname))
+
+                reference_hierarchy.append(f"{current_doctype} - {current_docname}")
+                if current_doctype not in doctype_list:
+                    doctype_list.append(current_doctype)
+
+                doc_approvers = get_approvers(current_doctype, current_docname)
+                if doc_approvers:
+                    approvers_map[current_doctype] = {
+                        "emails": list(doc_approvers),
+                        "names": [
+                            frappe.db.get_value("User", email, "full_name") or email for email in doc_approvers
+                        ]
+                    }
+                if current_doctype == "Purchase Invoice":
+                    purchase_orders = frappe.get_all("Purchase Invoice Item",
+                        filters={"parent": current_docname, "purchase_order": ["!=", ""]},
+                        fields=["purchase_order"])
+                    purchase_receipts = frappe.get_all("Purchase Invoice Item",
+                        filters={"parent": current_docname, "purchase_receipt": ["!=", ""]},
+                        fields=["purchase_receipt"])
+
+                    for po in purchase_orders:
+                        parents.append(("Purchase Order", po["purchase_order"]))
+                    for pr in purchase_receipts:
+                        parents.append(("Purchase Receipt", pr["purchase_receipt"]))
+
+                elif current_doctype == "Purchase Order":
+                    material_requests = frappe.get_all("Purchase Order Item",
+                        filters={"parent": current_docname, "material_request": ["!=", ""]},
+                        fields=["material_request"])
+                    
+                    for mr in material_requests:
+                        parents.append(("Material Request", mr["material_request"]))
+
+            return reference_hierarchy, doctype_list, approvers_map
+
+        reference_details = []
+
+        for ref_row in payment_entry_doc.references:
+            ref_doctype = ref_row.get("reference_doctype")
+            ref_docname = ref_row.get("reference_name")
+
+            if ref_doctype and ref_docname:
+                reference_hierarchy, doctype_list, approvers_map = get_all_parents(ref_doctype, ref_docname)
+                approvers_list = []
+                approver_names_list = []
+                for doc_type, approvers in approvers_map.items():
+                    approvers_list.append(f"{doc_type} Approver - {', '.join(approvers['emails'])}")
+                    approver_names_list.extend(approvers["names"])
+
+                reference_details.append({
+                    "Reference ID": ", ".join(reference_hierarchy),
+                    "Doctype": ", ".join(doctype_list),  
+                    "Approvers": ", ".join(approvers_list),
+                    "Approver Names": ", ".join(set(approver_names_list))  
+                })
+        custom_details = frappe.get_value("Payment Entry", payment_entry, 
+            ["custom_type", "custom_project_type", "remarks","custom_approved_by"], as_dict=True)
+
+        return {
+            "reference_details": reference_details,
+            "custom_details": custom_details
+        }
+
+    except Exception as e:
+        frappe.log_error(f"Error in get_payment_entry_reference_details: {str(e)}")
+        return {"error": _("Referenced document could not be fetched.")}
+

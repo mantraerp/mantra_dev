@@ -1,4 +1,5 @@
-import frappe
+import frappe # type: ignore
+from frappe.model.mapper import get_mapped_doc # type: ignore
 
 # This function creates a "Purchase Order Expected Date" record for each item in the purchase order
 # when the purchase order is approved (workflow_state is 'Approved')
@@ -56,3 +57,44 @@ def get_stock_details(item_code, warehouse):
 
     return stock_data
             
+
+@frappe.whitelist()
+def get_po_form_details(purchase_order_id):
+    if frappe.db.exists("PO Form Approval", {'purchase_order': purchase_order_id, 'docstatus': 1}):
+        doc = frappe.get_doc("PO Form Approval", {'purchase_order': purchase_order_id, 'docstatus': 1})
+        return doc
+    else:
+        return None
+    
+
+@frappe.whitelist()
+def make_po_form_approval(source_name, target_doc=None, ignore_permissions=False):
+    def postprocess(source, target):
+        set_missing_values(source, target)
+
+    def set_missing_values(source, target):
+        target.flags.ignore_permissions = True
+        target.append('price_comparison', {
+            'supplier': source.supplier,
+            'supplier_name': source.supplier_name,
+            'payment_terms': frappe.db.get_value("Supplier", source.supplier, "payment_terms") or ''
+        })
+            
+    doclist = get_mapped_doc(
+		"Purchase Order",
+		source_name,
+		{
+			"Purchase Order": {
+				"doctype": "PO Form Approval",
+				"field_map": {
+					"purchase_order": "name",
+					"cost_center": "cost_center",
+				},
+			},
+		},
+		target_doc,
+        postprocess,
+		ignore_permissions=ignore_permissions,
+	)
+
+    return doclist

@@ -192,7 +192,8 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 			frappe.throw(_("No linked Purchase Order found for this Purchase Receipt."))
 		
 		po = frappe.get_doc("Purchase Order", po_name)
-
+		if not po.cost_center:
+			frappe.throw(f"Cost Center is not found in Purchase Order {po.name}")
 		se = frappe.new_doc("Stock Entry")
 		se.stock_entry_type = "Material Transfer"
 		se.posting_date = self.posting_date
@@ -200,19 +201,19 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		se.from_warehouse = po.custom_set_reserve_warehouse
 		se.to_warehouse = self.supplier_warehouse
 		
-
 		for mt in items:
-			for i in po.items:
-				se_item = frappe.new_doc("Stock Entry Detail")
-				se_item.s_warehouse = po.custom_set_reserve_warehouse
-				se_item.t_warehouse = self.supplier_warehouse
-				se_item.item_code = mt['raw_material']
-				se_item.qty = mt['required_qty']
-				se_item.uom = frappe.db.get_value("Item", mt['raw_material'], "stock_uom")
-				se_item.cost_center = i.cost_center
-				se.append("items", se_item)
+			se_item = frappe.new_doc("Stock Entry Detail")
+			se_item.s_warehouse = po.custom_set_reserve_warehouse
+			se_item.t_warehouse = self.supplier_warehouse
+			se_item.item_code = mt['raw_material']
+			se_item.qty = mt['required_qty']
+			se_item.uom = frappe.db.get_value("Item", mt['raw_material'], "stock_uom")
+			se_item.cost_center = po.cost_center
+			se.append("items", se_item)
 		se.save()
 		se.submit()
+		return se.name
+
 	
 	def auto_create_subcontracting_receipt(self):
 		override_make_subcontracting_receipt(self.name, save=True)
