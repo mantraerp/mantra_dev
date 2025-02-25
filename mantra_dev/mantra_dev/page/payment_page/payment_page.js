@@ -456,18 +456,21 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
 
     let download_excel_btn = $(`<button id='export-to-excel' style="margin-right:10px;margin-top:10px;" class="btn btn-success" hidden>Send Excel File  </button>`)
         .appendTo(buttonContainer);
-
-    let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-success">Make Payment</button>`)
+    
+    if(['hiren@mantratec.com','bhavyen@mantratec.com'].includes(frappe.session.user)){
+        let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-success">Make Payment</button>`)
         .appendTo(buttonContainer);
 
-    make_payment_btn.on('click', function() {
-        let selected_entries = getSelectedEntries();
-        if (selected_entries.length === 0) {
-            frappe.msgprint("Please select at least one payment entry");
-        } else {
-            showBankAccountDialog();
-        }
-    });
+        make_payment_btn.on('click', function() {
+            let selected_entries = getSelectedEntries();
+            if (selected_entries.length === 0) {
+                frappe.msgprint("Please select at least one payment entry");
+            } else {
+                showBankAccountDialog();
+            }
+        });
+    }
+   
     $(document).on('click', '#export-to-excel', function () {
         // Create a new Frappe Dialog for selecting a user email
         let d = new frappe.ui.Dialog({

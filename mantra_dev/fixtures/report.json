@@ -2436,6 +2436,84 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2025-02-24 15:49:18.001721",
+  "module": "Mantra Dev",
+  "name": "Wage Register",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Salary Slip",
+  "reference_report": null,
+  "report_name": "Wage Register",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR OPS User"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "Wage Register",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
   "letter_head": "Sales Invoice",
   "modified": "2024-03-29 11:36:35.008079",
   "module": "Mantra Dev",
