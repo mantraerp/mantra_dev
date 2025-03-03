@@ -735,7 +735,7 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
         else :
             frappe.throw("Worng Bank Selected")          
     except Exception as e:
-        return "expenses"
+        return "Exception"
     
     
 #this function is use for a push file in icici snorken folder 
@@ -785,10 +785,12 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                 beneficiary_code = payment_entry.party or ""
                 beneficiary_ac_no = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "bank_account_no") or ""
                 beneficiary_name = payment_entry.party_name or ""
+
                 amt = payment_entry.base_paid_amount_after_tax
                 pay_mod = mdf[0]["abbrivation"] if mdf else ""
                 payable_location_name = ""
                 print_location = ""
+
                 input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
                 date = datetime.today().strftime('%d-%b-%Y')
                 # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
@@ -819,38 +821,40 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                 ]
                 data_rows.append(new_row)
 
-                if total_amount <= 500000:
 
-                    numeric_characters = string.digits
-                    unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+            if total_amount <= 500000:
 
-                    current_date = datetime.now()
-                    formatted_date = current_date.strftime("%d%m%Y")
-                    file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
-                    file_path = os.path.join(directory, file_name)
+                numeric_characters = string.digits
+                unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
+                current_date = datetime.now()
+                formatted_date = current_date.strftime("%d%m%Y")
 
-                    for payment_entry in party_payment_list:
-
-                        #Update value in payment entry
-                        update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
-                        # update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
-
-                        update_query_run = frappe.db.sql(update_query,as_dict=1)
-                        # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
-                        # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
+                file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+                file_path = os.path.join(directory, file_name)
 
 
+                for payment_entry in party_payment_list:
+
+                    #Update value in payment entry
+                    update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
+                    # update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
+
+                    update_query_run = frappe.db.sql(update_query,as_dict=1)
+                    # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
+                    # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
 
 
-                    # list_items = ast.literal_eval(party_payment_list)
 
 
-                    #Write file in bank folder
-                    with open(file_path, 'w', newline='') as file:
-                        writer = csv.writer(file, delimiter="|")
-                        writer.writerow(header)
-                        writer.writerows(data_rows)
+                # list_items = ast.literal_eval(party_payment_list)
+
+
+                #Write file in bank folder
+                with open(file_path, 'w', newline='') as file:
+                    writer = csv.writer(file, delimiter="|")
+                    writer.writerow(header)
+                    writer.writerows(data_rows)
 
 
 
@@ -1612,7 +1616,7 @@ def get_icici_bank_file(delimiter='|'):
     frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
-    
+  
 @frappe.whitelist()
 def get_icici_bank_file_background(delimiter='|'):
     
@@ -1659,7 +1663,7 @@ def get_icici_bank_file_background(delimiter='|'):
                     doc.file_name = file_name
                     doc.insert(ignore_permissions=True)
                     frappe.sendmail(
-                        recipients=["ravi.patel@mantratec.com","helpdesk1.erp@mantratec.com"],
+                        recipients=["ravi.patel@mantratec.com"],
                         subject="Bene file need to send on mefron server 5",
                         message="This is bene file send on mefron server {}".format(file_name)
                     )
@@ -1792,11 +1796,15 @@ def get_icici_bank_file_background(delimiter='|'):
         error_message = f"An error occurred in the get_icici_bank_file function: {e} <br> traceable: {str(traceback.format_exc())}"
         send_icici_bank_file_error_email(error_message,"Exception line 1384")
 
+
+
+
+
 def send_icici_bank_file_error_email(error_message,title=None):
     """
     Sends an email with the error message.
     """
-    recipients = ["mailto:ravi.patel@mantratec.com","helpdesk.erp@mantratec.com"]  # Replace with actual recipients
+    recipients = ["mailto:ravi.patel@mantratec.com"]
     subject = "Error in ICICI Bank File Processing".format(str(title))
     message = f"""
     <p>Dear User,</p>
@@ -1855,7 +1863,6 @@ def send_file(file_path,file_name):
     url = "http://192.168.5.56:8007/api/method/mefron_dev.backend_code.api.recive_file"
 
     # Path to the file to be uploaded
-
     try:
         # Open the file in binary mode
         with open(file_path, "rb") as file:
@@ -1883,8 +1890,8 @@ def send_file(file_path,file_name):
                     doc.insert(ignore_permissions=True)
             else:
 
-                recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
-                subject = "Error in Beneficiary File Processing 1716"
+                recipients = ["ravi.patel@mantratec.com"]
+                subject = "Error in Beneficiary File Processing 1890"
                 message = f"""
                 <p>Dear User,</p>
                 <p>An error occurred during the execution of the scheduled task:</p>
@@ -1897,7 +1904,7 @@ def send_file(file_path,file_name):
                     message="{}<br>{}".format(message,str(traceback.format_exc()))
                 )
     except Exception as e:
-        recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","helpdesk1.erp@mantratec.com"]  # Replace with actual recipients
+        recipients = ["ravi.patel@mantratec.com"]
         subject = "Error in Beneficiary File Processing : Using send file"
         message = f"""
         <p>Dear User,</p>

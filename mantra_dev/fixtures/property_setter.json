@@ -263,7 +263,7 @@
   "doctype_or_field": "DocField",
   "field_name": "custom_unique_batch_number",
   "is_system_generated": 0,
-  "modified": "2025-02-20 17:52:49.282333",
+  "modified": "2025-02-28 19:19:59.360985",
   "module": "Mantra Dev",
   "name": "Payment Entry-custom_unique_batch_number-in_list_view",
   "property": "in_list_view",

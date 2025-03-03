@@ -1,7 +1,7 @@
-frappe.pages['payment-page'].on_page_load = function(wrapper) {
+frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Payment Page',
+		title: 'Payment Page Approver',
 		single_column: true
 	});
    
@@ -123,7 +123,7 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
     $(".form-layout").css({"width": "490px"});
     this.fetchPaymentEntries = function(selectedBank) {
         frappe.call({
-            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.select_payment_entry",
+            method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.select_payment_entry",
             args: {
                 bank_account: selectedBank
             },
@@ -173,6 +173,8 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                             <th style="text-align:left;">Reference No</th>
                             <th style="text-align:left;">Total Paid Amount</th>
                             <th style="text-align:left;">Status</th>
+							<th style="text-align:left;">On Hold</th>
+							<th style="text-align:left;">Approve Action</th>
                             <th style="text-align:left;">Action</th>
                             <th style="text-align:left;">Details</th>
                         </tr>
@@ -215,6 +217,18 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                             </span>
                         </td>
                         <td style="text-align:left;">
+                                <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                    class="hold-btn group-hold" data-id="${first.name}">
+                                    Hold
+                                </button>
+                        </td>
+						<td style="text-align:left;">
+                                <button style="background-color:green; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                    class="approve-btn group-approve" data-id="${first.name}">
+                                    Approve
+                                </button>
+                        </td>
+                        <td style="text-align:left;">
                             <button style="background-color:red; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
                                 class="cancel-btn group-cancel" data-id="${first.name}">
                                 Reject
@@ -240,6 +254,18 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                                 <span style="${getBadgeStyle(row.workflow_state.toLowerCase())} padding: 5px 15px; font-size: 14px; border-radius: 20px;">
                                     ${row.workflow_state || ""}
                                 </span>
+                            </td>
+                            <td style="text-align:left;">
+                                <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                    class="hold-btn" data-id="${row.name}">
+                                    Hold
+                                </button>
+                            </td>
+							 <td style="text-align:left;">
+                                <button style="background-color:green; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                    class="approve-btn" data-id="${row.name}">
+                                    Approve
+                                </button>
                             </td>
                             <td style="text-align:left;">
                                 <button style="background-color:red; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
@@ -300,6 +326,89 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
                     else {
                         partyId = $row.find(".entry-checkbox").data("party");
                         cancelPaymentEntry([paymentEntryId], function (success) {
+                            if (success) {
+                                $row.remove(); 
+                                if ($(`.party-${partyId} .entry-checkbox`).length === 0) {
+                                    $(`.group-row[data-party="${partyId}"]`).remove();
+                                }
+                                else {
+                                    updateGroupPaidAmount(partyId);
+                                }
+                                updateTransactionSummary();
+                            }
+                        });
+                    
+                    }
+                });
+                $(document).off("click", ".hold-btn").on("click", ".hold-btn", function () {
+					console.log("clicked")
+                    let $btn = $(this);
+                    let $row = $btn.closest("tr");
+                    let paymentEntryId = $btn.data("id");
+                    let partyId = $row.closest(".group-row").data("party");
+                    if ($btn.hasClass("group-hold")) {
+                        let allIds = [];
+                        $(`.party-${partyId} .entry-checkbox`).each(function () {
+                            let childId = $(this).data("id");
+                            if (childId && !allIds.includes(childId)) {
+                                allIds.push(childId);
+                            }
+                        });
+                        if (paymentEntryId && !allIds.includes(paymentEntryId)) {
+                            allIds.push(paymentEntryId);
+                        }
+                        holdPaymentEntry(allIds, function (success) {
+                            if (success) {
+                                $row.remove(); 
+                                $(`.party-${partyId}`).remove(); 
+                                updateTransactionSummary();
+                            }
+                        });
+                    } 
+                    else {
+                        partyId = $row.find(".entry-checkbox").data("party");
+                        holdPaymentEntry([paymentEntryId], function (success) {
+                            if (success) {
+                                $row.remove(); 
+                                if ($(`.party-${partyId} .entry-checkbox`).length === 0) {
+                                    $(`.group-row[data-party="${partyId}"]`).remove();
+                                }
+                                else {
+                                    updateGroupPaidAmount(partyId);
+                                }
+                                updateTransactionSummary();
+                            }
+                        });
+                    
+                    }
+                });
+				$(document).off("click", ".approve-btn").on("click", ".approve-btn", function () {
+                    let $btn = $(this);
+                    let $row = $btn.closest("tr");
+                    let paymentEntryId = $btn.data("id");
+                    let partyId = $row.closest(".group-row").data("party");
+                    if ($btn.hasClass("group-approve")) {
+                        let allIds = [];
+                        $(`.party-${partyId} .entry-checkbox`).each(function () {
+                            let childId = $(this).data("id");
+                            if (childId && !allIds.includes(childId)) {
+                                allIds.push(childId);
+                            }
+                        });
+                        if (paymentEntryId && !allIds.includes(paymentEntryId)) {
+                            allIds.push(paymentEntryId);
+                        }
+                        approvePaymentEntry(allIds, function (success) {
+                            if (success) {
+                                $row.remove(); 
+                                $(`.party-${partyId}`).remove(); 
+                                updateTransactionSummary();
+                            }
+                        });
+                    } 
+                    else {
+                        partyId = $row.find(".entry-checkbox").data("party");
+                        approvePaymentEntry([paymentEntryId], function (success) {
                             if (success) {
                                 $row.remove(); 
                                 if ($(`.party-${partyId} .entry-checkbox`).length === 0) {
@@ -455,20 +564,6 @@ frappe.pages['payment-page'].on_page_load = function(wrapper) {
     let download_excel_btn = $(`<button id='export-to-excel' style="margin-right:10px;margin-top:10px;" class="btn btn-success" hidden>Send Excel File  </button>`)
         .appendTo(buttonContainer);
     
-    if(['hiren@mantratec.com','bhavyen@mantratec.com'].includes(frappe.session.user)){
-        let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-success">Make Payment</button>`)
-        .appendTo(buttonContainer);
-
-        make_payment_btn.on('click', function() {
-            let selected_entries = getSelectedEntries();
-            if (selected_entries.length === 0) {
-                frappe.msgprint("Please select at least one payment entry");
-            } else {
-                showBankAccountDialog();
-            }
-        });
-    }
-   
     $(document).on('click', '#export-to-excel', function () {
         // Create a new Frappe Dialog for selecting a user email
         let d = new frappe.ui.Dialog({
@@ -501,6 +596,9 @@ function generateExcelAndSend(selectedUser) {
         tableClone.find('th:nth-child(1), td:nth-child(1)').remove();
         tableClone.find('th:nth-child(5), td:nth-child(5)').remove();
         tableClone.find('th:nth-child(6), td:nth-child(6)').remove();
+		tableClone.find('th:nth-child(7), td:nth-child(7)').remove();
+		tableClone.find('th:nth-child(8), td:nth-child(8)').remove();
+		tableClone.find('th:nth-last-child(2), td:nth-last-child(2)').remove();
         tableClone.find('th:last-child, td:last-child').remove();
         
         let rows = tableClone.find('tr');
@@ -536,7 +634,6 @@ function generateExcelAndSend(selectedUser) {
             outputRows.push(["", "", "", "" + format_currency(partyTotal.toFixed(2), 'INR', precision=2)]);
         }
         ws_data = ws_data.concat(outputRows); 
-      
         let ws = XLSX.utils.aoa_to_sheet(ws_data);
         ws['!cols'] = [
             { wch: 20 },  // width for ID column
@@ -549,7 +646,7 @@ function generateExcelAndSend(selectedUser) {
         $('.hidden-row').css('display', 'none');
         let base64File = btoa(workbookOutput);
 
-        // Use frappe.call to send the email with the Excel file attachment
+        //Use frappe.call to send the email with the Excel file attachment
         frappe.call({
             method: "mantra_dev.mantra_dev.page.payment_page.payment_page.send_excel_email",  // Update with your app's path
             args: {
@@ -608,150 +705,41 @@ function cancelPaymentEntry(paymentEntryIds, callback) {
             }
         });
 }
-function showBankAccountDialog() {
-    let d = new frappe.ui.Dialog({
-        title: "Select Bank Account",
-        fields: [
-            {
-                label: "Bank",
-                fieldname: "bank",
-                fieldtype: "Link",
-                options: "Bank",
-                reqd: 1,
-                default:$('.frappe-control[data-fieldname="bank"] input').val()
-               
-            },
-            {
-                label: "Bank Account",
-                fieldname: "bank_account",
-                fieldtype: "Link",
-                options: "Bank Integration",
-                reqd: 1,
-                default:$('.frappe-control[data-fieldname="bank_account"] input').val(),
-               
-                get_query: () => {
-                    return {
-                        filters: [
-                            ["bank", "=", d.get_value("bank")],
-                            ["payments", "=", 1],
-                            ["enabled", "=", 1],
-                        ],
-                    };
-                },
-            },
-        ],
-        size: "small",
-        primary_action_label: "Submit",
-        primary_action: function (values) {
-            d.hide();
-            sendOTP(values.bank_account);
-        },
-    });
-    d.show();
+function holdPaymentEntry(paymentEntryIds, callback) {
+	frappe.call({
+		method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.hold_payment_entries",
+		args: {
+			payment_entry_ids: paymentEntryIds
+		},
+		callback: function(response) {
+			if (response.message === "Success") {
+				updateTransactionSummary()
+				callback(true); // Call the callback function with success = true
+			} else {
+				frappe.msgprint(__('Failed to cancel payment entries.'));
+				callback(false); // Call the callback function with success = false
+			}
+		}
+	});
+}
+function approvePaymentEntry(paymentEntryIds, callback) {
+	frappe.call({
+		method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.approve_payment_entries",
+		args: {
+			payment_entry_ids: paymentEntryIds
+		},
+		callback: function(response) {
+			if (response.message === "Success") {
+				updateTransactionSummary()
+				callback(true); 
+			} else {
+				frappe.msgprint(__('Failed to Approve payment entries.'));
+				callback(false); 
+			}
+		}
+	});
 }
 
-function sendOTP(bank_account) {
-    frappe.dom.freeze("Please wait... Sending OTP");
-    frappe.call({
-        method: "mantra_dev.api_code.banck_transaction.send_otp",
-        args: {
-            email: frappe.session.user,
-        },
-        callback: function (r) {
-            if (r.message) {
-                frappe.dom.unfreeze();
-                showOTPDIalog(bank_account);
-            }
-        },
-    });
-}
-
-function showOTPDIalog(bank_account) {
-    let d1 = new frappe.ui.Dialog({
-        title: "Enter OTP",
-        fields: [
-          {
-            label: "OTP",
-            fieldname: "otp",
-            fieldtype: "Data",
-            reqd: 1,
-          },
-        ],
-        size: "small",
-        primary_action_label: "Submit",
-        primary_action: function (values) {
-          d1.hide();
-          verifyotp(values.otp, bank_account);
-        },
-      });
-      d1.show();
-}
-function verifyotp(otp, bank_account) {
-    frappe.call({
-      method: "mantra_dev.api_code.banck_transaction.verify_otp",
-      args: {
-        email: frappe.session.user,
-        otp: otp,
-      },
-      callback: function (r) {
-        if (r.message) {
-          if (r.message == "Done") {
-            let selected_entries = getSelectedEntries();
-            selectPaymentEntry(selected_entries,bank_account) 
-          }
-          if (r.message == "Error") {
-            frappe.throw("Verifivation Code Is Incorrect, Please Ckeck & Enter")
-          }
-          if (r.message == "Expired") {
-            frappe.throw("Verifivation Code Is Expired, Plese Retry Process")
-          }
-        }
-      },
-    });
-  }
-
-function selectPaymentEntry(data,bank_account) {   
-    
-    frappe.confirm(
-        "Transaction Details:".concat(
-            "<br>",
-            "Total transaction: ", parseInt($("#selected-count").text()) || 0, "<br>",
-            "Total amount: ", format_currency(parseFloat($("#selected-amount").text().replace('₹', '').replace(/,/g, '').trim()) || 0, 'INR', precision=2)
-        ),
-        function() {
-           
-            frappe.call({
-                method: "mantra_dev.api_code.banck_transaction.upload_file",
-                args: {
-                    payment_entry_list: data,
-                    bank_account: bank_account,
-                },
-                callback: function (r) {
-                    if (r.message) {
-                        if (r.message == "Done") {
-                            // If success, open the external URL
-                            removeSelectedRows();
-                            updateTransactionSummary()
-                            let selectedPartyIds = [];
-                            $(".group-row").each(function() {
-                                let partyId = $(this).data("party"); 
-                                if (partyId && !selectedPartyIds.includes(partyId)) {
-                                    selectedPartyIds.push(partyId);  
-                                }
-                            });
-                            selectedPartyIds.forEach(function(partyId) {
-                                updateGroupPaidAmount(partyId);
-                            });
-                            window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
-                        } else {
-                            // If not done, you can reload or take another action
-                            // window.location.reload();`
-                        }
-                    }
-                },
-            });
-        },
-    )}
             
 function removeSelectedRows() {
     $("input[type='checkbox']:checked").closest("tr").remove();

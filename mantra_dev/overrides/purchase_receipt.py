@@ -1,24 +1,24 @@
-import frappe
-from frappe import _, throw
-from frappe.desk.notifications import clear_doctype_notifications
-from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import CombineDatetime
-from frappe.utils import cint, flt, get_datetime, getdate, nowdate
-from pypika import functions as fn
+import frappe # type: ignore
+from frappe import _, throw # type: ignore
+# from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.mapper import get_mapped_doc # type: ignore
+# from frappe.query_builder.functions import CombineDatetime
+from frappe.utils import cint, flt, get_datetime, getdate, nowdate # type: ignore
+from pypika import functions as fn # type: ignore
 
-import erpnext
-from erpnext.accounts.utils import get_account_currency
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.controllers.accounts_controller import merge_taxes
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
-from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
-from erpnext.buying.doctype.purchase_order.purchase_order import set_missing_values
-from frappe.utils import  get_link_to_form
-import json
+# import erpnext
+# from erpnext.accounts.utils import get_account_currency
+# from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+# from erpnext.buying.utils import check_on_hold_or_closed_status
+# from erpnext.controllers.accounts_controller import merge_taxes
+# from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt # type: ignore
+# from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po # type: ignore
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage # type: ignore
+# from erpnext.buying.doctype.purchase_order.purchase_order import set_missing_values
+# from frappe.utils import  get_link_to_form
+# import json
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -106,11 +106,12 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		"""
 		items, all_stock_available = self.check_raw_matrial_stock()
 		if items and all_stock_available:
-			self.auto_create_stock_entry(items)
-			self.auto_create_subcontracting_receipt()
+			stock_entry_name = self.auto_create_stock_entry(items)
+			self.auto_create_subcontracting_receipt(stock_entry_name)
 			
 		elif items is not None:
 			msg = ""
+
 			for item in items:
 				shortage_qty = item['required_qty'] - item['available_stock']
 				if shortage_qty > 0:
@@ -120,11 +121,13 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 							f"<b>Required Qty:</b> {item['required_qty']}<br>"
 							f"<b>Available Qty:</b> {item['available_stock']}<br>"
 							f"<b>Shortage Qty:</b> {item['required_qty'] - item['available_stock']}<br><br>")
+			
 			if msg:
 				frappe.throw(msg)
-		
+
 		elif not all_stock_available:
 			msg = ""
+		
 			for item in items:
 				shortage_qty = item['required_qty'] - item['available_stock']
 				if shortage_qty > 0:
@@ -134,12 +137,13 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 							f"<b>Required Qty:</b> {item['required_qty']}<br>"
 							f"<b>Available Qty:</b> {item['available_stock']}<br>"
 							f"<b>Shortage Qty:</b> {item['required_qty'] - item['available_stock']}<br><br>")
+			
 			if msg:
 				frappe.throw(msg)
-		
+				
 		else:
-			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance Report"))
-
+			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance Report")) 
+	
 	def check_raw_matrial_stock(self):
 		"""
 		Calculation The Bom from the finish goods item and is there in the reserved warehouse
@@ -213,19 +217,25 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		se.save()
 		se.submit()
 		return se.name
-
 	
-	def auto_create_subcontracting_receipt(self):
-		override_make_subcontracting_receipt(self.name, save=True)
+	def auto_create_subcontracting_receipt(self,stock_entry_name):
+		override_make_subcontracting_receipt(self.name, save=True,stock_entry=stock_entry_name)
 
 @frappe.whitelist()
-def override_make_subcontracting_receipt(source_name, target_doc=None, save=False):
+def override_make_subcontracting_receipt(source_name, target_doc=None, save=False,stock_entry=None):
 	target_doc = make_subcontracting_receipt(source_name, target_doc)
+	
 	if not target_doc:
 		return
 	
+	if stock_entry:
+		target_doc.append('doc_references', {
+				"link_doctype" : "Stock Entry",
+				"link_name" : stock_entry
+		})
 	if (save) and frappe.has_permission(target_doc.doctype, "create"):
 		target_doc.save()
+
 
 	# 	if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
 	# 		try:
@@ -269,6 +279,8 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 	if not subcontracting_orders:
 		return
 
+	valid_items = {item.purchase_order_item for item in purchase_receipt.items}
+
 	target_doc = get_mapped_doc(
 		"Subcontracting Order",
 		subcontracting_orders[0],
@@ -291,10 +303,11 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 					"bom": "bom",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty),
+				"condition": lambda doc: doc.purchase_order_item in valid_items and abs(doc.received_qty) < abs(doc.qty),#abs(doc.received_qty) < abs(doc.qty),
 			},
 		},
 		target_doc,
 	)
-
+	if purchase_receipt.supplier_delivery_note:
+		target_doc.supplier_delivery_note = purchase_receipt.supplier_delivery_note
 	return target_doc

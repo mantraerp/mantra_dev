@@ -21,11 +21,12 @@ def get_columns():
       {"label": _("Status"), "fieldname": "Status", "fieldtype": "Data", "width": 80},
       {"label": _("Item Code"), "fieldname": "ItemCode", "fieldtype": "Link", "options": "Item", "width": 90},
       {"label": _("Item Name"), "fieldname": "ItemName", "fieldtype": "Data", "width": 150},
-      {"label": _("Item Serial No"), "fieldname": "ItemSerialNo", "fieldtype": "Link", "options": "Serial No", "width": 100},
-      {"label": _("Batch No"), "fieldname": "BatchNo", "fieldtype": "Link", "options": "Batch", "width": 100},
+      {"label": _("Item Serial No"), "fieldname": "ItemSerialNo", "fieldtype": "Data", "width": 100},
+      {"label": _("Batch No"), "fieldname": "BatchNo", "fieldtype": "Data", "width": 100},
       {"label": _("Sample Size"), "fieldname": "SampleSize", "fieldtype": "Float", "width": 90},
+      {"label": _("Actual QTY"), "fieldname": "ActualQty", "fieldtype": "Float", "width": 90},
       {"label": _("Quality Inspection Template"), "fieldname": "QualityInspectionTemplate", "fieldtype": "Link", "options": "Quality Inspection Template", "width": 120},
-      {"label": _("Approve"), "fieldname": "Approve", "fieldtype": "Button", "width": 90},
+    #   {"label": _("Approve"), "fieldname": "Approve", "fieldtype": "Button", "width": 90},
   ]
 
 
@@ -42,13 +43,8 @@ def get_data(filters):
           qi.item_serial_no AS ItemSerialNo,
           qi.batch_no AS BatchNo,
           qi.sample_size AS SampleSize,
-          qi.quality_inspection_template AS QualityInspectionTemplate,
-       CONCAT(
-           '<button class="btn btn-primary pt-0 pb-0 qualityinspectionapprove" style="background-color: grey" ',
-           'data-quality_inspection="', qi.name, '" ',
-           'data-status="', qi.status, '" ',
-           '>Approve</button>'
-       ) AS Approve
+          qi.custom_actual_qty AS ActualQty,
+          qi.quality_inspection_template AS QualityInspectionTemplate
 
       FROM
           `tabQuality Inspection` qi
@@ -57,5 +53,5 @@ def get_data(filters):
       ORDER BY
           qi.report_date
   """, as_dict=True)
-  return data
 
+  return data

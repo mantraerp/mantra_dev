@@ -16,14 +16,15 @@ def select_payment_entry(bank_account):
         SELECT 
             name, 
             status, 
-            paid_amount, 
+            paid_amount,
+            base_paid_amount_after_tax,
             party, 
             reference_no, 
             workflow_state,
             party_name
         FROM `tabPayment Entry`
         WHERE custom_unique_batch_number IS NULL
-        AND docstatus = 1
+        AND workflow_state = 'Approved'
         AND payment_type = 'Pay'
         AND bank_account = %s
         AND mode_of_payment IN %s

@@ -80,8 +80,8 @@ def upload_beneficiary_file(doc_name):
         if not directory:
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
 
-        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop/Storing Folder', file_name)
+        file_path = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -170,8 +170,8 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
 
         # file_path = os.path.join(directory, file_name)
-        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
+        file_path = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -252,8 +252,8 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
         if not directory:
             frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
 
-        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
+        file_path = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
+        file_path2 = os.path.join('/home/mantra/Desktop/TestPayment', file_name)
 
         header = [
                 'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
@@ -708,7 +708,7 @@ def icici_file_create(bank_account, payment_entry_list):
                     # update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
                     update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
 
-                    update_query_run = frappe.db.sql(update_query,as_dict=1)
+                    # update_query_run = frappe.db.sql(update_query,as_dict=1)
                     # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
                     # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
 
@@ -768,7 +768,7 @@ def generate_salary_slip(payroll_entry=None):
         # directory = '/home/foramshah/Downloads/epayments/PayUpload'
         # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
         # file_path = os.path.join(directory, file_name)
-        file_path = os.path.join("/home/mantra/Desktop/", file_name)
+        file_path = os.path.join("/home/mantra/Desktop/TestPayment", file_name)
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
@@ -1350,7 +1350,7 @@ def pnb_file_create(bank_account, payment_entry_list, delimiter=','):
         with open(file_path, 'a', newline='') as file:
             writer = csv.writer(file, delimiter=",")
             writer.writerows(data_rows)
-        email_file_path='/home/mantra/Documents/email_file_folder/ICICI'
+        email_file_path='/home/mantra/Desktop/TestPayment'
         email_file_name=f"MANTRAS_{unique_batch_number}.csv"
         email_path=os.path.join(email_file_path, email_file_name)
         email_header=["Sr.No","Code",'Beneficiary','Amount',' Type','Approval','Approval type','Tally Entry','Remarks','Maker','Checker ']
@@ -1480,7 +1480,7 @@ def get_bene_file(delimiter='|'):
     # errorLog('BENY_CRON',"",False)
     
     try:
-        folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
+        folder_path = '/home/mantra/Desktop/TestPayment'
         one_hour_ago = datetime.now() - timedelta(hours=1)
 
         filersreturn = []        
@@ -1626,10 +1626,8 @@ def get_icici_bank_file_background(delimiter='|'):
     try:
         # Get the path to the folder containing the files
         folder_path = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_pull_path")
-        # /home/mantra/ICICI_Bank_integration/epayments/PayReport
         # Specify the path to the backup folder
         backup_folder = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_backup_path")
-        # /home/mantra/ICICI_Bank_Backup
         # print("Folder path:", folder_path)
         # print("Backup folder:", backup_folder)
 

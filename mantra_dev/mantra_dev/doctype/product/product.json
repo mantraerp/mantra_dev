@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{product_name}{####}",
+ "creation": "2025-02-25 11:53:21.034695",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "product_name",
+  "product_owner",
+  "product_manager",
+  "department",
+  "product_department",
+  "section_break_duzz",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "label": "Product Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "product_owner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product Owner",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "product_manager",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product Manager",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "product_department",
+   "fieldtype": "Table MultiSelect",
+   "label": "Product Department",
+   "options": "Product Departments"
+  },
+  {
+   "fieldname": "section_break_duzz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Product Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-25 11:53:21.034695",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Product",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

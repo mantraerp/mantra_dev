@@ -696,13 +696,17 @@ def recive_file():
     target_directory =""
     if file_type == "Bene":
         doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
+        #Comment for test
         target_directory = doc.beneficiary_file_upload_path
         # target_directory = "/home/mantra/Desktop/Storing Folder"
     else:
         doc = frappe.get_doc('Bank Integration', 'Mantra - ICICI Bank Limited - 018951000027')
+        #Comment for test
         target_directory = doc.file_upload_path
+        # target_directory = "/home/mantra/Desktop/Storing Folder"
+
+
     # Define the target directory
-    # target_directory = "/home/frappeuser/backup"
     os.makedirs(target_directory, exist_ok=True)
 
     # Save the file to the target directory
@@ -715,11 +719,24 @@ def recive_file():
         doc.file_from = "Mefron"
         doc.file_type = file_type
         doc.file_name = uploaded_file.filename
+        #Comment for test
         doc.insert(ignore_permissions=True)
         return {"status": "success", "message": f"File saved at {file_path}"}
     except Exception as e:
-        frappe.throw(f"Error saving file: {str(e)}")
-
+        recipients = ["ravi.patel@mantratec.com"]
+        subject = "Error in file saving from mefron"
+        message = f"""
+            <p>Dear User,</p>
+            <p>Error in file saving from mefron:730</p>
+            <p>{e}</p>
+            <p>Please check the logs and take necessary action.</p>
+        """
+        frappe.sendmail(
+            recipients=recipients,
+            subject=subject,
+            message="{}<br>{}".format(message,str(traceback.format_exc()))
+        )
+        return "False"
 
 
 

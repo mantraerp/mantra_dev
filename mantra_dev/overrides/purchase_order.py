@@ -1,14 +1,14 @@
-from erpnext.buying.doctype.purchase_order.purchase_order import PurchaseOrder
-import frappe
-from frappe.utils import  get_link_to_form
-from frappe import _
+from erpnext.buying.doctype.purchase_order.purchase_order import PurchaseOrder # type: ignore
+import frappe # type: ignore
+from frappe.utils import  get_link_to_form # type: ignore
+from frappe import _ # type: ignore
 import json
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
-from erpnext.stock.utils import get_bin
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_linked_doc
+from frappe.model.mapper import get_mapped_doc # type: ignore
+from frappe.utils import flt # type: ignore
+from erpnext.controllers.buying_controller import BuyingController # type: ignore
+from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty # type: ignore
+from erpnext.stock.utils import get_bin # type: ignore
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_linked_doc # type: ignore
 
 class CustomPurchaseOrder(BuyingController):
 	def on_submit(self):

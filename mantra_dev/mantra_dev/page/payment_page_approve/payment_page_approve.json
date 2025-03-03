@@ -1,0 +1,25 @@
+{
+ "content": null,
+ "creation": "2025-02-28 10:51:37.143597",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-02-28 10:51:37.143597",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "payment-page-approve",
+ "owner": "Administrator",
+ "page_name": "payment-page-approve",
+ "roles": [
+  {
+   "role": "Bank Checker"
+  },
+  {
+   "role": "Bank Maker"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0
+}
