@@ -1,7 +1,7 @@
 frappe.ui.form.on('Purchase Invoice', {
     onload (frm){
 
-// This added due to space not allow in supplier invoice number Jira - 343
+    // This added due to space not allow in supplier invoice number Jira - 343
         frm.fields_dict.bill_no.$wrapper.find('input').on('keypress', function(event) {
 
             if (event.which === 32) { // ASCII code for space
@@ -29,9 +29,8 @@ frappe.ui.form.on('Purchase Invoice', {
             });
         }, 1000); // 
     },
-
-
     refresh(frm) {
+        
         // if (frm.is_dirty()  && !frm.is_new()){
 
         //     frappe.call({
@@ -45,8 +44,8 @@ frappe.ui.form.on('Purchase Invoice', {
         //     });
         // }
     },
-
     custom_department(frm){
+        
         // frm.set_value("custom_expense_grouping","")
         // frm.fields_dict["custom_expense_grouping"].get_query = function () {
         //     let selected_department = frm.doc.custom_department;
@@ -68,9 +67,6 @@ frappe.ui.form.on('Purchase Invoice', {
         // if(!frm.doc.custom_department){
         //     frappe.throw("Please Select the Department")
         // }
-
-
-
 
         // If Item table present then check for linked PO no for purpose
         if (frm.doc.items && frm.doc.items.length > 0) {
@@ -101,6 +97,7 @@ frappe.ui.form.on('Purchase Invoice', {
         }
     },
     after_save(frm) {
+        
         if(frm.doc.docstatus !== 2){
             frappe.call({
                 method: "mantra_dev.backend_code.api.purchase_receipt_check_box_v1",
@@ -194,6 +191,7 @@ frappe.ui.form.on('Purchase Invoice', {
         }
     },
     validate(frm){
+        
         // frappe.call({
         //     method: "mantra_dev.backend_code.api.get_verification_users",
         //     args: {
@@ -257,10 +255,10 @@ frappe.ui.form.on('Purchase Invoice', {
         //     }
         // });
     },
-
 });
 
 function get_selected_values(department) {
+    
     let selected_values = [];
     frappe.call({
         method: "frappe.client.get_list",

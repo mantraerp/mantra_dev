@@ -9,11 +9,18 @@
  "field_order": [
   "select_department",
   "select_expense_grouping",
+  "section_break_dgdp",
   "verifier",
   "approver",
   "validation_1",
   "validation_2",
-  "auditor"
+  "auditor",
+  "column_break_k3qr",
+  "approver_role_1",
+  "approver_role_2",
+  "approver_role_3",
+  "approver_role_4",
+  "approver_role_5"
  ],
  "fields": [
   {
@@ -36,45 +43,77 @@
    "reqd": 1
   },
   {
-   "depends_on": "select_department",
    "fieldname": "verifier",
    "fieldtype": "Link",
    "label": "Verifier",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   },
   {
-   "depends_on": "verifier",
    "fieldname": "approver",
    "fieldtype": "Link",
    "label": "Approver",
    "options": "User"
   },
   {
-   "depends_on": "approver",
    "fieldname": "validation_1",
    "fieldtype": "Link",
    "label": "Validation 1",
    "options": "User"
   },
   {
-   "depends_on": "validation_1",
    "fieldname": "validation_2",
    "fieldtype": "Link",
    "label": "Validation 2",
    "options": "User"
   },
   {
-   "depends_on": "validation_2",
    "fieldname": "auditor",
    "fieldtype": "Link",
    "label": "Auditor",
    "options": "User"
+  },
+  {
+   "fieldname": "section_break_dgdp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_k3qr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approver_role_1",
+   "fieldtype": "Link",
+   "label": "Approver Role 1",
+   "options": "Role"
+  },
+  {
+   "fieldname": "approver_role_2",
+   "fieldtype": "Link",
+   "label": "Approver Role 2",
+   "options": "Role"
+  },
+  {
+   "fieldname": "approver_role_3",
+   "fieldtype": "Link",
+   "label": "Approver Role 3",
+   "options": "Role"
+  },
+  {
+   "fieldname": "approver_role_4",
+   "fieldtype": "Link",
+   "label": "Approver Role 4",
+   "options": "Role"
+  },
+  {
+   "fieldname": "approver_role_5",
+   "fieldtype": "Link",
+   "label": "Approver Role 5",
+   "options": "Role"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-18 17:37:59.145003",
+ "modified": "2025-03-04 15:49:07.113248",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Expense Verification Flow",

@@ -75,6 +75,33 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2025-03-03 15:32:45.149520",
+  "name": "Rework",
+  "style": "",
+  "workflow_state_name": "Rework"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-03-03 15:32:52.408002",
+  "name": "Return",
+  "style": "",
+  "workflow_state_name": "Return"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-03-04 16:12:15.258166",
+  "name": "Operation Approver",
+  "style": "",
+  "workflow_state_name": "Operation Approver"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2024-03-08 17:19:25.858649",
   "name": "Initiated",
   "style": "Danger",

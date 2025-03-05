@@ -10,7 +10,7 @@ frappe.ui.form.on("PO Form Approval", {
                 'purchase_order_id': frm.doc.purchase_order
             },
             callback: function(r) {
-                let default_fields = ['sales_order', 'material_request', 'requester', 'current_stock', 'cost_center', 'business_unit_name', 'business_unit_email'];
+                let default_fields = ['sales_order', 'material_request', 'requester', 'cost_center', 'business_unit_name', 'business_unit_email', 'purpose', 'approved_by'];
                 if (r.message) {
                     default_fields.forEach(field => {
                         frm.set_value(field, r.message[field]);
@@ -27,7 +27,7 @@ frappe.ui.form.on("PO Form Approval", {
         })
     },
     onload(frm){
-        if (frm.doc.purchase_order){
+        if (frm.doc.purchase_order && frm.is_new()){
             frm.events.purchase_order(frm);
             frm.events.supplier(frm);
         }

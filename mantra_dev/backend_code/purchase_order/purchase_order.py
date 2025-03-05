@@ -33,9 +33,8 @@ def cancel_purchase_order_expected_date(doc,method=None):
             )
 
 
-
 @frappe.whitelist()
-def get_stock_details(item_code, warehouse):
+def get_stock_details(item_code, warehouse=None):
     """
     Fetch available stock quantity for an item in a given warehouse
     and total stock across all warehouses.
@@ -56,7 +55,7 @@ def get_stock_details(item_code, warehouse):
     stock_data["total_available_stock"] = total_stock[0][0] if total_stock and total_stock[0][0] else 0
 
     return stock_data
-            
+
 
 @frappe.whitelist()
 def get_po_form_details(purchase_order_id):
@@ -75,10 +74,17 @@ def make_po_form_approval(source_name, target_doc=None, ignore_permissions=False
     def set_missing_values(source, target):
         target.flags.ignore_permissions = True
         target.append('price_comparison', {
-            'supplier': source.supplier,
             'supplier_name': source.supplier_name,
             'payment_terms': frappe.db.get_value("Supplier", source.supplier, "payment_terms") or ''
         })
+    
+    def update_item(source, target, source_parent):
+        stock_details = get_stock_details(source.item_code, source.warehouse or None)
+        target.target_warehouse_qty = stock_details['available_qty_in_target']
+        target.current_stock = stock_details['total_available_stock']
+        target.demand = 0
+        if source.material_request:
+            target.demand += frappe.db.get_value("Material Request Item", {'parent': source.material_request, 'docstatus': ['<', 2], 'item_code': source.item_code}, 'qty')
             
     doclist = get_mapped_doc(
 		"Purchase Order",
@@ -90,6 +96,15 @@ def make_po_form_approval(source_name, target_doc=None, ignore_permissions=False
 					"purchase_order": "name",
 					"cost_center": "cost_center",
 				},
+			},
+            "Purchase Order Item": {
+				"doctype": "PO Form Item Stock",
+				"field_map": {
+					"item_code": "item",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: doc.qty
+				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
 		},
 		target_doc,

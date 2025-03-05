@@ -6,6 +6,182 @@ frappe.provide("erpnext.accounts.dimensions");
 erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on('Material Request', {
+
+
+
+
+
+
+
+
+
+
+    after_save(frm){
+
+
+        let approvers = [
+            frm.doc.custom_approver_1,
+            frm.doc.custom_approver_2,
+            frm.doc.custom_approver_3,
+            frm.doc.custom_approver_4,
+            frm.doc.custom_approver_5
+        ].filter(approver => approver)
+        console.log("----->",approvers);
+        
+        if(approvers){
+
+            frappe.call({
+                method: "mantra_dev.backend_code.api.share_document",
+                args: {
+                    doctype: "Material Request",
+                    name: frm.doc.name,
+                    users: approvers,
+                    read: 1,
+                    write: 1,
+                    share: 0,
+                    everyone: 0
+                },
+                callback(r) {
+                    if(r.message) {
+                        console.log(r.message);
+                        frm.reload_doc()
+                        // document is shared with user
+                    }
+                }
+            })
+        }
+    },
+    validate(frm){
+		if ((!frm.doc.custom_approver_1 || frm.doc.custom_approver_1 === "") && (!frm.doc.custom_approver_role_1 || frm.doc.custom_approver_role_1 === "")){
+        frappe.call({
+            method: "mantra_dev.backend_code.api.get_verification_users_material",
+            args: {
+                expense_grouping_master: frm.doc.custom_expense_grouping,
+                department: frm.doc.custom_department
+            },
+            callback: function (r) {
+                let approver_fields = ["custom_approver_1", "custom_approver_2", "custom_approver_3", "custom_approver_4", "custom_approver_5"];
+                let role_fields = ["custom_approver_role_1", "custom_approver_role_2", "custom_approver_role_3", "custom_approver_role_4", "custom_approver_role_5"];
+
+                // **Reset all fields to empty before setting new values**
+                approver_fields.forEach(field => frm.set_value(field, ""));
+                role_fields.forEach(field => frm.set_value(field, ""));
+
+                if (r.message) {
+                    let stages = ["verifier", "approver", "validation_1", "validation_2", "auditor"];
+					
+                    for (let i = 0; i < stages.length; i++) {
+                        let user_value = r.message[stages[i]] || "";
+                        let role_value = r.message[`approver_role_${i + 1}`] || "";
+
+                        if (user_value) {
+                            frm.set_value(approver_fields[i], user_value);
+                        } else if (role_value) {
+                            frm.set_value(role_fields[i], role_value);
+                        }
+                    }
+
+                    // Ensure at least one approver is selected
+                    let has_approver = approver_fields.some(field => frm.doc[field]) || role_fields.some(field => frm.doc[field]);
+                    if (!has_approver) {
+                        // frappe.throw("There is no approver in the verification flow, and you have also not selected any approver.");
+                    }
+                }
+            }
+        });
+	}
+    },
+    custom_department(frm){
+        frm.set_value("custom_expense_grouping","")
+        frm.fields_dict["custom_expense_grouping"].get_query = function () {
+            let selected_department = frm.doc.custom_department;
+            if (!selected_department) {
+                return {};
+            }
+            return {
+                filters: {
+                    name: ["in", get_selected_values(selected_department)]
+                }
+            };
+        };
+    },
+	// custom_expense_grouping(frm){
+	// 	if (frm.doc.custom_department) {
+    //         frm.set_query("custom_expense_grouping", function () {
+    //             return {
+    //                 filters: {
+    //                     name: ["in", get_selected_values(frm.doc.custom_department)]
+    //                 }
+    //             };
+    //         });
+    //     }
+	// },
+
+
+
+
+
+
+	custom_approver_role_1: function(frm) {
+        if (frm.doc.custom_approver_role_1) {
+            frm.set_value("custom_approver_1", "");
+        }
+    },
+    custom_approver_1: function(frm) {
+        if (frm.doc.custom_approver_1) {
+            frm.set_value("custom_approver_role_1", "");
+        }
+    },
+    custom_approver_role_2: function(frm) {
+        if (frm.doc.custom_approver_role_2) {
+            frm.set_value("custom_approver_2", "");
+        }
+    },
+    custom_approver_2: function(frm) {
+        if (frm.doc.custom_approver_2) {
+            frm.set_value("custom_approver_role_2", "");
+        }
+    },
+    custom_approver_role_3: function(frm) {
+        if (frm.doc.custom_approver_role_3) {
+            frm.set_value("custom_approver_3", "");
+        }
+    },
+    custom_approver_3: function(frm) {
+        if (frm.doc.custom_approver_3) {
+            frm.set_value("custom_approver_role_3", "");
+        }
+    },
+    custom_approver_role_4: function(frm) {
+        if (frm.doc.custom_approver_role_4) {
+            frm.set_value("custom_approver_4", "");
+        }
+    },
+    custom_approver_4: function(frm) {
+        if (frm.doc.custom_approver_4) {
+            frm.set_value("custom_approver_role_4", "");
+        }
+    },
+    custom_approver_role_5: function(frm) {
+        if (frm.doc.custom_approver_role_5) {
+            frm.set_value("custom_approver_5", "");
+        }
+    },
+    custom_approver_5: function(frm) {
+        if (frm.doc.custom_approver_5) {
+            frm.set_value("custom_approver_role_5", "");
+        }
+    },
+
+
+
+
+
+
+
+
+
+
 	setup: function (frm) {
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Issue Material',
@@ -44,6 +220,22 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	onload: function (frm) {
+
+	if(frm.doc.custom_department){
+			frm.fields_dict["custom_expense_grouping"].get_query = function () {
+				let selected_department = frm.doc.custom_department;
+				if (!selected_department) {
+					return {};
+				}
+				return {
+					filters: {
+						name: ["in", get_selected_values(selected_department)]
+					}
+				};
+			};
+		}
+
+
 		// add item, if previous view was item
 		erpnext.utils.add_item(frm);
 
@@ -827,4 +1019,25 @@ function objectToList(obj, type) {
 	} else {
 		return null; // Handle invalid type
 	}
+}
+
+
+
+function get_selected_values(department) {
+    let selected_values = [];
+    frappe.call({
+        method: "frappe.client.get_list",
+        async: false,
+        args: {
+            doctype: "Expense Verification Flow",
+            filters: { select_department: department }, // Filter by selected department
+            fields: ["select_expense_grouping"]
+        },
+        callback: function (r) {
+            if (r.message) {
+                selected_values = r.message.map(row => row.select_expense_grouping);
+            }
+        }
+    });
+    return selected_values;
 }

@@ -28,15 +28,21 @@ frappe.ui.form.on('Purchase Receipt', {
     before_save(frm) {
         // If Item table present then check for linked PO no for purpose
         if (frm.doc.items && frm.doc.items.length > 0) {
+
+            frm.doc.items.forEach(item => {
+                item.custom_qc_remaining_quantity = item.qty;
+            });
+            frm.refresh_field('items');
+
             let purposes = [];
-            let purchase_orders = [...new Set(frm.doc.items.map(item => item.purchase_order))]; 
+            let purchase_orders = [...new Set(frm.doc.items.map(item => item.purchase_order))];
             let promises = [];
 
             purchase_orders.forEach(purchase_order => {
                 if (purchase_order) {
                     promises.push(
                         frappe.db.get_value('Purchase Order', purchase_order, 'custom_purpose').then(r => {
-                            if (r.message && r.message.custom_purpose) {        
+                            if (r.message && r.message.custom_purpose) {
                                 purposes.push(`${purchase_order}: ${r.message.custom_purpose}`);
                             }
                         })
@@ -56,32 +62,32 @@ frappe.ui.form.on('Purchase Receipt', {
 
     },
 
+
     after_workflow_action(frm) {
-        if(frm.doc.workflow_state === "Approved") {
-            frappe.call({
-                method: "frappe.client.get_single_value",
-                args: {
-                    doctype: "QC Settings",
-                    field: "auto_transfer_stock"
-                },
-                callback: function(r) {
-                    if (r.message === 1) {
-                        // If auto_transfer_stock is 1, create a stock entry for all items which do not required QC
-                        frappe.call({
-                            method: "mantra_dev.backend_code.stock_entry.qc_request_stock_entry.create_stock_entry_for_auto_transfer_stock",
-                            args: {
-                                purchase_receipt: frm.doc.name
-                            },
-                            callback: function(res) {
-                                if (res.message) {
-                                    frappe.msgprint(res.message);
+        if (frm.doc.workflow_state === "Approved") {
+            if (frm.doc.is_subcontracted === 0) {
+                frappe.call({
+                    method: "mantra_dev.backend_code.qc_module.get_auto_transfer_stock",
+                    callback: function (r) {
+                        if (r.message && r.message.auto_transfer_stock === 1) {
+                            
+                            // If auto_transfer_stock_for_non_qc_items is 1, create a stock entry for all items which do not required QC
+                            frappe.call({
+                                method: "mantra_dev.backend_code.qc_module.create_stock_entry_for_auto_transfer_stock",
+                                args: {
+                                    purchase_receipt: frm.doc.name
+                                },
+                                callback: function (res) {
+                                    if (res.message) {
+                                        frappe.msgprint(res.message);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     },
- 
 });
+

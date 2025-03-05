@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Inspection Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #details-container {
+            padding: 20px;
+            border: 2px solid #ddd;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        h3 {
+            color: Black;
+        }
+
+        p {
+            font-size: 16px;
+            color: Black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="details-container">
+        <h2>Quality Inspection Details</h2>
+        <p><strong>Document Name:</strong> {{ name }}</p>
+        <p><strong>Item Code:</strong> {{ item_code }}</p>
+        <p><strong>Item Name:</strong> {{ item_name }}</p>
+        <p><strong>Report Date:</strong> {{ report_date }}</p>
+        <p><strong>Batch No:</strong> {{ batch_no or "-" }}</p>
+        <p><strong>Serial No:</strong> {{ serial_no or "-" }}</p>
+        <p><strong>Sample Size:</strong> {{ sample_size }}</p>
+        <p><strong>Actual QTY:</strong> {{ actual_qty }}</p>
+    </div>
+
+</body>
+
+</html>

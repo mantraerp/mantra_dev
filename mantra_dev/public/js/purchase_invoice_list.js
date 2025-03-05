@@ -1,11 +1,8 @@
 
 frappe.listview_settings["Purchase Invoice"].onload = function (listview) {
-		
-
-
-
 
         if (frappe.session.user !== "Administrator") {
+
             frappe.call({
                 method: "mantra_dev.backend_code.api.get_user_purchase_invoice",
                 args: {
@@ -27,4 +24,8 @@ frappe.listview_settings["Purchase Invoice"].onload = function (listview) {
         } else {
             console.log("Session user is Administrator, showing all documents...");
         }
+
+        listview.page.add_action_item(__("Payment"), () => {
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
+		});
 };

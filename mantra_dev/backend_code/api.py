@@ -25,6 +25,34 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites
 from frappe.utils import today, get_link_to_form
 
 
+# def get_verification_users(expense_grouping_master=None,department=None):
+@frappe.whitelist()
+def get_verification_users_material(expense_grouping_master=None, department=None):
+    doc = frappe.get_all(
+        "Expense Verification Flow",
+        filters={
+            "select_department": department,
+            "select_expense_grouping": expense_grouping_master,
+        },
+        fields=[
+            "verifier",
+            "approver",
+            "validation_1",
+            "validation_2",
+            "auditor",
+            "approver_role_1",
+            "approver_role_2",
+            "approver_role_3",
+            "approver_role_4",
+            "approver_role_5",
+        ],
+    )
+
+    if not doc:
+        return None  # Return None if no records are found
+
+    return doc[0]  # Return the first matching document
+
 
 
 # Use in sales invoice to fetch new account from sales person.
@@ -451,237 +479,6 @@ def change_mode_of_payment(selected_records,new_mode_of_payment):
 
 
 
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-# Filter Items based on warehouse mentioned in QC Settings --> Default QC Processing Warehouse
-def get_items_from_warehouse(doctype, txt, searchfield, start, page_len, filters):
-
-
-   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-   if not warehouse:
-       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
-
-
-   return frappe.db.sql("""
-       SELECT DISTINCT item_code
-       FROM `tabBin`
-       WHERE warehouse = %s
-       AND item_code LIKE %s
-       LIMIT %s, %s
-   """, (warehouse, f"%{txt}%", start, page_len))
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-# Filter Item Serial No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
-def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
-  
-   item_code = filters.get("item_code")
-   if not item_code:
-       frappe.throw(_("Item Code is required to filter Serial Nos."))
-
-
-   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-   if not warehouse:
-       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
-
-
-   return frappe.db.sql("""
-       SELECT name
-       FROM `tabSerial No`
-       WHERE item_code = %s
-       AND warehouse = %s
-       AND name LIKE %s
-       LIMIT %s, %s
-   """, (item_code, warehouse, f"%{txt}%", start, page_len))
-
-
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-# Fetch Quality Inspection Template from Item master Quality Inspection Template field
-def get_quality_inspection_templates(doctype, txt, searchfield, start, page_len, filters):
-
-
-   item_code = filters.get("item_code")
-   if not item_code:
-       frappe.throw(_("Item Code is required to fetch Quality Inspection Templates."))
-
-
-   return frappe.db.sql("""
-       SELECT quality_inspection_template
-       FROM `tabItem`
-       WHERE item_code = %s
-       AND quality_inspection_template LIKE %s
-       LIMIT %s, %s
-   """, (item_code, f"%{txt}%", start, page_len))
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-# Filter Batch No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
-def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
-
-    item_code = filters.get("item_code")
-    if not item_code:
-        frappe.throw(_("Item Code is required to filter Batch Nos."))
-
-    warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-    if not warehouse:
-        frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
-
-    active_batches = []
-
-    batches = get_batch_qty(
-        item_code=item_code,
-        warehouse=warehouse
-    )
-
-    for batch_no, qty in batches.items():
-        if qty > 0:
-            active_batches.append(batch_no)
-
-    return [[batch_no] for batch_no in active_batches]
-
-
-# Get batch quantities using get_auto_batch_nos
-@frappe.whitelist()
-def get_batch_qty(
-    batch_no=None,
-    warehouse=None,
-    item_code=None,
-    posting_date=None,
-    posting_time=None,
-    ignore_voucher_nos=None,
-    for_stock_levels=False,
-):
-    batchwise_qty = defaultdict(float)
-    kwargs = frappe._dict(
-        {
-            "item_code": item_code,
-            "warehouse": warehouse,
-            "posting_date": posting_date,
-            "posting_time": posting_time,
-            "batch_no": batch_no,
-            "ignore_voucher_nos": ignore_voucher_nos,
-            "for_stock_levels": for_stock_levels,
-        }
-    )
-
-    batches = get_auto_batch_nos(kwargs)
-
-    for batch in batches:
-        batchwise_qty[batch.get("batch_no")] += batch.get("qty")
-
-    # If batch_no is provided, return its quantity
-    if batch_no:
-        return batchwise_qty.get(batch_no, 0)
-
-    return batchwise_qty
-
-
-# @frappe.whitelist()
-# @frappe.validate_and_sanitize_search_inputs
-# # Filter Batch No based on selected Item Code and warehouse mentioned in QC Settings --> Default QC Processing Warehouse
-# def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
-
-
-#    item_code = filters.get("item_code")
-#    if not item_code:
-#        frappe.throw(_("Item Code is required to filter Batch Nos."))
-
-
-#    warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-#    if not warehouse:
-#        frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
-
-
-#    # Fetch batch numbers directly associated with the given item_code and warehouse.
-#    batch_nos_from_sle = get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt)
-
-
-#    # Fetch batch numbers linked through serial and batch bundles.
-#    batch_nos_from_bundle = get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt)
-
-
-#    batch_nos = {batch["batch_no"] for batch in batch_nos_from_sle + batch_nos_from_bundle}
-#    return [[batch_no] for batch_no in batch_nos]
-
-
-
-
-# # Fetch batch numbers directly associated with the given item_code and warehouse.
-# def get_stock_ledger_entries_for_batch_no(item_code, warehouse, txt):
-  
-#    sle = frappe.qb.DocType("Stock Ledger Entry")
-#    query = (
-#        frappe.qb.from_(sle)
-#        .select(sle.batch_no)
-#        .where(
-#            (sle.item_code == item_code)
-#            & (sle.warehouse == warehouse)
-#            & (sle.docstatus == 1)
-#            & (sle.batch_no.like(f"%{txt}%"))
-#        )
-#        .distinct()
-#    )
-
-
-#    return query.run(as_dict=True) or []
-
-
-
-
-# # Fetch batch numbers linked through serial and batch bundles.
-# def get_stock_ledger_entries_for_batch_bundle(item_code, warehouse, txt):
-  
-#    sle = frappe.qb.DocType("Stock Ledger Entry")
-#    batch_package = frappe.qb.DocType("Serial and Batch Entry")
-
-
-#    query = (
-#        frappe.qb.from_(sle)
-#        .inner_join(batch_package)
-#        .on(batch_package.parent == sle.serial_and_batch_bundle)
-#        .select(batch_package.batch_no)
-#        .where(
-#            (sle.item_code == item_code)
-#            & (sle.warehouse == warehouse)
-#            & (sle.docstatus == 1)
-#            & (batch_package.batch_no.like(f"%{txt}%"))
-#        )
-#        .distinct()
-#    )
-
-
-#    return query.run(as_dict=True) or []
-
-
- 
-@frappe.whitelist()
-# Sample Size can not exceed total No of Items in QC Settings --> Default QC Processing Warehouse
-def get_available_qty(item_code):
-  
-   if not item_code:
-       frappe.throw(_("Item Code is required to validate Sample Size."))
-
-
-   warehouse = frappe.db.get_single_value("QC Settings", "default_qc_processing_warehouse")
-   if not warehouse:
-       frappe.throw(_("Default QC Processing Warehouse is not set in QC Settings."))
-
-
-   total_qty = frappe.db.get_value(
-       "Bin",
-       {"item_code": item_code, "warehouse": warehouse},
-       "actual_qty"
-   )
-
-
-   return total_qty or 0
 
 
 

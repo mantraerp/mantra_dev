@@ -96,7 +96,10 @@ doc_events = {
     },
     "Purchase Invoice":{
         "on_update": "mantra_dev.purchase_invoice.override_validate_due_date",
-    }
+    },
+    # "Stock Entry":{
+    #     "on_cancel":"mantra_dev.backend_code.qc_module.revert_auto_transfer_stock",
+    # },
 }
 
 # Scheduled Tasks

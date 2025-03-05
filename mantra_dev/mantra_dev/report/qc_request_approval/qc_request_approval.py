@@ -16,7 +16,7 @@ def execute(filters=None):
 
 def get_columns():
   return [
-      {"label": _("Purchase Receipt"), "fieldname": "VoucherNumber", "fieldtype": "Data", "width": 200},
+      {"label": _("Purchase Receipt"), "fieldname": "VoucherNumber", "fieldtype": "Link", "options": "Purchase Receipt", "width": 200},
       {"label": _("Date"), "fieldname": "Date", "fieldtype": "Date", "width": 100},
       {"label": _("Item Code"), "fieldname": "ItemCode", "fieldtype": "Link", "options": "Item", "width": 100},
       {"label": _("Item Name"), "fieldname": "ItemName", "fieldtype": "Data", "width": 150},
@@ -50,6 +50,9 @@ def get_data(filters):
         CONCAT(
            '<button class="btn btn-primary pt-0 pb-0 approvestockentry" style="background-color: grey" ',
            'data-stock_entry="', se.name, '" ',
+           'data-item_code="', sed.item_code, '" ',
+           'data-qty="', sed.qty, '" ',
+           'data-purchase_receipt="', pr.name, '" ',
            '>Approve</button>'
        ) AS Approve
     FROM

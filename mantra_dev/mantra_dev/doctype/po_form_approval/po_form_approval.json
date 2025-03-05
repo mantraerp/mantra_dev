@@ -1,5 +1,5 @@
 {
- "_seen": "[\"Administrator\"]",
+ "_seen": "[\"Administrator\", \"abhishek.jain@mantratec.com\"]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "PO-FORM-.YY.-.#####",
@@ -29,14 +29,15 @@
   "approved_by",
   "material_request",
   "purpose",
+  "comment",
   "stock_details_section",
   "current_stock",
-  "comment",
-  "column_break_wvnk",
   "demand",
   "additional",
+  "stock_detail",
   "price_comparison_section",
-  "price_comparison"
+  "price_comparison",
+  "amended_from"
  ],
  "fields": [
   {
@@ -186,26 +187,26 @@
   {
    "fieldname": "current_stock",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Current Stock",
    "read_only": 1
   },
   {
    "fieldname": "comment",
    "fieldtype": "Small Text",
-   "label": "Comment"
-  },
-  {
-   "fieldname": "column_break_wvnk",
-   "fieldtype": "Column Break"
+   "label": "Comment",
+   "max_height": "70px"
   },
   {
    "fieldname": "demand",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Demand"
   },
   {
    "fieldname": "additional",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Additional"
   },
   {
@@ -218,12 +219,28 @@
    "fieldtype": "Table",
    "label": "Price Comparison",
    "options": "PO Form Price Comparison"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PO Form Approval",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "stock_detail",
+   "fieldtype": "Table",
+   "label": "Stock Detail",
+   "options": "PO Form Item Stock"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-02-21 12:59:42.538568",
+ "modified": "2025-03-03 12:47:31.335375",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "PO Form Approval",

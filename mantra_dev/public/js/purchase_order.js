@@ -73,38 +73,6 @@ frappe.ui.form.on("Purchase Order", {
     
             let itemsWithStock = await Promise.all(itemStockPromises);
     
-            // Construct HTML content
-            let html = `
-                <div>
-                    <h4>${po.name}</h4>
-                    <p><strong>Supplier Name:</strong> ${po.supplier_name}</p>
-                    <p><strong>Status:</strong> ${po.status}</p>
-                    <p><strong>Grand Total:</strong> ${po.grand_total}</p>
-                    <h5>Items:</h5>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Qty</th>
-                                <th>Rate</th>
-                                <th>Target Warehouse Qty</th>
-                                <th>Total Qty</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsWithStock.map(item => `
-                                <tr>
-                                    <td>${item.item_name}</td>
-                                    <td>${item.qty}</td>
-                                    <td>${item.rate}</td>
-                                    <td>${item.available_qty_in_target}</td>
-                                    <td>${item.total_available_stock}</td>
-                                </tr>
-                            `).join("")}
-                        </tbody>
-                    </table>
-                </div>`;
-
             let po_form_details = await new Promise((resolve, reject) => {
                 frappe.call({
                     method: "mantra_dev.backend_code.purchase_order.purchase_order.get_po_form_details",
@@ -120,6 +88,47 @@ frappe.ui.form.on("Purchase Order", {
                     }
                 });
             });
+
+            let hasStockDetails = po_form_details && po_form_details.stock_detail && po_form_details.stock_detail.length > 0;
+
+            // Construct HTML content
+            let html = `
+                <div>
+                    <h4>${po.name}</h4>
+                    <p><strong>Supplier Name:</strong> ${po.supplier_name}</p>
+                    <p><strong>Status:</strong> ${po.status}</p>
+                    <p><strong>Grand Total:</strong> ${po.grand_total}</p>
+                    <h5>Items:</h5>
+                    <table class="table table-bordered item-stock">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Target Warehouse Qty</th>
+                                <th>Total Qty</th>
+                                ${hasStockDetails ? `<th>Demand</th><th>Additional</th>` : ""}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsWithStock.map(item => {
+                                let stockDetail = hasStockDetails 
+                                    ? po_form_details.stock_detail.find(detail => detail.item_code === item.item_code) || {} 
+                                    : {};
+                                return `
+                                    <tr>
+                                        <td>${item.item_name}</td>
+                                        <td>${frappe.format(item.qty, { fieldtype: "Float" })}</td>
+                                        <td>${frappe.format(item.rate, { fieldtype: "Currency" })}</td>
+                                        <td>${frappe.format(item.available_qty_in_target, { fieldtype: "Float" })}</td>
+                                        <td>${frappe.format(item.total_available_stock, { fieldtype: "Float" })}</td>
+                                        ${hasStockDetails ? `<td>${frappe.format(stockDetail.demand, { fieldtype: "Float" }) || 0}</td><td>${frappe.format(stockDetail.additional, { fieldtype: "Float" }) || 0}</td>` : ""}
+                                    </tr>
+                                `;
+                            }).join("")}
+                        </tbody>
+                    </table>
+                </div>`;
 
             if (po_form_details){
                 po_form_details['total_stock'] = itemsWithStock.reduce((sum, item) => sum + (item.total_available_stock || 0), 0);
@@ -149,7 +158,6 @@ frappe.ui.form.on("Purchase Order", {
     
             d.show();
         });
-
 
         frm.add_custom_button(
             __("Rate Comparison"),
@@ -390,11 +398,11 @@ function get_selected_values(department) {
 function createPoDetailsHTML(po_form_details){
     html = `
         <style>
-            .po-form-approval td div {
+            .po-form-approval td div, .item-stock td div {
                 text-align: left !important;
             }
             .po-form-approval td {
-                width: 16.66%;
+                width: 14.29%;
             }
         </style>
         <h4>PO Form Approval Details:</h4>
@@ -404,47 +412,49 @@ function createPoDetailsHTML(po_form_details){
                     <td>Project Code:</td>
                     <td colspan="2">${po_form_details.project || ''}</td>
                     <td>Project Name:</td>
-                    <td colspan="2">${po_form_details.project_name || ''}</td>
+                    <td colspan="3">${po_form_details.project_name || ''}</td>
                 </tr>
                 <tr>
                     <td>Sales Order No:</td>
                     <td colspan="2">${po_form_details.sales_order || ''}</td>
                     <td>Customer PO No:</td>
-                    <td colspan="2">${po_form_details.po_no || ''}</td>
+                    <td colspan="3">${po_form_details.po_no || ''}</td>
                 </tr>
                 <tr>
                     <td>Customer Code:</td>
                     <td colspan="2">${po_form_details.customer || ''}</td>
                     <td>Customer Name:</td>
-                    <td colspan="2">${po_form_details.customer_name || ''}</td>
+                    <td colspan="3">${po_form_details.customer_name || ''}</td>
                 </tr>
                 <tr>
                     <td>Business Unit Name:</td>
                     <td colspan="2">${po_form_details.business_unit_name || ''}</td>
                     <td>Business Unit Email:</td>
-                    <td colspan="2">${po_form_details.business_unit_email || ''}</td>
+                    <td colspan="3">${po_form_details.business_unit_email || ''}</td>
                 </tr>
                 <tr>
                     <td>Purpose:</td>
-                    <td colspan="5">${po_form_details.purpose || ''}</td>
+                    <td colspan="6">${po_form_details.purpose || ''}</td>
                 </tr>
                 <tr>
                     <td>Cost Center/Profit Center:</td>
-                    <td colspan="5">${po_form_details.cost_center || ''}</td>
+                    <td colspan="6">${po_form_details.cost_center || ''}</td>
                 </tr>
                 <tr>
                     <td>Requester:</td>
                     <td colspan="2">${po_form_details.requester || ''}</td>
                     <td>Approved By:</td>
-                    <td colspan="2">${po_form_details.approved_by || ''}</td>
+                    <td colspan="3">${po_form_details.approved_by || ''}</td>
                 </tr>
                 <tr>
                     <td>Material Request:</td>
-                    <td colspan="5">${po_form_details.material_request || ''}</td>
+                    <td colspan="2">${po_form_details.material_request || ''}</td>
+                    <td>Request By:</td>
+                    <td colspan="3">${po_form_details.request_by || ''}</td>
                 </tr>
                 <tr>
                     <td>Approval Link:</td>
-                    <td colspan="5">
+                    <td colspan="6">
                         ${po_form_details.approval_link ? `
                         <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.approval_link}', '_blank')">
                         View Approval </button>` : ""}
@@ -452,15 +462,15 @@ function createPoDetailsHTML(po_form_details){
                 </tr>
                 <tr>
                     <td>Overall Profit in case if Project:</td>
-                    <td colspan="5">${frappe.format(po_form_details.overall_profit_in_case_if_project, { fieldtype: "Currency" }) || ''}</td>
+                    <td colspan="6">${frappe.format(po_form_details.overall_profit_in_case_if_project, { fieldtype: "Currency" }) || ''}</td>
                 </tr>
                 <tr>
                     <td>Last Lowest Price:</td>
-                    <td colspan="5">${frappe.format(po_form_details.last_lowest_price, { fieldtype: "Currency" }) || ''}</td>
+                    <td colspan="6">${frappe.format(po_form_details.last_lowest_price, { fieldtype: "Currency" }) || ''}</td>
                 </tr>
                 <tr>
                     <td>Final Supplier Quotation Link:</td>
-                    <td colspan="5">
+                    <td colspan="6">
                         ${po_form_details.final_supplier_quotation_link ? `
                         <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.final_supplier_quotation_link}', '_blank')">
                         View Quotation </button>` : ""}
@@ -468,55 +478,78 @@ function createPoDetailsHTML(po_form_details){
                 </tr>
                 <tr>
                     <td>NDA:</td>
-                    <td colspan="5">
+                    <td colspan="6">
                         ${po_form_details.nda ? `
                         <button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${po_form_details.nda}', '_blank')" >
                         NDA </button>` : ""}
                     </td>
                 </tr>
                 <tr>
-                    <td>Current Stock:</td>
-                    <td>${frappe.format(po_form_details.current_stock, { fieldtype: "Float" }) || ''}</td>
-                    <td>Demand:</td>
-                    <td>${frappe.format(po_form_details.demand, { fieldtype: "Float" }) || ''}</td>
-                    <td>Additional:</td>
-                    <td>${frappe.format(po_form_details.additional, { fieldtype: "Float" }) || ''}</td>
-                </tr>
-                <tr>
                     <td>Comments:</td>
-                    <td colspan="3">${po_form_details.comment || ''}</td>
-                    <td>Physical Stock</td>
-                    <td>${frappe.format(po_form_details.total_stock, { fieldtype: "Float" }) || ''}</td>
+                    <td colspan="6">${po_form_details.comment || ''}</td>
                 </tr>`
-    
-    if (po_form_details.price_comparison.length > 0){
+
+    if (po_form_details.stock_detail.length > 0){
         html += `<tr>
-            <td colspan="6" style="text-align: center;"><h3>Price Comparison</h3></td>
+            <td colspan="7" style="text-align: center;"><h3 style="margin-bottom: 0px !important;">Stock Detail</h3></td>
+        </tr>
+        <tr>
+            <td>Item Code</td>
+            <td>Item Name</td>
+            <td>Qty</td>
+            <td>Target Warehouse Qty</td>
+            <td>Current Stock</td>
+            <td>Demand</td>
+            <td>Additional</td>
         </tr>`
 
-        tableHTML = `<tr>
-            <td></td>`
-
-        for (let i = 0; i < po_form_details.price_comparison.length; i++) {
+        for (let item of po_form_details.stock_detail) {
+            html += `
+                <tr>
+                    <td>${item.item_code}</td>
+                    <td>${item.item_name}</td>
+                    <td>${frappe.format(item.qty, { fieldtype: "Float" })}</td>
+                    <td>${frappe.format(item.target_warehouse_qty, { fieldtype: "Float" })}</td>
+                    <td>${frappe.format(item.current_stock, { fieldtype: "Float" })}</td>
+                    <td>${frappe.format(item.demand, { fieldtype: "Float" }) || 0}</td>
+                    <td>${frappe.format(item.additional, { fieldtype: "Float" }) || 0}</td>
+                </tr>`;
+        }
+    }
+    
+    if (po_form_details.price_comparison.length > 0) {
+        html += `<tr>
+            <td colspan="7" style="text-align: center;">
+                <h3 style="margin-bottom: 0px !important;">Price Comparison</h3>
+            </td>
+        </tr>`;
+    
+        // Slice the array to ensure a max of 6 entries
+        let priceComparisonData = po_form_details.price_comparison.slice(0, 6);
+    
+        let tableHTML = `<tr><td></td>`;
+    
+        for (let i = 0; i < priceComparisonData.length; i++) {
             tableHTML += `<td>L${i + 1}</td>`;
         }
-
-        tableHTML += `</tr>`
-        fields_dict = {
+    
+        tableHTML += `</tr>`;
+    
+        let fields_dict = {
             'supplier_name': 'Supplier Name',
             'quote_price_to_the_customer': 'Quote Price to the Customer',
             'total_purchase_price': 'Total Purchase Price',
             'supplier_quoted_price': 'Supplier Quoted Price',
-            'nagotiated': 'Nagotiated',
+            'nagotiated': 'Negotiated',
             'warranty_foc_spares': 'Warranty / FOC Spares (%)',
             'lead_time': 'Lead Time',
             'freight': 'Freight',
             'rate_contract': 'Rate Contract',
             'compliance__certificates_in_case_of_import': 'Compliance / Certificates (In case of IMPORT)',
+            'payment_terms': 'Payment Terms',
             'incoterms_shipping_terms': 'Incoterms/ Shipping Terms',
-            'payment_terms': 'Payment Terms'
-        }
-
+        };
+    
         let currency_fields = [
             'quote_price_to_the_customer', 
             'total_purchase_price', 
@@ -525,35 +558,36 @@ function createPoDetailsHTML(po_form_details){
             'freight', 
             'rate_contract'
         ];
-
+    
         for (let key in fields_dict) {
             tableHTML += `<tr>
                 <td><b>${fields_dict[key]}</b></td>`;
     
-            po_form_details.price_comparison.forEach(row => {
+            priceComparisonData.forEach(row => {
                 let value = row[key] || '';
-
+    
                 if (currency_fields.includes(key) && value !== '') {
                     value = frappe.format(value, { fieldtype: "Currency" });
                 }
-
-                if (key == 'compliance__certificates_in_case_of_import'){
-                    if (value){
+    
+                if (key == 'compliance__certificates_in_case_of_import') {
+                    if (value) {
                         value = `<button style="padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="window.open('${value}', '_blank')">
-                            View Certificate</button>`
+                            View Certificate</button>`;
                     } else {
-                        value = ''
+                        value = '';
                     }
                 }
-
+    
                 tableHTML += `<td>${value}</td>`;
             });
-
+    
             tableHTML += `</tr>`;
         }
-
+    
         html += tableHTML;
     }
+    
 
     html += `
             </tbody>
