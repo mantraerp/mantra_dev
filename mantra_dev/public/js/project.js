@@ -8,20 +8,21 @@ frappe.ui.form.on('Project', {
                     project: frm.doc.name
                 },
                 callback: function(response) {
+                    console.log(response.message)
                     if (response.message && response.message.length === 2) {
                         let aggregated_items = response.message[0]; 
-                        let warehouse_list = response.message[1];
                         if (aggregated_items.length > 0) {
                             frappe.route_options = {
-                                data: JSON.stringify(aggregated_items),  
-                                warehouse: JSON.stringify(warehouse_list)  
+                                data: JSON.stringify(aggregated_items)
                             }   
                         frappe.open_in_new_tab = true;
-                        frappe.set_route('query-report', 'BOM Stock Calculated with Valuation rate');
+                        frappe.set_route('query-report', 'Project Tracking');
                     }} else {
                         frappe.msgprint(__('No Sales Order Found for this Project'));
                     }     
             }
             });
-        }, __('Utility'));}
+        }, __('Utility'));
+    
+    }
 });

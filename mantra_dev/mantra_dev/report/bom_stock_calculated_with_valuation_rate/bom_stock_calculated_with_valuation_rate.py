@@ -54,7 +54,15 @@ def execute(filters=None):
                 **stock_data,
                 'shortage_qty': shortage_qty,
                 'total_qty': material_qty,
-                'valuation_rate': valuation_rate * material_qty
+                'valuation_rate': valuation_rate * material_qty,
+                'create_purchase_order': create_button(
+                    "Create Purchase Order", "background-color: gray;", "create-po",
+                    {"item_code": material_item_code, "shortage_qty": shortage_qty}
+                ) if shortage_qty > 0 else "",
+                'create_material_transfer': create_button(
+                    "Create Material Transfer", "background-color: gray;", "create-mt",
+                    {"item_code": material_item_code, "shortage_qty": shortage_qty}
+                ) if shortage_qty > 0 else "",
             }
 
             existing_row = next((row for row in data if row['raw_material_item'] == material_item_code), None)
@@ -63,6 +71,15 @@ def execute(filters=None):
                 existing_row['total_qty'] += material_qty
                 existing_row['valuation_rate'] = valuation_rate * existing_row['total_qty']
                 existing_row['shortage_qty'] = max(0, existing_row['total_qty'] - (existing_row['available_qty'] + existing_row['transit_qty']))
+                existing_row['create_purchase_order'] = create_button(
+                    "Create Purchase Order", "background-color: gray;", "create-po",
+                    {"item_code": material_item_code, "shortage_qty": existing_row['shortage_qty']}
+                ) if existing_row['shortage_qty'] > 0 else ""
+
+                existing_row['create_material_transfer'] = create_button(
+                    "Create Material Transfer", "background-color: gray;", "create-mt",
+                    {"item_code": material_item_code, "shortage_qty": existing_row['shortage_qty']}
+                ) if existing_row['shortage_qty'] > 0 else ""
             else:
                 data.append(row_data)
     
@@ -134,7 +151,7 @@ def get_latest_stock_qty2(item_code, warehouses=None):
         condition = "AND warehouse IN %s"
         values.append(tuple(warehouses))
     else:
-        condition = "AND warehouse IN (SELECT name FROM `tabWarehouse` WHERE custom_is_not_countable = 1)"
+        condition = "AND warehouse IN (SELECT name FROM `tabWarehouse` WHERE custom_is_not_countable = 0)"
     actual_qty = frappe.db.sql(
         f"""
         SELECT SUM(actual_qty) 
@@ -145,6 +162,12 @@ def get_latest_stock_qty2(item_code, warehouses=None):
     )[0][0]
     return actual_qty or 0
 
+def create_button(label: str, style: str, class_id: str, data_attr: dict) -> str:
+    """
+    Create an HTML button with specified attributes.
+    """
+    data_string = " ".join([f"data-{key}='{value}'" for key, value in data_attr.items()])
+    return f"<button class='btn btn-primary pt-0 pb-0 {class_id}' style='{style}' {data_string}>{label}</button>"
 
 def get_raw_materials_for_bom(bom_code):
     """ Fetches the raw materials for a given BOM. """
@@ -224,6 +247,19 @@ def get_columns(items):
                 "width": 150,
                 "align":"right"
             })
+    columns.append({
+            "fieldname": "create_purchase_order",
+            "label": _( "Purchase Order"),
+            "fieldtype": "Data",
+            "width": 200
+        })
+    columns.append( {
+            "fieldname": "create_material_transfer",
+            "label": _( "Material Transfer"),
+            "fieldtype": "Data",
+            "width": 200
+        })
+       
     return columns
 
 

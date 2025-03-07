@@ -2,6 +2,9 @@ import frappe # type: ignore
 from frappe import _ # type: ignore
 import traceback
 import json
+import requests # type: ignore
+
+
 from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url # type: ignore
 
 
@@ -13,32 +16,81 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url
 @frappe.whitelist(allow_guest=True)
 def minop_hook(**kwargs):
 
-	parameters=frappe._dict(kwargs) 
-	query = "SELECT * from `tabError Log` WHERE method='Minop Punch'"
-	previous_log = frappe.db.sql(query,as_dict=1)
-	if len(previous_log)<=10:
-		errorLog("Minop Punch",str(parameters))
-
-
-
+	parameters=frappe._dict(kwargs)
 	parameters['status_code']=200
 	parameters['sucessfull']=True
+
+	query = "SELECT * from `tabError Log` WHERE method='Minop Punch'"
+	previous_log = frappe.db.sql(query,as_dict=1)
+	if len(previous_log)<=50:
+		errorLog("Minop Punch",str(parameters))
+
+	frappe.enqueue(minop_hook_process, queue='long', job_name='Minop hook', timeout=3000, parameters=parameters)
 	return parameters
-		# query = "SELECT * from `tabError Log` WHERE error='{}' AND method='{}'".format(error,title)
-		# test= frappe.db.sql(query,as_dict=1)
+
+@frappe.whitelist(allow_guest=True)
+def minop_hook_process(parameters):
+    
+	keys_parameters = parameters.keys()
+ 
+	#Check keys in reponse
+	all_keys_found = True
+	for key in ['Punchid','DeviceId','PunchTime']:
+		if key not in keys_parameters:
+			all_keys_found = False
+			break
+
+	if not all_keys_found:
+		frappe.sendmail(
+			recipients=['ravi.patel@mantratec.com'],
+			subject="Minop hook keys not found",
+			message=str(parameters),
+		)
+		return "Keys not found"
+
+	return True
+
+ 
+ 
+
+
+    
+
+
+# {'Punchid': '383', 'DeviceId': '0', 'PunchTime': '2025-03-04 14:57:44', 'EntryDate': '2025-03-04 14:57:58', 'cmd': 'mantra_dev.backend_code.minop.minop_hook'}
 
 
 
 
+@frappe.whitelist(allow_guest=True)
+def attendance_device_id(allow_guest=True):
+    
+	login_url = "https://erptoavdms/api/Transaction/GetERPEmployeeDataApi"
+	login_headers = {
+		"accept": "application/json",
+	}
+	login_body = {
+		"username": "",
+		"password": ""
+	}
+	response = requests.post(login_url, headers=login_headers, json=login_body)
+
+	# Check if the response content is in bytes and decode it
+	response_content = response.content
+	if isinstance(response_content, bytes):
+		response_content = response_content.decode('utf-8')
+	
+	response_json = json.loads(response_content)
+	details = response_json["details"]
 
 
-
+	return True
 
 
 
 @frappe.whitelist()
 def employee_remain_bank_account(allow_guest=True):
-    #This method is call from cron every day to remain remain bank account list of employee.
+    # This method is call from cron every day to remain remain bank account list of employee.
     frappe.enqueue(employee_remain_bank_account_background, queue='long', timeout=10000)
     frappe.enqueue(employee_remain_email_id_background, queue='long', timeout=10000)
     
