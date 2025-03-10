@@ -430,6 +430,7 @@ def fetch_party_account(party):
 
 @frappe.whitelist()
 def change_mode_of_payment(selected_records,new_mode_of_payment):
+    
     selected_records = json.loads(selected_records)
     doc1 = frappe.get_doc("Mode of Payment",new_mode_of_payment)
     if doc1.accounts:
@@ -459,7 +460,7 @@ def change_mode_of_payment(selected_records,new_mode_of_payment):
                             frappe.db.set_value("Payment Entry",j,"mode_of_payment",new_mode_of_payment)         
                             frappe.db.set_value("Payment Entry",j,"bank_account",acc)        
                             frappe.db.set_value("Payment Entry",j,"custom_unique_batch_number","Not Available")     
-                    return "Mode of Payment and bank account updated for selected records."
+                    return "Mode of Payment and bank account start updateing in background for selected records. Please verify changes after process done."
                 else:
                     return "There is no Bank Account set for this particular mode of payment"
             else:

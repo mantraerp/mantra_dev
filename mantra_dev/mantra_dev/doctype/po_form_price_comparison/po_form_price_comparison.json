@@ -14,7 +14,6 @@
   "rate_contract",
   "freight",
   "column_break_kroa",
-  "supplier_name",
   "payment_terms",
   "supplier_quoted_price",
   "nagotiated",
@@ -50,7 +49,7 @@
   },
   {
    "fieldname": "warranty_foc_spares",
-   "fieldtype": "Percent",
+   "fieldtype": "Data",
    "label": "Warranty / FOC Spares (%) ",
    "reqd": 1
   },
@@ -69,17 +68,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "supplier.supplier_name",
-   "fieldname": "supplier_name",
-   "fieldtype": "Data",
-   "label": "Supplier Name"
-  },
-  {
    "fetch_from": "supplier.payment_terms",
    "fieldname": "payment_terms",
    "fieldtype": "Data",
-   "label": "Payment Terms",
-   "read_only": 1
+   "label": "Payment Terms"
   },
   {
    "fieldname": "supplier_quoted_price",
@@ -120,7 +112,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-03 14:47:06.787307",
+ "modified": "2025-03-07 11:44:20.587160",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "PO Form Price Comparison",

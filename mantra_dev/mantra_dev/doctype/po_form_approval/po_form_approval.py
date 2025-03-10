@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from mantra_dev.backend_code.purchase_order.purchase_order import get_stock_details
 
 
 class POFormApproval(Document):
@@ -22,7 +23,7 @@ def get_supplier_nda(supplier_id):
 def get_purchase_order_against_details(purchase_order_id):
 	# Fetch Purchase Order Details To Add and Append in PO Form Field Directly
 	purchase_order_doc = frappe.get_doc("Purchase Order", purchase_order_id)
-	item_code_list, request_list, material_request_list = [], [], []
+	item_code_list, request_list, material_request_list, stock_details_list = [], [], [], []
 	sales_person, bussiness_unit_name, bussiness_unit_email, sales_order = None, None, None, None
 
 	for item in purchase_order_doc.items:
@@ -32,7 +33,25 @@ def get_purchase_order_against_details(purchase_order_id):
 			request_list.append(frappe.db.get_value("Material Request", item.material_request, 'owner'))
 		if item.sales_order:
 			sales_order = item.sales_order
-	
+		
+		stock_details = get_stock_details(item.item_code, item.warehouse or None)
+		demand = 0
+		if item.material_request:
+			demand += frappe.db.get_value("Material Request Item", {'parent': item.material_request, 'docstatus': ['<', 2], 'item_code': item.item_code}, 'qty')
+		stock_details_list.append({
+			"item_code": item.item_code,
+			"item_name": item.item_name,
+			"qty": item.qty,
+			"target_warehouse_qty": stock_details['available_qty_in_target'],
+			"current_stock": stock_details['total_available_stock'],
+			"demand": 0
+		})
+
+	price_comparison = [{
+		'supplier_name': purchase_order_doc.supplier_name,
+		'payment_terms': frappe.db.get_value("Supplier", purchase_order_doc.supplier, "payment_terms") or ''
+	}]
+
 	if sales_order:
 		sales_person = frappe.db.get_value("Sales Order", sales_order, "custom_sales_person")
 		if sales_person:
@@ -40,6 +59,7 @@ def get_purchase_order_against_details(purchase_order_id):
 			employee_id = frappe.db.get_value("Sales Person", top_sales_person, "employee")
 			bussiness_unit_name = frappe.db.get_value("Employee", employee_id, 'employee_name')
 			bussiness_unit_email = frappe.db.get_value("Employee", employee_id, 'user_id')
+
 
 	return {
 		'sales_order': sales_order,
@@ -49,7 +69,9 @@ def get_purchase_order_against_details(purchase_order_id):
 		'business_unit_name': bussiness_unit_name,
 		'business_unit_email': bussiness_unit_email,
 		'purpose': purchase_order_doc.custom_purpose,
-		'approved_by': purchase_order_doc.custom_po_approver
+		'approved_by': purchase_order_doc.custom_po_approver,
+		'price_comparison': price_comparison,
+		'stock_detail': stock_details_list
 	}
 
 

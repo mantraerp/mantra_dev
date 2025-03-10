@@ -367,218 +367,6 @@
     "label": "From Date",
     "mandatory": 1,
     "options": null,
-    "parent": "JV",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   },
-   {
-    "default": "Today",
-    "fieldname": "to_date",
-    "fieldtype": "Date",
-    "label": "To Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "JV",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   }
-  ],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "",
-  "modified": "2024-08-05 14:54:34.525752",
-  "module": "Mantra Dev",
-  "name": "JV",
-  "prepared_report": 0,
-  "query": "SELECT \n    jv.posting_date AS 'Posting Date',\n    jv.voucher_type AS 'Voucher Type',\n    jv.name AS 'Voucher Number',\n    jea.reference_name as 'Reference',\n    jv.bill_date as 'Bill Date',\n    jea.reference_type as 'Reference Type',\n    jea.reference_name as 'Reference',\n    jea.cost_center as 'Cost Center',\n    jea.account as 'Account',\n    jv.total_amount as 'Ledger Amount',\n    jv.total_amount_currency as 'Amt Type',\n    jea.user_remark as 'Final Narration'\n\nFROM `tabJournal Entry` AS jv\nJOIN `tabJournal Entry Account` AS jea\nON jv.name = jea.parent\n\nWHERE jv.docstatus = 1 AND jv.posting_date BETWEEN %(from_date)s AND %(to_date)s\n;\n",
-  "ref_doctype": "Journal Entry",
-  "reference_report": null,
-  "report_name": "JV",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "JV",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Auditor"
-   },
-   {
-    "parent": "JV",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "JV",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "JV",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee Self Service"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-08-05 15:40:30.678100",
-  "module": "Mantra Dev",
-  "name": "Ledger Master",
-  "prepared_report": 0,
-  "query": "",
-  "ref_doctype": "Customer",
-  "reference_report": null,
-  "report_name": "Ledger Master",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Manager"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Master Manager"
-   },
-   {
-    "parent": "Ledger Master",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee Self Service"
-   }
-  ]
- },
- {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [
-   {
-    "default": "Today",
-    "fieldname": "from_date",
-    "fieldtype": "Date",
-    "label": "From Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Sales Transactions",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   },
-   {
-    "default": "Today",
-    "fieldname": "to_date",
-    "fieldtype": "Date",
-    "label": "To Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Sales Transactions",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   }
-  ],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-08-05 15:29:36.724140",
-  "module": "Mantra Dev",
-  "name": "Sales Transactions",
-  "prepared_report": 1,
-  "query": "",
-  "ref_doctype": "Sales Invoice",
-  "reference_report": null,
-  "report_name": "Sales Transactions",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Sales Transactions",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Sales Transactions",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "Sales Transactions",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee Self Service"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [
-   {
-    "default": "Today",
-    "fieldname": "from_date",
-    "fieldtype": "Date",
-    "label": "From Date",
-    "mandatory": 1,
-    "options": null,
     "parent": "SO and Customer",
     "parentfield": "filters",
     "parenttype": "Report",
@@ -647,188 +435,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Sales Executive"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [
-   {
-    "default": "Today",
-    "fieldname": "from_date",
-    "fieldtype": "Date",
-    "label": "From Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   },
-   {
-    "default": "Today",
-    "fieldname": "to_date",
-    "fieldtype": "Date",
-    "label": "To Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   }
-  ],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-08-05 15:03:39.183131",
-  "module": "Mantra Dev",
-  "name": "Purchase report for Tally with Tax",
-  "prepared_report": 0,
-  "query": "",
-  "ref_doctype": "Purchase Invoice",
-  "reference_report": null,
-  "report_name": "Purchase report for Tally with Tax",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Auditor"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase Manager"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "System Manager"
-   },
-   {
-    "parent": "Purchase report for Tally with Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Expense Executive"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [
-   {
-    "default": "Today",
-    "fieldname": "from_date",
-    "fieldtype": "Date",
-    "label": "From Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   },
-   {
-    "default": "Today",
-    "fieldname": "to_date",
-    "fieldtype": "Date",
-    "label": "To Date",
-    "mandatory": 1,
-    "options": null,
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "filters",
-    "parenttype": "Report",
-    "wildcard_filter": 0
-   }
-  ],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-08-05 15:25:58.627374",
-  "module": "Mantra Dev",
-  "name": "Purchase report for Tally without Tax",
-  "prepared_report": 0,
-  "query": "",
-  "ref_doctype": "Purchase Invoice",
-  "reference_report": null,
-  "report_name": "Purchase report for Tally without Tax",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Auditor"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase Manager"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "System Manager"
-   },
-   {
-    "parent": "Purchase report for Tally without Tax",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Expense Executive"
    }
   ]
  },
@@ -2412,48 +2018,6 @@
   "is_standard": "Yes",
   "javascript": null,
   "json": null,
-  "letter_head": "Sales Invoice",
-  "modified": "2024-03-29 11:36:35.008079",
-  "module": "Mantra Dev",
-  "name": "BUwise Sales",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Sales Invoice",
-  "reference_report": null,
-  "report_name": "BUwise Sales",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee Self Service"
-   }
-  ]
- },
- {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
   "letter_head": null,
   "modified": "2024-07-12 13:15:37.075544",
   "module": "Mantra Dev",
@@ -2741,6 +2305,442 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "QC User"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "JV",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "JV",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "",
+  "modified": "2024-08-05 14:54:34.525752",
+  "module": "Mantra Dev",
+  "name": "JV",
+  "prepared_report": 0,
+  "query": "SELECT \n    jv.posting_date AS 'Posting Date',\n    jv.voucher_type AS 'Voucher Type',\n    jv.name AS 'Voucher Number',\n    jea.reference_name as 'Reference',\n    jv.bill_date as 'Bill Date',\n    jea.reference_type as 'Reference Type',\n    jea.reference_name as 'Reference',\n    jea.cost_center as 'Cost Center',\n    jea.account as 'Account',\n    jv.total_amount as 'Ledger Amount',\n    jv.total_amount_currency as 'Amt Type',\n    jea.user_remark as 'Final Narration'\n\nFROM `tabJournal Entry` AS jv\nJOIN `tabJournal Entry Account` AS jea\nON jv.name = jea.parent\n\nWHERE jv.docstatus = 1 AND jv.posting_date BETWEEN %(from_date)s AND %(to_date)s\n;\n",
+  "ref_doctype": "Journal Entry",
+  "reference_report": null,
+  "report_name": "JV",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "JV",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:40:30.678100",
+  "module": "Mantra Dev",
+  "name": "Ledger Master",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Customer",
+  "reference_report": null,
+  "report_name": "Ledger Master",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Master Manager"
+   },
+   {
+    "parent": "Ledger Master",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Transactions",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Sales Transactions",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:29:36.724140",
+  "module": "Mantra Dev",
+  "name": "Sales Transactions",
+  "prepared_report": 1,
+  "query": "",
+  "ref_doctype": "Sales Invoice",
+  "reference_report": null,
+  "report_name": "Sales Transactions",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Sales Transactions",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:03:39.183131",
+  "module": "Mantra Dev",
+  "name": "Purchase report for Tally with Tax",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase report for Tally with Tax",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase report for Tally with Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": "Today",
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": "Today",
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-08-05 15:25:58.627374",
+  "module": "Mantra Dev",
+  "name": "Purchase report for Tally without Tax",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Purchase Invoice",
+  "reference_report": null,
+  "report_name": "Purchase report for Tally without Tax",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Purchase report for Tally without Tax",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Sales Invoice",
+  "modified": "2024-03-29 11:36:35.008079",
+  "module": "Mantra Dev",
+  "name": "BUwise Sales",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Sales Invoice",
+  "reference_report": null,
+  "report_name": "BUwise Sales",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "BUwise Sales",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
    }
   ]
  }

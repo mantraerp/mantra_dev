@@ -48,28 +48,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-02-18 18:03:32.614221",
-  "name": "Draft",
-  "style": "",
-  "workflow_state_name": "Draft"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2025-02-18 18:04:45.573275",
   "name": "Account Approve",
   "style": "",
   "workflow_state_name": "Account Approve"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2025-02-28 14:40:00.129427",
-  "name": "On Hold",
-  "style": "",
-  "workflow_state_name": "On Hold"
  },
  {
   "docstatus": 0,
@@ -102,10 +84,28 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2025-02-28 14:40:00.129427",
+  "name": "On Hold",
+  "style": "",
+  "workflow_state_name": "On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2024-03-08 17:19:25.858649",
   "name": "Initiated",
   "style": "Danger",
   "workflow_state_name": "Initiated"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-02-18 18:03:32.614221",
+  "name": "Draft",
+  "style": "",
+  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,

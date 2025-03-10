@@ -110,40 +110,87 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 			self.auto_create_subcontracting_receipt(stock_entry_name)
 			
 		elif items is not None:
-			msg = ""
-
-			for item in items:
-				shortage_qty = item['required_qty'] - item['available_stock']
-				if shortage_qty > 0:
-					msg += (f"<b>Service Item:</b> {item['service_item']}<br>"
-							f"<b>Finished Good Item:</b> {item['finished_item']}<br>"
-							f"<b>Raw Material:</b> {item['raw_material']}<br>"
-							f"<b>Required Qty:</b> {item['required_qty']}<br>"
-							f"<b>Available Qty:</b> {item['available_stock']}<br>"
-							f"<b>Shortage Qty:</b> {item['required_qty'] - item['available_stock']}<br><br>")
-			
+			msg = self.generate_stock_shortage_template(items)
 			if msg:
+				frappe.enqueue(
+					self.stock_shortage_email_reminder,
+					recipients=["rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					subject=f"Stock Shortage Alert Receipt Number -> {self.name}",
+					message=msg,
+				)
 				frappe.throw(msg)
 
 		elif not all_stock_available:
-			msg = ""
-		
-			for item in items:
-				shortage_qty = item['required_qty'] - item['available_stock']
-				if shortage_qty > 0:
-					msg += (f"<b>Service Item:</b> {item['service_item']}<br>"
-							f"<b>Finished Good Item:</b> {item['finished_item']}<br>"
-							f"<b>Raw Material:</b> {item['raw_material']}<br>"
-							f"<b>Required Qty:</b> {item['required_qty']}<br>"
-							f"<b>Available Qty:</b> {item['available_stock']}<br>"
-							f"<b>Shortage Qty:</b> {item['required_qty'] - item['available_stock']}<br><br>")
-			
+			msg = self.generate_stock_shortage_template(items)
 			if msg:
+				frappe.enqueue(
+					self.stock_shortage_email_reminder,
+					recipients=["rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					subject=f"Stock Shortage Alert For Receipt Number -> {self.name}",
+					message=msg,
+				)
 				frappe.throw(msg)
-				
 		else:
-			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance Report")) 
-	
+			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance"))
+
+	def stock_shortage_email_reminder(self,recipients, subject, message):
+		frappe.sendmail(
+			recipients=recipients,
+			subject=subject,
+			message=message,
+		)
+
+	def generate_stock_shortage_template(self,items):
+		if not items:
+			return "<b>No stock shortage detected.</b>"
+
+		table_html = """
+		    <head>
+        <style>
+        .msgprint-dialog .modal-content {
+			min-height: 110px;
+			width: 130%;
+		}
+        </style>
+        </head>
+			<p><b>Stock Shortage Alert</b></p>
+			<table border="1" cellspacing="0" cellpadding="5">
+				<tr>
+					<th style="width: 15%;">Purchase Receipt No</th>
+					<th style="width: 20%;">Warehouse</th>
+					<th style="width: 15%;">Finished Good Item</th>
+					<th style="width: 15%;">Service Item</th>
+					<th style="width: 15%;">Raw Material</th>
+					<th style="width: 10%;">Required Qty</th>
+					<th style="width: 10%;">Available Qty</th>
+					<th style="width: 10%; color: red;">Shortage Qty</th>
+				</tr>
+		"""
+		for i in items:
+			shortage_qty = i['required_qty'] - i['available_stock']
+			if shortage_qty > 0:
+				table_html += f"""
+				<tr>
+					<td>{self.name}</td>
+					<td>{i['source_warehouse']}</td>
+					<td>{i['finished_item']}</td>
+					<td>{i['service_item']}</td>
+					<td>{i['raw_material']}</td>
+					<td>{i['required_qty']}</td>
+					<td>{i['available_stock']}</td>
+					<td style="color: red;">{shortage_qty}</td>
+				</tr>
+				"""
+		table_html += """</table>
+			<p style="margin-top: 10px; font-style: italic; color: red;">
+            	Note: Raw materials for the finished goods are not available in the warehouse which is mentioned in the above table
+        	</p>
+			<p style="margin-top: 10px; font-style: italic; color: green;">
+				I have also sent the email please check.
+			</p>
+		<br>"""
+		return table_html
+
 	def check_raw_matrial_stock(self):
 		"""
 		Calculation The Bom from the finish goods item and is there in the reserved warehouse

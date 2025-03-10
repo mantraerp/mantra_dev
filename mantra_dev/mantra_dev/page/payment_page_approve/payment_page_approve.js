@@ -170,9 +170,8 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                             <th style="text-align:left;"><input type="checkbox" class="select-all"></th>
                             <th style="text-align:left;">ID</th>              
                             <th style="text-align:left;">Party</th>
-                            <th style="text-align:left;">Reference No</th>
+                            <th style="text-align:left;">Detail</th>
                             <th style="text-align:left;">Total Paid Amount</th>
-                            <th style="text-align:left;">Status</th>
 							<th style="text-align:left;">On Hold</th>
 							<th style="text-align:left;">Approve Action</th>
                             <th style="text-align:left;">Action</th>
@@ -210,12 +209,6 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                         <td style="text-align:left;">${first.party_name}</td>
                         <td style="text-align:left;"></td>
                         <td class="group-paid-amount" style="text-align:left;">${format_currency(totalAmount, 'INR', precision=2)}</td>
-                       
-                        <td style="text-align:left;">
-                            <span style="${badgeStyle} padding: 5px 15px; font-size: 14px; border-radius: 20px;">
-                                ${first.workflow_state || ""}
-                            </span>
-                        </td>
                         <td style="text-align:left;">
                                 <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
                                     class="hold-btn group-hold" data-id="${first.name}">
@@ -247,14 +240,11 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                             
                             <td style="text-align:left;"><a onclick="frappe.set_route('Form', 'Payment Entry', '${row.name}')">${row.name}</a></td>  <!-- ID for each child -->
                             <td style="text-align:left;">${row.party_name}</td>
-                            <td style="text-align:left;">${row.reference_no}</td>
-                            <td style="text-align:left;">${format_currency(row.base_paid_amount_after_tax, 'INR', precision=2)}</td>
-                          
                             <td style="text-align:left;">
-                                <span style="${getBadgeStyle(row.workflow_state.toLowerCase())} padding: 5px 15px; font-size: 14px; border-radius: 20px;">
-                                    ${row.workflow_state || ""}
-                                </span>
+                                ${row.remarks ? row.remarks.trim().replace(/(?:\r\n|\r|\n)/g, "<br>") : ""}
+                                ${row.custom_approved_by ? "<br>" + "Approved By: " + (row.custom_approved_by || '-') : ''}
                             </td>
+                            <td style="text-align:left;">${format_currency(row.base_paid_amount_after_tax, 'INR', precision=2)}</td>
                             <td style="text-align:left;">
                                 <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
                                     class="hold-btn" data-id="${row.name}">
@@ -457,10 +447,10 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
     
                     let referenceTableRows = referenceDetails.map(item => `
                         <tr>
-                            <td style="text-align:left;">${(item["Reference ID"] || "N/A").split(",").join("<br>")}</td>
-                            <td style="text-align:left;">${(item["Doctype"] || "N/A").split(",").join("<br>")}</td>
+                            <td style="text-align:left;">${(item["Reference ID"] || "").split(",").join("<br>")}</td>
+                            <td style="text-align:left;">${(item["Doctype"] || "").split(",").join("<br>")}</td>
                             <td style="text-align:left;">${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
-                            <td style="text-align:left;">${(item["Approver Names"] || "N/A").split(",").join("<br>")}</td>
+                            <td style="text-align:left;">${(item["Approver Names"] || "").split(",").join("<br>")}</td>
 
                         </tr>
                     `).join("");
@@ -478,10 +468,10 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td style="text-align:left;">${customDetails.custom_type || "N/A"}</td>
-                                    <td style="text-align:left;">${customDetails.custom_project_type || "N/A"}</td>
-                                    <td style="text-align:left;">${customDetails.custom_approved_by || "N/A"}</td>
-                                    <td style="text-align:left;">${customDetails.remarks || "N/A"}</td>
+                                    <td style="text-align:left;">${customDetails.custom_type || ""}</td>
+                                    <td style="text-align:left;">${customDetails.custom_project_type || ""}</td>
+                                    <td style="text-align:left;">${customDetails.custom_approved_by || ""}</td>
+                                    <td style="text-align:left;">${customDetails.remarks || ""}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -518,19 +508,20 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                 </style>
     
                                 <div class="section-title"></div>
-                                <table class="reference-data">
-                                    <thead>
-                                        <tr>
-                                            <th>Reference ID</th>
-                                            <th>Doctype</th>
-                                            <th>Approvers</th>
-                                            <th>Approver Names</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${referenceTableRows || `<tr><td colspan="4">No Reference Details Found</td></tr>`}
-                                    </tbody>
-                                </table>
+                                ${referenceTableRows ?
+                                    `<table class="reference-data">
+                                        <thead>
+                                            <tr>
+                                                <th>Reference ID</th>
+                                                <th>Doctype</th>
+                                                <th>Approvers</th>
+                                                <th>Approver Names</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${referenceTableRows || `<tr><td colspan="4">No Reference Details Found</td></tr>`}
+                                        </tbody>
+                                    </table>`:''}
     
                                 <div class="section-title"></div>
                                 ${customDetailsTable}
@@ -597,7 +588,6 @@ function generateExcelAndSend(selectedUser) {
         tableClone.find('th:nth-child(5), td:nth-child(5)').remove();
         tableClone.find('th:nth-child(6), td:nth-child(6)').remove();
 		tableClone.find('th:nth-child(7), td:nth-child(7)').remove();
-		tableClone.find('th:nth-child(8), td:nth-child(8)').remove();
 		tableClone.find('th:nth-last-child(2), td:nth-last-child(2)').remove();
         tableClone.find('th:last-child, td:last-child').remove();
         
@@ -638,7 +628,7 @@ function generateExcelAndSend(selectedUser) {
         ws['!cols'] = [
             { wch: 20 },  // width for ID column
             { wch: 30 },  // width for Party column
-            { wch: 25 },  // width for Reference No column
+            { wch: 100 },  // width for Reference No column
             { wch: 20 }   // width for Total Paid Amount column
         ];
         XLSX.utils.book_append_sheet(wb, ws, "Sheet1");

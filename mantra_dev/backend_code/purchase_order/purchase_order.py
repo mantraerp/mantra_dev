@@ -1,5 +1,5 @@
 import frappe # type: ignore
-from frappe.model.mapper import get_mapped_doc # type: ignore
+# from frappe.model.mapper import get_mapped_doc # type: ignore
 
 # This function creates a "Purchase Order Expected Date" record for each item in the purchase order
 # when the purchase order is approved (workflow_state is 'Approved')
@@ -66,50 +66,50 @@ def get_po_form_details(purchase_order_id):
         return None
     
 
-@frappe.whitelist()
-def make_po_form_approval(source_name, target_doc=None, ignore_permissions=False):
-    def postprocess(source, target):
-        set_missing_values(source, target)
+# @frappe.whitelist()
+# def make_po_form_approval(source_name, target_doc=None, ignore_permissions=False):
+#     def postprocess(source, target):
+#         set_missing_values(source, target)
 
-    def set_missing_values(source, target):
-        target.flags.ignore_permissions = True
-        target.append('price_comparison', {
-            'supplier_name': source.supplier_name,
-            'payment_terms': frappe.db.get_value("Supplier", source.supplier, "payment_terms") or ''
-        })
+#     def set_missing_values(source, target):
+#         target.flags.ignore_permissions = True
+#         target.append('price_comparison', {
+#             'supplier_name': source.supplier_name,
+#             'payment_terms': frappe.db.get_value("Supplier", source.supplier, "payment_terms") or ''
+#         })
     
-    def update_item(source, target, source_parent):
-        stock_details = get_stock_details(source.item_code, source.warehouse or None)
-        target.target_warehouse_qty = stock_details['available_qty_in_target']
-        target.current_stock = stock_details['total_available_stock']
-        target.demand = 0
-        if source.material_request:
-            target.demand += frappe.db.get_value("Material Request Item", {'parent': source.material_request, 'docstatus': ['<', 2], 'item_code': source.item_code}, 'qty')
+#     def update_item(source, target, source_parent):
+#         stock_details = get_stock_details(source.item_code, source.warehouse or None)
+#         target.target_warehouse_qty = stock_details['available_qty_in_target']
+#         target.current_stock = stock_details['total_available_stock']
+#         target.demand = 0
+#         if source.material_request:
+#             target.demand += frappe.db.get_value("Material Request Item", {'parent': source.material_request, 'docstatus': ['<', 2], 'item_code': source.item_code}, 'qty')
             
-    doclist = get_mapped_doc(
-		"Purchase Order",
-		source_name,
-		{
-			"Purchase Order": {
-				"doctype": "PO Form Approval",
-				"field_map": {
-					"purchase_order": "name",
-					"cost_center": "cost_center",
-				},
-			},
-            "Purchase Order Item": {
-				"doctype": "PO Form Item Stock",
-				"field_map": {
-					"item_code": "item",
-				},
-				"postprocess": update_item,
-				"condition": lambda doc: doc.qty
-				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
-			},
-		},
-		target_doc,
-        postprocess,
-		ignore_permissions=ignore_permissions,
-	)
+#     doclist = get_mapped_doc(
+# 		"Purchase Order",
+# 		source_name,
+# 		{
+# 			"Purchase Order": {
+# 				"doctype": "PO Form Approval",
+# 				"field_map": {
+# 					"purchase_order": "name",
+# 					"cost_center": "cost_center",
+# 				},
+# 			},
+#             "Purchase Order Item": {
+# 				"doctype": "PO Form Item Stock",
+# 				"field_map": {
+# 					"item_code": "item",
+# 				},
+# 				"postprocess": update_item,
+# 				"condition": lambda doc: doc.qty
+# 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
+# 			},
+# 		},
+# 		target_doc,
+#         postprocess,
+# 		ignore_permissions=ignore_permissions,
+# 	)
 
-    return doclist
+#     return doclist

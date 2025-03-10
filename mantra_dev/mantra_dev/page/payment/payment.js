@@ -1,4 +1,4 @@
-frappe.pages['payment-page'].on_page_load = function (wrapper) {
+frappe.pages['payment'].on_page_load = function (wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Payment Page',
@@ -31,6 +31,47 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
 
     this.form = new frappe.ui.FieldGroup({
         fields: [
+			{
+				label: __("Use Payroll Entry"),
+				fieldname: "use_payroll_entry",
+				fieldtype: "Check",
+				default: 0,
+				change: () => {
+					let usePayroll = this.form.get_value("use_payroll_entry");
+					console.log(usePayroll)
+					if (usePayroll == 1) {
+						// Hide the Bank Account field
+						this.form.set_df_property("bank", "hidden", true);
+						this.form.set_df_property("bank_account", "hidden", true);
+                        this.form.set_value("payroll_entry", "");
+                        this.form.set_value("bank", "");
+                        this.form.set_value("bank_account", "");
+						// Show the Payroll Entry field
+						this.form.set_df_property("payroll_entry", "hidden", false);
+                        $("#total-transactions").text(0);
+                        $("#total-amount").text(format_currency(0, 'INR', precision = 2));
+                        $("#selected-count").text(0);
+                        $("#selected-amount").text(format_currency(0, 'INR', precision = 2));
+                        $(tableContainer).hide();
+					} else {
+						// Show the Bank Account field
+						this.form.set_df_property("bank", "hidden", false);
+						this.form.set_df_property("bank_account", "hidden", false);
+                        this.form.set_value("bank", "");
+                        this.form.set_value("bank_account", "");
+						// Hide the Payroll Entry field
+						this.form.set_df_property("payroll_entry", "hidden", true);
+                        $("#total-transactions").text(0);
+                        $("#total-amount").text(format_currency(0, 'INR', precision = 2));
+                        $("#selected-count").text(0);
+                        $("#selected-amount").text(format_currency(0, 'INR', precision = 2));
+                        $(tableContainer).hide();
+					}
+				}
+			},
+            {
+                fieldtype: "Column Break"
+            },
             {
                 label: __("Bank"),
                 fieldname: "bank",
@@ -55,6 +96,35 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
                     }
                 }
             },
+			{
+				label: __("Payroll Entry"),
+				fieldname: "payroll_entry",
+				fieldtype: "Link",
+				options: "Payroll Entry",
+				hidden: true,  // Initially hidden
+				reqd: 1,
+				depends_on: "use_payroll_entry",
+				get_query: () => {
+					return {
+						filters: {
+							status: "Submitted",
+							custom_salary_slip_file_generated:0,
+                            custom_payroll_entry_approved:1
+						}
+					};
+				},
+				change: () => {
+					let selectedPayrollEntry = this.form.get_value("payroll_entry");
+					if (selectedPayrollEntry) {
+						// Handle changes related to Payroll Entry field
+                        this.fetchPayrollEntries(selectedPayrollEntry)
+						console.log("Payroll Entry selected:", selectedPayrollEntry);
+					}
+                    else{
+                        $(tableContainer).hide();
+                    }
+				}
+			},
             {
                 fieldtype: "Column Break"
             },
@@ -106,7 +176,7 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
                     }
                 }
 
-            }
+            },
         ],
         body: filterContainer
     });
@@ -120,12 +190,217 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
     });
 
     $("input").css({ "width": "auto" });
-    $(".form-layout").css({ "width": "490px" });
+    $(".form-layout").css({ "width": "720px" });
     this.fetchPaymentEntries = function (selectedBank) {
         frappe.call({
-            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.select_payment_entry",
+            method: "mantra_dev.mantra_dev.page.payment.payment.select_payment_entry",
             args: {
                 bank_account: selectedBank
+            },
+            callback: function (response) {
+                let data = response.message;
+                if (!data || data.length === 0) {
+                    $(tableContainer).html('<p style="text-align: center; font-size: 16px; color: red;">No Payment Entry Found</p>');
+                    $("#total-transactions").text(0);
+                    $("#total-amount").text(format_currency(0, 'INR', precision = 2));
+                    $("#export-to-excel").attr("hidden", true);
+                    return;
+                }
+                let groupedData = {};
+                data.forEach(row => {
+                    let groupKey = row.party || row.party_name;
+                    if (!groupedData[groupKey]) {
+                        groupedData[groupKey] = {
+                            entries: [],
+                            total_amount: 0
+                        };
+                    }
+                    groupedData[groupKey].entries.push(row);
+                    groupedData[groupKey].total_amount += parseFloat(row.base_paid_amount_after_tax);
+                });
+                let table_html = `
+                <head>
+                <style>
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { padding: 10px; text-align: center; vertical-align: middle;font-size:15px; }
+                    thead { background-color: #007cc3; color: white; }
+                    .toggle-arrow { cursor: pointer; font-size: 18px; }
+                    .hidden-row { display: none; }
+                    .indent { text-align: left;}
+                    #transaction-summary-table tbody tr:hover, .no-hover-effect tbody tr:hover {
+                        background-color: transparent !important;
+                    }
+                </style>
+                  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+                </head>
+                <table class="no-hover-effect">
+                      <thead style="position: sticky; top: 0; z-index: 2;">
+                        <tr>
+                            <th style="text-align:left;"></th>
+                            <th style="text-align:left;"><input type="checkbox" class="select-all"></th>
+                            <th style="text-align:left;">ID</th>              
+                            <th style="text-align:left;">Party</th>
+                            <th style="text-align:left;">Detail</th>
+                            <th style="text-align:left;">Total Paid Amount</th>
+                            <th style="text-align:left;">Action</th>
+                            <th style="text-align:left;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                // Initialize total variables before the loop
+                let totalTransactions = 0;
+                let totalAmt = 0;
+                Object.keys(groupedData).forEach(groupKey => {
+                    let group = groupedData[groupKey];
+                    let payments = group.entries;
+                    let totalAmount = group.total_amount;
+                    let count = payments.length;
+
+                    let first = payments[0]; // Use the first row for summary
+                    let status = first.workflow_state ? first.workflow_state.toLowerCase() : "";
+                    let badgeStyle = getBadgeStyle(status);
+
+                    // SUMMARY ROW (Always Visible)
+                    table_html += `<tr class="group-row summary-row" data-party="${groupKey}">
+                        <td style="text-align:left;">
+                            ${`<span class="toggle-arrow" data-party="${groupKey}">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                  </span>`
+
+                        }
+                        </td>
+                        <td style="text-align:left;">
+                        <input type="checkbox" class="group-checkbox" data-party="${groupKey}">
+                        </td>
+                        <td style="text-align:left;"></td>        
+                        <td style="text-align:left;">${first.party_name}</td>
+                        <td style="text-align:left;"></td>
+                        <td class="group-paid-amount" style="text-align:left;">${format_currency(totalAmount, 'INR', precision = 2)}</td>
+                       
+                        <td style="text-align:left;">
+                        
+                            <button style="background-color:red; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
+                                class="cancel-btn group-cancel" data-id="${first.name}">
+                                Reject
+                            </button>
+                        </td>
+                        
+                    </tr>`;
+
+                    // CHILD ROWS (Hidden by Default)
+                    payments.forEach((row, index) => {
+                        table_html += `<tr class="hidden-row party-${groupKey}" style="display: none;">
+                            <td></td>
+                           <td class="indent">
+                                <input type="checkbox" class="entry-checkbox" data-id="${row.name}" data-party="${groupKey}">
+                            </td>
+                            
+                            <td style="text-align:left;"><a onclick="frappe.set_route('Form', 'Payment Entry', '${row.name}')">${row.name}</a></td>  <!-- ID for each child -->
+                            <td style="text-align:left;">${row.party_name}</td>
+                            <td style="text-align:left;">
+                                ${row.remarks ? row.remarks.trim().replace(/(?:\r\n|\r|\n)/g, "<br>") : ""}
+                                ${row.custom_approved_by ? "<br>" + "Approved By: " + (row.custom_approved_by || '-') : ''}
+                            </td>
+                            <td style="text-align:left;">${format_currency(row.base_paid_amount_after_tax, 'INR', precision = 2)}</td>
+                          
+                            <td style="text-align:left;">
+                                <button style="background-color:red; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
+                                    class="cancel-btn" data-id="${row.name}">
+                                    Reject
+                                </button>
+                            </td>
+                             <td style="text-align:left;">
+                            <button style="background-color:blue; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
+                                class="get-details">
+                                Details
+                            </button>
+                        </td>
+                        </tr>`;
+                    });
+                    totalTransactions += count;
+                    totalAmt += totalAmount;
+                });
+                $("#total-transactions").text(totalTransactions);
+                $("#total-amount").text(format_currency(totalAmt.toFixed(2), 'INR', precision = 2));
+                table_html += `</tbody></table>`;
+                $(tableContainer).html(table_html);
+                $(".toggle-arrow").on("click", function () {
+                    let partyId = $(this).data("party");
+                    let hiddenRows = $(`.party-${partyId}`);
+                    if (hiddenRows.is(":visible")) {
+                        hiddenRows.hide();
+                        $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>`);
+                    } else {
+                        hiddenRows.show();
+                        $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>`);
+                    }
+                });
+                $(document).off("click", ".cancel-btn").on("click", ".cancel-btn", function () {
+
+                    if($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked') == true){
+                        // console.log('clicked---------------------')
+                        alert('You can not reject this entry');
+                        return;
+                    }
+                    else{
+
+
+                    let $btn = $(this);
+                    let $row = $btn.closest("tr");
+                    let paymentEntryId = $btn.data("id");
+                    let partyId = $row.closest(".group-row").data("party");
+                    if ($btn.hasClass("group-cancel")) {
+                        let allIds = [];
+                        $(`.party-${partyId} .entry-checkbox`).each(function () {
+                            let childId = $(this).data("id");
+                            if (childId && !allIds.includes(childId)) {
+                                allIds.push(childId);
+                            }
+                        });
+                        if (paymentEntryId && !allIds.includes(paymentEntryId)) {
+                            allIds.push(paymentEntryId);
+                        }
+                        cancelPaymentEntry(allIds, function (success) {
+                            if (success) {
+                                $row.remove();
+                                $(`.party-${partyId}`).remove();
+                                updateTransactionSummary();
+                            }
+                        });
+                    }
+                    else {
+                        partyId = $row.find(".entry-checkbox").data("party");
+                        cancelPaymentEntry([paymentEntryId], function (success) {
+                            if (success) {
+                                $row.remove();
+                                if ($(`.party-${partyId} .entry-checkbox`).length === 0) {
+                                    $(`.group-row[data-party="${partyId}"]`).remove();
+                                }
+                                else {
+                                    updateGroupPaidAmount(partyId);
+                                }
+                                updateTransactionSummary();
+                            }
+                        });
+
+                    }
+                }
+                });
+                if (data.length !== 0) {
+                    $(tableContainer).show();
+                }
+                else {
+                    $("#export-to-excel").attr("hidden", true);
+                }
+
+            }
+        });
+    };
+    this.fetchPayrollEntries = function (selectedPayrollEntry) {
+        frappe.call({
+            method: "mantra_dev.mantra_dev.page.payment.payment.get_salary_slip",
+            args: {
+                payroll_entry: selectedPayrollEntry
             },
             callback: function (response) {
                 let data = response.message;
@@ -317,6 +592,7 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
     };
 
 
+
     $(document).on('click', '.get-details', function () {
         let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
 
@@ -326,7 +602,7 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
         }
 
         frappe.call({
-            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.get_payment_entry_reference_details",
+            method: "mantra_dev.mantra_dev.page.payment.payment.get_payment_entry_reference_details",
             args: { payment_entry: paymentEntryId },
             callback: function (r) {
                 if (r.message) {
@@ -447,17 +723,28 @@ frappe.pages['payment-page'].on_page_load = function (wrapper) {
     let download_excel_btn = $(`<button id='export-to-excel' style="margin-right:10px;margin-top:10px;" class="btn btn-success" hidden>Send Excel File  </button>`)
         .appendTo(buttonContainer);
 
+    //Comment for live
     if (['hiren@mantratec.com', 'bhavyen@mantratec.com'].includes(frappe.session.user)) {
         let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-success">Make Payment</button>`)
             .appendTo(buttonContainer);
 
         make_payment_btn.on('click', function () {
             let selected_entries = getSelectedEntries();
+            // console.log($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked'))
+          
+
+            if($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked') == true){
+
+                sendOTP($('.frappe-control[data-fieldname="payroll_entry"] input').val());
+            } 
+            else{
+
             if (selected_entries.length === 0) {
                 frappe.msgprint("Please select at least one payment entry");
             } else {
                 showBankAccountDialog();
             }
+        }
         });
     }
 
@@ -542,7 +829,7 @@ function generateExcelAndSend(selectedUser) {
 
     // Use frappe.call to send the email with the Excel file attachment
     frappe.call({
-        method: "mantra_dev.mantra_dev.page.payment_page.payment_page.send_excel_email",  // Update with your app's path
+        method: "mantra_dev.mantra_dev.page.payment.payment.send_excel_email",  // Update with your app's path
         args: {
             user_email: selectedUser,
             filename: "payment_data.xlsx",
@@ -584,7 +871,7 @@ function getBadgeStyle(status) {
 }
 function cancelPaymentEntry(paymentEntryIds, callback) {
     frappe.call({
-        method: "mantra_dev.mantra_dev.page.payment_page.payment_page.cancel_payment_entries",
+        method: "mantra_dev.mantra_dev.page.payment.payment.cancel_payment_entries",
         args: {
             payment_entry_ids: paymentEntryIds
         },
@@ -678,6 +965,7 @@ function showOTPDIalog(bank_account) {
     d1.show();
 }
 function verifyotp(otp, bank_account) {
+
     frappe.call({
         method: "mantra_dev.api_code.banck_transaction.verify_otp",
         args: {
@@ -711,36 +999,68 @@ function selectPaymentEntry(data, bank_account) {
         ),
         function () {
 
-            frappe.call({
-                method: "mantra_dev.api_code.banck_transaction.upload_file",
-                args: {
-                    payment_entry_list: data,
-                    bank_account: bank_account,
-                },
-                callback: function (r) {
-                    if (r.message) {
-                        if (r.message == "Done") {
-                            // If success, open the external URL
-                            removeSelectedRows();
-                            updateTransactionSummary()
-                            let selectedPartyIds = [];
-                            $(".group-row").each(function () {
-                                let partyId = $(this).data("party");
-                                if (partyId && !selectedPartyIds.includes(partyId)) {
-                                    selectedPartyIds.push(partyId);
-                                }
-                            });
-                            selectedPartyIds.forEach(function (partyId) {
-                                updateGroupPaidAmount(partyId);
-                            });
-                            window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
-                        } else {
-                            // If not done, you can reload or take another action
-                            // window.location.reload();`
+            if($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked') == true){
+                frappe.call({
+                    method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
+                    args: {
+                        payroll_entry: bank_account,
+                        create_only_file: 0,
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            if (r.message.status_code == 200) {
+                                // If success, open the external URL
+                                removeSelectedRows();
+                                updateTransactionSummary()
+                                let selectedPartyIds = [];
+                                $(".group-row").each(function () {
+                                    let partyId = $(this).data("party");
+                                    if (partyId && !selectedPartyIds.includes(partyId)) {
+                                        selectedPartyIds.push(partyId);
+                                    }
+                                });
+                                selectedPartyIds.forEach(function (partyId) {
+                                    updateGroupPaidAmount(partyId);
+                                });
+                            }
+                            else{
+                                alert(r.message.message);
+                            }
                         }
-                    }
-                },
-            });
+                    },
+                });
+            }else{
+                frappe.call({
+                    method: "mantra_dev.api_code.banck_transaction.upload_file",
+                    args: {
+                        payment_entry_list: data,
+                        bank_account: bank_account,
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            if (r.message == "Done") {
+                                // If success, open the external URL
+                                removeSelectedRows();
+                                updateTransactionSummary()
+                                let selectedPartyIds = [];
+                                $(".group-row").each(function () {
+                                    let partyId = $(this).data("party");
+                                    if (partyId && !selectedPartyIds.includes(partyId)) {
+                                        selectedPartyIds.push(partyId);
+                                    }
+                                });
+                                selectedPartyIds.forEach(function (partyId) {
+                                    updateGroupPaidAmount(partyId);
+                                });
+                                window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
+                            } else {
+                                // If not done, you can reload or take another action
+                                // window.location.reload();`
+                            }
+                        }
+                    },
+                });
+            }
         },
     )
 }

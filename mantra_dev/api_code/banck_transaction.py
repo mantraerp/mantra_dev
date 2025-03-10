@@ -899,15 +899,12 @@ def generate_salary_slip(payroll_entry=None):
         formatted_date = current_date.strftime("%d%m%Y")
         file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
 
-        # file_name = "MANTRASH2H_MANTRASH2HUP.txt"
-        # directory = '/home/foramshah/Downloads/epayments/PayUpload'
-        # /home/mantra/ICICI_Bank_integration/epayments/PayUpload
-        # file_path = os.path.join(directory, file_name)
         file_path = os.path.join("/home/mantra/Desktop/", file_name)
+
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
-            filters={"payroll_entry": payroll_entry} if payroll_entry else {},
+            filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
             fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
         )
                 
@@ -1043,7 +1040,7 @@ def generate_salary_slip(payroll_entry=None):
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def generate_payroll_payment_file(payroll_entry,create_only_file=None):
 
     reply={}
@@ -1056,7 +1053,6 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
     create_only_file = int(create_only_file)
 
     try:
-        
         if payroll_entry in [None,"","None"]:
             reply['message']="No payroll entry found."
             return reply
@@ -1069,7 +1065,6 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
         if payroll_entry_document.custom_salary_slip_file_generated in [1,True]: 
             reply['message']="Payroll payment entry is already done."
             return reply
-
 
         directory_sql = "SELECT file_upload_path FROM `tabBank Integration`"
         directory_list = frappe.db.sql(directory_sql, as_dict=True) 
@@ -1084,22 +1079,17 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
             reply['message']="Payment file upload path not set in 'Bank Integration'"
             return reply
 
-        numeric_characters = string.digits
-        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
-        current_date = datetime.now()
-        formatted_date = current_date.strftime("%d%m%Y")
-        file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
 
-        file_path_temp = frappe.utils.get_bench_path()+ "/sites/" + frappe.utils.get_path('public', 'files', file_name)[2:]
-        file_path = os.path.join(directory, file_name)
+
+
 
         # Fetch Salary Slip details based on Payroll Entry        
         salary_slips = frappe.get_all(
             "Salary Slip",
-            filters={"payroll_entry": payroll_entry} if payroll_entry else {},
+            filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
             fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
         )
-                
+
         if not salary_slips:
             reply['message']="No salary slips found for the given payroll entry."
             return reply
@@ -1143,12 +1133,18 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
                     rows_not_process.append(slip)
                     addedInFail = True
 
+
+            # emp_name = str(slip["employee_name"]).replace('/n',''),
+            # emp_name = str(emp_name).replace('\n',''),
+            # emp_name = str(emp_name).replace('"',''),
+            emp_name = str(slip["employee_name"])
+
             if not addedInFail:
                 rows.append([
                     debit_ac_no,
                     slip["employee"],
                     employee_account_no,
-                    slip["employee_name"],
+                    emp_name,
                     slip["net_pay"],
                     "N",
                     date,
@@ -1190,60 +1186,44 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
             reply['message']="Not found any entry to process."
             return reply
 
+        # Commente remove
         file_content = ""
         #Write file in testing folder
-        with open(file_path_temp, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(headers) 
-            writer.writerows(rows)  
+        # with open(file_path_temp, 'w', newline='') as file:
+        #     writer = csv.writer(file, delimiter="|")
+        #     writer.writerow(headers) 
+        #     writer.writerows(rows)  
 
-        with open(file_path_temp, 'rb') as file:
-            file_content = file.read()
+        # with open(file_path_temp, 'rb') as file:
+        #     file_content = file.read()
 
 
+        # for row in rows:
+        numeric_characters = string.digits
+        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+        current_date = datetime.now()
+        formatted_date = current_date.strftime("%d%m%Y")
+        file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+
+        # Commente remove
+        file_path_temp = frappe.utils.get_bench_path()+ "/sites/" + frappe.utils.get_path('public', 'payroll', file_name)[2:]
+        file_path = os.path.join(directory, file_name)
+        # file_path = file_path_temp
+        
         #Write in live payment path
         if create_only_file==0:
             with open(file_path, 'w', newline='') as file:
                 writer = csv.writer(file, delimiter="|")
                 writer.writerow(headers) 
-                writer.writerows(rows)  
+                # writer.writerows([row])
+                writer.writerows(rows)
 
             with open(file_path, 'rb') as file:
                 file_content = file.read()
 
-        out = {
-            "fname": file_name,
-            "fcontent": file_content
-        }
-        frappe.sendmail(
-            recipients = ["ravi.patel@mantratec.com"],
-            message = message,
-            subject= "Payroll payment file : {}".format(payroll_entry),
-            attachments= [out],
-            now = True
-        )
 
-        try:
-            file_doc = frappe.get_doc({
-                "doctype": "File",
-                "file_name": file_name,
-                "file_size": len(file_content),
-                "attached_to_doctype": "Payroll Entry",
-                "attached_to_name": payroll_entry,
-                "content": file_content,
-                "is_private": True  # Set this to True if you want it to be private
-            })
-            file_doc.save()
-            
-        except Exception as e:
-            frappe.sendmail(
-                recipients = ["ravi.patel@mantratec.com"],
-                message = "{} user have no permission to save record of file.",
-                subject= "Payroll payment file save issue in file list.",
-                now = True
-            )
-            
         if create_only_file==0:
+            # Commente remove
             frappe.db.set_value('Payroll Entry', payroll_entry, "custom_salary_slip_file_generated", 1)
             reply['message']="Payment file {} create with {} entry. <br><br> {}".format(file_name,len(rows),account_error)
         else:
@@ -1301,7 +1281,7 @@ def generate_salary_slip_test(payroll_entry=None):
         # Fetch Salary Slip details based on Payroll Entry
         salary_slips = frappe.get_all(
             "Salary Slip",
-            filters={"payroll_entry": payroll_entry} if payroll_entry else {},
+            filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
             fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
         )
                 
@@ -1959,10 +1939,17 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     if document.references:
         for i in document.references:
             d = frappe.get_doc(i.reference_doctype, i.reference_name)
+            
+            t_date = ""
+            if i.reference_doctype=="Purchase Invoice":
+                t_date = d.posting_date
+            else:
+                t_date = d.transaction_date
+
             x = {
                 "document_no": i.reference_name,
                 "invoice_no": i.bill_no if i.bill_no else "-",
-                "invoice_date": d.transaction_date,
+                "invoice_date": t_date,
                 "paid_amount":i.allocated_amount
             }
             email = d.contact_email if d.contact_email else ""
@@ -2147,12 +2134,27 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
     # Add dynamic rows for invoices
     for invoice in payment_data['invoices']:
+        
+        allkeys = invoice.keys()
+        document_no = ""
+        invoice_no = ""
+        invoice_date = ""
+        paid_amount = ""
+        if "document_no" in allkeys:
+            document_no = str(invoice['document_no'])
+        if "invoice_no" in allkeys:
+            invoice_no = str(invoice['invoice_no'])
+        if "invoice_date" in allkeys:
+            invoice_date = str(invoice['invoice_date'])        
+        if "paid_amount" in allkeys:
+            paid_amount = str(invoice['paid_amount'])        
+        
         html_content += f"""
         <tr>
-            <td>{invoice['document_no']}</td>
-            <td>{invoice['invoice_no']}</td>
-            <td>{invoice['invoice_date']}</td>
-            <td>₹{invoice['paid_amount']}</td>
+            <td>{document_no}</td>
+            <td>{invoice_no}</td>
+            <td>{invoice_date}</td>
+            <td>₹{paid_amount}</td>
         </tr>
         """
     

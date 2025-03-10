@@ -146,10 +146,10 @@ frappe.ui.form.on("Purchase Order", {
                     }
                 ],
                 size: 'extra-large',
-                primary_action_label: __("Process"),
-                primary_action: () => {
-                    d.hide();
-                },
+                // primary_action_label: __(""),
+                // primary_action: () => {
+                //     d.hide();
+                // },
                 secondary_action_label: __("Cancel"),
                 secondary_action: () => {
                     d.hide();
@@ -181,6 +181,7 @@ frappe.ui.form.on("Purchase Order", {
         );
 
         if(frm.doc.docstatus !== 2){
+
             frm.add_custom_button(__('Calculate Project Qty'), function() {
     
                 frappe.call({
@@ -205,14 +206,26 @@ frappe.ui.form.on("Purchase Order", {
             }, __('Utility'));
 
 
-            frm.add_custom_button(
-                __("Add PO Form Approval"),
-                () => frappe.model.open_mapped_doc({
-                    method: "mantra_dev.backend_code.purchase_order.purchase_order.make_po_form_approval",
-                    frm: frm,
-                }),
-                __("Utility")
-            );
+            frm.add_custom_button(__('Add PO Form Approval'), function () {
+                frappe.db.get_value(
+                    "PO Form Approval",
+                    { purchase_order : frm.doc.name, docstatus: ['<', 2]},
+                    "name",
+                    (r) => {
+                        frappe.open_in_new_tab = true;
+                        if(r?.name){
+                            frappe.set_route("Form","PO Form Approval",r.name)
+                        }
+                        else{
+                            let po_form = frappe.model.get_new_doc("PO Form Approval");
+                            frappe.route_options = {
+                                purchase_order: frm.doc.name
+                            };
+                            frappe.set_route("Form", "PO Form Approval", po_form.name);                        
+                        }
+                })
+            },
+            __("Utility"));
         }
 
         
@@ -375,24 +388,24 @@ frappe.ui.form.on("Purchase Order", {
     },
 });
 
-function get_selected_values(department) {
-    let selected_values = [];
-    frappe.call({
-        method: "frappe.client.get_list",
-        async: false,
-        args: {
-            doctype: "Expense Verification Flow",
-            filters: { select_department: department }, // Filter by selected department
-            fields: ["select_expense_grouping"]
-        },
-        callback: function (r) {
-            if (r.message) {
-                selected_values = r.message.map(row => row.select_expense_grouping);
-            }
-        }
-    });
-    return selected_values;
-}
+// function get_selected_values(department) {
+//     let selected_values = [];
+//     frappe.call({
+//         method: "frappe.client.get_list",
+//         async: false,
+//         args: {
+//             doctype: "Expense Verification Flow",
+//             filters: { select_department: department }, // Filter by selected department
+//             fields: ["select_expense_grouping"]
+//         },
+//         callback: function (r) {
+//             if (r.message) {
+//                 selected_values = r.message.map(row => row.select_expense_grouping);
+//             }
+//         }
+//     });
+//     return selected_values;
+// }
 
 
 function createPoDetailsHTML(po_form_details){
@@ -536,7 +549,7 @@ function createPoDetailsHTML(po_form_details){
         tableHTML += `</tr>`;
     
         let fields_dict = {
-            'supplier_name': 'Supplier Name',
+            'supplier': 'Supplier Name',
             'quote_price_to_the_customer': 'Quote Price to the Customer',
             'total_purchase_price': 'Total Purchase Price',
             'supplier_quoted_price': 'Supplier Quoted Price',

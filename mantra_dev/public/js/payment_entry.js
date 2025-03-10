@@ -262,18 +262,18 @@ frappe.listview_settings["Payment Entry"] = {
                     selected_records: selectedItems.map((item) => item.name),
                     new_mode_of_payment: modeOfPayment,
                   },
-                  callback: function (res) {
+                  callback: function (res) 
+                  {
                     if (res.message) {
                       frappe.msgprint(
                         (res.message)
                       );
                       // listview.refresh();
-                      console.log(res.message)
+                      // console.log(res.message)
                     }
                   },
                 });
                 }
-
               }, "Change Mode Of Payment");
             }
           }

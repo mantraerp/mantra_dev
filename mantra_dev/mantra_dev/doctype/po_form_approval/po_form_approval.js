@@ -11,17 +11,35 @@ frappe.ui.form.on("PO Form Approval", {
             },
             callback: function(r) {
                 let default_fields = ['sales_order', 'material_request', 'requester', 'cost_center', 'business_unit_name', 'business_unit_email', 'purpose', 'approved_by'];
+                let child_tables = ['stock_detail', 'price_comparison'];
                 if (r.message) {
                     default_fields.forEach(field => {
                         frm.set_value(field, r.message[field]);
                         frm.refresh_field(field);
                     });
+
+                    child_tables.forEach(child_table => {
+                        frm.clear_table(child_table);
+                        if (Array.isArray(r.message[child_table])) {
+                            r.message[child_table].forEach(row_data => {
+                                let child = frm.add_child(child_table);
+                                Object.keys(row_data).forEach(key => {
+                                    child[key] = row_data[key];
+                                });
+                            });
+                            frm.refresh_field(child_table);
+                        }
+                    });
+
                 } else {
                     default_fields.forEach(field => {
                         frm.set_value(field, '');
                         frm.refresh_field(field);
                     });
-                    
+                    child_tables.forEach(child_table => {
+                        frm.clear_table(child_table);
+                        frm.refresh_field(child_table);
+                    });
                 }
             }
         })

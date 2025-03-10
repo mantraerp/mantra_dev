@@ -39,6 +39,36 @@ def select_payment_entry(bank_account):
 
     return payment_entries
 
+
+
+
+
+
+@frappe.whitelist()
+def get_salary_slip(payroll_entry):
+    salary_slips = frappe.get_all(
+            "Salary Slip",
+            filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
+            fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
+        )
+
+    payment_entries=[]
+    for salary in salary_slips:
+        obj = {}
+        obj['name']=salary['name']
+        obj['base_paid_amount_after_tax']=salary['net_pay']
+        obj['party']=salary['employee']
+        obj['remarks']=''
+        obj['custom_approved_by']=''
+        obj['reference_no']=''
+        obj['workflow_state']=''
+        obj['party_name']=salary['employee_name']
+        payment_entries.append(obj)
+
+
+    return payment_entries
+
+
 @frappe.whitelist()
 def cancel_payment_entries(payment_entry_ids):
     try:
