@@ -13,7 +13,8 @@ frappe.ui.form.on('Project', {
                         let aggregated_items = response.message[0]; 
                         if (aggregated_items.length > 0) {
                             frappe.route_options = {
-                                data: JSON.stringify(aggregated_items)
+                                data: JSON.stringify(aggregated_items),
+                                project:frm.doc.name
                             }   
                         frappe.open_in_new_tab = true;
                         frappe.set_route('query-report', 'Project Tracking');

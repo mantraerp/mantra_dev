@@ -54,15 +54,7 @@ def execute(filters=None):
                 **stock_data,
                 'shortage_qty': shortage_qty,
                 'total_qty': material_qty,
-                'valuation_rate': valuation_rate * material_qty,
-                'create_purchase_order': create_button(
-                    "Create Purchase Order", "background-color: gray;", "create-po",
-                    {"item_code": material_item_code, "shortage_qty": shortage_qty}
-                ) if shortage_qty > 0 else "",
-                'create_material_transfer': create_button(
-                    "Create Material Transfer", "background-color: gray;", "create-mt",
-                    {"item_code": material_item_code, "shortage_qty": shortage_qty}
-                ) if shortage_qty > 0 else "",
+                'valuation_rate': valuation_rate * material_qty
             }
 
             existing_row = next((row for row in data if row['raw_material_item'] == material_item_code), None)
@@ -71,15 +63,6 @@ def execute(filters=None):
                 existing_row['total_qty'] += material_qty
                 existing_row['valuation_rate'] = valuation_rate * existing_row['total_qty']
                 existing_row['shortage_qty'] = max(0, existing_row['total_qty'] - (existing_row['available_qty'] + existing_row['transit_qty']))
-                existing_row['create_purchase_order'] = create_button(
-                    "Create Purchase Order", "background-color: gray;", "create-po",
-                    {"item_code": material_item_code, "shortage_qty": existing_row['shortage_qty']}
-                ) if existing_row['shortage_qty'] > 0 else ""
-
-                existing_row['create_material_transfer'] = create_button(
-                    "Create Material Transfer", "background-color: gray;", "create-mt",
-                    {"item_code": material_item_code, "shortage_qty": existing_row['shortage_qty']}
-                ) if existing_row['shortage_qty'] > 0 else ""
             else:
                 data.append(row_data)
     
@@ -246,20 +229,7 @@ def get_columns(items):
                 "fieldtype": "Float",
                 "width": 150,
                 "align":"right"
-            })
-    columns.append({
-            "fieldname": "create_purchase_order",
-            "label": _( "Purchase Order"),
-            "fieldtype": "Data",
-            "width": 200
-        })
-    columns.append( {
-            "fieldname": "create_material_transfer",
-            "label": _( "Material Transfer"),
-            "fieldtype": "Data",
-            "width": 200
-        })
-       
+            })   
     return columns
 
 

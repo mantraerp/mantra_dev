@@ -418,6 +418,7 @@ def fetch_company_account():
 
 @frappe.whitelist()
 def fetch_party_account(party):
+    
     doc = frappe.db.get_list('Bank Account',
     filters={
         'party': party,
@@ -427,6 +428,35 @@ def fetch_party_account(party):
     as_list=True
     )
     return doc
+
+
+@frappe.whitelist()
+def fetch_party_account_new(party):
+
+    reply={}
+    reply['message']="Account not found."
+    reply['status_code']=200
+    reply['data']=[]
+
+
+    try:
+        directory_sql = "SELECT * FROM `tabBank Account` WHERE `workflow_state`='Approved' AND `is_company_account`=0 AND `custom_beneficiary_file_uploaded`=1 AND `is_default`=1 AND `disabled`=0"
+        directory_list = frappe.db.sql(directory_sql, as_dict=True)
+        reply['data']=directory_list
+
+        if len(directory_list)!=0:
+            reply['message']="No account found."
+            reply['status_code']=500
+
+    except Exception as e:
+        reply['message']=str(e)
+        reply['status_code']=500
+        frappe.log_error("Bank account detail fetch error",str(traceback.format_exc()))
+
+    return reply
+
+
+
 
 @frappe.whitelist()
 def change_mode_of_payment(selected_records,new_mode_of_payment):

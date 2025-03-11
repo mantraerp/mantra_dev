@@ -46,24 +46,29 @@ def select_payment_entry(bank_account):
 
 @frappe.whitelist()
 def get_salary_slip(payroll_entry):
-    salary_slips = frappe.get_all(
-            "Salary Slip",
-            filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
-            fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
-        )
+    
+    
+    query = "SELECT employee as party,employee_name as party_name,net_pay as base_paid_amount_after_tax,bank_name,bank_account_no,posting_date,name FROM `tabSalary Slip` WHERE `payroll_entry`='{}' AND `docstatus`=1 AND `custom_payment_status` IN ('Fail','Initiated')".format(payroll_entry)
+    payment_entries= frappe.db.sql(query,as_dict=1)
+    
+    # salary_slips = frappe.get_all(
+    #         "Salary Slip",
+    #         filters={"payroll_entry": payroll_entry,"docstatus": 1} if payroll_entry else {},
+    #         fields=["employee", "employee_name", "net_pay", "bank_name", "bank_account_no", "posting_date", "name"]
+    #     )
 
-    payment_entries=[]
-    for salary in salary_slips:
-        obj = {}
-        obj['name']=salary['name']
-        obj['base_paid_amount_after_tax']=salary['net_pay']
-        obj['party']=salary['employee']
-        obj['remarks']=''
-        obj['custom_approved_by']=''
-        obj['reference_no']=''
-        obj['workflow_state']=''
-        obj['party_name']=salary['employee_name']
-        payment_entries.append(obj)
+    # payment_entries=[]
+    # for salary in salary_slips:
+    #     obj = {}
+    #     obj['name']=salary['name']
+    #     # obj['base_paid_amount_after_tax']=salary['net_pay']
+    #     # obj['party']=salary['employee']
+    #     obj['remarks']=''
+    #     obj['custom_approved_by']=''
+    #     obj['reference_no']=''
+    #     obj['workflow_state']=''
+    #     # obj['party_name']=salary['employee_name']
+    #     payment_entries.append(obj)
 
 
     return payment_entries

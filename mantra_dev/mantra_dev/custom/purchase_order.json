@@ -26,7 +26,7 @@
    "hide_border": 0,
    "hide_days": 0,
    "hide_seconds": 0,
-   "idx": 27,
+   "idx": 28,
    "ignore_user_permissions": 0,
    "ignore_xss_filter": 0,
    "in_global_search": 0,
@@ -316,7 +316,7 @@
    "search_index": 0,
    "show_dashboard": 0,
    "sort_options": 0,
-   "translatable": 1,
+   "translatable": 0,
    "unique": 0,
    "width": null
   },
@@ -444,7 +444,7 @@
    "search_index": 0,
    "show_dashboard": 0,
    "sort_options": 0,
-   "translatable": 1,
+   "translatable": 0,
    "unique": 0,
    "width": null
   },

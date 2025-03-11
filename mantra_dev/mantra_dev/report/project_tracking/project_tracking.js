@@ -13,10 +13,20 @@ frappe.query_reports["Project Tracking"] = {
 			fieldtype: "Data",
 			hidden:1,
 			default: frappe.route_options && frappe.route_options.data,
-		}
+		},
+        {
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "Data",
+			hidden:1,
+			default: frappe.route_options.project,
+		},
 	],
 	onload: function () {
+       
         $(document).off("click", ".create-po").on("click", ".create-po", function () {
+            let queryParams = frappe.utils.get_query_params();
+            
             let items = [
                 {
                     "item_code": $(this).data("item_code"),
@@ -26,7 +36,9 @@ frappe.query_reports["Project Tracking"] = {
             
             frappe.model.with_doctype("Purchase Order", function () {
                 let po = frappe.model.get_new_doc("Purchase Order");
-        
+                po.project = queryParams['project']
+            
+              
                 frappe.set_route("Form", "Purchase Order", po.name).then(() => {
                  
                     items.forEach(item_data => {
@@ -42,6 +54,7 @@ frappe.query_reports["Project Tracking"] = {
         
         });
 		$(document).off("click", ".create-mt").on("click", ".create-mt", function () {
+            let queryParams = frappe.utils.get_query_params();
             let items = [
                 {
                     "item_code": $(this).data("item_code"),
@@ -51,6 +64,7 @@ frappe.query_reports["Project Tracking"] = {
 
             frappe.model.with_doctype("Material Request", function () {
                 let mt = frappe.model.get_new_doc("Material Request");
+                mt.project = queryParams['project']
                 mt.custom_stock_entry_type_reference = "Material Transfer";
                 mt.custom_stock_entry_type_reference = "Material Transfer"
                 
@@ -68,6 +82,7 @@ frappe.query_reports["Project Tracking"] = {
             });
         });
         $(document).off("click", ".create-wo").on("click", ".create-wo", function () {
+            let queryParams = frappe.utils.get_query_params();
             let table_instance = frappe.query_report.datatable;
             let row_data = table_instance.datamanager.data.find(row => 
                 row.raw_material_item === $(this).data("item_code")
@@ -77,7 +92,7 @@ frappe.query_reports["Project Tracking"] = {
                 frappe.msgprint("Could not retrieve row data.");
                 return;
             }
-            open_work_order_dialog(row_data);
+            open_work_order_dialog(row_data,queryParams);
         });
     },
     after_datatable_render: function (table_instance) {
@@ -99,7 +114,7 @@ function color_single_row(table_instance, rowIdx,color) {
 }
 
 
-function open_work_order_dialog(row_data) {
+function open_work_order_dialog(row_data,query_params) {
     let item_options = [];
     
     // Collect finished goods from row_data (all keys except raw_material_item & metadata columns)
@@ -137,7 +152,7 @@ function open_work_order_dialog(row_data) {
         ],
         primary_action_label: __("Create"),
         primary_action(values) {
-            create_work_order(values.qty, values.finished_good);
+            create_work_order(values.qty, values.finished_good,query_params);
             dialog.hide();
         }
     });
@@ -155,9 +170,10 @@ function open_work_order_dialog(row_data) {
 
 
 
-function create_work_order(qty, row_material_item) {
+function create_work_order(qty, row_material_item,query_params) {
     frappe.model.with_doctype("Work Order", function () {
         let wo = frappe.model.get_new_doc("Work Order");
+        wo.project=query_params['project']
         frappe.set_route("Form", "Work Order", wo.name).then(() => {
             frappe.model.set_value("Work Order", wo.name, "production_item", row_material_item);
             frappe.model.set_value("Work Order", wo.name, "qty", qty.toFixed(2));

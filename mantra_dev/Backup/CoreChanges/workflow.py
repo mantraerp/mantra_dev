@@ -1,5 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: MIT. See LICENSE
+# /home/mantra/mantrastage-bench/apps/frappe/frappe/model/
 import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Union
@@ -238,9 +239,18 @@ def bulk_workflow_approval(docnames, doctype, action):
 			if not doc.bank_account:
 				frappe.throw(_("Company bank account not found in {}".format(doc_name)), title=_("Error"))
 				return
+
+			if doc.bank_account in [None,"",'None']:
+				frappe.throw(_("Company bank account not found in {}".format(doc_name)), title=_("Error"))
+				return
+
 			if not doc.party_bank_account:
 				frappe.throw(_("Party bank account not found in {}".format(doc_name)), title=_("Error"))
 				return
+
+			if doc.party_bank_account in [None,"",'None']:
+				frappe.throw(_("Party bank account not found in {}".format(doc_name)), title=_("Error"))
+				return				
 
 	if doctype=="Bank Account":
 		dds = json.loads(docnames)
@@ -263,7 +273,13 @@ def bulk_workflow_approval(docnames, doctype, action):
 				return
 			if doc.bank_account_no in [None,"",'None']:
 				frappe.throw(_("{} bank account number not found.".format(acc)), title=_("Error"))
-				return 	
+				return 
+
+		for idx, acc in enumerate(dds):
+			doc = frappe.get_doc("Bank Account",acc)
+			query = "UPDATE `tabBank Account` SET `disabled`='0' WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(doc.bank_account_no)
+			mdf = frappe.db.sql(query, as_dict=True)	
+
 		frappe.enqueue("mantra_dev.api_code.banck_transaction.bulk_upload_beneficiary_file",queue='long',job_name="Bank approve",timeout=100000,bank_account_list=dds)
 
 

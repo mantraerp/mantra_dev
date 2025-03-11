@@ -20,18 +20,22 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billi
 # from frappe.utils import  get_link_to_form
 # import json
 
+
+
+
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 class CustomPurchaseReceipt(PurchaseReceipt):
 	def on_submit(self):
-		super().on_submit()
-
 		# Check for Approving Authority
 		frappe.get_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
 		)
+		
 		if self.is_subcontracted:
 			self.bom_stock_validation()
+			
+		super().on_submit()
 
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
@@ -114,7 +118,7 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 			if msg:
 				frappe.enqueue(
 					self.stock_shortage_email_reminder,
-					recipients=["rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
 					subject=f"Stock Shortage Alert Receipt Number -> {self.name}",
 					message=msg,
 				)
@@ -125,7 +129,7 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 			if msg:
 				frappe.enqueue(
 					self.stock_shortage_email_reminder,
-					recipients=["rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
 					subject=f"Stock Shortage Alert For Receipt Number -> {self.name}",
 					message=msg,
 				)

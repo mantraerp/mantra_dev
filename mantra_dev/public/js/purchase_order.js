@@ -592,7 +592,7 @@ function createPoDetailsHTML(po_form_details){
                     }
                 }
     
-                tableHTML += `<td>${value}</td>`;
+                tableHTML += `<td style="word-wrap: break-word; max-width: 200px;" >${value}</td>`;
             });
     
             tableHTML += `</tr>`;

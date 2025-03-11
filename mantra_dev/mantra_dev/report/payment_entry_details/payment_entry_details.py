@@ -16,7 +16,7 @@ def get_column():
 	colunms.append({"label": "Party", "fieldname": "party", "fieldtype": "Data","width": 100})
 	colunms.append({"label": "Party Name", "fieldname": "party_name", "fieldtype": "Data","width": 150})
 	colunms.append({"label": "Remarks", "fieldname": "remarks", "fieldtype": "Data","width": 150})
-	colunms.append({"label": "Narattion", "fieldname": "narration", "fieldtype": "Data", "width": 150})
+	colunms.append({"label": "Narration", "fieldname": "narration", "fieldtype": "Data", "width": 150})
 	colunms.append({"label": "Type", "fieldname": "type", "fieldtype": "Data", "width": 150})
 	colunms.append({"label": "Project", "fieldname": "project", "fieldtype": "Data", "width": 150})
 	colunms.append({"label": "Paid Amount", "fieldname": "paid_amount", "fieldtype": "Currency", "width": 150})
