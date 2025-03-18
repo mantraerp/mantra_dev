@@ -42,7 +42,7 @@ frappe.query_reports["QC Request"] = {
 						frappe.msgprint({
 							title: __("Validation Error"),
 							indicator: "red",
-							message: __("Quantity cannot exceed QC Remaining QTY (" + qcRemainingQuantity + ")"),
+							message: __("Quantity cannot exceed QC Remaining QTY (" + parseFloat(qcRemainingQuantity) + ")"),
 						});
 						return;
 
@@ -120,7 +120,7 @@ frappe.query_reports["QC Request"] = {
 
 			// If inspection not required for particular item then make drafted stock entry from Default Inward Warehouse to Default QC Accepted Warehouse
 			frappe.call({
-				method: "mantra_dev.backend_code.qc_module.create_draft_stock_entry_for_material_transfer",
+				method: "mantra_dev.backend_code.qc_module.create_stock_entry_for_material_transfer",
 				args: {
 					purchase_receipt: purchaseReceiptId,
 					item_code: itemCode,

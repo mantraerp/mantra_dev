@@ -38,6 +38,7 @@ doctype_js = {
     "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
+    "Salary Slip": "public/js/salary_slip.js",
     "Item": "public/js/item.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
@@ -97,9 +98,11 @@ doc_events = {
     "Purchase Invoice":{
         "on_update": "mantra_dev.purchase_invoice.override_validate_due_date",
     },
-    # "Stock Entry":{
-    #     "on_cancel":"mantra_dev.backend_code.qc_module.revert_auto_transfer_stock",
-    # },
+    "Stock Entry":{
+        "on_submit":"mantra_dev.backend_code.qc_module.send_notification_on_submit",
+        "on_cancel":"mantra_dev.backend_code.qc_module.revert_auto_transfer_stock",
+        "on_trash": "mantra_dev.backend_code.qc_module.restore_qc_quantities_on_delete"
+    },
 }
 
 # Scheduled Tasks

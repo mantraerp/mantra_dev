@@ -27,7 +27,6 @@ frappe.ui.form.on("Payroll Entry", {
                     }
                     else{
                         frappe.msgprint(r.message.message);
-                        // frappe.msgprint('ravi');
                     }
                 }
             });

@@ -1,4 +1,5 @@
 {
+ "_seen": "[\"Administrator\"]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "format:{product_name}{####}",
@@ -9,7 +10,6 @@
   "product_name",
   "product_owner",
   "product_manager",
-  "department",
   "product_department",
   "section_break_duzz",
   "items"
@@ -38,12 +38,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Department"
-  },
-  {
    "fieldname": "product_department",
    "fieldtype": "Table MultiSelect",
    "label": "Product Department",
@@ -62,7 +56,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-25 11:53:21.034695",
+ "modified": "2025-03-18 14:48:35.282652",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Product",

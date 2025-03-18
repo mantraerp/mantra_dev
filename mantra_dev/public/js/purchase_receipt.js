@@ -69,7 +69,7 @@ frappe.ui.form.on('Purchase Receipt', {
                 frappe.call({
                     method: "mantra_dev.backend_code.qc_module.get_auto_transfer_stock",
                     callback: function (r) {
-                        if (r.message && r.message.auto_transfer_stock === 1) {
+                        if (r.message && r.message == 1) {
                             
                             // If auto_transfer_stock_for_non_qc_items is 1, create a stock entry for all items which do not required QC
                             frappe.call({

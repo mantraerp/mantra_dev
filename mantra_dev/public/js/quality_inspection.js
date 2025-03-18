@@ -107,6 +107,7 @@ frappe.ui.form.on("Quality Inspection", {
     },
 
     item_serial_no: function (frm) {
+
         if (frm.doc.item_serial_no) {
             // If item has serial no and batch no both and if serial no is selected then set the batch no of that serial no
             frappe.call({
@@ -145,6 +146,7 @@ frappe.ui.form.on("Quality Inspection", {
 
 
     batch_no: function (frm) {
+
         if (frm.doc.batch_no) {
             // if item has serial no and batch no both and if batch no is selected then filter serial no of that batch
             frm.set_query("item_serial_no", function () {
@@ -252,7 +254,24 @@ frappe.ui.form.on("Quality Inspection", {
             frm.set_value("custom_actual_qty", frm.doc.sample_size);
             return;
         }
-    
+
+        if (frm.doc.reference_type == "Stock Entry" && frm.doc.reference_name) {
+            frappe.call({
+                method: "mantra_dev.backend_code.qc_module.get_stock_entry_details",
+                args: {
+                    reference_name: frm.doc.reference_name
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        const custom_actual_qty = r.message.custom_actual_qty;
+                        if (frm.doc.custom_actual_qty > custom_actual_qty) {
+                            frappe.msgprint(__("Actual QTY cannot exceed the available quantity ({0}) in the Stock Entry.".replace("{0}", custom_actual_qty)));
+                            frm.set_value("custom_actual_qty", custom_actual_qty);
+                        }
+                    }
+                }
+            });
+        }
 
         if (frm.doc.item_serial_no) {
             // if item has serial no then actual qty should be exactly 1
@@ -315,6 +334,27 @@ frappe.ui.form.on("Quality Inspection", {
 
     },
 
+    reference_name: function (frm) {
+        if (frm.doc.reference_type == "Stock Entry" && frm.doc.reference_name) {
+            frappe.call({
+                method: "mantra_dev.backend_code.qc_module.get_stock_entry_details",
+                args: {
+                    reference_name: frm.doc.reference_name
+                },
+                callback: function (r) {
+                    if (r.message) {
+                        const custom_actual_qty = r.message.custom_actual_qty;
+                        if (frm.doc.custom_actual_qty > custom_actual_qty) {
+                            frappe.msgprint(__("Actual QTY cannot exceed the available quantity ({0}) in the Stock Entry.".replace("{0}", custom_actual_qty)));
+                            frm.set_value("custom_actual_qty", custom_actual_qty);
+                        }
+                    }
+                }
+            });
+
+        }
+    },
+
     before_save: function (frm) {
         if (frm.doc.sample_size <= 0) {
             frappe.throw("Sample size should be greater than 0.")
@@ -341,9 +381,17 @@ frappe.ui.form.on("Quality Inspection", {
                     report_date = frappe.datetime.str_to_user(report_date); // Converts to user's date format
                 }
 
+                // let qr_url = `http://192.168.5.78:8000/quality_inspection_details?name=${frm.doc.name}`;
+                // let qr_url = `${window.location.origin}/quality_inspection_details?name=${frm.doc.name}`;
                 let qr_url = `${window.location.origin}/quality_inspection_details?name=${frm.doc.name}&item_code=${item_code}&item_name=${item_name}&report_date=${report_date}&serial_no=${serial_no}&batch_no=${batch_no}&sample_size=${sample_size}&actual_qty=${actual_qty}`;
-                
+
                 let qr_code_url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr_url)}&size=200x200`;
+
+                // let qr_url = `http://192.168.5.78:8000/quality_inspection_details?name=${frm.doc.name}&item_code=${item_code}&item_name=${item_name}&report_date=${report_date}&serial_no=${serial_no}&batch_no=${batch_no}&sample_size=${sample_size}&actual_qty=${actual_qty}`;
+
+                // // Use the API to generate the QR code image with this URL
+                // let qr_code_url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr_url)}&size=200x200`;
+
 
                 // Wait for the field to update, then print only the QR code
                 setTimeout(function () {
@@ -377,6 +425,25 @@ frappe.ui.form.on("Quality Inspection", {
                     printWindow.document.close();
                 }, 500);
 
+                // let report_date = frm.doc.report_date;
+                // let item_code = frm.doc.item_code;
+                // let item_name = frm.doc.item_name;
+                // let serial_no = frm.doc.item_serial_no || "";
+                // let batch_no = frm.doc.batch_no || "";
+                // let sample_size = frm.doc.sample_size;
+                // let actual_qty = frm.doc.custom_actual_qty;
+
+                // if (report_date) {
+                //     report_date = frappe.datetime.str_to_user(report_date); // Converts to user's date format
+                // }
+
+                // let qr_url = `http://192.168.5.78:8000/quality_inspection_details?name=${frm.doc.name}&item_code=${item_code}&item_name=${item_name}&report_date=${report_date}&serial_no=${serial_no}&batch_no=${batch_no}&sample_size=${sample_size}&actual_qty=${actual_qty}`;
+
+                // // Use the API to generate the QR code image with this URL
+                // let qr_code_url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr_url)}&size=200x200`;
+
+                // // Open the QR code in a new tab
+                // window.open(qr_code_url, "_blank");
             });
         }
     },

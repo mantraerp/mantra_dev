@@ -1,0 +1,135 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"4YDWqgmnfo\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">QC Manager</span>\",\"col\":12}},{\"id\":\"dityK_ugAp\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"zjWK_1sDVz\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>QC User Tasks</b></span>\",\"col\":12}},{\"id\":\"GLP014yVqb\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"QA Reports\",\"col\":4}},{\"id\":\"FiLLYHOpOD\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Quality Inspection Template\",\"col\":4}},{\"id\":\"Fk5c8GIkmD\",\"type\":\"card\",\"data\":{\"card_name\":\"Quick Access\",\"col\":4}}]",
+ "creation": "2025-03-03 15:54:20.251301",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "QC Manager",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "QC Request",
+   "link_count": 0,
+   "link_to": "QC Request",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "QC Request Approval",
+   "link_count": 0,
+   "link_to": "QC Request Approval",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Quality Inspection Approval",
+   "link_count": 0,
+   "link_to": "Quality Inspection Approval",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rejected Quality Inspection",
+   "link_count": 0,
+   "link_to": "Rejected Quality Inspection",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "QC Stock Report",
+   "link_count": 0,
+   "link_to": "QC Stock Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "QC Stock Details",
+   "link_count": 0,
+   "link_to": "QC Stock Details",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quick Access",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Inspection Parameter",
+   "link_count": 0,
+   "link_to": "Quality Inspection Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-03-18 11:39:52.566747",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "QC Manager",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Quality Inspection",
+   "label": "QA Reports",
+   "quick_list_filter": "[]"
+  },
+  {
+   "document_type": "Quality Inspection Template",
+   "label": "Quality Inspection Template",
+   "quick_list_filter": "[]"
+  }
+ ],
+ "roles": [
+  {
+   "role": "Quality Manager"
+  },
+  {
+   "role": "QC User"
+  }
+ ],
+ "sequence_id": 36.0,
+ "shortcuts": [],
+ "title": "QC Manager"
+}

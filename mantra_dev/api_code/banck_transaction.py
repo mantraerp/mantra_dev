@@ -76,11 +76,11 @@ def upload_beneficiary_file(doc_name):
 
         data_rows = [[
             "A",  # Indicator
-            bank_account.party,  # Beneficiary Code
-            bank_account.account_name,  # Beneficiary Name
-            bank_account.custom_ifsc,  # Beneficiary IFSC
-            bank_account.bank_account_no,  # Beneficiary Account No
-            bank_account.custom_branch_location  # Beneficiary Address
+            bank_account.party.replace("\n", ""),  # Beneficiary Code
+            bank_account.account_name.replace("\n", ""),  # Beneficiary Name
+            bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
+            bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
+            bank_account.custom_branch_location.replace("\n", "")  # Beneficiary Address
         ]]
 
         with open(file_path, 'w', newline='') as file:
@@ -162,11 +162,11 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
 
         data_rows = [[
             "M",  # Indicator
-            bank_account.party,  # Beneficiary Code
-            bank_account.account_name,  # Beneficiary Name
-            bank_account.custom_ifsc,  # Beneficiary IFSC
-            bank_account.bank_account_no,  # Beneficiary Account No
-            bank_account.custom_branch_location  # Beneficiary Address
+            bank_account.party.replace("\n", ""),  # Beneficiary Code
+            bank_account.account_name.replace("\n", ""),  # Beneficiary Name
+            bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
+            bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
+            bank_account.custom_branch_location.replace("\n", "")  # Beneficiary Address
         ]]
 
         with open(file_path, 'w', newline='') as file:
@@ -243,11 +243,11 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 
         data_rows = [[
             "D",  # Indicator
-            bank_account.party,  # Beneficiary Code
-            bank_account.account_name,  # Beneficiary Name
-            bank_account.custom_ifsc,  # Beneficiary IFSC
-            bank_account.bank_account_no,  # Beneficiary Account No
-            bank_account.custom_branch_location  # Beneficiary Address
+            bank_account.party.replace("\n", ""),  # Beneficiary Code
+            bank_account.account_name.replace("\n", ""),  # Beneficiary Name
+            bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
+            bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
+            bank_account.custom_branch_location.replace("\n", "")  # Beneficiary Address
         ]]
 
         with open(file_path, 'w', newline='') as file:
@@ -291,7 +291,7 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 # get reverse MIS of Beneficiary File
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
-    
+
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
         one_hour_ago = datetime.now() - timedelta(hours=1)
@@ -806,10 +806,14 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                 bane_add_detail_5 = ""
                 
                 new_row = [
-                    debit_ac_no, beneficiary_code, beneficiary_ac_no, beneficiary_name,
-                    amt, pay_mod, date, ifsc, payable_location_name, print_location,
+                    debit_ac_no.replace("\n", ""),
+                    beneficiary_code.replace("\n", ""),
+                    beneficiary_ac_no.replace("\n", ""), 
+                    beneficiary_name.replace("\n", ""),
+                    amt, pay_mod, date, ifsc.replace("\n", ""), 
+                    payable_location_name, print_location,
                     bane_mobile_no, bane_email_id, bane_add1, bane_add2, bane_add3,
-                    bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks
+                    bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks.replace("\n", "")
                 ]
                 data_rows.append(new_row)
 
@@ -944,14 +948,14 @@ def generate_salary_slip(payroll_entry=None):
 
             if not addedInFail:
                 rows.append([
-                    debit_ac_no,
-                    slip["employee"],
-                    employee_account_no,
-                    slip["employee_name"],
+                    debit_ac_no.replace("\n", ""),
+                    slip["employee"].replace("\n", ""),
+                    employee_account_no.replace("\n", ""),
+                    slip["employee_name"].replace("\n", ""),
                     slip["net_pay"],
                     "N",
                     date,
-                    ifsc_code,
+                    ifsc_code.replace("\n", ""),
                     "",
                     "",
                     "",
@@ -1131,14 +1135,14 @@ def generate_payroll_payment_file(payroll_entry,create_only_file=None):
 
             if not addedInFail:
                 rows.append([
-                    debit_ac_no,
-                    slip["employee"],
-                    employee_account_no,
-                    emp_name,
+                    debit_ac_no.replace("\n", ""),
+                    slip["employee"].replace("\n", ""),
+                    employee_account_no.replace("\n", ""),
+                    emp_name.replace("\n", ""),
                     slip["net_pay"],
                     "N",
                     date,
-                    ifsc_code,
+                    ifsc_code.replace("\n", ""),
                     "",
                     "",
                     "",
@@ -1539,21 +1543,14 @@ def get_icici_bank_file_background(delimiter='|'):
                         if data_dict[22] == "Paid" or data_dict[22]=="Authorization Pending" or data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
                             if data_dict[22]=="Expired or Rejected by Authorizer/Confirmer":
                                 ERP_status = "Fail"
-                                rejection_reason = "Rejected"
-
-                                frappe.db.set_value("Payment Entry", data_dict[15], {
-                                "workflow_state": "Cancelled",
-                                })
-                                
+                                rejection_reason = data_dict[22]
                             else:
                                 if data_dict[22] == "Paid":
                                     ERP_status = "Success"
-                                    document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
-                                    if document.custom_sent_payment_advice == 1:
-                                        send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
                                 else:
                                     ERP_status = "Authorization Pending"
-                                
+                                    rejection_reason = data_dict[22]
+
                             frappe.db.set_value("Payment Entry", data_dict[15], {
                                 "custom_payment_status_": ERP_status,
                                 "custom_payment_ref_no": data_dict[21],
@@ -1565,7 +1562,26 @@ def get_icici_bank_file_background(delimiter='|'):
                                 "custom_rejection_reason":rejection_reason,
                                 # "docstatus": docstatus
                             })
-                            # frappe.db.commit()
+                            
+                            
+                            #If fail then need to reject
+                            if ERP_status == "Fail":
+                                current_user = frappe.session.user
+                                frappe.set_user("Administrator")
+                                doc = frappe.get_doc("Payment Entry",data_dict[15])
+                                doc.cancel()
+                                
+                                # frappe.db.set_value("Payment Entry", data_dict[15], {
+                                #     "workflow_state": "Cancelled",
+                                # })
+                                frappe.set_user(current_user)
+                                query = "UPDATE `tabPayment Entry` SET `workflow_state`='Cancelled' WHERE `name`='{}'".format(data_dict[15])
+                                update_work_flow_state = frappe.db.sql(query, as_dict=True) 
+                            
+                            if ERP_status == "Success":
+                                document = frappe.get_doc("Bank Integration", "ICICI Bank Limited - 018905013388")
+                                if document.custom_sent_payment_advice == 1:
+                                    send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
 
 
                     elif frappe.db.exists("Salary Slip", data_dict[15]):
@@ -1612,19 +1628,28 @@ def get_icici_bank_file_background(delimiter='|'):
                     else:
                         if frappe.db.exists("Payment Entry", data_dict[17]):
 
+                            rejection_reason=""
                             if data_dict[24]=="P":
-                                frappe.db.set_value("Payment Entry", data_dict[17], {
-                                    "custom_rejection_reason":data_dict[25],
-                                    "custom_payment_status_": "Fail",
-                                    "workflow_state": "Cancelled",
-                                })
-                                # frappe.db.commit()
+                                rejection_reason = data_dict[25]
                             else:
-                                frappe.db.set_value("Payment Entry", data_dict[17], {
+                                rejection_reason = data_dict[24]
+                                
+                            frappe.db.set_value("Payment Entry", data_dict[17], {
+                                    "custom_rejection_reason":rejection_reason,
                                     "custom_payment_status_": "Fail",
-                                    "workflow_state": "Cancelled",
                                 })
-                                # frappe.db.commit()
+
+                            current_user = frappe.session.user
+                            frappe.set_user("Administrator")
+                            doc = frappe.get_doc("Payment Entry",data_dict[17])
+                            doc.cancel()
+                            
+                            # frappe.db.set_value("Payment Entry", data_dict[17], {
+                            #         "workflow_state": "Cancelled",
+                            #     })
+                            frappe.set_user(current_user)
+                            query = "UPDATE `tabPayment Entry` SET `workflow_state`='Cancelled' WHERE `name`='{}'".format(data_dict[17])
+                            update_work_flow_state = frappe.db.sql(query, as_dict=True)     
 
                         elif frappe.db.exists("Salary Slip", data_dict[17]):
 
@@ -1721,6 +1746,17 @@ def send_frappe_mail():
 
 @frappe.whitelist()
 def send_file(file_path,file_name):
+
+
+    if not file_name.startswith("585730452"):
+        frappe.sendmail(
+            recipients = 'ravi.patel@mantratec.com',
+            subject = 'File try to send on mefron which is related to mantra',
+            message = '{}-{}'.format(file_path,file_name),
+        )
+        return
+
+
     
     # URL to send the POST request
     url = "http://192.168.5.56:8007/api/method/mefron_dev.backend_code.api.recive_file"
@@ -1754,7 +1790,7 @@ def send_file(file_path,file_name):
             else:
 
                 recipients = ["ravi.patel@mantratec.com"]
-                subject = "Error in Beneficiary File Processing 1890"
+                subject = "Error in Beneficiary File Processing 1772"
                 message = f"""
                 <p>Dear User,</p>
                 <p>An error occurred during the execution of the scheduled task:</p>
@@ -1826,7 +1862,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     
         
     
-    if frappe.db.exists("Payment Entry",payment_entry):
+    if not frappe.db.exists("Payment Entry",payment_entry):
         frappe.sendmail(
             recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
             subject="Error in payment advice",
@@ -1837,7 +1873,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
 
     document = frappe.get_doc("Payment Entry",payment_entry)
-    email = document.custom_party_email if d.custom_party_email else ""
+    email = document.custom_party_email if document.custom_party_email else ""
 
     invoices = []
 

@@ -69,7 +69,6 @@ frappe.ui.form.on('Employee', {
 						dialog.hide();
 					}
 				});
-			
 				// Show the dialog
 				dialog.show();
         },('Utility'));

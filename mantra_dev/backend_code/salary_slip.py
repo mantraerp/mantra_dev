@@ -150,6 +150,10 @@ def salary_slip_date_range_back(employee_id,from_date,to_date):
 # @frappe.whitelist(allow_guest=True)
 def email_salary_slip(salary_slip_no):
 
+	reply={}
+	reply["status_code"]=500
+	reply['message']=''
+
 	try:
 		query = "SELECT * FROM `tabSalary Slip` WHERE `name`='{}'".format(salary_slip_no)
 		salary_slip_detail = frappe.db.sql(query,as_dict=1)
@@ -161,7 +165,8 @@ def email_salary_slip(salary_slip_no):
 				content = "Salary slip not found error",
 				now = True
 			)
-			return "Salary slip not found"
+			reply['message']='Salary slip not found'
+			return reply
 
 		if salary_slip_detail[0]['employee'] in ['',None,'None']:
 			frappe.sendmail(
@@ -170,7 +175,8 @@ def email_salary_slip(salary_slip_no):
 				content = "Employee code not found",
 				now = True
 			)
-			return "Employee code not found"
+			reply['message']="Employee code not found"
+			return reply
 		
 		if salary_slip_detail[0]['docstatus'] in [2,0]:	
 			frappe.sendmail(
@@ -179,12 +185,13 @@ def email_salary_slip(salary_slip_no):
 				content = "docstatus error",
 				now = True
 			)
-			return "docstatus error"
+			reply['message']="Salary slip need to be in submitted status"
+			return reply
 		
   
 		if salary_slip_detail[0]['custom_email_send'] in [1,True]:
-			return "Salary slip is already send"
-
+			reply['message']="Salary slip is already send"
+			return reply
 
 		employee_code = salary_slip_detail[0]['employee']
 
@@ -241,19 +248,168 @@ def email_salary_slip(salary_slip_no):
 				content = "Employee email not found, hence email not sent",
 				now = True
 			)
-			return "Employee email not found, hence email not sent"
+			reply['message']="Employee prefered email not found, hence email not sent"
+			return reply
 
-		return "Email send"
+		reply['message']="Salary slip mail send"
+		reply["status_code"]=200
+		return reply
 
 	except Exception as e:
-		error = '{} - {}'.format(str(e),str(traceback.format_exc()))
+		error = '{} <br> {}'.format(str(e),str(traceback.format_exc()))
 		frappe.sendmail(
 			recipients = ['ravi.patel@mantratec.com'],
 			subject = "Salary slip mail error: {}".format(salary_slip_no),
 			content = error,
 			now = True
 		)
-		return "Error send in mail"
+		reply['message']=error
+		return reply
+
+
+@frappe.whitelist()
+# @frappe.whitelist(allow_guest=True)
+def email_salary_slip_single_without_restriction(salary_slip_no,prefered_email):
+
+	reply={}
+	reply["status_code"]=500
+	reply['message']=''
+
+	try:
+		query = "SELECT * FROM `tabSalary Slip` WHERE `name`='{}'".format(salary_slip_no)
+		salary_slip_detail = frappe.db.sql(query,as_dict=1)
+
+		if len(salary_slip_detail)==0:
+			frappe.sendmail(
+				recipients = ['ravi.patel@mantratec.com'],
+				subject = "Salary slip not found error: {}".format(salary_slip_no),
+				content = "Salary slip not found error",
+				now = True
+			)
+			reply['message']='Salary slip not found'
+			return reply
+
+		if salary_slip_detail[0]['employee'] in ['',None,'None']:
+			frappe.sendmail(
+				recipients = ['ravi.patel@mantratec.com'],
+				subject = "Salary slip Employee error: {}".format(salary_slip_no),
+				content = "Employee code not found",
+				now = True
+			)
+			reply['message']="Employee code not found"
+			return reply
+		
+		if salary_slip_detail[0]['docstatus'] in [2,0]:	
+			frappe.sendmail(
+				recipients = ['ravi.patel@mantratec.com'],
+				subject = "Salary slip docstatus error: {}".format(salary_slip_no),
+				content = "docstatus error",
+				now = True
+			)
+			reply['message']="Salary slip need to be in submitted status"
+			return reply
+
+		employee_code = salary_slip_detail[0]['employee']
+
+		payroll_settings = frappe.get_single("Payroll Settings")
+		message = "Please see attachment" #if email templete is not set
+		
+		password = None
+		if payroll_settings.encrypt_salary_slips_in_emails:
+			password = generate_password_for_pdf(payroll_settings.password_policy, employee_code)
+			message += """<br>Note: Your salary slip is password protected,
+				the password to unlock the PDF is of the format {0}. """.format(
+				payroll_settings.password_policy
+			)
+
+		if prefered_email:
+
+			document = frappe.get_doc("Salary Slip",salary_slip_no)
+			doc_args = document.as_dict()
+			doc_args.update(
+				{
+					"start_date": document.start_date,
+					"employee_name": document.employee_name,
+				}
+			)
+
+			subject = "Salary slip {}".format(salary_slip_no) #if email templete is not set
+			if payroll_settings.email_template not in [None,"","None"," "]:
+				email_template = frappe.get_doc("Email Template", "Salary Slip")
+				message = frappe.render_template(email_template.response_, doc_args)
+				subject = frappe.render_template(email_template.subject, doc_args)
+
+			frappe.sendmail(
+				recipients = [prefered_email],
+				message = message,
+				subject= subject,
+				attachments= [
+					frappe.attach_print('Salary Slip', salary_slip_no, file_name=salary_slip_no, password=password)
+				],
+				reference_doctype= 'Salary Slip',
+				reference_name= salary_slip_no,
+				now = True
+			)
+		else:
+			frappe.sendmail(
+				recipients = ['ravi.patel@mantratec.com'],
+				subject = "Employee email not found, hence email not sent: {}".format(salary_slip_no),
+				content = "Employee email not found, hence email not sent",
+				now = True
+			)
+			reply['message']="Employee prefered email not found, hence email not sent"
+			return reply
+
+		reply['message']="Salary slip mail send"
+		reply["status_code"]=200
+		return reply
+
+	except Exception as e:
+		error = '{} <br> {}'.format(str(e),str(traceback.format_exc()))
+		frappe.sendmail(
+			recipients = ['ravi.patel@mantratec.com'],
+			subject = "Salary slip mail error: {}".format(salary_slip_no),
+			content = error,
+			now = True
+		)
+		reply['message']=error
+		return reply
+
+
+@frappe.whitelist()
+def employee_prefere_email_id(employee):
+
+	reply={}
+	reply["status_code"]=500
+	reply['message']=''
+	reply['email']=''
+
+	try:
+
+		if employee in ['',None,'None']:
+			reply['message']="Employee code not found"
+			return reply
+
+		receiver = frappe.db.get_value("Employee", employee, "prefered_email")
+		
+		if receiver:
+			reply['email']=receiver
+			reply["status_code"]=200
+			return reply
+
+		return reply
+
+	except Exception as e:
+		error = '{} <br> {}'.format(str(e),str(traceback.format_exc()))
+		frappe.sendmail(
+			recipients = ['ravi.patel@mantratec.com'],
+			subject = "employee_prefere_email_id mail error: {}".format(employee),
+			content = error,
+			now = True
+		)
+		reply['message']=error
+		return reply
+
 
 
 def generate_password_for_pdf(policy_template, employee):
