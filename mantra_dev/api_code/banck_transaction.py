@@ -1579,7 +1579,7 @@ def get_icici_bank_file_background(delimiter='|'):
                                 update_work_flow_state = frappe.db.sql(query, as_dict=True) 
                             
                             if ERP_status == "Success":
-                                document = frappe.get_doc("Bank Integration", "ICICI Bank Limited - 018905013388")
+                                document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
                                 if document.custom_sent_payment_advice == 1:
                                     send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
 
@@ -1759,7 +1759,7 @@ def send_file(file_path,file_name):
 
     
     # URL to send the POST request
-    url = "http://192.168.5.56:8007/api/method/mefron_dev.backend_code.api.recive_file"
+    url = "http://192.168.5.56:8008/api/method/mefron_dev.backend_code.api.recive_file"
 
     # Path to the file to be uploaded
     try:
@@ -2074,29 +2074,40 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
     # Add dynamic rows for invoices
     for invoice in payment_data['invoices']:
-        
-        allkeys = invoice.keys()
-        document_no = ""
-        invoice_no = ""
-        invoice_date = ""
-        paid_amount = ""
-        if "document_no" in allkeys:
-            document_no = str(invoice['document_no'])
-        if "invoice_no" in allkeys:
-            invoice_no = str(invoice['invoice_no'])
-        if "invoice_date" in allkeys:
-            invoice_date = str(invoice['invoice_date'])        
-        if "paid_amount" in allkeys:
-            paid_amount = str(invoice['paid_amount'])        
-        
-        html_content += f"""
-        <tr>
-            <td>{document_no}</td>
-            <td>{invoice_no}</td>
-            <td>{invoice_date}</td>
-            <td>₹{paid_amount}</td>
-        </tr>
-        """
+
+        if invoice != "-":
+            allkeys = invoice.keys()
+            document_no = ""
+            invoice_no = ""
+            invoice_date = ""
+            paid_amount = ""
+            if "document_no" in allkeys:
+                document_no = str(invoice['document_no'])
+            if "invoice_no" in allkeys:
+                invoice_no = str(invoice['invoice_no'])
+            if "invoice_date" in allkeys:
+                invoice_date = str(invoice['invoice_date'])        
+            if "paid_amount" in allkeys:
+                paid_amount = str(invoice['paid_amount'])        
+            
+            html_content += f"""
+            <tr>
+                <td>{document_no}</td>
+                <td>{invoice_no}</td>
+                <td>{invoice_date}</td>
+                <td>₹{paid_amount}</td>
+            </tr>
+            """
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     # Close table and add footer
     html_content += f"""
