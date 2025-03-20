@@ -20,12 +20,10 @@ def select_payment_entry(bank_account):
             base_paid_amount_after_tax,
             party, 
             reference_no, 
-            remarks,
-            custom_approved_by,
             workflow_state,
             party_name
         FROM `tabPayment Entry`
-        WHERE (custom_unique_batch_number IS NULL or custom_unique_batch_number="")
+        WHERE custom_unique_batch_number IS NULL
         AND workflow_state = 'Checked'
         AND payment_type = 'Pay'
         AND bank_account = %s
@@ -33,12 +31,8 @@ def select_payment_entry(bank_account):
     """
     
     payment_entries = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)
-    for entry in payment_entries:
-        if entry['custom_approved_by']:
-            entry['custom_approved_by'] = frappe.db.get_value("User",entry['custom_approved_by'],'full_name')
 
     return payment_entries
-
 
 
 @frappe.whitelist()
@@ -50,15 +44,17 @@ def approve_payment_entries(payment_entry_ids):
             # Ensure document exists before modifying it
             if frappe.db.exists("Payment Entry", payment_entry_id):
                 frappe.db.set_value("Payment Entry", payment_entry_id, "workflow_state", "Approved")
-                frappe.db.set_value("Payment Entry", payment_entry_id, "docstatus", 1)
+                current_user = frappe.session.user
+                frappe.set_user("Administrator")
+                doc = frappe.get_doc("Payment Entry",payment_entry_id)
+                doc.submit()
+                frappe.set_user(current_user)
 
-        frappe.db.commit()
         return "Success"
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error while canceling Payment Entries")
         return f"An error occurred while canceling payment entries: {str(e)}"
-    
 
 
 @frappe.whitelist()
@@ -70,9 +66,12 @@ def hold_payment_entries(payment_entry_ids):
             # Ensure document exists before modifying it
             if frappe.db.exists("Payment Entry", payment_entry_id):
                 frappe.db.set_value("Payment Entry", payment_entry_id, "workflow_state", "On Hold")
-                frappe.db.set_value("Payment Entry", payment_entry_id, "docstatus", 1)
+                current_user = frappe.session.user
+                frappe.set_user("Administrator")
+                doc = frappe.get_doc("Payment Entry",payment_entry_id)
+                doc.submit()
+                frappe.set_user(current_user)
 
-        frappe.db.commit()
         return "Success"
 
     except Exception as e:

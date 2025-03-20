@@ -95,7 +95,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
 						filters: {
 							status: "Submitted",
 							custom_salary_slip_file_generated:0,
-                            custom_payroll_entry_approved:1
+                            custom_payroll_entry_approved:0
 						}
 					};
 				},
@@ -561,27 +561,51 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
                     let customDetails = r.message.custom_details || {};
     
                     let referenceTableRows = referenceDetails.map(item => {
-                        let attachmentColumn = item["Attachments"];
+                        let attachmentColumn = item["doctype"] === "Purchase Order" ? "":item["Attachments"];
     
                        
-                        if (item["doctype"] === "Purchase Order") {
-                            attachmentColumn += ` <button class="btn btn-primary btn-sm view-po" data-po="${item["Document ID"]}">
+                        if (item["doctype"] === "Purchase Order" && item["Po Approval"] ) {
+                            attachmentColumn += ` <button class="btn btn-primary btn-sm po-details-btn" data-po="${item["Po Approval"]}">
                                 PO Details
                             </button>`;
+                        }
+
+                        let linkContent = "";
+                        if (item["doctype"] === "Purchase Order") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-order/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        } else if (item["doctype"] === "Material Request") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/material-request/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        } else if (item["doctype"] === "Purchase Invoice") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-invoice/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Purchase Receipt") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-receipt/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Employee Advance") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/employee-advance/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Expense Claim") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/expense-claim/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
                         }
     
                         return `
                             <tr>
                                 <td style="text-align:left;">
-                                    <b>${item["Document ID"]}</b><br>
+                                    ${linkContent}
+
                                     <small>Created on: ${item["Created On"]}</small><br>
                                     <small>Submitted on: ${item["Submitted On"]}</small>
                                 </td>
                                 <td style="text-align:left;">${item["Purpose"] || ""}</td>
                                 <td style="text-align:left;">${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
                                  <td style="text-align:left;">
-                                    ${item["Attachments"] || ""}
-                                    ${item["doctype"] === "Purchase Order" ? `<br><button class="po-details-btn btn btn-primary" data-po="${item["Document"]}">PO Details</button>` : ""}
+                                 ${item['doctype'] !== 'Purchase Order' ? (
+                                    item['Attachments'] && item['doctype'] !== 'Purchase Order' ? 
+                                      item['Attachments'].split(',').map(attachment => 
+                                        `<a href="${attachment}" target="_blank">${attachment}</a><br>`).join('') 
+                                      : ''
+                                  ) : ''}
+                                    ${attachmentColumn}
                         </td>
                             </tr>
                         `;
@@ -677,7 +701,10 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         let poId = $(this).data("po");
         if (poId) {
             frappe.open_in_new_tab = true;
-            frappe.set_route("Form", "Purchase Order", poId);
+            frappe.set_route("Form", "PO Form Approval", poId);
+        }
+        else{
+           frappe.msgprint('Po Form Approval is not Found')
         }
     });
     
@@ -689,6 +716,10 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         .appendTo(buttonContainer);
 
     //Comment for live
+    // if (['hiren@mefron.com', 'bhavyen@mefron.com'].includes(frappe.session.user)) {
+
+
+
     if (['hiren@mantratec.com', 'bhavyen@mantratec.com'].includes(frappe.session.user)) {
         let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-primary">Make Payment</button>`)
             .appendTo(buttonContainer);
@@ -884,7 +915,7 @@ function showBankAccountDialog() {
 function sendOTP(bank_account) {
     frappe.dom.freeze("Please wait... Sending OTP");
     frappe.call({
-        method: "mantra_dev.api_code.banck_transaction.send_otp",
+        method: "mantra_dev.api_code.bank_transaction.send_otp",
         args: {
             email: frappe.session.user,
         },
@@ -920,7 +951,7 @@ function showOTPDIalog(bank_account) {
 function verifyotp(otp, bank_account) {
 
     frappe.call({
-        method: "mantra_dev.api_code.banck_transaction.verify_otp",
+        method: "mantra_dev.api_code.bank_transaction.verify_otp",
         args: {
             email: frappe.session.user,
             otp: otp,
@@ -954,7 +985,7 @@ function selectPaymentEntry(data, bank_account) {
 
             if($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked') == true){
                 frappe.call({
-                    method: "mantra_dev.api_code.banck_transaction.generate_payroll_payment_file",
+                    method: "mantra_dev.api_code.bank_transaction.generate_payroll_payment_file",
                     args: {
                         payroll_entry: bank_account,
                         create_only_file: 0,
@@ -984,7 +1015,7 @@ function selectPaymentEntry(data, bank_account) {
                 });
             }else{
                 frappe.call({
-                    method: "mantra_dev.api_code.banck_transaction.upload_file",
+                    method: "mantra_dev.api_code.bank_transaction.upload_file",
                     args: {
                         payment_entry_list: data,
                         bank_account: bank_account,

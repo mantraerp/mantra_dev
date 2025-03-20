@@ -8,7 +8,8 @@
  "field_order": [
   "system_tab",
   "get_system_status_notification",
-  "system_status_notification_users"
+  "system_status_notification_users",
+  "allow_delivery_note_without_sales_invoice"
  ],
  "fields": [
   {
@@ -26,12 +27,18 @@
    "fieldname": "system_status_notification_users",
    "fieldtype": "Data",
    "label": "System status notification users"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_delivery_note_without_sales_invoice",
+   "fieldtype": "Check",
+   "label": "Allow delivery note without sales invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-17 18:15:28.079811",
+ "modified": "2025-03-19 17:28:53.252129",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "ERP Settings",

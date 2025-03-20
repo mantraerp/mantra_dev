@@ -53,13 +53,21 @@ frappe.ui.form.on('Delivery Note', {
             if (item.against_sales_invoice) {
                 // Additional specific condition
                 console.log('Item against sales invoice:', item.against_sales_invoice);
-            } else {
-                if (item.against_sales_order) {
-                    console.log(item.base_amount);
-                    if (parseInt(item.base_amount) > 0) {
-                        frappe.throw(`You cannot create a delivery note with an amount of more than 0. Please remove line item ${item.idx} from the delivery note.`);
-                    } else {
-                        console.log('Item against sales order:', item.against_sales_order);
+            } 
+            else {
+                if (item.against_sales_order) 
+                {
+                    // doc = frappe.get_doc('ERP Settings')
+                    // if(!doc.allow_delivery_note_without_sales_invoice)
+                    // console.log("START")
+                    // console.log(frappe.db.get_single_value('ERP Settings', 'allow_delivery_note_without_sales_invoice'))
+                    if(!frappe.db.get_single_value('ERP Settings', 'allow_delivery_note_without_sales_invoice'))
+                    {
+                        if (parseInt(item.base_amount) > 0) {
+                            frappe.throw(`You cannot create a delivery note with an amount of more than 0. Please remove line item ${item.idx} from the delivery note.`);
+                        } else {
+                            console.log('Item against sales order:', item.against_sales_order);
+                        }
                     }
                 }
             }

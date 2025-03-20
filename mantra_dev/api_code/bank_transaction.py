@@ -871,6 +871,7 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
         error_mail_send("Payment file creation issue.","{} payment file create. {}".format(str(e),str(traceback.format_exc())))
         return str(traceback.format_exc())
 
+
 @frappe.whitelist()
 def error_mail_send(title,error):
     frappe.sendmail(
@@ -1834,6 +1835,7 @@ def send_file(file_path,file_name):
 
 
 
+
 @frappe.whitelist(allow_guest=True)
 def send_payment_advice_payment_entry(payment_entry):
     
@@ -1865,6 +1867,7 @@ def send_payment_advice_payment_entry(payment_entry):
     send_payment_advice_email(debit_account_no,amount,date,remarks,benfiecery_account_no,utr_no,payment_mode,ifsc_code,benifecery_code,benifecery_name,instrument_ref_no,payment_entry)
 
     return "Payment advice send"
+
 
 
 @frappe.whitelist()
@@ -2185,6 +2188,8 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
         if email:
             frappe.sendmail(
                 recipients=[email,'subhash@mantratec.com'],
+                # recipients=['ravi.patel@mantratec.com'],
+
                 subject="Payment Advice",
                 message="Please find the attached payment advice.",
                 attachments=[{

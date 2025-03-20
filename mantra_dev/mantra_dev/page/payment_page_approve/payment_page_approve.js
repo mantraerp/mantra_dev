@@ -7,13 +7,13 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
    
     let filterContainer = $('<div class="filter-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: space-between;"></div>').appendTo(page.body);
     
-    let transaction_summary_table = $(`<table id="transaction-summary-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;">
+    let transaction_summary_table = $(`<table id="transaction-summary-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;font-family: var(--font-stack);">
         <thead>
             <tr>
-                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Transactions</th>
-                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Amount (₹)</th>
-                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Selected Transactions</th>
-                <th style="background-color: #007cc3; color:white;padding:10px; text-align: center;">Total Selected Transcation Amount (₹)</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Transactions</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Amount (₹)</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Selected Transactions</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Selected Transcation Amount (₹)</th>
             </tr>
         </thead>
         <tbody>
@@ -97,7 +97,6 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                          this.fetchPaymentEntries(selectedBankAccount)
                     }
                     else{
-                        $(tableContainer).hide();
                         $("#export-to-excel").attr("hidden", true);
                         $("#total-transactions").text(0);
                         $("#total-amount").text(format_currency(0, 'INR', precision=2));
@@ -137,6 +136,8 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     return;
                 }
                 let groupedData = {};
+                let totalTransactions = 0;
+                let totalAmt = 0;
                 data.forEach(row => {
                     let groupKey = row.party || row.party_name; 
                     if (!groupedData[groupKey]) {
@@ -153,7 +154,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                 <style>
                     table { width: 100%; border-collapse: collapse; }
                     th, td { padding: 10px; text-align: center; vertical-align: middle;font-size:15px; }
-                    thead { background-color: #007cc3; color: white; }
+                    thead { background-color: var(--subtle-fg); color: var(--text-color) !important;}
                     .toggle-arrow { cursor: pointer; font-size: 18px; }
                     .hidden-row { display: none; }
                     .indent { text-align: left;}
@@ -180,8 +181,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     </thead>
                     <tbody>`;
                  // Initialize total variables before the loop
-                let totalTransactions = 0;
-                let totalAmt = 0;
+               
                 Object.keys(groupedData).forEach(groupKey => {
                     let group = groupedData[groupKey];
                     let payments = group.entries;
@@ -191,44 +191,87 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     let first = payments[0]; // Use the first row for summary
                     let status = first.workflow_state ? first.workflow_state.toLowerCase() : "";
                     let badgeStyle = getBadgeStyle(status);
+                    totalTransactions += count;
+                    totalAmt += totalAmount;
+
     
-                    // SUMMARY ROW (Always Visible)
-                    table_html += `<tr class="group-row summary-row" data-party="${groupKey}">
-                        <td style="text-align:left;">
-                            ${
-                                 `<span class="toggle-arrow" data-party="${groupKey}">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                                  </span>`
-                               
-                            }
-                        </td>
-                        <td style="text-align:left;">
-                        <input type="checkbox" class="group-checkbox" data-party="${groupKey}">
-                        </td>
-                        <td style="text-align:left;"></td>        
-                        <td style="text-align:left;">${first.party_name}</td>
-                        <td style="text-align:left;"></td>
-                        <td class="group-paid-amount" style="text-align:left;">${format_currency(totalAmount, 'INR', precision=2)}</td>
-                        <td style="text-align:left;">
-                                <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
-                                    class="hold-btn group-hold" data-id="${first.name}">
+                    if (count === 1) {
+                        // If only one entry, display as a normal row
+                        let row = payments[0];
+                        table_html += `
+                        <tr class="group-row">
+                            <td></td>
+                            <td style="text-align:left;">
+                                <input type="checkbox" class="entry-checkbox" data-id="${row.name}">
+                            </td>
+                            <td style="text-align:left;">
+                                <a onclick="frappe.set_route('Form', 'Payment Entry', '${row.name}')">${row.name}</a>
+                            </td>
+                            <td style="text-align:left;">${row.party_name}</td>
+                            <td style="text-align:left;">
+                                ${row.remarks ? row.remarks.trim().replace(/(?:\r\n|\r|\n)/g, "<br>") : ""}
+                                ${row.approver_names ? "<br>Approved By: " + row.approver_names : ''}
+                            </td>
+                            <td style="text-align:left;">${format_currency(row.base_paid_amount_after_tax, 'INR', 2)}</td>
+                            <td style="text-align:left;">
+                                <button class="hold-btn btn btn-secondary" data-id="${row.name}" >
                                     Hold
                                 </button>
-                        </td>
-						<td style="text-align:left;">
-                                <button style="background-color:green; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
-                                    class="approve-btn group-approve" data-id="${first.name}">
+                            </td>
+                            <td style="text-align:left;">
+                                <button class="approve-btn btn btn-secondary" data-id="${row.name}" >
                                     Approve
                                 </button>
-                        </td>
-                        <td style="text-align:left;">
-                            <button style="background-color:red; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
-                                class="cancel-btn group-cancel" data-id="${first.name}">
-                                Reject
-                            </button>
-                        </td>
-                        
-                    </tr>`;
+                            </td>
+                            <td style="text-align:left;">
+                                <button class="cancel-btn btn btn-secondary" data-id="${row.name}" >
+                                    Reject
+                                </button>
+                            </td>
+                              <td>
+                                <button 
+                                    class="get-details btn btn-primary">
+                                    Details
+                                </button>
+                            </td>
+                        </tr>`;
+                    } else {
+                        // If multiple entries, display collapsible rows
+                        let first = payments[0]; // Use first row for summary
+    
+                        table_html += `
+                        <tr class="group-row summary-row" data-party="${groupKey}">
+                            <td style="text-align:left;">
+                                <span class="toggle-arrow" data-party="${groupKey}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </span>
+                            </td>
+                            <td style="text-align:left;">
+                                <input type="checkbox" class="group-checkbox" data-party="${groupKey}">
+                            </td>
+                            <td style="text-align:left;"></td>        
+                            <td style="text-align:left;">${first.party_name}</td>
+                            <td style="text-align:left;"></td>
+                            <td class="group-paid-amount" style="text-align:left;">${format_currency(totalAmount, 'INR', 2)}</td>
+                            <td style="text-align:left;">
+                                <button class="hold-btn group-hold btn btn-secondary" data-id="${first.name}" >
+                                    Hold
+                                </button>
+                            </td>
+                            <td style="text-align:left;">
+                                <button class="approve-btn group-approve btn btn-secondary" data-id="${first.name}" >
+                                    Approve
+                                </button>
+                            </td>
+                            <td style="text-align:left;">
+                                <button class="cancel-btn group-cancel btn btn-secondary" data-id="${first.name}" >
+                                    Reject
+                                </button>
+                            </td>
+                            
+                        </tr>`;
     
                     // CHILD ROWS (Hidden by Default)
                     payments.forEach((row, index) => {
@@ -242,37 +285,37 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                             <td style="text-align:left;">${row.party_name}</td>
                             <td style="text-align:left;">
                                 ${row.remarks ? row.remarks.trim().replace(/(?:\r\n|\r|\n)/g, "<br>") : ""}
-                                ${row.custom_approved_by ? "<br>" + "Approved By: " + (row.custom_approved_by || '-') : ''}
+                                ${row.approver_names ? "<br>" + "Approved By: " + (row.approver_names || '-') : ''}
                             </td>
                             <td style="text-align:left;">${format_currency(row.base_paid_amount_after_tax, 'INR', precision=2)}</td>
                             <td style="text-align:left;">
-                                <button style="background-color:orange; color:white;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
-                                    class="hold-btn" data-id="${row.name}">
+                                <button 
+                                    class="hold-btn btn btn-secondary" data-id="${row.name}">
                                     Hold
                                 </button>
                             </td>
 							 <td style="text-align:left;">
-                                <button style="background-color:green; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
-                                    class="approve-btn" data-id="${row.name}">
+                                <button 
+                                    class="approve-btn btn btn-secondary" data-id="${row.name}">
                                     Approve
                                 </button>
                             </td>
                             <td style="text-align:left;">
-                                <button style="background-color:red; color:white    ;padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;"
-                                    class="cancel-btn" data-id="${row.name}">
+                                <button 
+                                    class="cancel-btn btn btn-secondary" data-id="${row.name}">
                                     Reject
                                 </button>
                             </td>
                              <td style="text-align:left;">
-                            <button style="background-color:blue; padding: 5px 15px; font-size: 14px; border-radius: 6px; border: 0px;color:white"
-                                class="get-details">
+                            <button
+                                class="get-details btn btn-primary">
                                 Details
                             </button>
                         </td>
                         </tr>`;
                     });
-                    totalTransactions += count;
-                    totalAmt += totalAmount;
+                  
+                }
                 });
                 $("#total-transactions").text(totalTransactions);
                 $("#total-amount").text(format_currency(totalAmt.toFixed(2), 'INR', precision=2));
@@ -331,7 +374,6 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     }
                 });
                 $(document).off("click", ".hold-btn").on("click", ".hold-btn", function () {
-					console.log("clicked")
                     let $btn = $(this);
                     let $row = $btn.closest("tr");
                     let paymentEntryId = $btn.data("id");
@@ -425,7 +467,8 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
     };
 
     
-    $(document).on('click', '.get-details', function() {
+    
+    $(document).on('click', '.get-details', function () {
         let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
     
         if (!paymentEntryId) {
@@ -434,29 +477,71 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
         }
     
         frappe.call({
-            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.get_payment_entry_reference_details",
+            method: "mantra_dev.mantra_dev.page.payment.payment.get_payment_entry_reference_details",
             args: { payment_entry: paymentEntryId },
-            callback: function(r) {
+            callback: function (r) {
                 if (r.message) {
                     if (r.message.error) {
                         frappe.msgprint(r.message.error);
                         return;
                     }
+
+    
                     let referenceDetails = r.message.reference_details || [];
                     let customDetails = r.message.custom_details || {};
     
-                    let referenceTableRows = referenceDetails.map(item => `
-                        <tr>
-                            <td style="text-align:left;">${(item["Reference ID"] || "").split(",").join("<br>")}</td>
-                            <td style="text-align:left;">${(item["Doctype"] || "").split(",").join("<br>")}</td>
-                            <td style="text-align:left;">${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
-                            <td style="text-align:left;">${(item["Approver Names"] || "").split(",").join("<br>")}</td>
+                    let referenceTableRows = referenceDetails.map(item => {
+                        let attachmentColumn = item["doctype"] === "Purchase Order" ? "":item["Attachments"];
+    
+                       
+                        if (item["doctype"] === "Purchase Order" && item["Po Approval"] ) {
+                            attachmentColumn += ` <button class="btn btn-primary btn-sm po-details-btn" data-po="${item["Po Approval"]}">
+                                PO Details
+                            </button>`;
+                        }
 
-                        </tr>
-                    `).join("");
+                        let linkContent = "";
+                        if (item["doctype"] === "Purchase Order") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-order/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        } else if (item["doctype"] === "Material Request") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/material-request/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        } else if (item["doctype"] === "Purchase Invoice") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-invoice/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Purchase Receipt") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/purchase-receipt/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Employee Advance") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/employee-advance/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+                        else if (item["doctype"] === "Expense Claim") {
+                            linkContent = `<b>${item["Document ID"]} - <a href="/app/expense-claim/${item['Document']}" target="_blank">${item['Document']}</a></b><br>`;
+                        }
+    
+                        return `
+                            <tr>
+                                <td style="text-align:left;">
+                                    ${linkContent}
+
+                                    <small>Created on: ${item["Created On"]}</small><br>
+                                    <small>Submitted on: ${item["Submitted On"]}</small>
+                                </td>
+                                <td style="text-align:left;">${item["Purpose"] || ""}</td>
+                                <td style="text-align:left;">${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
+                                 <td style="text-align:left;">
+                                 ${item['doctype'] !== 'Purchase Order' ? (
+                                    item['Attachments']? 
+                                      item['Attachments'].split(',').map(attachment => 
+                                        `<a href="${attachment}" target="_blank">${attachment}</a><br>`).join('') 
+                                      : ''
+                                  ) : ''}
+                                    ${attachmentColumn}
+                        </td>
+                            </tr>
+                        `;
+                    }).join("");
     
                     let customDetailsTable = `
-                        
                         <table class="custom-details-table">
                             <thead>
                                 <tr>
@@ -478,23 +563,21 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     `;
     
                     let d = new frappe.ui.Dialog({
-                        title: __("Reference Details"),
+                        title: __("Approval Details"),
                         size: "extra-large",
                         fields: [{
                             fieldtype: "HTML",
                             options: `
                                 <style>
-                                    .reference-data, .custom-details-table {
+                                    .reference-data {
                                         border-collapse: collapse;
                                         width: 100%;
                                         font-size: 14px;
-                                        
                                     }
-                                    .reference-data th, .reference-data td, 
-                                    .custom-details-table th, .custom-details-table td {
+                                    .reference-data th, .reference-data td {
                                         padding: 10px;
                                         border: 1px solid #ddd;
-                                        text-align: center;
+                                        text-align: left;
                                     }
                                     .reference-data thead {
                                         font-weight: bold;    
@@ -505,35 +588,55 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                         margin-top: 10px;
                                         margin-bottom: 5px;
                                     }
+                                    .custom-details-table td{
+                                        padding: 10px;
+                                        border: 1px solid #ddd;
+                                        text-align: left;
+                                    }
+                                    .custom-details-table th{
+                                        padding: 10px;
+                                        border: 1px solid #ddd;
+                                        text-align: left;
+                                    }
+                                    
                                 </style>
-    
-                                <div class="section-title"></div>
-                                ${referenceTableRows ?
-                                    `<table class="reference-data">
-                                        <thead>
-                                            <tr>
-                                                <th>Reference ID</th>
-                                                <th>Doctype</th>
-                                                <th>Approvers</th>
-                                                <th>Approver Names</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${referenceTableRows || `<tr><td colspan="4">No Reference Details Found</td></tr>`}
-                                        </tbody>
-                                    </table>`:''}
-    
+                                
+                                <table class="reference-data">
+                                    <thead>
+                                        <tr>
+                                            <th>Document</th>
+                                            <th>Purpose</th>
+                                            <th>Approvals</th>
+                                            <th>Attachments</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${referenceTableRows || `<tr><td colspan="4">No Reference Details Found</td></tr>`}
+                                    </tbody>
+                                </table>
                                 <div class="section-title"></div>
                                 ${customDetailsTable}
                             `
                         }]
                     });
+    
                     d.show();
                 }
             }
+            
         });
     });
-    
+
+    $(document).on("click", ".po-details-btn", function () {
+        let poId = $(this).data("po");
+        if (poId) {
+            frappe.open_in_new_tab = true;
+            frappe.set_route("Form", "PO Form Approval", poId);
+        }
+        else{
+           frappe.msgprint('Po Form Approval is not Found')
+        }
+    });
     
       
     $(document).off("change", ".entry-checkbox").on("change", ".entry-checkbox", function() {
@@ -552,7 +655,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
     let buttonContainer = $("<div style='display: flex; justify-content: flex-start;'>")
     .appendTo(filterContainer);
 
-    let download_excel_btn = $(`<button id='export-to-excel' style="margin-right:10px;margin-top:10px;" class="btn btn-success" hidden>Send Excel File  </button>`)
+    let download_excel_btn = $(`<button id='export-to-excel' style="margin-right:10px;margin-top:10px;" class="btn btn-primary" hidden>Send Excel File  </button>`)
         .appendTo(buttonContainer);
     
     $(document).on('click', '#export-to-excel', function () {
@@ -680,7 +783,7 @@ function getBadgeStyle(status) {
     }
 function cancelPaymentEntry(paymentEntryIds, callback) {
         frappe.call({
-            method: "mantra_dev.mantra_dev.page.payment_page.payment_page.cancel_payment_entries",
+            method: "mantra_dev.mantra_dev.page.payment.payment.cancel_payment_entries",
             args: {
                 payment_entry_ids: paymentEntryIds
             },
@@ -730,69 +833,104 @@ function approvePaymentEntry(paymentEntryIds, callback) {
 	});
 }
 
-            
-function removeSelectedRows() {
-    $("input[type='checkbox']:checked").closest("tr").remove();
-}
 function updateTransactionSummary() {
     let selectedCount = 0;
     let selectedAmount = 0;
     let totalTransactionCount = 0;
     let totalTransactionAmount = 0;
-    $(".group-row").each(function() {
+
+    $(".group-row").each(function () {
         let partyId = $(this).data("party");
+        let groupCheckbox = $(`.group-checkbox[data-party="${partyId}"]`);
         let groupChildren = $(`.party-${partyId} .entry-checkbox`);
-        totalTransactionCount += groupChildren.length;
-        groupChildren.each(function() {
-            let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-            // Remove ₹, commas, and trim
+
+        // If the party has only one entry, it won't have child rows
+        if (groupChildren.length === 0) {
+            totalTransactionCount++;
+            let amountText = $(this).find("td:nth-child(6)").text();
             let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
-    
+
             if (!isNaN(amount)) {
                 totalTransactionAmount += amount;
             }
-        });
-        if ($(`.group-checkbox[data-party="${partyId}"]`).prop("checked")) {
-            selectedCount += groupChildren.length;
-            groupChildren.each(function() {
-                let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
-                let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
-    
-                if (!isNaN(amount)) {
-                    selectedAmount += amount;
-                }
-            });
-        } else {
-            $(`.party-${partyId} .entry-checkbox:checked`).each(function() {
+
+            // Check if this single-row entry is selected
+            if ($(this).find(".entry-checkbox").prop("checked")) {
                 selectedCount++;
+                selectedAmount += amount;
+            }
+        } else {
+            // Multiple transactions under a group
+            totalTransactionCount += groupChildren.length;
+            groupChildren.each(function () {
                 let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
                 let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
-    
+
                 if (!isNaN(amount)) {
-                    selectedAmount += amount;
+                    totalTransactionAmount += amount;
                 }
             });
+
+            if (groupCheckbox.prop("checked")) {
+                selectedCount += groupChildren.length;
+                groupChildren.each(function () {
+                    let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
+                    let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
+
+                    if (!isNaN(amount)) {
+                        selectedAmount += amount;
+                    }
+                });
+            } else {
+                // Count only selected child rows if the group is not checked
+                groupChildren.filter(":checked").each(function () {
+                    selectedCount++;
+                    let amountText = $(this).closest("tr").find("td:nth-child(6)").text();
+                    let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
+
+                    if (!isNaN(amount)) {
+                        selectedAmount += amount;
+                    }
+                });
+            }
         }
     });
+
+    // Update UI
     $("#selected-count").text(selectedCount);
-    $("#selected-amount").text(format_currency(selectedAmount.toFixed(2), 'INR', precision=2));
+    $("#selected-amount").text(format_currency(selectedAmount.toFixed(2), 'INR', precision = 2));
     $("#total-transactions").text(totalTransactionCount);
-    $("#total-amount").text(format_currency(totalTransactionAmount.toFixed(2), 'INR', precision=2));
+    $("#total-amount").text(format_currency(totalTransactionAmount.toFixed(2), 'INR', precision = 2));
 }
 
+
 function getSelectedEntries() {
-        let selectedEntries = new Set();
-        $(".group-row").each(function () {
-            let partyId = $(this).data("party");
-            if ($(`.group-checkbox[data-party="${partyId}"]`).prop("checked")) {
-                $(`.party-${partyId} .entry-checkbox`).each(function () {
+    let selectedEntries = new Set();
+
+    $(".group-row").each(function () {
+        let partyId = $(this).data("party");
+        let groupCheckbox = $(`.group-checkbox[data-party="${partyId}"]`);
+        let groupChildren = $(`.party-${partyId} .entry-checkbox`);
+
+        // If the party has only one entry (no child rows)
+        if (groupChildren.length === 0) {
+            let singleEntryCheckbox = $(this).find(".entry-checkbox");
+            if (singleEntryCheckbox.prop("checked")) {
+                selectedEntries.add(singleEntryCheckbox.data("id"));
+            }
+        } else {
+            // Handle grouped entries
+            if (groupCheckbox.prop("checked")) {
+                groupChildren.each(function () {
                     selectedEntries.add($(this).data("id"));
                 });
             } else {
-                $(`.party-${partyId} .entry-checkbox:checked`).each(function () {
+                groupChildren.filter(":checked").each(function () {
                     selectedEntries.add($(this).data("id"));
                 });
             }
-        });
-        return Array.from(selectedEntries);
-    }
+        }
+    });
+
+    return Array.from(selectedEntries);
+}
