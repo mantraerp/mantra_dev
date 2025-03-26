@@ -40,10 +40,11 @@ def bulk_upload_beneficiary_file(bank_account_list):
         frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord)
     return True
 
+
 # Upload Approved Beneficiary file on Snorkel with Indicator A
 @frappe.whitelist()
-def upload_beneficiary_file(doc_name):
-    return
+def upload_beneficiary_file_main(doc_name,beny_type):
+    
     try:
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
@@ -71,9 +72,11 @@ def upload_beneficiary_file(doc_name):
 
         bank_account = frappe.get_doc("Bank Account", doc_name)
 
+        new_supplier_code = "{}{}".format(bank_account.account_name.replace("\n", ""),str(bank_account.bank_account_no.replace("\n", ""))[-4:])
+
         data_rows = [[
-            "A",  # Indicator
-            bank_account.party.replace("\n", ""),  # Beneficiary Code
+            beny_type,  # Indicator
+            new_supplier_code,  # Beneficiary Code
             bank_account.account_name.replace("\n", ""),  # Beneficiary Name
             bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
             bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
@@ -106,192 +109,32 @@ def upload_beneficiary_file(doc_name):
         doc.file_name = file_name
         doc.insert(ignore_permissions=True)
 
-
         return f"File created successfully: {file_name}"
 
     except Exception as e :
         frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
         return str(e)
 
+# Upload Approved Beneficiary file on Snorkel with Indicator A
+@frappe.whitelist()
+def upload_beneficiary_file(doc_name):
+    return upload_beneficiary_file_main(doc_name,"A")
 
 # Upload Modified Approved Beneficiary file on Snorkel with Indicator M
 @frappe.whitelist()
 def upload_beneficiary_file_for_modified_doc(doc_name):
-    return
-
-    try:
-
-        bank_account = frappe.get_doc("Bank Account", doc_name)
-        if bank_account.custom_remark in ["Field code Beneficiary Account No does not exists in buyer Mst Table","CMS ERROR  Field code Beneficiary Account No does not exists in buyer Mst Table"]:
-            upload_beneficiary_file(doc_name)
-            return
-
-        numeric_characters = string.digits
-        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
-
-        current_date = datetime.now()
-        formatted_date = current_date.strftime("%d%m%Y")
-
-        file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
-
-        directory_sql = """
-            SELECT beneficiary_file_upload_path
-            FROM `tabBank Integration`
-            WHERE upload_beneficiary_file = 1
-        """
-
-        directory_list = frappe.db.sql(directory_sql, as_dict=True)
-        if not directory_list:
-            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
-
-        directory = directory_list[0].get("beneficiary_file_upload_path")
-
-        if not directory:
-            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
-
-        # file_path = os.path.join(directory, file_name)
-        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
-
-        header = [
-                'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
-            ]
-
-
-        data_rows = [[
-            "M",  # Indicator
-            bank_account.party.replace("\n", ""),  # Beneficiary Code
-            bank_account.account_name.replace("\n", ""),  # Beneficiary Name
-            bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
-            bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
-            bank_account.custom_branch_location.replace("\n", "")  # Beneficiary Address
-        ]]
-
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(header)
-            writer.writerows(data_rows) 
-
-        with open(file_path, 'rb') as file:
-            file_content = file.read()
-
-        with open(file_path2, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(header)
-            writer.writerows(data_rows) 
-
-        with open(file_path2, 'rb') as file:
-            file_content = file.read()
-
-        frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
-        frappe.db.set_value("Bank Account", doc_name, "disabled", 1)
-        frappe.db.commit()
-
-        doc = frappe.new_doc('Bank Integration Log')
-        doc.file_from = "Mantra"
-        doc.file_type = "Bene"
-        doc.file_name = file_name
-        doc.insert(ignore_permissions=True)
-
-        return f"File created successfully: {file_name}"
-
-    except Exception as e :
-        frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
-        return str(e)
-
-
-
+    return upload_beneficiary_file_main(doc_name,"M")
 
 # Upload Approved Beneficiary file on Snorkel with Indicator D
 @frappe.whitelist()
 def upload_beneficiary_file_for_cancelled_doc(doc_name):
-    return
-    
-    try:
+    return upload_beneficiary_file_main(doc_name,"D")
 
-        numeric_characters = string.digits
-        unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
-
-        current_date = datetime.now()
-        formatted_date = current_date.strftime("%d%m%Y")
-
-        file_name = f"MANTRASH2H_MANTRABENH2HUP_{formatted_date}_{unique_batch_number}.txt"
-
-        directory_sql = """
-            SELECT beneficiary_file_upload_path
-            FROM `tabBank Integration`
-            WHERE upload_beneficiary_file = 1
-        """
-
-        directory_list = frappe.db.sql(directory_sql, as_dict=True)
-        if not directory_list:
-            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
-
-        directory = directory_list[0].get("beneficiary_file_upload_path")
-
-        if not directory:
-            frappe.throw("Upload beneficiary file path not set in 'Bank Integration'")
-
-        file_path = os.path.join('/home/mantra/ICICI_Bank_integration/epayments/beneupload', file_name)
-        file_path2 = os.path.join('/home/mantra/Desktop', file_name)
-
-        header = [
-                'Indicator','Beneficiary Code','Beneficiary Name','Beneficiary IFSC','Beneficiary Account No','Beneficiary Address'
-            ]
-
-        bank_account = frappe.get_doc("Bank Account", doc_name)
-
-        data_rows = [[
-            "D",  # Indicator
-            bank_account.party.replace("\n", ""),  # Beneficiary Code
-            bank_account.account_name.replace("\n", ""),  # Beneficiary Name
-            bank_account.custom_ifsc.replace("\n", ""),  # Beneficiary IFSC
-            bank_account.bank_account_no.replace("\n", ""),  # Beneficiary Account No
-            bank_account.custom_branch_location.replace("\n", "")  # Beneficiary Address
-        ]]
-
-        with open(file_path, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(header)
-            writer.writerows(data_rows) 
-
-        with open(file_path, 'rb') as file:
-            file_content = file.read()
-
-        
-
-        with open(file_path2, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter="|")
-            writer.writerow(header)
-            writer.writerows(data_rows) 
-
-        with open(file_path2, 'rb') as file:
-            file_content = file.read()
-
-        frappe.db.set_value("Bank Account", doc_name, "custom_beneficiary_file_uploaded", 1)
-        frappe.db.set_value("Bank Account", doc_name, "disabled", 1)
-        frappe.db.commit()
-        
-
-
-        doc = frappe.new_doc('Bank Integration Log')
-        doc.file_from = "Mantra"
-        doc.file_type = "Bene"
-        doc.file_name = file_name
-        doc.insert(ignore_permissions=True)
-
-
-        return f"File created successfully: {file_name}"
-
-    except Exception as e :
-        frappe.log_error(message=str(e), title="Beneficiary File Creation Error")
-        return str(e)
 
 
 # get reverse MIS of Beneficiary File
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
-    return
 
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
@@ -433,7 +276,7 @@ def send_bene_file_error_email(error_message):
     """
     Sends an email with the error message.
     """
-    recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","anurag@mantratec.com"]  # Replace with actual recipients
+    recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","anurag@mantratec.com"]
     subject = "Error in Beneficiary File Processing 2"
     message = f"""
         <p>Dear User,</p>
@@ -707,10 +550,8 @@ def select_payment_entry(bank_account):
 
 
 
+############################################ Payment file process
 
-
-
-  
 @frappe.whitelist()
 def upload_file(payment_entry_list,bank_account, delimiter=','):
     try :
@@ -719,9 +560,7 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
             if isinstance(payment_entry_list, str):
                 payment_entry_list = json.loads(payment_entry_list)
 
-
-            icici_file_create(bank_account,payment_entry_list,delimiter=',')
-            return "Done"
+            return icici_file_create(bank_account,payment_entry_list,delimiter=',')
            
         elif frappe.db.get_value("Bank Integration", bank_account, "bank")=="Punjab National Bank":
             pnb_file_create(bank_account,payment_entry_list,delimiter=',')  
@@ -730,147 +569,151 @@ def upload_file(payment_entry_list,bank_account, delimiter=','):
     except Exception as e:
         return "Exception"
     
-    
+
 #this function is use for a push file in icici snorken folder 
 def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
+
+	try :
+		
+		#distribute payment entry based on vendor code
+		vendor_payment_entry={}
+		account_issue = False
+		account_issue_message = ""
+		for i in payment_entry_list:
+			payment_entry = frappe.get_doc("Payment Entry", i)
+			all_vendor = vendor_payment_entry.keys()
+			
+			if payment_entry.party in all_vendor:
+				party_payment_list = vendor_payment_entry[payment_entry.party]
+				party_payment_list.append(payment_entry)
+			else:
+				vendor_payment_entry[payment_entry.party] = [payment_entry]
+				directory_sql = "SELECT account_name FROM `tabBank Account` WHERE `name` = '{}' AND `disabled`=0 AND `workflow_state`='Approved'".format(payment_entry.party_bank_account)
+				directory_list = frappe.db.sql(directory_sql, as_dict=True)
+				if len(directory_list)==0:
+					account_issue = True
+					account_issue_message = "{} ({}) is having issue with account {}".format(payment_entry.party_name,payment_entry.party,payment_entry.party_bank_account)
+					break
+				
+				
+		if account_issue==True:
+			error_mail_send("Payment file creation issue.","{}".format(account_issue_message))
+			return account_issue_message
+
+
+		#Start payment file creation
+		directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
+		# directory = '/home/mantra/Desktop/TestPayment'
+
+		header = [
+			'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
+			'Amt', 'Pay Mod', 'Date', 'IFSC', 'Payable Location name', 'Print Location',
+			'Bene Mobile no', 'Bene email id', 'Ben add1', 'Ben add2', 'Ben add3',
+			'Ben add4', 'Add details 1', 'Add details 2', 'Add details 3',
+			'Add details 4', 'Add details 5', 'Remarks'
+		]
+
+		all_vendor = vendor_payment_entry.keys()
+		for vendor in all_vendor:
+			party_payment_list = vendor_payment_entry[vendor]
+			
+			total_amount = 0
+			data_rows = []
+			for payment_entry in party_payment_list:
+				mdf = frappe.db.sql("""SELECT mode_of_payment, abbrivation FROM `tabMode of Payment Setting` WHERE parent=%s AND mode_of_payment=%s""", (bank_account, payment_entry.mode_of_payment), as_dict=True)
+
+				#Company bank account
+				debit_ac_no = frappe.db.get_value("Bank Account", payment_entry.bank_account, "bank_account_no") or ""
+				
+				
+				
+
+				#Party bank account detail
+				# beneficiary_code = payment_entry.party or ""
+				# beneficiary_ac_no = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "bank_account_no") or ""
+				beneficiary_name = payment_entry.party_name or ""
     
-    try :
-        
-        directory = frappe.db.get_value("Bank Integration", bank_account, "file_upload_path")
-        # directory = '/home/mantra/Desktop/TestPayment'
-
-        header = [
-            'Debit Ac No', 'beneficiary code', 'Beneficiary Ac No', 'Beneficiary Name',
-            'Amt', 'Pay Mod', 'Date', 'IFSC', 'Payable Location name', 'Print Location',
-            'Bene Mobile no', 'Bene email id', 'Ben add1', 'Ben add2', 'Ben add3',
-            'Ben add4', 'Add details 1', 'Add details 2', 'Add details 3',
-            'Add details 4', 'Add details 5', 'Remarks'
-        ]
-        
-        #distribute payment entry based on vendor code
-        vendor_payment_entry={}
-        for i in payment_entry_list:
-            payment_entry = frappe.get_doc("Payment Entry", i)
-            all_vendor = vendor_payment_entry.keys()
-            
-            if payment_entry.party in all_vendor:
-                party_payment_list = vendor_payment_entry[payment_entry.party]
-                party_payment_list.append(payment_entry)
-            else:
-                vendor_payment_entry[payment_entry.party] = [payment_entry]
+				bank_account = frappe.get_doc("Bank Account", payment_entry.party_bank_account)
+				beneficiary_code = "{}{}".format(bank_account.account_name.replace("\n", ""),str(bank_account.bank_account_no.replace("\n", ""))[-4:])
+				beneficiary_ac_no = bank_account.bank_account_no.replace("\n", "")
 
 
-        all_vendor = vendor_payment_entry.keys()
-        for vendor in all_vendor:
-            party_payment_list = vendor_payment_entry[vendor]
-            
-            total_amount = 0
-            data_rows = []
-            for payment_entry in party_payment_list:
-                mdf = frappe.db.sql("""
-                    SELECT mode_of_payment, abbrivation 
-                    FROM `tabMode of Payment Setting` 
-                    WHERE parent=%s AND mode_of_payment=%s
-                """, (bank_account, payment_entry.mode_of_payment), as_dict=True)
+				amt = payment_entry.base_paid_amount_after_tax
+				pay_mod = mdf[0]["abbrivation"] if mdf else ""
+				payable_location_name = ""
+				print_location = ""
 
+				input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
+				date = datetime.today().strftime('%d-%b-%Y')
+				# date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
+				remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
+				ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
 
-                debit_ac_no = frappe.db.get_value("Bank Account", payment_entry.bank_account, "bank_account_no") or ""
-                beneficiary_code = payment_entry.party or ""
-                beneficiary_ac_no = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "bank_account_no") or ""
-                beneficiary_name = payment_entry.party_name or ""
+				total_amount += amt
+				
+				bane_mobile_no = ""
+				bane_email_id = ""
+				bane_add1 = ""
+				bane_add2 = ""
+				bane_add3 = ""
+				bane_add4 = ""
+				
+				# bane_add_detail_1 = unique_batch_number
+				bane_add_detail_1 = payment_entry.name
+				bane_add_detail_2 = ""
+				bane_add_detail_3 = ""
+				bane_add_detail_4 = ""
+				bane_add_detail_5 = ""
+				
+				new_row = [
+					debit_ac_no.replace("\n", ""),
+					beneficiary_code.replace("\n", ""),
+					beneficiary_ac_no.replace("\n", ""), 
+					beneficiary_name.replace("\n", ""),
+					amt, pay_mod, date, ifsc.replace("\n", ""), 
+					payable_location_name, print_location,
+					bane_mobile_no, bane_email_id, bane_add1, bane_add2, bane_add3,
+					bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks.replace("\n", "")
+				]
+				data_rows.append(new_row)
 
-                amt = payment_entry.base_paid_amount_after_tax
-                pay_mod = mdf[0]["abbrivation"] if mdf else ""
-                payable_location_name = ""
-                print_location = ""
+			if total_amount <= 500000:
 
-                input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
-                date = datetime.today().strftime('%d-%b-%Y')
-                # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
-                remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
-                ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
+				numeric_characters = string.digits
+				unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
 
-                total_amount += amt
-                
-                bane_mobile_no = ""
-                bane_email_id = ""
-                bane_add1 = ""
-                bane_add2 = ""
-                bane_add3 = ""
-                bane_add4 = ""
-                
-                # bane_add_detail_1 = unique_batch_number
-                bane_add_detail_1 = payment_entry.name
-                bane_add_detail_2 = ""
-                bane_add_detail_3 = ""
-                bane_add_detail_4 = ""
-                bane_add_detail_5 = ""
-                
-                new_row = [
-                    debit_ac_no.replace("\n", ""),
-                    beneficiary_code.replace("\n", ""),
-                    beneficiary_ac_no.replace("\n", ""), 
-                    beneficiary_name.replace("\n", ""),
-                    amt, pay_mod, date, ifsc.replace("\n", ""), 
-                    payable_location_name, print_location,
-                    bane_mobile_no, bane_email_id, bane_add1, bane_add2, bane_add3,
-                    bane_add4, bane_add_detail_1, bane_add_detail_2, bane_add_detail_3,bane_add_detail_4,bane_add_detail_5, remarks.replace("\n", "")
-                ]
-                data_rows.append(new_row)
+				current_date = datetime.now()
+				formatted_date = current_date.strftime("%d%m%Y")
 
+				file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
+				file_path = os.path.join(directory, file_name)
 
-            if total_amount <= 500000:
+				for payment_entry in party_payment_list:
+					#Update value in payment entry
+					update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
+					update_query_run = frappe.db.sql(update_query,as_dict=1)
 
-                numeric_characters = string.digits
-                unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
+				#Write file in bank folder
+				try :
+					with open(file_path, 'w', newline='') as file:
+						writer = csv.writer(file, delimiter="|")
+						writer.writerow(header)
+						writer.writerows(data_rows)
+				except Exception as e :
+					error_mail_send("Payment file write issue.","{} payment file create.<br>{}".format(str(e),str(traceback.format_exc())))
 
-                current_date = datetime.now()
-                formatted_date = current_date.strftime("%d%m%Y")
+				try:
+					for payment_entry in party_payment_list:
+						frappe.db.set_value("Payment Entry", payment_entry.name, "custom_payment_status_", "Processed")
+				except Exception as e :
+					error_mail_send("Payment file creation issue.","{} payment file create.<br>{}".format(str(e),str(traceback.format_exc())))
 
-                file_name = f"MANTRASH2H_MANTRASH2HUP_{formatted_date}_{unique_batch_number}.txt"
-                file_path = os.path.join(directory, file_name)
+		frappe.db.commit()
+		return "Done"
+	except Exception as e :
+		error_mail_send("Payment file creation issue.","{} payment file create. {}".format(str(e),str(traceback.format_exc())))
+		return str(traceback.format_exc())
 
-
-                for payment_entry in party_payment_list:
-
-                    #Update value in payment entry
-                    update_query = "UPDATE `tabPayment Entry` SET `custom_unique_batch_number`='{}', `custom_payment_status_`='Processed', `custom_payment_file_name`='{}' WHERE `name`='{}'".format(unique_batch_number,file_name,payment_entry.name)
-                    # update_query = "UPDATE `tabPayment Entry` SET `custom_payment_file_name`='{}' WHERE `name`='{}'".format(file_name,payment_entry.name)
-
-                    update_query_run = frappe.db.sql(update_query,as_dict=1)
-                    # frappe.db.set_value("Payment Entry", payment_entry.name, "custom_unique_batch_number", unique_batch_number)
-                    # frappe.db.set_value("Payment Entry", i, "custom_payment_status_", "Processed")
-
-
-
-
-                # list_items = ast.literal_eval(party_payment_list)
-
-
-                #Write file in bank folder
-                try :
-                    with open(file_path, 'w', newline='') as file:
-                        writer = csv.writer(file, delimiter="|")
-                        writer.writerow(header)
-                        writer.writerows(data_rows)
-                except Exception as e :
-                    error_mail_send("Payment file write issue.","{} payment file create.<br>{}".format(str(e),str(traceback.format_exc())))
-                    return e
-
-
-                try:
-                    for payment_entry in party_payment_list:
-                        frappe.db.set_value("Payment Entry", payment_entry.name, "custom_payment_status_", "Processed")
-                except Exception as e :
-                    error_mail_send("Payment file creation issue.","{} payment file create.<br>{}".format(str(e),str(traceback.format_exc())))
-
-
-
-        frappe.db.commit()
-        return "Done"
-    except Exception as e :
-        error_mail_send("Payment file creation issue.","{} payment file create. {}".format(str(e),str(traceback.format_exc())))
-        return str(traceback.format_exc())
 
 @frappe.whitelist()
 def error_mail_send(title,error):
@@ -1477,7 +1320,7 @@ def get_pnb_file():
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
     
-    # frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
   
@@ -1835,6 +1678,7 @@ def send_file(file_path,file_name):
 
 
 
+
 @frappe.whitelist()
 def send_payment_advice_payment_entry(payment_entry,email):
     
@@ -1923,9 +1767,9 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
 
     document = frappe.get_doc("Payment Entry",payment_entry)
+    
     if email=="":
         email = document.contact_email if document.contact_email else ""
-
 
     invoices = []
 
@@ -1952,7 +1796,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
                 "invoice_no": "-",
                 "invoice_date": "-",
                 "paid_amount":"-",
-            }
+            }    
 
     payment_data = {
         # "customer_ref_no": instrument_ref_no,
@@ -2141,16 +1985,6 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
                 <td>₹{paid_amount}</td>
             </tr>
             """
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     # Close table and add footer
     html_content += f"""

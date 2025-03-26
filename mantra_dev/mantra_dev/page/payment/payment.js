@@ -1037,9 +1037,8 @@ function selectPaymentEntry(data, bank_account) {
                                     updateGroupPaidAmount(partyId);
                                 });
                                 window.open("https://cibnext.icicibank.com/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&__START_TRAN_FLAG__=Y&FG_BUTTONS__=LOAD&ACTION.LOAD=Y&AuthenticationFG.LOGIN_FLAG=1&BANK_ID=ICI&ITM=nli_corp_primer_login_btn_desk", "_blank");
-                            } else {
-                                // If not done, you can reload or take another action
-                                // window.location.reload();`
+                            }else{
+                                frappe.msgprint(r.message)
                             }
                         }
                     },

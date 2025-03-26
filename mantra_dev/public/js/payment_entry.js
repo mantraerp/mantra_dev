@@ -66,6 +66,19 @@ frappe.ui.form.on("Payment Entry", {
   },
   refresh: function (frm) {
 
+    if (frm.doc.mode_of_payment==="NEFT-H2H" && frm.doc.payment_type==="Pay" && frm.doc.custom_payment_file_name!="" && frm.doc.custom_payment_status_==="Success" && frm.doc.custom_payment_ref_no!="")
+    {
+      frm.add_custom_button("Send payment advice", function() {
+        show_email_dialog(frm.doc.contact_email,frm);
+      }, "Utility");
+    }
+
+    if(frappe.session.user==="abhishek.jain@mantratec.com")
+    {
+        frm.add_custom_button("Send payment advice without h2h", function() {
+          show_email_dialog(frm.doc.contact_email,frm);
+        }, "Utility");
+    }
   },
   before_save(frm) {
 
@@ -175,3 +188,36 @@ frappe.listview_settings["Payment Entry"] = {
   onload: function (listview) {
   },
 };
+
+
+
+
+function show_email_dialog(email,frm) {
+  let d = new frappe.ui.Dialog({
+      title: "Send payment advice email",
+      fields: [
+          {
+              label: "Recceiver email ID",
+              fieldname: "email",
+              fieldtype: "Data",
+              default: email
+          }
+      ],
+      primary_action_label: "Send",
+      primary_action(values) {
+          frappe.call({
+              method: "mantra_dev.api_code.bank_transaction.send_payment_advice_payment_entry",
+              freeze: true,
+              args: {
+                  payment_entry: frm.doc.name,
+                  email: values.email
+              },
+              callback: function(r) {
+                  frappe.msgprint(r.message);
+              },
+          })
+          d.hide();
+      }
+  });
+  d.show();
+}

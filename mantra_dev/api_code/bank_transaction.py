@@ -3,10 +3,8 @@ import num2words # type: ignore
 import random
 import shutil
 from frappe.email.email_body import get_pdf # type: ignore
-from frappe.utils import flt, nowdate # type: ignore
 import os
 import csv
-import glob
 import json
 from frappe.utils import now # type: ignore
 from frappe.email.queue import flush # type: ignore
@@ -14,7 +12,6 @@ from datetime import datetime, timedelta
 from frappe.core.doctype.activity_log.activity_log import add_authentication_log # type: ignore
 from frappe.auth import LoginManager # type: ignore
 import string
-import ast
 from cryptography.fernet import Fernet # type: ignore
 import requests # type: ignore
 from datetime import datetime
@@ -47,6 +44,7 @@ def bulk_upload_beneficiary_file(bank_account_list):
 @frappe.whitelist()
 def upload_beneficiary_file(doc_name):
     
+    return
     try:
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
@@ -120,7 +118,8 @@ def upload_beneficiary_file(doc_name):
 # Upload Modified Approved Beneficiary file on Snorkel with Indicator M
 @frappe.whitelist()
 def upload_beneficiary_file_for_modified_doc(doc_name):
-    
+    return
+
     try:
 
         bank_account = frappe.get_doc("Bank Account", doc_name)
@@ -207,6 +206,8 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
 # Upload Approved Beneficiary file on Snorkel with Indicator D
 @frappe.whitelist()
 def upload_beneficiary_file_for_cancelled_doc(doc_name):
+    return
+    
     try:
 
         numeric_characters = string.digits
@@ -291,6 +292,7 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 # get reverse MIS of Beneficiary File
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
+    return
 
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
@@ -328,11 +330,12 @@ def get_bene_file(delimiter='|'):
                     for line in file:
                         row = line.strip().split(delimiter)
                         if len(row) < 8:
-                            frappe.sendmail(
-                                recipients=["ravi.patel@mantratec.com"],
-                                subject="Bene file row not suffcient 353",
-                                message=str(row)
-                            )
+                            if not str(row).startswith("['File_Name', 'DATA_S'"):
+                                frappe.sendmail(
+                                    recipients=["ravi.patel@mantratec.com"],
+                                    subject="Bene file row not suffcient",
+                                    message=str(row)
+                                )
                         else:
                             data.append(row)
 
@@ -381,7 +384,6 @@ def get_bene_file(delimiter='|'):
                                 <p><strong>Row Data:</strong> {data_dict}</p>
                                 <p>The workflow state has been set to "Rejected" for the bank account with account number: {bank_account_no}.</p>
                             """
-                            # send_bene_file_error_email(error_message)
                             previous_file = frappe.get_all("Bank Integration Log",filters=[['file_type', '=', 'Mail Send Bene'],['file_name', '=', data_dict[0]]])
                             if len(previous_file)==0:
                                 send_bene_file_error_email(error_message)
@@ -432,13 +434,13 @@ def send_bene_file_error_email(error_message):
     """
     Sends an email with the error message.
     """
-    recipients = ["ravi.patel@mantratec.com","helpdesk.erp@mantratec.com","anurag@mantratec.com"]  # Replace with actual recipients
+    recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","anurag@mantratec.com"]
     subject = "Error in Beneficiary File Processing 2"
     message = f"""
-    <p>Dear User,</p>
-    <p>An error occurred during the execution of the scheduled task:</p>
-    <p>{error_message}</p>
-    <p>Please check the logs and take necessary action.</p>
+        <p>Dear User,</p>
+        <p>An error occurred during the execution of the scheduled task:</p>
+        <p>{error_message}</p>
+        <p>Please check the logs and take necessary action.</p>
     """
     try:
         frappe.sendmail(
@@ -1477,7 +1479,7 @@ def get_pnb_file():
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
     
-    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+    # frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
   
@@ -1597,7 +1599,7 @@ def get_icici_bank_file_background(delimiter='|'):
                             if ERP_status == "Success":
                                 document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
                                 if document.custom_sent_payment_advice == 1:
-                                    send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15])
+                                    send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15],"")
 
 
                     elif frappe.db.exists("Salary Slip", data_dict[15]):
@@ -1836,8 +1838,8 @@ def send_file(file_path,file_name):
 
 
 
-@frappe.whitelist(allow_guest=True)
-def send_payment_advice_payment_entry(payment_entry):
+@frappe.whitelist()
+def send_payment_advice_payment_entry(payment_entry,email):
     
     # payment_entry = 'ACC-PAY-2025-03504'
     if not frappe.db.exists("Payment Entry",payment_entry):
@@ -1864,16 +1866,16 @@ def send_payment_advice_payment_entry(payment_entry):
     benifecery_name = document.party_name
     instrument_ref_no = document.custom_instrument_ref_no
     payment_entry = document.name
-    send_payment_advice_email(debit_account_no,amount,date,remarks,benfiecery_account_no,utr_no,payment_mode,ifsc_code,benifecery_code,benifecery_name,instrument_ref_no,payment_entry)
+    send_payment_advice_email(debit_account_no,amount,date,remarks,benfiecery_account_no,utr_no,payment_mode,ifsc_code,benifecery_code,benifecery_name,instrument_ref_no,payment_entry,email)
 
-    return "Payment advice send"
+    return "Payment advice send on {}".format(email)
 
 
 
 @frappe.whitelist()
-def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry):
+def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry,email):
     
-    email = ""
+    # email = ""
     if amount:
         rupees, paise = divmod(round(float(amount) * 100), 100)
             
@@ -1924,7 +1926,9 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
 
     document = frappe.get_doc("Payment Entry",payment_entry)
-    email = document.custom_party_email if document.custom_party_email else ""
+    
+    if email=="":
+        email = document.contact_email if document.contact_email else ""
 
     invoices = []
 
@@ -1951,15 +1955,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
                 "invoice_no": "-",
                 "invoice_date": "-",
                 "paid_amount":"-",
-            }
-            
-        
-    # email="helpdesk1.erp@mantratec.com"
-    # email = "parth@sanskartechnolab.com"
-    # email = "abhishek.jain@mantratec.com"
-    # email = "finance@mantratec.com"
-    # email = "accounts1@mefron.com"
-    
+            }    
 
     payment_data = {
         # "customer_ref_no": instrument_ref_no,
@@ -2058,9 +2054,9 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             <tr>
             <td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8001/files/images.png" alt="" width="188" height="97" /></td>
             <td style="width: 33.3333%; border-style: none;">
-            <h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech INDIA Pvt Ltd</h4>
+            <h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech India Pvt Ltd</h4>
             <p style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
-        HIGHWAY SOLA, AHMEDABAD, GUJARAT, 380060</p>
+        HIGHWAY SOLA,<br>AHMEDABAD, GUJARAT, 380060</p>
             <p style="text-align: center;"></p>
             <p style="text-align: center;"></p>
             <p style="text-align: center;"></p>
@@ -2098,7 +2094,6 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
                     </tr>
                     <tr>
                         <td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
-                        <td>Remarks</td><td>:</td><td>{payment_data['remarks']}</td>
                     </tr>
                 </table>
                 
@@ -2150,16 +2145,6 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             </tr>
             """
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     # Close table and add footer
     html_content += f"""
             </tbody>
@@ -2188,8 +2173,6 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
         if email:
             frappe.sendmail(
                 recipients=[email,'subhash@mantratec.com'],
-                # recipients=['ravi.patel@mantratec.com'],
-
                 subject="Payment Advice",
                 message="Please find the attached payment advice.",
                 attachments=[{
@@ -2201,17 +2184,15 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             frappe.msgprint(f"Payment advice email sent successfully to {email}.")
         else:
             frappe.sendmail(
-                recipients=["abhishek.jain@mantratec.com",'ravi.patel@mantratec.com'],
-                subject="supplier email not found for Payment Advice",
-                message="Please find the attached payment advice.",
+                recipients=["abhishek.jain@mantratec.com"],
+                subject="Supplier email not found in payment entry {}".format(document.name),
+                message="Please find the attached payment advice for payment entry.",
                 attachments=[{
                     'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
                     'fcontent': pdf_data
                 }]
             )
     except Exception as e:
-        # frappe.log_error(f"Error sending payment advice email: {str(e)}", "Email Sending Error")
-        # frappe.throw(f"Failed to send email to {email}. Please try again.")
         frappe.sendmail(
             recipients=['ravi.patel@mantratec.com'],
             subject="Payment advice error",

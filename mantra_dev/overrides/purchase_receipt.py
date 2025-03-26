@@ -26,16 +26,21 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billi
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 class CustomPurchaseReceipt(PurchaseReceipt):
-	def on_submit(self):
-		# Check for Approving Authority
-		frappe.get_doc("Authorization Control").validate_approving_authority(
-			self.doctype, self.company, self.base_grand_total
-		)
-		
+
+	def before_submit(self):
 		if self.is_subcontracted:
 			self.bom_stock_validation()
+
+	# def on_submit(self):
+	# 	# Check for Approving Authority
+	# 	frappe.get_doc("Authorization Control").validate_approving_authority(
+	# 		self.doctype, self.company, self.base_grand_total
+	# 	)
+		
+	# 	if self.is_subcontracted:
+	# 		self.bom_stock_validation()
 			
-		super().on_submit()
+	# 	super().on_submit()
 
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]

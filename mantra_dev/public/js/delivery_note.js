@@ -56,11 +56,7 @@ frappe.ui.form.on('Delivery Note', {
             } 
             else {
                 if (item.against_sales_order) 
-                {
-                    // doc = frappe.get_doc('ERP Settings')
-                    // if(!doc.allow_delivery_note_without_sales_invoice)
-                    // console.log("START")
-                    // console.log(frappe.db.get_single_value('ERP Settings', 'allow_delivery_note_without_sales_invoice'))
+                {  
                     if(!frappe.db.get_single_value('ERP Settings', 'allow_delivery_note_without_sales_invoice'))
                     {
                         if (parseInt(item.base_amount) > 0) {
