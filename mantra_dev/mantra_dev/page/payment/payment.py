@@ -447,7 +447,7 @@ def get_payment_entry_reference_details(payment_entry):
         reference_details.reverse()
 
         custom_details = frappe.get_value("Payment Entry", payment_entry, 
-            ["custom_type", "custom_project_type", "remarks", "custom_approved_by"], as_dict=True)
+            ["custom_type", "custom_project_type", "remarks", "custom_approved_by","custom_management_remarks"], as_dict=True)
 
         return {
             "reference_details": reference_details,

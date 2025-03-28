@@ -598,9 +598,13 @@ def update_serial_no_records():
  
 	try:
 		query_update = "UPDATE `tabSerial No` SET `custom_marked_in_avdm`=1 WHERE `name` IN {}".format(flat_list2)
+  
+		query_update = query_update.replace("',)","')")
+  
 		serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
   
 		query_delete = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error` IN {}".format(key_serial_no,flat_list2)
+		query_delete = query_delete.replace("',)","')")
 		delete = frappe.db.sql(query_delete,as_dict=1)
   
 		return "Delete done"
@@ -608,7 +612,7 @@ def update_serial_no_records():
 		frappe.sendmail(
 			recipients=["ravi.patel@mantratec.com"],
 			subject="Serial no not update bulk",
-			message="Line 259 avdm.py <br>{} <br>{} <br>{} <br>{}".format(str(e),str(serial_no_list),query_update,query_delete)
+			message="Line 611 avdm.py <br>{} <br>{} <br>{} <br>{}".format(str(e),str(serial_no_list),query_update,query_delete)
 		)
  
 	return serial_no_list
@@ -628,9 +632,12 @@ def update_delivery_note_records():
   
 	try:
 		query = "UPDATE `tabDelivery Note` SET `custom_marked_in_avdm`=1 WHERE `name` IN {}".format(flat_list2)
+		query = query.replace("',)","')")
+
 		serial_no_list_update = frappe.db.sql(query,as_dict=1)
   
 		query_delete = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error` IN {}".format(key_dc_no,flat_list2)
+		query_delete = query_delete.replace("',)","')")
 		delete = frappe.db.sql(query_delete,as_dict=1)
   
 		return "Delete done"

@@ -21,7 +21,7 @@ from frappe.model.mapper import get_mapped_doc
 from collections import defaultdict
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from mantra_dev.backend_code.globle import errorLog,errorLogExites
-
+import re
 from frappe.utils import today, get_link_to_form
 
 
@@ -63,6 +63,30 @@ def sales_invoice_get_account(custom_sales_person):
     if len(overdue_pos)==0:
         return ""
     return overdue_pos[0]['custom_bank_account']
+
+
+
+@frappe.whitelist()
+def search_item_names(search_term):
+    # sanitized_search = re.sub(r'[^a-zA-Z0-9]', '', search_term).lower()
+    
+    # items = frappe.get_all("Item", fields=["item_name"], limit_page_length=1000)
+
+    # matched_items = []
+    # for item in items:
+    #     clean_item_name = re.sub(r'[^a-zA-Z0-9]', '', item.item_name).lower()
+    #     if sanitized_search in clean_item_name:
+    #         matched_items.append(item.item_name)
+
+
+    matched_items = []
+    query = " SELECT item_name FROM `tabItem` WHERE `item_name` LIKE '%{}%'".format(search_term)
+    items = frappe.db.sql(query, as_dict=True)
+    for item in items:
+        matched_items.append(item['item_name'])
+
+    return matched_items
+
 
 
 # "mantra_dev.backend_code.api.notify_purchase_managers"

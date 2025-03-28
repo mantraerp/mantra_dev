@@ -372,7 +372,7 @@
   "doctype": "Workflow",
   "document_type": "Supplier",
   "is_active": 1,
-  "modified": "2025-03-06 19:12:55.048558",
+  "modified": "2025-03-26 18:43:51.874404",
   "name": "Vendor Approval",
   "override_status": 1,
   "send_email_alert": 0,
@@ -388,8 +388,8 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Pending",
-    "update_field": "disabled",
-    "update_value": "1",
+    "update_field": "",
+    "update_value": "",
     "workflow_builder_id": null
    },
    {
@@ -403,8 +403,8 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Pending",
-    "update_field": "disabled",
-    "update_value": "1",
+    "update_field": "",
+    "update_value": "",
     "workflow_builder_id": null
    },
    {
@@ -433,8 +433,8 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Reviewed",
-    "update_field": "disabled",
-    "update_value": "1",
+    "update_field": "",
+    "update_value": "",
     "workflow_builder_id": null
    },
    {

@@ -32,7 +32,6 @@ frappe.ui.form.on("Purchase Order", {
         }, 1000); // 1000 milliseconds = 1 second
         if (frappe.user_roles.includes("System Manager") == false) {
             setTimeout(() => {
-                console.log("View Hide");
                 frm.remove_custom_button("Update Items");
             }, 0);
         }

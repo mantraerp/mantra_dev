@@ -120,9 +120,12 @@ scheduler_events = {
         "30 23 * * *": [
             "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"
         ],
+        "0 7 * * *": [
+            "mantra_dev.backend_code.api.notify_purchase_managers", # To send notification to Purchase manage if PO schedule date is due today.
+        ],
         "0 8 * * *": [
             "mantra_dev.backend_code.minop.employee_remain_bank_account",
-            "mantra_dev.backend_code.globle.check_system_status"
+            "mantra_dev.backend_code.globle.check_system_status",
         ]
     },
 	"daily": [

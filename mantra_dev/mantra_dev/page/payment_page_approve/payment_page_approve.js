@@ -466,9 +466,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
         });
     };
 
-    
-    
-    $(document).on('click', '.get-details', function () {
+     $(document).on('click', '.get-details', function () {
         let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
     
         if (!paymentEntryId) {
@@ -491,7 +489,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                     let customDetails = r.message.custom_details || {};
     
                     let referenceTableRows = referenceDetails.map(item => {
-                        let attachmentColumn = item["doctype"] === "Purchase Order" ? "":item["Attachments"];
+                    let attachmentColumn = "";
     
                        
                         if (item["doctype"] === "Purchase Order" && item["Po Approval"] ) {
@@ -529,9 +527,9 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                 <td style="text-align:left;">${item["Purpose"] || ""}</td>
                                 <td style="text-align:left;">${(item["Approvers"] || "No Approvers").split(",").join("<br>")}</td>
                                  <td style="text-align:left;">
-                                 ${item['doctype'] !== 'Purchase Order' ? (
+                                  ${item['doctype'] !== 'Purchase Order' ? (
                                     item['Attachments']? 
-                                      item['Attachments'].split(',').map(attachment => 
+                                    item['Attachments'].split(',').map(attachment => 
                                         `<a href="${attachment}" target="_blank">${attachment}</a><br>`).join('') 
                                       : ''
                                   ) : ''}
@@ -556,7 +554,15 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                     <td style="text-align:left;">${customDetails.custom_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_project_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_approved_by || ""}</td>
-                                    <td style="text-align:left;">${customDetails.remarks || ""}</td>
+                                    <td style="text-align:left;"> <span class="remark-text">${customDetails.remarks + "<br>" + customDetails.custom_management_remarks|| "No Remark"}</span>
+                                        <button style="float:right;" class="btn btn-primary btn-sm update-remark-btn" 
+                                            data-payment-entry="${customDetails.name}" 
+                                            data-remark="${customDetails.custom_management_remarks || ''}"
+                                            data-previous-remark = "${customDetails.remarks|| "No Remark"}"
+                                            ">
+                                            Update Remark
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -757,7 +763,49 @@ function generateExcelAndSend(selectedUser) {
             }
         });
     
-}
+}$(document).on('click', '.update-remark-btn', function () {
+    let paymentEntryId = $(this).data('payment-entry');
+    let currentRemark = $(this).data('remark');
+    let previousRemark= $(this).data('previous-remark')
+    let remarkTextSpan = $(this).closest('tr').find('.remark-text');
+
+    let updateDialog = new frappe.ui.Dialog({
+        title: __("Update Remark"),
+        fields: [
+            {
+                fieldname: 'remark',
+                fieldtype: 'Small Text',
+                label: 'Remark',
+                default: currentRemark
+            }
+        ],
+        primary_action_label: 'Submit',
+        primary_action(values) {
+            frappe.call({
+                method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.update_payment_entry_remark",
+                args: {
+                    payment_entry: paymentEntryId,
+                    remark: values.remark
+                },
+                callback: function (r) {
+                    if (r.message === 'success') {
+                        frappe.msgprint(__('Remark updated successfully.'));
+                        if(remarkTextSpan){
+                        remarkTextSpan.html('')
+                        remarkTextSpan.html(previousRemark + "<br>" + values.remark)
+                        }
+                        updateDialog.hide();
+                        
+                    } else {
+                        frappe.msgprint(__('Failed to update remark.'));
+                    }
+                }
+            });
+        }
+    });
+
+    updateDialog.show();
+});
 function updateGroupPaidAmount(partyId) {
     let totalPaidAmount = 0;
     $(`.party-${partyId} .entry-checkbox`).each(function () {

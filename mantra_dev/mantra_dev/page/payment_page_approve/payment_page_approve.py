@@ -77,3 +77,14 @@ def hold_payment_entries(payment_entry_ids):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error while canceling Payment Entries")
         return f"An error occurred while canceling payment entries: {str(e)}"
+
+
+@frappe.whitelist()
+def update_payment_entry_remark(payment_entry, remark):
+    try:
+        doc = frappe.get_doc("Payment Entry", payment_entry)
+        doc.custom_management_remarks = remark
+        doc.save()
+        return "success"
+    except Exception as e:
+        return frappe.msgprint(str(e))

@@ -43,7 +43,7 @@ def bulk_upload_beneficiary_file(bank_account_list):
 # Upload Approved Beneficiary file on Snorkel with Indicator A
 @frappe.whitelist()
 def upload_beneficiary_file(doc_name):
-    return
+    # return
     try:
         numeric_characters = string.digits
         unique_batch_number = ''.join(random.choices(numeric_characters, k=6))
@@ -117,7 +117,7 @@ def upload_beneficiary_file(doc_name):
 # Upload Modified Approved Beneficiary file on Snorkel with Indicator M
 @frappe.whitelist()
 def upload_beneficiary_file_for_modified_doc(doc_name):
-    return
+    # return
 
     try:
 
@@ -205,7 +205,7 @@ def upload_beneficiary_file_for_modified_doc(doc_name):
 # Upload Approved Beneficiary file on Snorkel with Indicator D
 @frappe.whitelist()
 def upload_beneficiary_file_for_cancelled_doc(doc_name):
-    return
+    # return
     
     try:
 
@@ -291,7 +291,7 @@ def upload_beneficiary_file_for_cancelled_doc(doc_name):
 # get reverse MIS of Beneficiary File
 @frappe.whitelist()
 def get_bene_file(delimiter='|'):
-    return
+    # return
 
     try:
         folder_path = '/home/mantra/ICICI_Bank_integration/epayments/PayReportBackup'
@@ -1477,7 +1477,7 @@ def get_pnb_file():
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
     
-    # frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+    frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
   
