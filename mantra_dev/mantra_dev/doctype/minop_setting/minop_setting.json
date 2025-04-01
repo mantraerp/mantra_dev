@@ -36,8 +36,9 @@
   },
   {
    "fieldname": "slot",
-   "fieldtype": "Data",
-   "label": "Slot"
+   "fieldtype": "Select",
+   "label": "Slot",
+   "options": "\nSlot 1\nSlot 2"
   },
   {
    "fieldname": "column_break_59sv",
@@ -65,7 +66,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-03-25 16:55:13.239283",
+ "modified": "2025-03-28 17:35:43.889266",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Minop Setting",

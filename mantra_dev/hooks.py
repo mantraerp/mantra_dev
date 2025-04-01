@@ -52,9 +52,8 @@ doctype_list_js = {
     "Item" : "public/js/item_list.js",
     "Purchase Order": "public/js/purchase_order_list.js",
     "Purchase Invoice": "public/js/purchase_invoice_list.js",
-
-    
-    }
+    # "Employee Advance": "public/js/employee_advance_list.js",
+}
 
 
 # Override standard doctype classes
@@ -111,6 +110,9 @@ doc_events = {
 scheduler_events = {
 
     "cron": {
+        "0/1 * * * *": [
+            "mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process"
+        ],
         "0/2 * * * *": [
             "mantra_dev.backend_code.avdm.process_one_record"
         ],        

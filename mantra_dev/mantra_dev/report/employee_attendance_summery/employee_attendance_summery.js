@@ -52,7 +52,24 @@ frappe.query_reports["Employee Attendance Summery"] = {
 			"default": new Date().getFullYear().toString()
 		},
 	],
+	after_datatable_render: function (table_instance) {
+        table_instance.datamanager.data.forEach((row, rowIdx) => {
+			console.log(row['present_days'] + row['absent_days'] + row['taken_leave'] + row['no_of_holiday'] + row['no_of_weekoff'])
+			console.log("total", row['total_days'])
+            if (row['present_days'] + row['absent_days'] + row['taken_leave'] + row['no_of_holiday'] + row['no_of_weekoff'] != row['total_days']) {
+                color_single_row(table_instance, rowIdx,'#ff000040 !important');
+            } else {
+				color_single_row(table_instance, rowIdx, 'transparent !important'); // Reset to default
+			}
+        });
+    },
 	"onload": function(report){
 		$("textarea[data-fieldname='employee_list']").css({'height':'60'});
 	}
 };
+
+function color_single_row(table_instance, rowIdx,color) {
+    for (let col = 0; col < Object.entries(table_instance.datamanager.columns).length; col++) {
+        table_instance.style.setStyle(`.dt-cell--${col}-${rowIdx}`, { backgroundColor: `${color}` });
+    }
+}

@@ -72,6 +72,69 @@ frappe.ui.form.on('Employee', {
 				// Show the dialog
 				dialog.show();
         },('Utility'));
+
+
+		frm.add_custom_button(("Send Attendance Summery Mail"), () => {
+			let d = new frappe.ui.Dialog({
+				title: "Send Attendance Summery Mail",
+				fields: [
+					{
+						label: "From Date",
+						fieldname: "from_date",
+						fieldtype: "Date",
+						reqd: 1
+					},
+					{
+						label: "To Date",
+						fieldname: "to_date",
+						fieldtype: "Date",
+						reqd: 1
+					}
+				],
+				primary_action_label: "Send Mail",
+				primary_action(values) {
+					if (values.from_date && values.to_date) {
+						let from_date = new Date(values.from_date);
+						let to_date = new Date(values.to_date);
+
+						if (to_date < from_date) {
+							frappe.throw({
+								title: __("Validation Error"),
+								message: __("To Date cannot be earlier than From Date."),
+							});
+						}
+						frappe.call({
+							method: "mantra_dev.mantra_dev.report.employee_attendance_summery.employee_attendance_summery.send_employee_attendace_summery_report_mail",
+							args: { 
+								filters: {
+									from_date: values.from_date,
+									to_date: values.to_date,
+									employee : frm.doc.name
+								}
+							},
+							freeze: true,
+							freeze_message: "sending data...",
+							callback: function (r) {
+								if(r.message){
+									frappe.dom.unfreeze();
+									d.hide();
+									frappe.msgprint(r.message)
+								}
+								else{
+									frappe.msgprint(r.message);
+								}
+							}
+						});
+					} else {
+						frappe.throw("Please Select Both Date.")
+					}
+				}
+			})
+
+			d.show();
+		
+		}, ('Utility'));
+
     },
 	department(frm) {
 	    frm.set_value("custom_opration_approver",undefined)

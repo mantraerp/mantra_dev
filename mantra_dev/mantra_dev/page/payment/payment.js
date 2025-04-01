@@ -95,7 +95,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
 						filters: {
 							status: "Submitted",
 							custom_salary_slip_file_generated:0,
-                            custom_payroll_entry_approved:0
+                            custom_payroll_entry_approved:1
 						}
 					};
 				},

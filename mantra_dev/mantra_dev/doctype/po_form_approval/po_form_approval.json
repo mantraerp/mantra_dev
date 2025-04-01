@@ -1,5 +1,5 @@
 {
- "_seen": "[\"Administrator\", \"abhishek.jain@mantratec.com\"]",
+ "_seen": "[\"Administrator\"]",
  "actions": [],
  "allow_rename": 1,
  "autoname": "PO-FORM-.YY.-.#####",
@@ -153,11 +153,9 @@
    "read_only": 1
   },
   {
-   "fetch_from": "purchase_order.custom_po_approver",
    "fieldname": "approved_by",
    "fieldtype": "Data",
-   "label": "Approved By",
-   "read_only": 1
+   "label": "Approved By"
   },
   {
    "fieldname": "material_request",
@@ -240,7 +238,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-07 11:43:13.560230",
+ "modified": "2025-03-28 16:17:49.964165",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "PO Form Approval",

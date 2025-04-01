@@ -23,6 +23,71 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from mantra_dev.backend_code.globle import errorLog,errorLogExites
 import re
 from frappe.utils import today, get_link_to_form
+from frappe.utils import today, add_days
+
+
+
+@frappe.whitelist()
+def send_payment_request_alert():
+    try:
+        yesterday = add_days(today(), -1)
+
+        # Fetch Payment Entries modified yesterday and not canceled
+        payment_entries = frappe.get_all(
+            "Payment Entry",
+            filters={
+                "modified": ["between", [yesterday + " 00:00:00", yesterday + " 23:59:59"]],
+                "docstatus": ["!=", 2]
+            },
+            fields=["name"]
+        )
+
+        email_recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com"]  # Change this to your recipient list
+        email_subject = "Multiple Payment Requests Created"
+        email_body = ""
+
+        multiple_requests_found = False  # Track if we need to send an email
+
+        # Fetch references from child table
+        for pe in payment_entries:
+            payment_doc = frappe.get_doc("Payment Entry", pe.name)
+            for ref in payment_doc.references:
+                # Fetch all Payment Requests related to this reference_name
+                payment_requests = frappe.get_all(
+                    "Payment Request",
+                    filters={"reference_name": ref.reference_name, "docstatus": ["!=", 2]},
+                    fields=["name", "status", "transaction_date"],
+                    order_by="transaction_date asc"
+                )
+
+                # If more than one Payment Request exists, prepare email content
+                if len(payment_requests) > 1:
+                    multiple_requests_found = True
+                    email_body += f"<h4>{ref.reference_doctype}: {ref.reference_name}</h4>"
+                    email_body += "<ul>"
+                    for pr in payment_requests:
+                        email_body += f"<li>Payment Request: {pr['name']}, Status: {pr['status']}, <b>Date:</b> {pr['transaction_date']}</li>"
+                    email_body += "</ul>"
+
+        # If multiple Payment Requests exist, send an email
+        if multiple_requests_found:
+            try:
+                frappe.sendmail(
+                    recipients=email_recipients,
+                    subject=email_subject,
+                    message=email_body
+                )
+                return "Email sent successfully"
+            except Exception as e:
+                frappe.log_error(f"Failed to send email: {str(e)}", "send_payment_request_alert")
+                return "Error sending email. Logged error."
+        
+        return "No multiple Payment Requests found"
+    
+    except Exception as e:
+        frappe.log_error(f"Error in send_payment_request_alert: {str(e)}", "send_payment_request_alert")
+        return "Error occurred. Logged error."
+
 
 
 # def get_verification_users(expense_grouping_master=None,department=None):
@@ -65,9 +130,30 @@ def sales_invoice_get_account(custom_sales_person):
     return overdue_pos[0]['custom_bank_account']
 
 
-
 @frappe.whitelist()
 def search_item_names(search_term):
+    # Sanitize the search_term (remove all non-alphanumerics, lowercase)
+    sanitized_search = re.sub(r'[^a-zA-Z0-9]', '', search_term).lower()
+
+    if not sanitized_search:
+        return []
+
+    # Use raw SQL to fetch item names and filter them after cleaning
+    result = frappe.db.sql("""
+        SELECT item_name FROM `tabItem`
+        WHERE disabled = 0
+    """, as_dict=True)
+
+    # Filter in Python after cleaning each item name
+    matched_items = []
+    for row in result:
+        clean_item_name = re.sub(r'[^a-zA-Z0-9]', '', row.item_name).lower()
+        if sanitized_search in clean_item_name:
+            matched_items.append(row.item_name)
+
+    return matched_items
+@frappe.whitelist()
+def search_item_names2(search_term):
     # sanitized_search = re.sub(r'[^a-zA-Z0-9]', '', search_term).lower()
     
     # items = frappe.get_all("Item", fields=["item_name"], limit_page_length=1000)
@@ -185,6 +271,202 @@ def get_user_expense_claims(user):
         return [row["name"] for row in result]
     
     return []
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def make_payment_entries(source_names):
+    """
+    Create Payment Entries for multiple Employee Advances.
+    """
+    source_names = json.loads(source_names)
+
+    for name in source_names:
+        docstatus_of_payment_advances = frappe.db.get_value("Employee Advance", name, "docstatus")
+        if docstatus_of_payment_advances != 1:
+            frappe.throw(f"{name} is not submitted.")
+
+    # Step 1: Validate all selected docs have mode_of_payment
+    missing_mode_of_payment = []
+    for name in source_names:
+        mode_of_payment = frappe.db.get_value("Employee Advance", name, "mode_of_payment")
+        if not mode_of_payment:
+            missing_mode_of_payment.append(name)
+
+    if missing_mode_of_payment:
+        frappe.throw(
+            "The following Employee Advances are missing Mode of Payment:\n" +
+            "\n".join(missing_mode_of_payment)
+        )
+    else:
+        for name in source_names:
+            mode_of_payment = frappe.db.get_value("Employee Advance", name, "mode_of_payment")
+            doc1 = frappe.get_doc("Mode of Payment",mode_of_payment)
+            if doc1.accounts:
+                for row in doc1.accounts:
+                    if row.default_account:
+                        set_acc = frappe.db.get_all('Bank Account',
+                            filters={
+                                'is_company_account':1
+                            },
+                            or_filters=[
+                                ['account', '=', row.default_account],  # OR condition 1
+                                ['name', '=', row.default_account]   # OR condition 2
+                            ],
+                            fields=['name'],
+                            as_list=True
+                        )
+                        if set_acc:
+                            for i in set_acc:
+                                pass
+                        else:
+                            frappe.throw(f"There is no Bank Account releted to this internal account in this Employee Advance {name}.")
+                    else:
+                        frappe.throw(f"Bank Account does not exists for Default Mode of Payment in this Employee Advance {name}.")
+            else:
+                frappe.throw(f"Account not set for this Mode Of Payment({mode_of_payment}) in this Employee Advance {name}.")
+
+
+        for name in source_names:
+            employee_code = frappe.db.get_value("Employee Advance", name, "employee")
+            party_bank_account = frappe.db.get_all("Bank Account",                     filters={'is_company_account':0, 'disabled':0, 'docstatus':1, 'party':employee_code, 'party_type':"Employee"}, fields=['name'], as_list=True)
+            if party_bank_account:
+                pass
+            else:
+                frappe.throw(f"Bank Account not created for this Employee {employee_code}")
+
+    # Step 2: Proceed if all have mode_of_payment
+    created_entries = []
+
+    for name in source_names:
+        try:
+            entry_name = make_payment_entry(name)
+            if entry_name:
+                created_entries.append(str(entry_name))
+        except Exception as e:
+            frappe.log_error(f"Error creating Payment Entry for {name}: {str(e)}")
+            frappe.msgprint(f"Failed to create Payment Entry for {name}: {str(e)}")
+
+    if created_entries:
+        frappe.msgprint(f"Payment Entries created: {', '.join(created_entries)}")
+    else:
+        frappe.msgprint("No Payment Entries were created.")
+
+
+
+
+
+
+@frappe.whitelist()
+def make_payment_entry(source_name, target_doc=None):
+    source_doc = frappe.get_doc("Employee Advance", source_name)
+
+    if source_doc.docstatus != 1:
+        frappe.throw("Only submitted Employee Advances can be paid.")
+
+    # Check if Payment Entry already exists and is not Cancelled
+    existing_pe = frappe.db.sql("""
+        SELECT per.parent
+        FROM `tabPayment Entry Reference` per
+        JOIN `tabPayment Entry` pe ON per.parent = pe.name
+        WHERE per.reference_doctype = %s
+        AND per.reference_name = %s
+        AND pe.docstatus != 2
+    """, ("Employee Advance", source_name), as_dict=True)
+
+    if existing_pe:
+        frappe.msgprint(f"Payment Entry already exists for Employee Advance {source_name}.")
+        return None
+
+    payment_entry = frappe.new_doc("Payment Entry")
+    payment_entry.payment_type = "Pay"
+    payment_entry.posting_date = frappe.utils.nowdate()
+    payment_entry.company = source_doc.company
+    payment_entry.mode_of_payment = source_doc.mode_of_payment
+    payment_entry.party_type = "Employee"
+    payment_entry.party = source_doc.employee
+    payment_entry.party_name = frappe.db.get_value("Employee", source_doc.employee, "employee_name")
+    payment_entry.paid_from = frappe.get_cached_value("Company", source_doc.company, "default_cash_account")
+    payment_entry.paid_to = source_doc.advance_account
+    payment_entry.paid_amount = source_doc.advance_amount
+    payment_entry.received_amount = source_doc.advance_amount
+    payment_entry.reference_no = source_doc.name
+    payment_entry.reference_date = source_doc.posting_date
+
+    payment_entry.append("references", {
+        "reference_doctype": "Employee Advance",
+        "reference_name": source_doc.name,
+        "allocated_amount": source_doc.advance_amount
+    })
+
+
+    mode_of_payment = frappe.db.get_value("Employee Advance", source_name, "mode_of_payment")
+    if mode_of_payment:
+        doc1 = frappe.get_doc("Mode of Payment",mode_of_payment)
+        if doc1.accounts:
+            for row in doc1.accounts:
+                if row.default_account:
+                    set_acc = frappe.db.get_list('Bank Account',
+                        filters={
+                            'is_company_account':1
+                        },
+                        or_filters=[
+                            ['account', '=', row.default_account],  # OR condition 1
+                            ['name', '=', row.default_account]   # OR condition 2
+                        ],
+                        fields=['name', 'account'],
+                        as_list=True
+                    )
+                    if set_acc:
+                        for i in set_acc:
+                            payment_entry.set("bank_account", i[0])
+                    else:
+                        payment_entry.set("bank_account", "")
+                else:
+                    payment_entry.set("bank_account", "")
+        else:
+            payment_entry.set("bank_account", "")
+    
+
+
+    employee_code = frappe.db.get_value("Employee Advance", source_name, "employee")
+    party_bank_account = frappe.db.get_all("Bank Account", filters={'is_company_account':0, 'disabled':0, 'docstatus':1, 'party':employee_code, 'party_type':"Employee"}, fields=['name'], as_list=True)
+    if party_bank_account:
+        for i in party_bank_account:
+            payment_entry.set("party_bank_account", i[0])
+    else:
+        pass
+
+
+
+    payment_entry.flags.ignore_mandatory = True
+    payment_entry.insert()
+
+    frappe.msgprint(f"Payment Entry {payment_entry.name} created in Draft state for Employee Advance {source_name}.")
+    return payment_entry.name
+
+
+
+
+
+
+
+
 
 @frappe.whitelist()
 def get_user_purchase_order(user):

@@ -353,7 +353,7 @@ def get_bene_file(delimiter='|'):
                         "name"
                     )
                     if bank_account_doc:
-                        query = "UPDATE `tabBank Account` SET `disabled`=0,`custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `name`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[7]),bank_account_doc)
+                        query = "UPDATE `tabBank Account` SET `disabled`=0,`custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `name`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[7])[:100],bank_account_doc)
                         mdf = frappe.db.sql(query, as_dict=True)
                         # frappe.db.commit()
 
@@ -375,7 +375,7 @@ def get_bene_file(delimiter='|'):
                                 "Bank Account", bank_account_doc, {
                                     "workflow_state": "Rejected",
                                     "custom_beneficiary_file_uploaded": 0,
-                                    "custom_remark": data_dict[8]
+                                    "custom_remark": str(data_dict[8])[:100]
                                 }
                             )
                             # frappe.db.commit()
@@ -396,7 +396,7 @@ def get_bene_file(delimiter='|'):
                                 doc.insert(ignore_permissions=True)
                         else:
 
-                            query = "UPDATE `tabBank Account` SET `disabled`=0,`custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[8]),bank_account_no)
+                            query = "UPDATE `tabBank Account` SET `disabled`=0,`custom_remark`='{}', `custom_beneficiary_file_uploaded`=1 WHERE `bank_account_no`='{}' AND `docstatus`=1 AND `workflow_state`='Approved'".format(str(data_dict[8])[:100],bank_account_no)
                             mdf = frappe.db.sql(query, as_dict=True)
                             doc_name = frappe.db.get_value(
                                 "Bank Account", 

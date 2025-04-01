@@ -23,13 +23,14 @@ def get_supplier_nda(supplier_id):
 def get_purchase_order_against_details(purchase_order_id):
 	# Fetch Purchase Order Details To Add and Append in PO Form Field Directly
 	purchase_order_doc = frappe.get_doc("Purchase Order", purchase_order_id)
-	item_code_list, request_list, material_request_list, stock_details_list = [], [], [], []
+	item_code_list, request_list, material_request_list, stock_details_list,approver_list = [], [], [], [], []
 	sales_person, bussiness_unit_name, bussiness_unit_email, sales_order = None, None, None, None
 
 	for item in purchase_order_doc.items:
 		item_code_list.append(item.item_code)
 		if item.material_request:
 			material_request_list.append(item.material_request)
+			approver_list.append(frappe.db.get_value("Comment", {"comment_type": "Workflow", "reference_doctype": "Material Request", "reference_name": item.material_request, "content": "Approved"}, "comment_email"))
 			request_list.append(frappe.db.get_value("Material Request", item.material_request, 'owner'))
 		if item.sales_order:
 			sales_order = item.sales_order
@@ -69,7 +70,7 @@ def get_purchase_order_against_details(purchase_order_id):
 		'business_unit_name': bussiness_unit_name,
 		'business_unit_email': bussiness_unit_email,
 		'purpose': purchase_order_doc.custom_purpose,
-		'approved_by': purchase_order_doc.custom_po_approver,
+		'approved_by': ','.join(set(approver_list)),
 		'price_comparison': price_comparison,
 		'stock_detail': stock_details_list
 	}
