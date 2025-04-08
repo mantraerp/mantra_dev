@@ -34,7 +34,8 @@ frappe.ui.form.on("Minop Setting", {
                 'fromdatetime': frm.doc.from_date,
                 'todatetime' : frm.doc.to_date,
                 'Emp_Code' : frm.doc.employee,
-                'department':frm.doc.department
+                'department':frm.doc.department,
+                'slot' : frm.doc.slot
             },
             callback : function(r){
                 console.log(r)

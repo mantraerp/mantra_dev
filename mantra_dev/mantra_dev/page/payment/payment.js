@@ -477,6 +477,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
     
                 if (totalTransactions === 0) {
                     $(tableContainer).empty()
+                    $(tableContainer).show()
                     $(tableContainer).html('<p style="text-align: center; font-size: 16px; color: red;">No Salary Slip Found</p>');
                     resetSummary();
                     frappe.dom.unfreeze(); // Unfreezing UI after fetching
@@ -561,11 +562,13 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
                     let customDetails = r.message.custom_details || {};
     
                     let referenceTableRows = referenceDetails.map(item => {
-                        let attachmentColumn = item["doctype"] === "Purchase Order" ? "":item["Attachments"];
+                        let attachmentColumn = "";
+
+                        // let attachmentColumn = item["doctype"] === "Purchase Order" ? "":item["Attachments"];
     
                        
                         if (item["doctype"] === "Purchase Order" && item["Po Approval"] ) {
-                            attachmentColumn += ` <button class="btn btn-primary btn-sm po-details-btn" data-po="${item["Po Approval"]}">
+                            attachmentColumn += ` <button class="btn btn-primary btn-sm po-details-btn" data-docname="${item['Document']}" data-po="${item["Po Approval"]}">
                                 PO Details
                             </button>`;
                         }
@@ -697,17 +700,63 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         });
     });
 
-    $(document).on("click", ".po-details-btn", function () {
-        let poId = $(this).data("po");
+    // $(document).on("click", ".po-details-btn", function () {
+    //     let poId = $(this).data("po");
+    //     if (poId) {
+    //         frappe.open_in_new_tab = true;
+    //         frappe.set_route("Form", "PO Form Approval", poId);
+    //     }
+    //     else{
+    //        frappe.msgprint('Po Form Approval is not Found')
+    //     }
+    // });
+    $(document).on("click", ".po-details-btn", async function () {
+        let poId = $(this).data("docname");
+        console.log(poId)
         if (poId) {
-            frappe.open_in_new_tab = true;
-            frappe.set_route("Form", "PO Form Approval", poId);
-        }
-        else{
-           frappe.msgprint('Po Form Approval is not Found')
-        }
-    });
-    
+            
+   
+        try {
+            // Fetch document details via Frappe backend
+            let response = await new Promise((resolve, reject) => {
+                frappe.call({
+                    method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                    args: {
+                        doctype: "Purchase Order",
+                        docname: poId
+                    },
+                    callback: function (r) {
+                        console.log(r.message);
+                        if (r.message) {
+                            resolve(r.message);
+                        } else {
+                            reject("Error fetching document details");
+                        }
+                    }
+                });
+            });
+
+            // Create and display dialog with the fetched HTML
+            let d = new frappe.ui.Dialog({
+                title: __("Purchase Order Details"),
+                fields: [
+                    {
+                        fieldtype: "HTML",
+                        fieldname: "po_details",
+                        options: response
+                    }
+                ],
+                size: 'extra-large',
+                primary_action_label: __("Close"),
+                primary_action: () => d.hide()
+            });
+
+            d.show();
+        } catch (error) {
+            console.error(error);
+            frappe.msgprint(__("Failed to fetch purchase order details"));
+        }}}
+    );
     
     let buttonContainer = $("<div style='display: flex; justify-content: flex-start;'>")
         .appendTo(filterContainer);

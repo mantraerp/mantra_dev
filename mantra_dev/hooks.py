@@ -128,7 +128,10 @@ scheduler_events = {
         "0 8 * * *": [
             "mantra_dev.backend_code.minop.employee_remain_bank_account",
             "mantra_dev.backend_code.globle.check_system_status",
-        ]
+        ],
+        # "0 20 * * *": [
+        #     "mantra_dev.mantra_dev.page.payment.payment.email_payment_entry"
+        # ],
     },
 	"daily": [
         #This log will clear beny process files log every day at night.

@@ -6,10 +6,10 @@ import traceback
 import json
 # from datetime import datetime,timedelta
 from frappe.utils import getdate # type: ignore
-
+from mantra_dev.backend_code.globle import errorLog,errorLogExites # type: ignore
 
 producation_mode = False
-
+employee_key_token = "MINOPPROCESS"
 
 
 class MinopSetting(Document):
@@ -126,7 +126,7 @@ def send_mail_hr_team(subject,message):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None):
+def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None,slot=None):
     
 	'''
 		Sync the attendace an employee wise and if the employee 
@@ -175,7 +175,7 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 		}
 		add_url(att_url,payload)
 		#start 1 min cron
-		frappe.enqueue(start_url_fetching_cron, queue='long', timeout=10000)
+		frappe.enqueue(start_url_fetching_cron, queue='long', timeout=10000,value=0)
 		reply["message"]="Proccess for data for {}".format(Emp_Code)
 		return reply
 	
@@ -183,6 +183,11 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 		query = "SELECT name FROM `tabEmployee` WHERE `status`='Active'"
 		if department:
 			query += f" AND department = '{department}'"
+		if slot:
+			query += f" AND custom_slot = '{slot}'"
+		
+		if department and slot:
+			query += f" AND department = '{department}' AND custom_slot = '{slot}'"
 
 		emp_list =frappe.db.sql(query,as_dict=True)
 		for emp in emp_list:
@@ -195,8 +200,21 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 			frappe.enqueue(add_url, url=att_url, payload=payload, queue='long', timeout=10000)
 		#start 1 min cron
 		frappe.enqueue(start_url_fetching_cron, queue='long', timeout=10000,value=0)
+		# start_url_fetching_cron(0)
   
-		reply["message"]="Start proccess for data with all employee in background once its done we will send the emial"
+		#reply["message"]="Start proccess for data with all employee in background once its done we will send the email"
+		msg = "Start proccess for data with all employee"
+
+		if department or slot:
+			msg += " for"
+			if department:
+				msg += f" Department: {department}"
+			if department and slot:
+				msg += " and "
+			if slot:
+				msg += f"Slot: {slot}"
+		msg += " in the background. Once it's done, we will send an email."
+		reply["message"] = msg
 		return reply
 	
 	reply["status_code"]=200
@@ -205,7 +223,10 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 
 def start_url_fetching_cron(value):
 	query = "UPDATE `tabScheduled Job Type` SET `stopped`={} WHERE `method` = '{}'".format(value,'mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process')
+	# frappe.log_error("query",query)
 	records = frappe.db.sql(query,as_dict=1)
+	frappe.db.commit()
+	return True
     
 
 def add_url(url,payload):
@@ -229,7 +250,7 @@ def url_cron_process():
 		the attendance error log 
 	'''
 
-	limit_records = 5
+	limit_records = 20
 
 	query = "SELECT name,url,payload FROM `tabAttendance Sync Log` WHERE `execute`= 0 ORDER BY `modified` DESC LIMIT {}".format(limit_records)
 	url_list =frappe.db.sql(query,as_dict=True)
@@ -267,10 +288,7 @@ def url_featching_process(record):
 			response_status = "Success"
 			if data:
 				for rec in data:
-        
-					if rec['Emp_Code'] in ['MN001313','C023']:
-						frappe.log_error("Selected employee attendance done","")
-        
+
 					if frappe.db.exists("Attendance Error Log", {'emp_id':rec.get("Emp_Code"),'at_date':rec.get('Date')}):
 						continue
 					att_data = frappe.get_doc({
@@ -306,10 +324,8 @@ def cron_sync_attendance():
 		Create the attendance in the bulk and in the background 	
 	'''
 
-	limit_records = 1
-	emp_id_filter = "MN001250"
-	query = f"SELECT name, emp_id FROM `tabAttendance Error Log` WHERE `sync`=0 AND `emp_id`='{emp_id_filter}' LIMIT {limit_records}"
-	# query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0 LIMIT {}".format(limit_records)
+	limit_records = 7
+	query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0 AND `emp_id` NOT IN (SELECT error FROM `tabError Log` WHERE method='{}') LIMIT {}".format(employee_key_token,limit_records)
 	employee_id_list = frappe.db.sql(query,as_dict=True)
 	
  
@@ -320,9 +336,17 @@ def cron_sync_attendance():
 			attendances_temp = frappe.db.sql(query,as_dict=True)
 			for att in attendances_temp:
 				attendances.append(att)
- 
-
- 
+    
+			errorLog(employee_key_token,str(employee['emp_id']))
+	else:
+		query = "DELETE FROM `tabError Log` WHERE method='{}'".format(employee_key_token)
+		employee_id_list = frappe.db.sql(query,as_dict=True)
+  
+		query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0"
+		employee_id_list = frappe.db.sql(query,as_dict=True)
+		if len(employee_id_list)!=0:
+			send_error_mail("Unsync attendance records: Attendance Error Log","332")
+			
 	for at in attendances:
 		frappe.enqueue(create_attendance, rec=at['name'], queue='long', timeout=10000)
 
@@ -361,21 +385,43 @@ def create_attendance(rec):
 			attendance.attendance_date = att_doc.at_date
 			attendance.custom_minop_status = att_doc.m_status
    
-			if att_doc.m_status in ["P","PW","PH","W","WH","H","HW"]:
-				attendance.status = "Present"
-			elif att_doc.m_status == "A" and att_doc.leave_type == "Paid":
-				if att_doc.leave in ['HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD']:
-					attendance.status = "Half Day"
-					attendance.leave_type = att_doc.leave[1:]
-			elif att_doc.m_status == "A" and att_doc.leave_type == "Unpaid":
-				attendance.status = "On Leave"
-				attendance.leave_type = "Leave Without Pay"
-			elif att_doc.m_status in ["A","XX"]:
-				attendance.status = "Absent"
-			elif att_doc.m_status in ["TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC']:
-				if att_doc.leave_type == "Paid":
+			if str(att_doc.m_status.upper().replace(" ","")) in ["P","PW","PH","W","WH","H","HW"]:
+				if str(att_doc.leave_type.replace(" ","")) == "Paid":
+					if str(att_doc.leave.upper().replace(" ","")) in ['HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD']:
+						attendance.status = "Half Day"
+						attendance.leave_type = att_doc.leave[1:]
+					elif str(att_doc.leave.upper().replace(" ","")) in ["TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC']:
+						attendance.status = "On Leave"
+						attendance.leave_type = att_doc.leave
+					else:
+						attendance.status = "Present"
+				elif str(att_doc.leave_type.replace(" ","")) == "Unpaid":
 					attendance.status = "On Leave"
-					leavs = att_doc.leave.split(",")
+					attendance.leave_type = "Leave Without Pay"
+				else:
+					attendance.status = "Present"
+					
+			elif str(att_doc.m_status.upper().replace(" ","")) in ["A","XX"]:
+				if str(att_doc.leave_type.replace(" ","")) == "Paid":
+					if str(att_doc.leave.upper().replace(" ","")) in ['HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD']:
+						attendance.status = "Half Day"
+						attendance.leave_type = att_doc.leave[1:]
+					elif str(att_doc.leave.upper().replace(" ","")) in ["TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC']:
+						attendance.status = "On Leave"
+						attendance.leave_type = att_doc.leave
+					else:
+						attendance.status = "Absent"
+         
+				elif str(att_doc.leave_type.replace(" ","")) == "Unpaid":
+					attendance.status = "On Leave"
+					attendance.leave_type = "Leave Without Pay"
+				else:
+					attendance.status = "Absent"
+        
+			elif str(att_doc.m_status.upper().replace(" ","")) in ["TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC']:
+				if str(att_doc.leave_type.replace(" ","")) == "Paid":
+					attendance.status = "On Leave"
+					leavs = str(att_doc.leave.upper().replace(" ","")).split(",")
 					if len(leavs) > 1:
 						attendance.leave_type = "LC"
 					else:
@@ -383,32 +429,42 @@ def create_attendance(rec):
 				elif att_doc.leave_type == "Unpaid":
 					attendance.status = "On Leave"
 					attendance.leave_type = "Leave Without Pay"
-				elif not att_doc.leave_type and att_doc.leave:
+				else:
 					attendance.status = "On Leave"
 					attendance.leave_type = "Leave Without Pay"
-			elif att_doc.m_status in ["HD","LH","E","LC"]:
-				if att_doc.leave_type == "Paid":
+			elif str(att_doc.m_status.upper().replace(" ","")) in ["HD"]:
+				if str(att_doc.leave_type.replace(" ","")) == "Paid":
 					attendance.status = "Half Day"
-					leavs = att_doc.leave.split(",")
-					if len(leavs) > 1:
-						attendance.leave_type = "LC"
-					elif att_doc.leave == "OD":
+					if att_doc.leave in ["TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC']:
 						attendance.leave_type = att_doc.leave
 					else:
 						attendance.leave_type = att_doc.leave[1:]
-				elif att_doc.leave_type == "Unpaid":
+				elif str(att_doc.leave_type.replace(" ","")) == "Unpaid":
 					attendance.status = "Half Day"
 					attendance.leave_type = "Leave Without Pay"
-				elif not att_doc.leave_type or not att_doc.leave:
+				else:
 					attendance.status = "Half Day"
 					attendance.leave_type = "Leave Without Pay"
-     
+			elif str(att_doc.m_status.upper().replace(" ","")) in ["LH","E"]:
+				if str(att_doc.leave_type.replace(" ","")) == "Paid":
+					if str(att_doc.leave.upper().replace(" ",""))  in ['HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD']:
+						attendance.status = "Half Day"
+						attendance.leave_type = att_doc.leave[1:]
+					elif str(att_doc.leave.upper().replace(" ","")) in ['TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD','LC']:
+						attendance.status = "On Leave"
+						attendance.leave_type = att_doc.leave
+					else:
+						attendance.status = "Absent"
+				else:
+					attendance.status = "Absent"
+			else:
+				attendance.status = "Absent"
+    
 			attendance.save(ignore_permissions=True)
 			attendance.submit()
 			
 			query = """UPDATE `tabAttendance Error Log` SET `sync` = 1 WHERE `name` = %s"""
 			frappe.db.sql(query,rec,as_dict=True)
-			# frappe.db.set_value("Attendance Error Log", rec, "sync", 1)
 		else:
 			send_error_mail("Error Create the Employee Attendance. Recrod not found.create_attendance",rec)
 	

@@ -1,21 +1,74 @@
 {
+ "_seen": "[\"Administrator\"]",
  "actions": [],
  "allow_rename": 1,
  "creation": "2025-03-28 15:36:47.258840",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_ybuy"
+  "emp_id",
+  "at_date",
+  "m_status",
+  "column_break_niub",
+  "half_day",
+  "leave_type",
+  "leave",
+  "sync"
  ],
  "fields": [
   {
-   "fieldname": "section_break_ybuy",
-   "fieldtype": "Section Break"
+   "fieldname": "emp_id",
+   "fieldtype": "Link",
+   "label": "Emp Id",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "at_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "m_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_niub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "half_day",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Half Day",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Leave Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave",
+   "fieldtype": "Data",
+   "label": "Leave"
+  },
+  {
+   "default": "0",
+   "fieldname": "sync",
+   "fieldtype": "Check",
+   "label": "Sync",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-28 15:36:47.258840",
+ "modified": "2025-04-01 12:21:29.413461",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Attendance Error Log",

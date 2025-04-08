@@ -339,7 +339,9 @@ def get_bene_file(delimiter='|'):
                             data.append(row)
 
         if len(data)==0:
+            # frappe.log_error("data","No data found1")
             return "No row found to process"
+
 
         for data_dict in data:
             try:
@@ -356,10 +358,24 @@ def get_bene_file(delimiter='|'):
                         mdf = frappe.db.sql(query, as_dict=True)
                         # frappe.db.commit()
 
-                elif data_dict[0].startswith("MANTRASH2H_MANTRABENH2HUP"):
+                elif data_dict[0].startswith("MANTRASH2H_"):
+
+                    bank_approve_error = []
+                    dynamicerror1 = "CMS ERROR Unique combination data does not exists in buyer Mst Table for Buyer code {}".format(str(data_dict[0]))
+                    bank_approve_error.append(dynamicerror1)
+                    dynamicerror2 = "CMS ERROR Unique combination data does not exists in buyer Mst Table for Buyer code {}".format(str(data_dict[2]))
+                    bank_approve_error.append(dynamicerror2)
+                    dynamicerror3 = "CMS ERROR  Unique combination data does not exists in buyer Mst Table for Buyer code"
+                    bank_approve_error.append(dynamicerror3)                    
+                    dynamicerror4 = "CMS ERROR Unique combination data Already exists in buyer Mst Tmp Table"
+                    bank_approve_error.append(dynamicerror4)                    
+                    dynamicerror5 = 'Field code Beneficiary Account No Already exists in buyer Mst Tmp Table'
+                    bank_approve_error.append(dynamicerror5)
+                    dynamicerror6 = 'CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table'
+                    bank_approve_error.append(dynamicerror6)
 
                     wantToReject = True
-                    if str(data_dict[8]) in ['Field code Beneficiary Account No Already exists in buyer Mst Tmp Table','CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table']:
+                    if str(data_dict[8]) in bank_approve_error:
                         wantToReject = False
 
                     bank_account_no = data_dict[5]
@@ -1649,23 +1665,18 @@ def get_icici_bank_file_background(delimiter='|'):
                                 rejection_reason = data_dict[25]
                             else:
                                 rejection_reason = data_dict[24]
-                                
-                            frappe.db.set_value("Payment Entry", data_dict[17], {
-                                    "custom_rejection_reason":rejection_reason,
-                                    "custom_payment_status_": "Fail",
-                                })
+
+                            query = "UPDATE `tabPayment Entry` SET `custom_payment_status_`='Fail', `custom_rejection_reason`='{}' WHERE `name`='{}'".format(str(rejection_reason)[0:150],str(data_dict[17]))
+                            update_work_flow_state = frappe.db.sql(query, as_dict=True) 
 
                             current_user = frappe.session.user
                             frappe.set_user("Administrator")
                             doc = frappe.get_doc("Payment Entry",data_dict[17])
                             doc.cancel()
-                            
-                            # frappe.db.set_value("Payment Entry", data_dict[17], {
-                            #         "workflow_state": "Cancelled",
-                            #     })
                             frappe.set_user(current_user)
-                            query = "UPDATE `tabPayment Entry` SET `workflow_state`='Cancelled' WHERE `name`='{}'".format(data_dict[17])
-                            update_work_flow_state = frappe.db.sql(query, as_dict=True)     
+                            query = "UPDATE `tabPayment Entry` SET `workflow_state`='Cancelled' WHERE `name`='{}'".format(str(data_dict[17]))
+                            update_work_flow_state = frappe.db.sql(query, as_dict=True) 
+
 
                         elif frappe.db.exists("Salary Slip", data_dict[17]):
 

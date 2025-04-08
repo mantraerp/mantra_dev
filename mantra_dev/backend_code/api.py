@@ -1,30 +1,47 @@
-import frappe
-from frappe import _
-import random
+import frappe # type: ignore
+from frappe import _ # type: ignore
+# import random
 import shutil
-from frappe.utils import flt, nowdate
+from frappe.utils import nowdate # type: ignore
 import os
-import csv
-import glob
+# import csv
+# import glob
 import json
-from frappe.utils import now
-from frappe.email.queue import flush
-from datetime import datetime, timedelta
-from frappe.core.doctype.activity_log.activity_log import add_authentication_log
-from frappe.auth import LoginManager
-import string
-import ast
+# from frappe.utils import now
+from frappe.email.queue import flush # type: ignore
+# from datetime import datetime, timedelta
+# from frappe.core.doctype.activity_log.activity_log import add_authentication_log
+# from frappe.auth import LoginManager
+# import string
+# import ast
 import traceback
-from cryptography.fernet import Fernet
-import requests
-from frappe.model.mapper import get_mapped_doc
-from collections import defaultdict
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
-from mantra_dev.backend_code.globle import errorLog,errorLogExites
+# from cryptography.fernet import Fernet
+import requests # type: ignore
+from frappe.model.mapper import get_mapped_doc # type: ignore
+# from collections import defaultdict
+# from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+from mantra_dev.backend_code.globle import errorLog,errorLogExites # type: ignore
 import re
-from frappe.utils import today, get_link_to_form
-from frappe.utils import today, add_days
+from frappe.utils import today, get_link_to_form,add_days # type: ignore
 
+
+
+
+
+
+@frappe.whitelist()
+def add_hold_reason_comment(doc_name, action, reason):
+    """
+    Add a comment to a document in Frappe.
+    
+    :param doctype: The type of document (e.g., "Purchase Order")
+    :param docname: The name of the document
+    :param comment: The comment text to be added
+    """
+    doc = frappe.get_doc("Purchase Order", doc_name)
+    doc.add_comment("Comment", text=reason)
+    doc.save()
+    return {"status": "success", "message": "Comment added successfully"}
 
 
 @frappe.whitelist()

@@ -1,10 +1,10 @@
 # Copyright (c) 2025, Foram Shah and contributors
 # For license information, please see license.txt
 
-import frappe
-from frappe import _
-from frappe.model.document import Document
-from mantra_dev.backend_code.purchase_order.purchase_order import get_stock_details
+import frappe # type: ignore
+from frappe import _ # type: ignore
+from frappe.model.document import Document # type: ignore
+from mantra_dev.backend_code.purchase_order.purchase_order import get_stock_details # type: ignore
 
 
 class POFormApproval(Document):
@@ -58,8 +58,8 @@ def get_purchase_order_against_details(purchase_order_id):
 		if sales_person:
 			top_sales_person = get_top_sales_person(sales_person)
 			employee_id = frappe.db.get_value("Sales Person", top_sales_person, "employee")
-			bussiness_unit_name = frappe.db.get_value("Employee", employee_id, 'employee_name')
-			bussiness_unit_email = frappe.db.get_value("Employee", employee_id, 'user_id')
+			bussiness_unit_name = frappe.db.get_value("Employee", employee_id, 'employee_name') or top_sales_person
+			bussiness_unit_email = frappe.db.get_value("Employee", employee_id, 'user_id') or frappe.db.get_value("Sales Person", top_sales_person, "custom_email") or frappe.db.get_value("Sales Person", top_sales_person, "custom_user_email")
 
 
 	return {

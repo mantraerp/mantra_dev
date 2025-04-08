@@ -43,6 +43,49 @@ frappe.ui.form.on('Purchase Invoice', {
         //         }
         //     });
         // }
+
+
+        frm.add_custom_button(("Details"), async () => {
+            try {
+                let response = await new Promise((resolve, reject) => {
+                    frappe.call({
+                        method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                        args: {
+                            doctype: "Purchase Invoice",
+                            docname: frm.doc.name
+                        },
+                        callback: function(r) {
+                            console.log(r.message)
+                            if (r.message) {
+                                resolve(r.message);
+                            } else {
+                                reject("Error fetching document details");
+                            }
+                        }
+                    });
+                });
+                let d = new frappe.ui.Dialog({
+                    title: __("Purchase Order Details"),
+                    fields: [
+                        {
+                            fieldtype: "HTML",
+                            fieldname: "po_details",
+                            options: response
+                        }
+                    ],
+                    size: response =='This document does not have an associated purchase order.' ? 'small' :'extra-large',
+                    primary_action_label: __("Close"),
+                    primary_action: () => d.hide()
+                });
+
+                d.show();
+            } catch (error) {
+                console.error(error);
+                frappe.msgprint(__("Failed to fetch purchase order details"));
+            }
+        
+    
+        });
     },
     custom_department(frm){
         

@@ -34,7 +34,13 @@ def select_payment_entry(bank_account):
     
     payment_entries = frappe.db.sql(sql_query, (bank_account, tuple(mode_of_payment)), as_dict=True)
     return payment_entries
-    
+
+
+@frappe.whitelist()
+def email_payment_entry(bank_account):
+    # mantra_dev.mantra_dev.page.payment.payment.email_payment_entry
+    return True
+
 @frappe.whitelist()
 def get_salary_slip(payroll_entry):
     query = """

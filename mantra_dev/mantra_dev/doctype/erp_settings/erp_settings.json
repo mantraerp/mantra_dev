@@ -9,7 +9,10 @@
   "system_tab",
   "get_system_status_notification",
   "system_status_notification_users",
-  "allow_delivery_note_without_sales_invoice"
+  "allow_delivery_note_without_sales_invoice",
+  "column_break_durp",
+  "end_point",
+  "key"
  ],
  "fields": [
   {
@@ -33,12 +36,28 @@
    "fieldname": "allow_delivery_note_without_sales_invoice",
    "fieldtype": "Check",
    "label": "Allow delivery note without sales invoice"
+  },
+  {
+   "fieldname": "column_break_durp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "https://merp.minopcloud.com/api/",
+   "fieldname": "end_point",
+   "fieldtype": "Data",
+   "label": "End Point"
+  },
+  {
+   "default": "nBpnKvx+hRQ/BDwDeNx/+N8+YxVJWHeG3F1HyRaBqoMVIot3erGo6HyIXg6Z1Ef6",
+   "fieldname": "key",
+   "fieldtype": "Data",
+   "label": "Api Key"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-03-19 17:28:53.252129",
+ "modified": "2025-04-01 10:43:44.613143",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "ERP Settings",

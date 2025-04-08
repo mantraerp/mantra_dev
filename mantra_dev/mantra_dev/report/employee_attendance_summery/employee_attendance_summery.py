@@ -48,14 +48,17 @@ def get_data(filters):
             SUM(
                 CASE 
                     WHEN at.custom_minop_status IN ('P', 'PW', 'PH', 'WH', 'HW') THEN 1
-                    WHEN at.custom_minop_status IN ('HD', 'LH', 'E') THEN 0.5
+                    WHEN at.custom_minop_status IN ('HD') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 1
                     ELSE 0
                 END
             ) AS present_days,
             SUM(
                 CASE 
-                    WHEN at.custom_minop_status IN ('A', 'XX') THEN 1
-                    WHEN at.custom_minop_status IN ('LH', 'E') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 0
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') THEN 1
                     WHEN at.custom_minop_status = 'HD' AND at.leave_type = 'Leave Without Pay' THEN 0.5
                     ELSE 0
                 END
@@ -71,6 +74,8 @@ def get_data(filters):
             SUM(CASE WHEN at.custom_minop_status = 'W' THEN 1 ELSE 0 END) AS no_of_weekoff,
             SUM(
                 CASE 
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 1
                     WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') THEN 0
                     WHEN at.custom_minop_status = 'HD' AND at.leave_type = 'Leave Without Pay' THEN 0.5
                     WHEN at.status = 'On Leave' AND at.leave_type = 'Leave Without Pay' THEN 0
@@ -151,25 +156,32 @@ def send_employee_attendace_summery_report_mail(filters):
             elif (at.status == 'HD' and at.leave_type == 'Leave Without Pay'):
                 attendance_status_count_list['P'] += 0.5
                 attendance_status_count_list['A'] += 0.5
-            elif (at.status == 'XX'):
-                attendance_status_count_list['A'] += 1
-            elif (at.status in ['LH', 'E']):
-                attendance_status_count_list['A'] += 0.5
+            elif (at.status in ('A', 'XX', 'LH', 'E') and at.leave_type in ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD')):
                 attendance_status_count_list['P'] += 0.5
+                attendance_status_count_list['A'] += 0.5
+            elif (at.status in ('A', 'XX', 'LH', 'E') and at.leave_type in ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' )):
+                attendance_status_count_list['P'] += 1
+            # elif (at.status == 'XX'):
+            #     attendance_status_count_list['A'] += 1
+            # elif (at.status in ['LH', 'E']):
+            #     attendance_status_count_list['A'] += 0.5
+            #     attendance_status_count_list['P'] += 0.5
             elif (at.status in ('TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD')):
                 attendance_status_count_list['TL'] += 1
-            
+
             if at.status in ['P', 'A', 'H', 'W']:
                 attendance_status_count_list[at.status] += 1
 
-            if at.status in ('A', 'XX'):
+            if at.status in ('A', 'XX') and at.leave_type == 'Leave Without Pay':
                 continue
             elif at.attendance_status == 'On Leave' and at.leave_type == 'Leave Without Pay':
                 continue
             elif at.status == 'HD' and at.leave_type == 'Leave Without Pay':
                 attendance_status_count_list['no_of_paiddays'] += 0.5
-            elif at.status in ['LH', 'E']:
+            elif at.status in ['A', 'XX', 'LH', 'E'] and at.leave_type in ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD'):
                 attendance_status_count_list['no_of_paiddays'] += 0.5
+            elif at.status in ['A', 'XX', 'LH', 'E'] and at.leave_type in ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ):
+                attendance_status_count_list['no_of_paiddays'] += 1
             else:
                 attendance_status_count_list['no_of_paiddays'] += 1
 
