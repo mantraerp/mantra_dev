@@ -382,7 +382,8 @@ def get_bene_file(delimiter='|'):
                     bank_approve_error.append(dynamicerror5)
                     dynamicerror6 = 'CMS ERROR  Field code Beneficiary Account No Already exists in buyer Mst Tmp Table'
                     bank_approve_error.append(dynamicerror6)
-
+                    dynamicerror7 = 'Unique combination data Already exists in buyer Mst Tmp Table'
+                    bank_approve_error.append(dynamicerror7)
 
                     wantToReject = True
                     if str(data_dict[8]) in bank_approve_error:
@@ -2081,7 +2082,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             <p style="text-align: center;"></p>
             <p style="text-align: center;"></p>
             </td>
-            <td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" /></td>
+            <td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" width="200" /></td>
             </tr>
             </tbody>
             </table>
@@ -2184,6 +2185,20 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     </html>
     """
 
+
+    message = "Please find the attached payment advice."
+    subject = "Payment Advice"
+    
+    if frappe.db.exists("Email Template","Payment Advice"):
+        doc_args = {"supplier_name": benifecery_name,}
+        email_template = frappe.get_doc("Email Template", "Payment Advice")
+        message = frappe.render_template(email_template.response, doc_args)
+        subject = frappe.render_template(email_template.subject)    
+    
+
+
+
+
     # Step 2: Generate PDF from the HTML
     pdf_data = get_pdf(html_content)
 
@@ -2191,9 +2206,9 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
     try:
         if email:
             frappe.sendmail(
-                recipients=[email,'subhash@mantratec.com'],
-                subject="Payment Advice",
-                message="Please find the attached payment advice.",
+                recipients=[email],
+                subject=subject,
+                message=message,
                 attachments=[{
                     'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
                     'fcontent': pdf_data

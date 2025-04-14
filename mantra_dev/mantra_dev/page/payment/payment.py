@@ -55,7 +55,7 @@ def get_salary_slip(payroll_entry):
         FROM `tabSalary Slip` 
         WHERE payroll_entry = %s 
             AND docstatus = 1 
-            AND custom_payment_status != 'Success'
+            AND custom_payment_status not in ('Success','Hold')
     """
     
     payment_entries = frappe.db.sql(query, (payroll_entry,), as_dict=True)
@@ -453,7 +453,7 @@ def get_payment_entry_reference_details(payment_entry):
         reference_details.reverse()
 
         custom_details = frappe.get_value("Payment Entry", payment_entry, 
-            ["custom_type", "custom_project_type", "remarks", "custom_approved_by","custom_management_remarks"], as_dict=True)
+            ["custom_type","name", "custom_project_type", "remarks", "custom_approved_by","custom_management_remarks"], as_dict=True)
 
         return {
             "reference_details": reference_details,
@@ -463,3 +463,19 @@ def get_payment_entry_reference_details(payment_entry):
     except Exception as e:
         frappe.log_error(f"Error in get_payment_entry_reference_details: {str(e)}")
         return {"error": _(f"Error fetching approval details: {str(e)}")}
+
+
+@frappe.whitelist()
+def hold_salary_slip(salary_slip_id):
+    try:
+        frappe.db.sql("""
+            UPDATE `tabSalary Slip`
+            SET custom_payment_status = %s
+            WHERE name = %s
+        """, ("Hold", salary_slip_id))
+
+        frappe.db.commit()
+        return "Success"
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Error while holding salary slip")
+        return f"An error occurred while canceling holding salary slip: {str(e)}"

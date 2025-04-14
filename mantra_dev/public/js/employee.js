@@ -3,7 +3,6 @@ frappe.ui.form.on('Employee', {
 
         frm.add_custom_button(("Send salary slip mail"), () => {
 
-			
 				let dialog = new frappe.ui.Dialog({
 					title: "Select Date Range",
 					fields: [
@@ -73,7 +72,6 @@ frappe.ui.form.on('Employee', {
 				dialog.show();
         },('Utility'));
 
-
 		frm.add_custom_button(("Send Attendance Summery Mail"), () => {
 			let d = new frappe.ui.Dialog({
 				title: "Send Attendance Summery Mail",
@@ -134,7 +132,6 @@ frappe.ui.form.on('Employee', {
 			d.show();
 		
 		}, ('Utility'));
-
     },
 	department(frm) {
 	    frm.set_value("custom_opration_approver",undefined)
@@ -160,5 +157,109 @@ frappe.ui.form.on('Employee', {
 	            // }	            
 	       }	        
 	    })
-	}
+	},
+	validate(frm) {
+		const nameRegex = /^[A-Za-z\s]+$/;
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+ 
+		const first_name = frm.doc.first_name;
+		const middle_name = frm.doc.middle_name;
+		const last_name = frm.doc.last_name;
+		const cell = frm.doc.cell_number;
+		const personal_email = frm.doc.personal_email;
+		const company_email = frm.doc.company_email;
+		const pan = frm.doc.pan_number;
+		const pf_account = frm.doc.provident_fund_account;
+		const ifsc_code = frm.doc.ifsc_code;
+		const esic = frm.doc.custom_esic_no;
+		const uan = frm.doc.custom_uan_no;
+		const passport = frm.doc.passport_number;
+ 
+		if (first_name && !nameRegex.test(first_name)) {
+			frappe.throw(__("First Name must contain only letters and space."));
+		}
+ 
+		if (middle_name && !nameRegex.test(middle_name)) {
+			frappe.throw(__("Middle Name must contain only letters and space."));
+		}
+ 
+		if (last_name && !nameRegex.test(last_name)) {
+			frappe.throw(__("Last Name must contain only letters and space."));
+		}
+ 
+		if (cell) {
+			const cellRegex = /^\d{10}$/;
+			if (!cellRegex.test(cell)) {
+				frappe.throw(
+					__("Invalid Mobile Number. It must be exactly 10 digits.")
+				);
+			}
+		}
+ 
+		if (personal_email && !emailRegex.test(personal_email)) {
+			frappe.throw(__("Invalid Personal Email."));
+		}
+ 
+		if (company_email && !emailRegex.test(company_email)) {
+			frappe.throw(__("Invalid Company Email."));
+		}
+ 
+		if (pan) {
+			const panRegex = /^[A-Z]{5}(?!0{4})[0-9]{4}[A-Z]{1}$/;
+			if (!panRegex.test(pan)) {
+				frappe.throw(
+					__(
+						"Invalid PAN Number. Format: 5 uppercase letters, 4 digits (not all zeros), and 1 uppercase letter."
+					)
+				);
+			}
+		}
+ 
+		if (pf_account) {
+			const pfRegex = /^[A-Za-z0-9]{22}$/;
+			if (!pfRegex.test(pf_account)) {
+				frappe.throw(
+					__(
+						"Invalid Provident Fund Account. It must be exactly 22 letters or digits."
+					)
+				);
+			}
+		}
+ 
+		if (ifsc_code) {
+			const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+			if (!ifscRegex.test(ifsc_code)) {
+				frappe.throw(
+					__(
+						"Invalid IFSC Code. Format: 4 letters, 0, then 6 alphanumeric characters. Example: SBIN0001234"
+					)
+				);
+			}
+		}
+ 
+		if (esic) {
+			const esicRegex = /^\d{10}$/;
+			if (!esicRegex.test(esic)) {
+				frappe.throw(__("Invalid ESIC Number. It must be exactly 10 digits."));
+			}
+		}
+ 
+		if (uan) {
+			const uanRegex = /^\d{12}$/;
+			if (!uanRegex.test(uan)) {
+				frappe.throw(__("Invalid UAN Number. It must be exactly 12 digits."));
+			}
+		}
+ 
+		if (passport) {
+			const passportRegex = /^[A-Z][0-9]{7}$/;
+			if (!passportRegex.test(passport)) {
+				frappe.throw(
+					__(
+						"Invalid Passport Number. It should be 1 letter followed by 7 digits. Example: A1234567"
+					)
+				);
+			}
+		}
+	},
 })

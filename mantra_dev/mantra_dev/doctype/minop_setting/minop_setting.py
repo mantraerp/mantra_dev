@@ -380,6 +380,13 @@ def create_attendance(rec):
 				reply["message"] = f"Attendance already exists for {att_doc.emp_id} on {att_doc.at_date}. Skipping."
 				return reply
 
+			joining_date = frappe.get_value("Employee", {"name": att_doc.emp_id}, "date_of_joining")
+			j_date = getdate(joining_date)
+			if getdate(att_doc.at_date) < j_date:
+				reply["message"] = f"Skip attendance records for {att_doc.at_date}.Skip...."
+				return reply
+
+
 			attendance = frappe.new_doc("Attendance")
 			attendance.employee = att_doc.emp_id
 			attendance.attendance_date = att_doc.at_date

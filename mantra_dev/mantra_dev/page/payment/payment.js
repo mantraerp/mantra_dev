@@ -497,6 +497,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
                                 <th>ID</th>
                                 <th>Party ID</th>
                                 <th>Party</th>
+                                <th>Hold</th>
                                 <th>Total Paid Amount</th>
                             </tr>
                         </thead>
@@ -504,11 +505,16 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
     
                 data.forEach(row => {
                     table_html += `
-                        <tr class="group-row" data-party="${row.party_name}">
-                            <td><input type="checkbox" class="entry-checkbox" data-id="${row.name}" data-party="${row.party_name}" hidden></td>
+                        <tr class="group-row" data-party="${row.party}">
+                            <td><input type="checkbox" class="entry-checkbox" data-id="${row.name}" data-party="${row.party}" hidden></td>
                            <td><a onclick="window.open('/app/salary-slip/${row.name}', '_blank')">${row.name}</a></td>
                             <td>${row.party}</td>
                             <td>${row.party_name}</td>
+                            <td>
+                                <button class="hold-btn btn btn-secondary" data-id="${row.name}" >
+                                    Hold
+                                </button>
+                            </td>
                             <td>${format_currency(row.base_paid_amount_after_tax, 'INR', 2)}</td>
                         </tr>`;
                 });
@@ -532,6 +538,42 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         });
     };
     
+    $(document).off("click", ".hold-btn").on("click", ".hold-btn", function () {
+        let $btn = $(this);
+        let $row = $btn.closest("tr");
+        let salarySlipId = $btn.data("id");
+        let partyId = $row.closest(".group-row").data("party");
+        partyId = $row.find(".entry-checkbox").data("party");
+            holdSalarySlip(salarySlipId, function (success) {
+                if (success) {
+                    $row.remove(); 
+                    if ($(`.party-${partyId} .entry-checkbox`).length === 0) {
+                        $(`.group-row[data-party="${partyId}"]`).remove();
+                    }
+                    updateTransactionSummary();
+                }
+            });
+    
+    });
+    function holdSalarySlip(salarySlipId, callback) {
+        frappe.call({
+            method: "mantra_dev.mantra_dev.page.payment.payment.hold_salary_slip",
+            args: {
+                salary_slip_id: salarySlipId
+            },
+            callback: function(response) {
+                if (response.message === "Success") {
+                    updateTransactionSummary()
+                    callback(true); // Call the callback function with success = true
+                } else {
+                    frappe.msgprint(__('Failed to cancel payment entries.'));
+                    callback(false); // Call the callback function with success = false
+                }
+            }
+        });
+    }    
+    
+
     // Function to reset summary when no data is found
     function resetSummary() {
         $("#total-transactions").text(0);
@@ -541,6 +583,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
     }
 
     $(document).on('click', '.get-details', function () {
+        frappe.dom.freeze(__("Fetching Details..."));
         let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
     
         if (!paymentEntryId) {
@@ -553,7 +596,9 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
             args: { payment_entry: paymentEntryId },
             callback: function (r) {
                 if (r.message) {
+                    frappe.dom.unfreeze();
                     if (r.message.error) {
+                        
                         frappe.msgprint(r.message.error);
                         return;
                     }
@@ -629,7 +674,22 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
                                     <td style="text-align:left;">${customDetails.custom_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_project_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_approved_by || ""}</td>
-                                    <td style="text-align:left;">${customDetails.remarks || ""}</td>
+                                    <td style="text-align:left;" rowspan="2">
+                                        <div class="remark-text">
+                                            <strong>Remark:</strong><br>
+                                            <p>${customDetails.remarks || ""}</p>
+                                            <hr style="margin:3px 0; border: 0; border-top: 1px solid #ccc;">
+                                            ${customDetails.custom_management_remarks ? `<strong>Approver Remark:</strong><br>
+                                            <p>${customDetails.custom_management_remarks || ""}</p>`:''}
+                                            <button style="float:left;margin-top:5px;" class="btn btn-primary btn-sm update-remark-btn" 
+                                            data-payment-entry="${customDetails.name}" 
+                                            data-remark="${(customDetails.remarks + (customDetails.custom_management_remarks ? customDetails.custom_management_remarks : '')) || ''}"
+                                            data-previous-remark="${customDetails.remarks || ''}"   
+                                            data-management-remark = "${customDetails.custom_management_remarks || ''}">
+                                            Update Remark
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -700,16 +760,57 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         });
     });
 
-    // $(document).on("click", ".po-details-btn", function () {
-    //     let poId = $(this).data("po");
-    //     if (poId) {
-    //         frappe.open_in_new_tab = true;
-    //         frappe.set_route("Form", "PO Form Approval", poId);
-    //     }
-    //     else{
-    //        frappe.msgprint('Po Form Approval is not Found')
-    //     }
-    // });
+    $(document).on('click', '.update-remark-btn', function () {
+        let paymentEntryId = $(this).data('payment-entry');
+        let currentRemark = $(this).data('remark');
+        let previousRemark= $(this).data('previous-remark')
+        let remarkTextSpan = $(this).closest('tr').find('.remark-text');
+        let management_remark = $(this).data('management-remark');
+    
+        let updateDialog = new frappe.ui.Dialog({
+            title: __("Update Remark"),
+            fields: [
+                {
+                    fieldname: 'remark',
+                    fieldtype: 'Small Text',
+                    label: 'Remark',
+                    default: management_remark ? management_remark : currentRemark
+                }
+            ],
+            primary_action_label: 'Submit',
+            primary_action(values) {
+                frappe.call({
+                    method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.update_payment_entry_remark",
+                    args: {
+                        payment_entry: paymentEntryId,
+                        remark: values.remark
+                    },
+                    callback: function (r) {
+                        if (r.message === 'success') {
+                            frappe.msgprint(__('Remark updated successfully.'));
+                            if(remarkTextSpan){
+                            remarkTextSpan.html('')
+                            remarkTextSpan.html(" <strong>Remark: </strong><p>" + previousRemark + "</p><hr style='margin:10px 0; border: 0; border-top: 1px solid #ccc;'>" + "<strong>Approver Remark: </strong><p>" + values.remark + "</p>")
+                            remarkTextSpan.append(
+                                "<button style='float:left; margin-top:5px; margin-right:5px;' class='btn btn-primary btn-sm update-remark-btn' " +
+                                "data-payment-entry='" + paymentEntryId + "' " +
+                                "data-remark='" + ((currentRemark) || '') + "' " +
+                                "data-previous-remark='" + (previousRemark || '') + "' " +
+                                "data-management-remark='" + ((values.remark ? values.remark : currentRemark) || '') + "'>" +
+                                "Update Remark</button>"
+                            );
+                            }
+                            updateDialog.hide();    
+                        } else {
+                            frappe.msgprint(__('Failed to update remark.'));
+                        }
+                    }
+                });
+            }
+        });
+    
+        updateDialog.show();
+    });
     $(document).on("click", ".po-details-btn", async function () {
         let poId = $(this).data("docname");
         console.log(poId)
@@ -769,7 +870,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
 
 
 
-    if (['hiren@mantratec.com', 'bhavyen@mantratec.com'].includes(frappe.session.user)) {
+    if (['hiren@mantratec.com', 'bhavyen@mantratec.com', 'abhishek.jain@mantratec.com'].includes(frappe.session.user)) {
         let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-primary">Make Payment</button>`)
             .appendTo(buttonContainer);
 
@@ -1118,7 +1219,7 @@ function updateTransactionSummary() {
         // If the party has only one entry, it won't have child rows
         if (groupChildren.length === 0) {
             totalTransactionCount++;
-            let amountColumnIndex = usePayrollEntryChecked ? 5 : 6;
+            let amountColumnIndex = usePayrollEntryChecked ? 6 : 6;
             let amountText = $(this).find(`td:nth-child(${amountColumnIndex})`).text();
             let amount = parseFloat(amountText.replace('₹', '').replace(/,/g, '').trim());
 
@@ -1132,7 +1233,7 @@ function updateTransactionSummary() {
                 selectedAmount += amount;
             }
         } else {
-            let amountColumnIndex = usePayrollEntryChecked ? 5 : 6;
+            let amountColumnIndex = usePayrollEntryChecked ? 6 : 6;
             // Multiple transactions under a group
             totalTransactionCount += groupChildren.length;
             groupChildren.each(function () {

@@ -5,6 +5,41 @@ import traceback
 # import frappe
 from frappe.utils import today # type: ignore
 import requests # type: ignore
+from datetime import datetime
+import json
+
+
+
+@frappe.whitelist()
+def mark_salary_slip_paid(salary_slip, values):
+	if isinstance(values, str):
+		values = json.loads(values)
+
+	values = frappe._dict(values)
+
+	# Convert liquidation_date as dd-mm-yyyy
+	liquidation_date = values.get("liquidation_date")
+	if liquidation_date:
+		try:
+			liquidation_date_obj = datetime.strptime(liquidation_date, "%Y-%m-%d")
+			liquidation_date = liquidation_date_obj.strftime("%d-%m-%Y")
+		except Exception as e:
+			frappe.throw(f"Invalid date format: {e}")
+	
+	frappe.db.set_value("Salary Slip", salary_slip, {
+        "custom_payment_status": "Success",
+        "custom_liquidation_date": liquidation_date,
+        "custom_instrument_ref_no": values.get("instrument_ref_no"),
+        "custom_utr_no": values.get("utr_no"),
+        "custom_payment_ref_no": values.get("payment_ref_no"),
+        "custom_customer_ref_no": values.get("customer_ref_no"),
+        "custom_instrument_no": values.get("instrument_no"),
+        "custom_rejection_reason": f"{frappe.session.user} marked as completed manually"
+    })
+	
+	return "Payment details updated successfully."
+
+
 
 @frappe.whitelist(allow_guest=True)
 # @frappe.whitelist()

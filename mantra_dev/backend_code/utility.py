@@ -2,7 +2,45 @@ import frappe # type: ignore
 from frappe import _ # type: ignore
 from mantra_dev.backend_code.globle import errorLog # type: ignore
 
+
+
+
+
+
 @frappe.whitelist(allow_guest=True)
+def email_queue_data_trancate():
+
+	reply={}
+	reply['message']=""
+
+	query = "SELECT name,message FROM `tabEmail Queue` LIMIT 10"
+	all_email_queue = frappe.db.sql(query, as_dict=True)
+
+	reply['data']=all_email_queue
+	reply['data_length']=len(all_email_queue)	
+	for index, record in enumerate(all_email_queue):
+		frappe.enqueue(email_refine_data,queue='long',job_name="So Process",timeout=100000,record=record)
+
+	return reply
+
+@frappe.whitelist(allow_guest=True)
+def email_refine_data(record):
+	message = record['message'][0:100]
+	query = "UPDATE `tabEmail Queue` SET `message`='{}'".format(message)
+	all_email_queue = frappe.db.sql(query, as_dict=True)
+	return True
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
 def sales_order_auto_close():
 
 	reply={}
@@ -26,7 +64,7 @@ def sales_order_auto_close():
 	return reply
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def sales_order_auto_close_update_delivered_qty_value(so_no):
 
 	doc = frappe.get_doc("Sales Order", so_no)
@@ -61,7 +99,7 @@ def sales_order_auto_close_update_delivered_qty_value(so_no):
  
 	return round(total_invoice_amount,2)
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def sales_order_auto_close_update_delivered_qty(record):
     
 	try:

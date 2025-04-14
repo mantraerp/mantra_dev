@@ -1,25 +1,31 @@
 __version__ = "0.0.1"
-import erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry
+import erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry # type: ignore
 # import mantra_dev.backend_code.stock_reservation_entry
-import mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry
+import mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry # type: ignore
 
-import erpnext.accounts.doctype.purchase_invoice.purchase_invoice
-import mantra_dev.purchase_invoice
+import erpnext.accounts.doctype.purchase_invoice.purchase_invoice # type: ignore
+import mantra_dev.purchase_invoice # type: ignore
 
-import erpnext.stock.doctype.purchase_receipt.purchase_receipt
-import mantra_dev.purchase_receipt
+import erpnext.stock.doctype.purchase_receipt.purchase_receipt # type: ignore
+import mantra_dev.purchase_receipt # type: ignore
 
-import erpnext.stock.doctype.shipment.shipment
-import mantra_dev.backend_code.shipment.shipment
+import erpnext.stock.doctype.shipment.shipment # type: ignore
+import mantra_dev.backend_code.shipment.shipment # type: ignore
 
-import erpnext.selling.doctype.sales_order.sales_order
-import mantra_dev.backend_code.sales_order.sales_order
+import erpnext.selling.doctype.sales_order.sales_order # type: ignore
+import mantra_dev.backend_code.sales_order.sales_order # type: ignore
 
-import erpnext.accounts.doctype.sales_invoice.sales_invoice
-import mantra_dev.backend_code.sales_invoice.sales_invoice
+import erpnext.accounts.doctype.sales_invoice.sales_invoice # type: ignore
+import mantra_dev.backend_code.sales_invoice.sales_invoice # type: ignore
 
-import erpnext.accounts.doctype.bank_account.bank_account
-import mantra_dev.backend_code.bank_account.bank_account
+import erpnext.accounts.doctype.bank_account.bank_account # type: ignore
+import mantra_dev.backend_code.bank_account.bank_account # type: ignore
+
+from erpnext.controllers.accounts_controller import AccountsController # type: ignore
+import mantra_dev.backend_code.accounts_controller # type: ignore
+
+
+
 
 erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note = mantra_dev.backend_code.sales_invoice.sales_invoice.make_delivery_note
 
@@ -37,3 +43,5 @@ erpnext.stock.doctype.purchase_receipt.purchase_receipt.PurchaseReceipt.po_requi
 erpnext.stock.doctype.shipment.shipment.Shipment.on_submit = mantra_dev.backend_code.shipment.shipment.Shipment.on_submit
 
 erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request = mantra_dev.backend_code.sales_order.sales_order.make_raw_material_request
+
+erpnext.controllers.accounts_controller.AccountsController.set_due_date = mantra_dev.backend_code.accounts_controller.set_due_date

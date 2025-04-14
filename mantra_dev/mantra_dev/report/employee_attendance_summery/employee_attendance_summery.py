@@ -4,14 +4,13 @@
 import frappe
 import re
 import datetime
-from frappe.utils import get_first_day, get_last_day, date_diff
+from frappe.utils import get_first_day, get_last_day, date_diff,getdate
 
 
 def execute(filters=None):
     columns = get_columns()
     data = get_data(filters)
     return columns, data
-
 
 def get_columns():
     return [
@@ -24,6 +23,8 @@ def get_columns():
         {"label": "No.OF WeekOff", "fieldname": "no_of_weekoff", "fieldtype": "Data", "width": 200},
         {"label": "No.Of Paiddays", "fieldname": "no_of_paiddays", "fieldtype": "Data", "width": 200},
         {"label": "Total Days", "fieldname": "total_days", "fieldtype": "Data", "width": 200},
+        {"label": "Joining Date", "fieldname": "date_of_joining", "fieldtype": "Date", "width": 200},
+        {"label": "Dyas Diff(From 1st Day Of Month to Joining Date)", "fieldname": "days_difference", "fieldtype": "Data", "width": 200},
     ]
 
 def get_data(filters):
@@ -45,28 +46,38 @@ def get_data(filters):
         SELECT 
             at.employee AS employee_code,
             at.employee_name,
+            DATE(emp.date_of_joining) AS date_of_joining,
+            DATEDIFF(emp.date_of_joining, DATE_FORMAT(emp.date_of_joining, '%Y-%m-01')) AS days_difference,    
             SUM(
-                CASE 
+                CASE
+                    WHEN at.custom_minop_status IN ("P","PW","PH","W","WH","H","HW") AND at.status = 'Half Day' THEN 0.5
+                    WHEN at.custom_minop_status IN ("P","PW","PH","W","WH","H","HW") AND at.status = 'On Leave' THEN 0
                     WHEN at.custom_minop_status IN ('P', 'PW', 'PH', 'WH', 'HW') THEN 1
                     WHEN at.custom_minop_status IN ('HD') THEN 0.5
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 1
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Half Day' THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Present' THEN 1
                     ELSE 0
                 END
             ) AS present_days,
             SUM(
                 CASE 
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 0
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Present' THEN 0
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Half Day' THEN 0.5
                     WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') THEN 1
+                    WHEN at.custom_minop_status IN ("P","PW","PH","W","WH","H","HW") AND at.status = 'Half Day' AND at.leave_type = 'Leave Without Pay' THEN 0.5
+                    WHEN at.custom_minop_status IN ("P","PW","PH","W","WH","H","HW") AND at.status = 'On Leave' AND at.leave_type = 'Leave Without Pay' THEN 1
                     WHEN at.custom_minop_status = 'HD' AND at.leave_type = 'Leave Without Pay' THEN 0.5
                     ELSE 0
                 END
             ) AS absent_days,
             SUM(
                 CASE
-                    WHEN at.custom_minop_status IN ('TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD') THEN 1
+                    WHEN at.custom_minop_status IN ('TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD', 'LC') THEN 1
                     WHEN at.custom_minop_status = 'HD' AND at.leave_type != 'Leave Without Pay' THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Half Day' THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Present' THEN 1
+                    WHEN at.custom_minop_status IN ("P","PW","PH","WH","HW") AND at.status = 'Half Day' AND at.leave_type NOT IN ('Leave Without Pay', '') THEN 0.5
+                    WHEN at.custom_minop_status IN ("P","PW","PH","WH","HW") AND at.status = 'On Leave' AND at.leave_type NOT IN ('Leave Without Pay', '') THEN 1
                     ELSE 0
                 END
             ) AS taken_leave,
@@ -74,9 +85,11 @@ def get_data(filters):
             SUM(CASE WHEN at.custom_minop_status = 'W' THEN 1 ELSE 0 END) AS no_of_weekoff,
             SUM(
                 CASE 
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ('HTL','HCL','HSL','HWL','HML','HML','HBL','HBR','HLL','HCO','HEL','HOD') THEN 0.5
-                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type IN ("TL", "CL", "SL", "WL", "ML", "BL", "BR", "LL", "CO", "EL", "OD",'LC' ) THEN 1
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Half Day' THEN 0.5
+                    WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') AND at.leave_type NOT IN ('Leave Without Pay', '') AND at.status = 'Present' THEN 1
                     WHEN at.custom_minop_status IN ('A', 'XX', 'LH', 'E') THEN 0
+                    WHEN at.custom_minop_status IN ("P","PW","PH","WH","HW") AND at.status = 'Half Day' AND at.leave_type = 'Leave Without Pay' THEN 0.5
+                    WHEN at.custom_minop_status IN ("P","PW","PH","WH","HW") AND at.status = 'On Leave' AND at.leave_type = 'Leave Without Pay' THEN 0
                     WHEN at.custom_minop_status = 'HD' AND at.leave_type = 'Leave Without Pay' THEN 0.5
                     WHEN at.status = 'On Leave' AND at.leave_type = 'Leave Without Pay' THEN 0
                     ELSE 1
@@ -85,6 +98,8 @@ def get_data(filters):
             {date_diff(to_date, from_date) + 1} AS total_days
         FROM 
             `tabAttendance` AS at
+        LEFT JOIN
+            `tabEmployee` AS emp ON at.employee = emp.name
         WHERE 
             {conditions}
         GROUP BY
@@ -106,7 +121,8 @@ def send_employee_attendace_summery_report_mail(filters):
         'H': 'No.Of Holiday',
         'W': 'No.OF WeekOff',
         'no_of_paiddays': 'No.Of Paiddays',
-        'total_days': 'Total(days)'
+        'total_days': 'Total(days)',
+        'difference': 'Days Difference (From 1st Day Of Month to Joining Date)'
     }
 
     attendance_status_count_list = {
@@ -117,14 +133,25 @@ def send_employee_attendace_summery_report_mail(filters):
         'H': 0,
         'no_of_paiddays': 0,
         'total_days': date_diff(filters.get('to_date'), filters.get('from_date')) + 1,
+        'difference': 0
     }
-    employee_doc = frappe.db.get_value("Employee", filters.get('employee'), ["employee_name", "prefered_email"], as_dict=True)
+    employee_doc = frappe.db.get_value("Employee", filters.get('employee'), ["employee_name", "prefered_email","date_of_joining"], as_dict=True)
 
     if not employee_doc.get("employee_name"):
         return "Employee Name is not found"
 
     if not employee_doc.get("prefered_email"):
         return "Prefered Email is not set in Employee"
+
+    if not employee_doc.get("date_of_joining"):
+        return "Date Of Joining is not set in Employee"
+
+
+    joining_date = getdate(employee_doc.get('date_of_joining'))
+    first_day = joining_date.replace(day=1)
+    days_difference = (joining_date - first_day).days
+
+    attendance_status_count_list['difference'] = days_difference
 
     conditions = f"at.docstatus = 1 AND at.attendance_date BETWEEN '{filters.get('from_date')}' AND '{filters.get('to_date')}' AND at.employee = '{filters.get('employee')}'"
     query = f"""
@@ -166,7 +193,7 @@ def send_employee_attendace_summery_report_mail(filters):
             # elif (at.status in ['LH', 'E']):
             #     attendance_status_count_list['A'] += 0.5
             #     attendance_status_count_list['P'] += 0.5
-            elif (at.status in ('TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD')):
+            elif (at.status in ('TL', 'CL', 'SL', 'WL', 'ML', 'BL', 'BR', 'LL', 'CO', 'EL', 'OD', 'LC')):
                 attendance_status_count_list['TL'] += 1
 
             if at.status in ['P', 'A', 'H', 'W']:
@@ -188,6 +215,8 @@ def send_employee_attendace_summery_report_mail(filters):
         html = f"""
             <b>Employee Code:</b> {filters.get('employee')}<br>
             <b>Employee Name:</b> {employee_doc.get("employee_name")}<br>
+            <b>Date Of Joining:</b> {frappe.utils.format_date(joining_date)}<br>
+            <b>Days Difference (From 1st Day Of Month to Joining Date):</b> <span style="color:red;">{days_difference}</span><br>
             <b>Date Range:</b> {frappe.utils.format_date(filters.get("from_date"))} to {frappe.utils.format_date(filters.get("to_date"))}
             <br>
             <h4>Attendance Summury:</h4>

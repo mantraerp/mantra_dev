@@ -56,7 +56,7 @@ frappe.query_reports["Employee Attendance Summery"] = {
         table_instance.datamanager.data.forEach((row, rowIdx) => {
 			console.log(row['present_days'] + row['absent_days'] + row['taken_leave'] + row['no_of_holiday'] + row['no_of_weekoff'])
 			console.log("total", row['total_days'])
-            if (row['present_days'] + row['absent_days'] + row['taken_leave'] + row['no_of_holiday'] + row['no_of_weekoff'] != row['total_days']) {
+            if (row['present_days'] + row['absent_days'] + row['taken_leave'] + row['no_of_holiday'] + row['no_of_weekoff'] != row['total_days'] - row['days_difference']) {
                 color_single_row(table_instance, rowIdx,'#ff000040 !important');
             } else {
 				color_single_row(table_instance, rowIdx, 'transparent !important'); // Reset to default

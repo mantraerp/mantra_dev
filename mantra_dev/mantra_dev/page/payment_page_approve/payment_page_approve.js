@@ -10,10 +10,10 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
     let transaction_summary_table = $(`<table id="transaction-summary-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;font-family: var(--font-stack);">
         <thead>
             <tr>
-                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Transactions</th>
-                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Amount (₹)</th>
-                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Selected Transactions</th>
-                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; text-align: center;">Total Selected Transcation Amount (₹)</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; padding:10px; text-align: center;">Total Transactions</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; padding:10px; text-align: center;">Total Amount (₹)</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; padding:10px; text-align: center;">Selected Transactions</th>
+                <th style="background-color: var(--subtle-fg); color: var(--text-color) !important; padding:10px; text-align: center;">Total Selected Transcation Amount (₹)</th>
             </tr>
         </thead>
         <tbody>
@@ -467,6 +467,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
     };
 
      $(document).on('click', '.get-details', function () {
+        frappe.dom.freeze(__("Fetching Details..."));
         let paymentEntryId = $(this).closest('tr').find('td a').text().trim();
     
         if (!paymentEntryId) {
@@ -479,12 +480,13 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
             args: { payment_entry: paymentEntryId },
             callback: function (r) {
                 if (r.message) {
-                    if (r.message.error) {
+                    frappe.dom.unfreeze();
+                    if (r.message.error) 
+                    {
                         frappe.msgprint(r.message.error);
                         return;
                     }
 
-    
                     let referenceDetails = r.message.reference_details || [];
                     let customDetails = r.message.custom_details || {};
     
@@ -546,7 +548,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                     <th>Type</th>
                                     <th>Project Type</th>
                                     <th>Approved By</th>
-                                    <th>Remarks</th>
+                                    <th>Payment Remark</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -554,14 +556,21 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                     <td style="text-align:left;">${customDetails.custom_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_project_type || ""}</td>
                                     <td style="text-align:left;">${customDetails.custom_approved_by || ""}</td>
-                                    <td style="text-align:left;"> <span class="remark-text">${customDetails.remarks + "<br>" + customDetails.custom_management_remarks|| "No Remark"}</span>
-                                        <button style="float:right;" class="btn btn-primary btn-sm update-remark-btn" 
+                                    <td style="text-align:left;" rowspan="2">
+                                        <div class="remark-text">
+                                            <strong>Remark:</strong><br>
+                                            <p>${customDetails.remarks || "No Remark"}</p>
+                                            <hr style="margin:3px 0; border: 0; border-top: 1px solid #ccc;">
+                                            ${customDetails.custom_management_remarks ? `<strong>Approver Remark:</strong><br>
+                                            <p>${customDetails.custom_management_remarks || ""}</p>`:''}
+                                            <button style="float:left;margin-top:5px;" class="btn btn-primary btn-sm update-remark-btn" 
                                             data-payment-entry="${customDetails.name}" 
-                                            data-remark="${customDetails.custom_management_remarks || ''}"
-                                            data-previous-remark = "${customDetails.remarks|| "No Remark"}"
-                                            ">
+                                            data-remark="${(customDetails.remarks + (customDetails.custom_management_remarks ? customDetails.custom_management_remarks : '')) || ''}"
+                                            data-previous-remark="${customDetails.remarks || ''}"   
+                                            data-management-remark = "${customDetails.custom_management_remarks || ''}">
                                             Update Remark
-                                        </button>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -611,7 +620,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                     <thead>
                                         <tr>
                                             <th>Document</th>
-                                            <th>Purpose</th>
+                                            <th>Purchase Remark</th>
                                             <th>Approvals</th>
                                             <th>Attachments</th>
                                         </tr>
@@ -810,11 +819,13 @@ function generateExcelAndSend(selectedUser) {
             }
         });
     
-}$(document).on('click', '.update-remark-btn', function () {
+}
+$(document).on('click', '.update-remark-btn', function () {
     let paymentEntryId = $(this).data('payment-entry');
     let currentRemark = $(this).data('remark');
     let previousRemark= $(this).data('previous-remark')
     let remarkTextSpan = $(this).closest('tr').find('.remark-text');
+    let management_remark = $(this).data('management-remark');
 
     let updateDialog = new frappe.ui.Dialog({
         title: __("Update Remark"),
@@ -823,7 +834,7 @@ function generateExcelAndSend(selectedUser) {
                 fieldname: 'remark',
                 fieldtype: 'Small Text',
                 label: 'Remark',
-                default: currentRemark
+                default: management_remark ? management_remark : currentRemark
             }
         ],
         primary_action_label: 'Submit',
@@ -837,12 +848,20 @@ function generateExcelAndSend(selectedUser) {
                 callback: function (r) {
                     if (r.message === 'success') {
                         frappe.msgprint(__('Remark updated successfully.'));
-                        if(remarkTextSpan){
-                        remarkTextSpan.html('')
-                        remarkTextSpan.html(previousRemark + "<br>" + values.remark)
+                        if(remarkTextSpan)
+                        {
+                            remarkTextSpan.html('')
+                            remarkTextSpan.html(" <strong>Remark: </strong><p>" + previousRemark + "</p><hr style='margin:10px 0; border: 0; border-top: 1px solid #ccc;'>" + "<strong>Approver Remark: </strong><p>" + values.remark + "</p>")
+                            remarkTextSpan.append(
+                                "<button style='float:left; margin-top:5px; margin-right:5px;' class='btn btn-primary btn-sm update-remark-btn' " +
+                                "data-payment-entry='" + paymentEntryId + "' " +
+                                "data-remark='" + ((currentRemark) || '') + "' " +
+                                "data-previous-remark='" + (previousRemark || '') + "' " +
+                                "data-management-remark='" + (values.remark ? values.remark : currentRemark || '') + "'>" +
+                                "Update Remark</button>"
+                            );
                         }
-                        updateDialog.hide();
-                        
+                        updateDialog.hide();    
                     } else {
                         frappe.msgprint(__('Failed to update remark.'));
                     }

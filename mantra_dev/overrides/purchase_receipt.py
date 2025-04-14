@@ -41,6 +41,45 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 	# 		self.bom_stock_validation()
 			
 	# 	super().on_submit()
+	def before_save(self):
+		if self.is_subcontracted:
+			self.notification_stock_not_available()
+
+
+	def notification_stock_not_available(self):
+		items, all_stock_available = self.check_raw_matrial_stock()
+		if items is not None:
+			msg = self.generate_stock_shortage_template(items)
+			if msg:
+				frappe.enqueue(
+					self.stock_shortage_email_reminder,
+					# recipients = ['bhavesh.odedara@mantratec.com'],
+					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					subject=f"Stock Shortage Alert Receipt Number -> {self.name}",
+					message=msg,
+				)
+				frappe.msgprint(msg)
+
+		elif not all_stock_available:
+			msg = self.generate_stock_shortage_template(items)
+			if msg:
+				frappe.enqueue(
+					self.stock_shortage_email_reminder,
+					# recipients = ['bhavesh.odedara@mantratec.com'],
+					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
+					subject=f"Stock Shortage Alert For Receipt Number -> {self.name}",
+					message=msg,
+				)
+				frappe.msgprint(msg)
+		else:
+			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance"))
+
+
+
+
+
+
+
 
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
@@ -117,30 +156,12 @@ class CustomPurchaseReceipt(PurchaseReceipt):
 		if items and all_stock_available:
 			stock_entry_name = self.auto_create_stock_entry(items)
 			self.auto_create_subcontracting_receipt(stock_entry_name)
-			
 		elif items is not None:
-			msg = self.generate_stock_shortage_template(items)
-			if msg:
-				frappe.enqueue(
-					self.stock_shortage_email_reminder,
-					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
-					subject=f"Stock Shortage Alert Receipt Number -> {self.name}",
-					message=msg,
-				)
-				frappe.throw(msg)
-
+			frappe.throw(_("Before the processing please check your email, system sent email in your email id for stock shortage please check and update the stock"))
 		elif not all_stock_available:
-			msg = self.generate_stock_shortage_template(items)
-			if msg:
-				frappe.enqueue(
-					self.stock_shortage_email_reminder,
-					recipients=["rmstores01@mantratec.com","rupesh.joshi@mantratec.com","purchase5@mantratec.com","stores.audit@mantratec.com","accounts6@mantratec.com"],
-					subject=f"Stock Shortage Alert For Receipt Number -> {self.name}",
-					message=msg,
-				)
-				frappe.throw(msg)
+			frappe.throw(_("Before the processing please check your email, system sent email in your email id for stock shortage please check and update the stock"))
 		else:
-			frappe.throw(_(f"Item Stock is not Availble please check the Stock Ledger or Stock Balance"))
+			frappe.throw(_("Before the processing please check your email, system sent email in your email id for stock shortage please check and update the stock"))
 
 	def stock_shortage_email_reminder(self,recipients, subject, message):
 		frappe.sendmail(
@@ -158,7 +179,12 @@ class CustomPurchaseReceipt(PurchaseReceipt):
         <style>
         .msgprint-dialog .modal-content {
 			min-height: 110px;
-			width: 130%;
+			width: 150%;
+		}
+		.modal-dialog {
+			display: flex;
+			align-items: center;
+			justify-content: center;	
 		}
         </style>
         </head>

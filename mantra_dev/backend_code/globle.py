@@ -65,7 +65,7 @@ def system_call(reply,url,key):
 
 def site_base_url():
 	siteurl = get_url()
-	if "http://192.168.1.38:8001":
+	if siteurl=="http://192.168.1.38:8001":
 		siteurl = "https://mantratec.milaap.ai"
   
 	return siteurl
@@ -81,72 +81,24 @@ def permission_count():
 	)
 
 	return "Mail send for permission count"
-    
+
+
 @frappe.whitelist(allow_guest=True)
-def order_status():
-	query = """
- 				SELECT status, COUNT(name) AS order_count, SUM(grand_total) AS grand_total_value, SUM(net_total) AS net_total_value
-				FROM `tabSales Order`
-				WHERE docstatus < 2
-				GROUP BY status;
-			"""
-	data_list = frappe.db.sql(query,as_dict=1)	
- 
-	html = """
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<title>Order Status</title>
-				<style>
-					th {
-						padding: 15px;
-						text-align: left;
-					}
-				</style>    
-			</head>
-			<body>
+def weekly_check():
 
-				<h2>All Order Status</h2>
+	email_receipient = ['ravi.patel@mantratec.com','sajal.chandrawanshi@mantratec.com','abhishek.jain@mantratec.com']
+	email_message_body = """<br> This mail is to reminder for weelky check point list.
+		<br> 1. ERP auto backup is work based on set numbers.
+ 	"""
 
-				<table>
-					<thead>
-						<tr style="text-align: left;">
-							<th>Status</th>
-							<th>Total</th>
-						</tr>
-					</thead>
-					<tbody id="order-table-body">
- 			"""
- 
- 
-	for data in data_list:
-		html = """{}
-			<tr>
-				<th>{}</th>
-				<th>{}</th>
-			</tr>
-  		""".format(html,data['status'],data['order_count'],data['grand_total_value'],data['net_total_value'])
-
- 
- 
-	end_html = """{}
-					</tbody>
-				</table>
-			</body>
-			</html>
-		""".format(html)
  
 	frappe.sendmail(
-		recipients=["ravi.patel@mantratec.com"],
-		subject="All Order Status",
-		message=html,
-		as_markdown=False,
-		delayed=False
+		recipients=email_receipient,
+		subject="Weekly check points {}".format(frappe.utils.nowdate()),
+		message=email_message_body
 	)
 
-	return "Mail send for permission count"
-
-
+	return True
 
 #To create entry in erro log
 @frappe.whitelist(allow_guest=True)
@@ -230,14 +182,12 @@ def create_notification_log(
 	notification_log.insert(ignore_permissions=True)
 
 
-
+#To clear process beny file name
 @frappe.whitelist(allow_guest=True)
 def ClearBenyFileProcessLog():
 	frappe.enqueue(clear_beny_file_process_log, queue='long', timeout=10000)
 	return True
 
-    
- 
 @frappe.whitelist()
 def clear_beny_file_process_log():   
     

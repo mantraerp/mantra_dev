@@ -137,6 +137,9 @@ scheduler_events = {
         #This log will clear beny process files log every day at night.
 		"mantra_dev.backend_code.globle.clear_beny_file_process_log"
 	],
+    "weekly_long":[
+        "mantra_dev.backend_code.globle.weekly_check"
+    ]
 # 	"hourly": [
 # 		"mantra_dev.tasks.hourly"
 # 	],
