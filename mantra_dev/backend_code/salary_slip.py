@@ -41,8 +41,7 @@ def mark_salary_slip_paid(salary_slip, values):
 
 
 
-@frappe.whitelist(allow_guest=True)
-# @frappe.whitelist()
+@frappe.whitelist()
 def email_payroll_salary_slip(payroll_no):
     
 	reply={}
@@ -182,7 +181,6 @@ def salary_slip_date_range_back(employee_id,from_date,to_date):
 
 
 @frappe.whitelist()
-# @frappe.whitelist(allow_guest=True)
 def email_salary_slip(salary_slip_no):
 
 	reply={}
@@ -303,7 +301,6 @@ def email_salary_slip(salary_slip_no):
 
 
 @frappe.whitelist()
-# @frappe.whitelist(allow_guest=True)
 def email_salary_slip_single_without_restriction(salary_slip_no,prefered_email):
 
 	reply={}

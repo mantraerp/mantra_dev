@@ -1,10 +1,10 @@
-from erpnext.buying.doctype.purchase_order.purchase_order import PurchaseOrder
-import frappe
-from frappe.utils import  get_link_to_form
-from frappe import _
+from erpnext.buying.doctype.purchase_order.purchase_order import PurchaseOrder # type: ignore
+import frappe # type: ignore
+from frappe.utils import  get_link_to_form # type: ignore
+from frappe import _ # type: ignore
 import json
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.model.mapper import get_mapped_doc # type: ignore
+from frappe.utils import flt # type: ignore
 
 class CustomPurchaseOrder(PurchaseOrder):
 	def on_submit(self):
@@ -147,3 +147,19 @@ def override_make_purchase_receipt(source_name, target_doc=None):
 	)
 
 	return doc
+
+@frappe.whitelist()
+def get_purchase_person():
+	cur_user = frappe.session.user
+	if cur_user in ["Administrator", "Guest"]:
+		return
+	
+	employee = frappe.get_value("Employee",{"user_id" : cur_user},'name')
+	if not employee:
+		return
+	
+	purchase_person = frappe.get_value("Purchase Person",{"employee":employee},'name')
+	if not purchase_person:
+		return
+	
+	return purchase_person

@@ -22,7 +22,7 @@ def check_system_status():
 	if len(email_receipient)==0:
 		return "No email found"
 
-# check_system_status
+ # check_system_status
 	reply = system_call(reply,"http://192.168.5.78:8000/login#login",'UAT')
 	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
 	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global') 

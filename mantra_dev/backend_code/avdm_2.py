@@ -6,9 +6,12 @@ import traceback
 import requests # type: ignore
 from mantra_dev.backend_code.globle import errorLog,errorLogExites # type: ignore
 import ast
+from requests.auth import HTTPBasicAuth # type: ignore
+
 
 delivery_note_number_proccess = []
 key_token = "TOKENAVDM"
+key_token_pratham = "TOKENAVDMPRATHAM"
 key_body_process = "BODYPROCESSAVDM"
 key_serial_no = "SERIALNOAVDM"
 key_sub_serial_no = "SUBSERIALNO"
@@ -42,6 +45,7 @@ def login_to_avdm(transaction_date):
 
 		try:
 			generate_token()
+			generate_token_pratham()
 			process_dc_list(dc_list)
 
 			errorLog('AVDM-End',transaction_date,False)
@@ -105,6 +109,49 @@ def generate_token():
 
 
 @frappe.whitelist(allow_guest=True)
+def generate_token_pratham():
+	
+	reply={}
+ 
+	# username = frappe.db.get_single_value("AVDM Setting", "username")
+	# password = frappe.db.get_single_value("AVDM Setting", "password")
+
+	username = "ConsumeDetailsUser"
+	password = "bDFsSUhaTjlQU0FRdDhY"
+
+	url = "http://prathamapi.mantratecapp.com/production/api/Authenticate/Login"
+
+	payload = json.dumps({
+		"DeviceType": "A"
+	})
+	headers = {
+		'Content-Type': 'application/json',
+	}
+
+	response = requests.post(url, headers=headers, data=payload,auth=HTTPBasicAuth(username, password))
+ 
+	response_content = response.content
+	if isinstance(response_content, bytes):
+		response_content = response_content.decode('utf-8')
+	
+	response_json = json.loads(response_content)
+ 
+	details = response_json["entityObject"]
+	api_token = details["AuthToken"]
+	
+	reply['api_token']=api_token
+
+	#Delete token and resave in list
+	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 1".format(key_token_pratham)
+	records = frappe.db.sql(query,as_dict=1)
+	errorLog(key_token_pratham,str(api_token))
+ 
+	return reply
+
+
+
+
+@frappe.whitelist(allow_guest=True)
 def date_convert(timestamp):
 	# timestamp = "2025-02-11T10:59:20.348062Z"
 	# timestamp = "2025-02-11T9:59:20.3480264422Z"
@@ -146,8 +193,8 @@ def process_dc_list(dc_list):
 									"subModelType": "0"
 								}
 								body.append(data)
-								#Add serial number to check for sub serial number 
-								# frappe.enqueue(add_sub_serial_no_entry, queue='long', timeout=3600,data=str(data))
+								data['item_code']=i.item_code
+								errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
 
 			cunk_size = 100
 
@@ -161,13 +208,11 @@ def process_dc_list(dc_list):
 					reply['chunk_send_{}'.format(str(index))]="Cunk Send"
 					errorLog(key_body_process,str(body_send))
 					record_found = True
-					# frappe.enqueue(send_serial_no_to_server,queue='long',job_name="AVDM Process",timeout=100000,body=body_send,creating_url=creating_url,headers=headers)
 					body_send = []
 
 			if len(body_send)!=0:
 				record_found = True
 				errorLog(key_body_process,str(body_send))
-				# frappe.enqueue(send_serial_no_to_server,queue='long',job_name="AVDM Process",timeout=100000,body=body_send,creating_url=creating_url,headers=headers)
 
 			#If any record is found then 5 min cron set on
 			if record_found:
@@ -197,8 +242,8 @@ def process_dc_list(dc_list):
 
 
 def add_sub_serial_no_entry(data):
-    # errorLog(key_sub_serial_no,str(data))
-    return True
+	errorLog(key_sub_serial_no,str(data))
+	return True
 
 
 
@@ -214,6 +259,7 @@ def process_one_record():
 
 @frappe.whitelist(allow_guest=True)
 def process_one_record_background():
+	
 	reply= {}
 	try:
 		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 4".format(key_body_process)
@@ -221,29 +267,35 @@ def process_one_record_background():
 	
 		#If all body process then start update serial no in DB
 		if len(list_body_to_process)==0:
-			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_serial_no)
-			serial_no_list = frappe.db.sql(query)
 			
-   			# If serial no record found then going to update it.
+			#Start fetching sub-serial no
+			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_sub_serial_no)
+			serial_subserial_no_list = frappe.db.sql(query)
+			if len(serial_subserial_no_list)!=0:
+				return fetch_sub_serial_no_records()
+
+			#Start update serial no in database
+			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_serial_no)
+			serial_no_list = frappe.db.sql(query)			
 			if len(serial_no_list)!=0:
-				return update_serial_no_records()
-			else:
-				# Serial no update record not found then start dn record update
-				query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_dc_no)
-				dn_no_list = frappe.db.sql(query)
-				if len(dn_no_list)!=0:
-					return update_delivery_note_records()
-				else:
-					#stop cron all record are process
-					query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = '{}'".format('mantra_dev.backend_code.avdm.process_one_record')
-					dn_no_list = frappe.db.sql(query)
-					return "All task are done cron stop call"
+				return update_serial_no_records(500)
 
-			return "All body are process"
-		else:
-			frappe.enqueue(update_serial_no_records, queue='long', timeout=3600)
+			# Serial no update record not found then start dn record update
+			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_dc_no)
+			dn_no_list = frappe.db.sql(query)
+			if len(dn_no_list)!=0:
+				return update_delivery_note_records()
+ 				
+			#stop cron all record are process
+			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = '{}'".format('mantra_dev.backend_code.avdm.process_one_record')
+			dn_no_list = frappe.db.sql(query)
+			return "All task are done cron stop call"
 
-  
+
+		frappe.enqueue(update_serial_no_records, queue='long', timeout=3600,limit=200)
+		frappe.enqueue(fetch_sub_serial_no_records, queue='long', timeout=3600)
+
+
 		#Process for registration
 		creating_url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM"
 	
@@ -266,7 +318,6 @@ def process_one_record_background():
 			reply['message']="Exception"
 			reply['message_traceback']=str(traceback.format_exc())
 			mssage = str(traceback.format_exc())
-			errorLog("AVDM_error",mssage)
 			frappe.sendmail(
 				recipients=["ravi.patel@mantratec.com"],
 				subject="AVDM not process due to issue",
@@ -275,91 +326,252 @@ def process_one_record_background():
 			
 	return reply
 
-
 @frappe.whitelist(allow_guest=True)
 def process_request(process_record,creating_url,headers):
     
 	reply={}
     
-	body_pass = ast.literal_eval(process_record['error'])
-	process_dc_of_serial={}
-	body_pass_avdm = []
-	for s_no_data in body_pass:
-		process_dc_of_serial[s_no_data['serialNo']]=s_no_data['dcNo']
-		s_no_data['dcDate'] = date_convert(s_no_data['dcDate'])
-		if int(s_no_data['model']) != 13:
-			body_pass_avdm.append(s_no_data)
+	try:
+		body_pass = ast.literal_eval(process_record['error'])
+		process_dc_of_serial={}
+		body_pass_avdm = []
+		for s_no_data in body_pass:
+			process_dc_of_serial[s_no_data['serialNo']]=s_no_data['dcNo']
+			s_no_data['dcDate'] = date_convert(s_no_data['dcDate'])
+			if int(s_no_data['model']) != 13:
+				body_pass_avdm.append(s_no_data)
+
+		if len(body_pass_avdm)==0:
+			#Once process delete record from error log
+			query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(process_record['name'])
+			records_deleted = frappe.db.sql(query,as_dict=1)
+			reply['request_url']="No serial no match"
+			return reply
+
+		reply['request_url']=creating_url
+		reply['request_header']=headers
+		reply['request_body']=body_pass_avdm
 		
-
-	if len(body_pass_avdm)==0:
-		#Once process delete record from error log
-		query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(process_record['name'])
-		records_deleted = frappe.db.sql(query,as_dict=1)
-		reply['request_url']="No serial no match"
-		return reply
-
-	reply['request_url']=creating_url
-	reply['request_header']=headers
-	reply['request_body']=body_pass_avdm
-	
-
-	response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
-	reply['resposne_status_code']=response1.status_code
-	
-
-	dc_response_content = response1.content
-	if isinstance(dc_response_content, bytes):
-		dc_response_content = dc_response_content.decode('utf-8')
-	reply['resposne_contennt']=dc_response_content
-
-	if response1.status_code==200:
-
-		#Once process delete record from error log
-		query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(process_record['name'])
-		records_deleted = frappe.db.sql(query,as_dict=1)
-
-		#Get all serial number response in this.
-		dc_response_json = json.loads(dc_response_content)
-		reply['response']=dc_response_json
+		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
+		reply['resposne_status_code']=response1.status_code
 		
-		if dc_response_json:
-			process_dc_no = []
+		dc_response_content = response1.content
+		if isinstance(dc_response_content, bytes):
+			dc_response_content = dc_response_content.decode('utf-8')
+		reply['resposne_contennt']=dc_response_content
 
-			error_searial_no = []
-			for i in dc_response_json:
-				if int(i['errorCode'])==0:
-					errorLog(key_serial_no,str(i['devicesr']))
-					if process_dc_of_serial[i['devicesr']] not in delivery_note_number_proccess:
-						process_dc_no.append(process_dc_of_serial[i['devicesr']])
-						delivery_note_number_proccess.append(process_dc_of_serial[i['devicesr']])
-				else:
-					error_searial_no.append(str(i['devicesr']))
-					# frappe.enqueue(update_serial_no_field,queue='long',job_name="Update serial no {}".format(i['devicesr']),timeout=100000,serial_no=i['devicesr'])
+		if response1.status_code==200:
 
-			for dc_no in process_dc_no:
-				errorLog(key_dc_no,str(dc_no))
-				# frappe.enqueue(update_delivery_field,queue='long',job_name="Update delivery note {}".format(str(dc_no)),timeout=100000,dc_no=str(dc_no))
+			#Once process delete record from error log
+			query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(process_record['name'])
+			records_deleted = frappe.db.sql(query,as_dict=1)
 
-			#Get all serial no with error reponse
-			if len(error_searial_no)!=0:
-				email_serial_no_with_error = []
-				for s_no_data in body_pass:
-					if str(s_no_data['serialNo']) in error_searial_no:
-						email_serial_no_with_error.append(s_no_data)
+			#Get all serial number response in this.
+			dc_response_json = json.loads(dc_response_content)
+			reply['response']=dc_response_json
+			
+			if dc_response_json:
+				process_dc_no = []
 
-				if len(email_serial_no_with_error)!=0:
-					frappe.sendmail(
-						recipients=["ravi.patel@mantratec.com"],
-						subject="Serial no with error response",
-						message="{}".format(str(email_serial_no_with_error))
-					)
+				error_searial_no = []
+				for i in dc_response_json:
+					if int(i['errorCode'])==0:
+						errorLog(key_serial_no,str(i['devicesr']))
+						if process_dc_of_serial[i['devicesr']] not in delivery_note_number_proccess:
+							process_dc_no.append(process_dc_of_serial[i['devicesr']])
+							delivery_note_number_proccess.append(process_dc_of_serial[i['devicesr']])
+					else:
+						error_searial_no.append(str(i['devicesr']))
+						# frappe.enqueue(update_serial_no_field,queue='long',job_name="Update serial no {}".format(i['devicesr']),timeout=100000,serial_no=i['devicesr'])
 
-	return True
+				for dc_no in process_dc_no:
+					errorLog(key_dc_no,str(dc_no))
+					# frappe.enqueue(update_delivery_field,queue='long',job_name="Update delivery note {}".format(str(dc_no)),timeout=100000,dc_no=str(dc_no))
+
+				#Get all serial no with error reponse
+				if len(error_searial_no)!=0:
+					email_serial_no_with_error = []
+					for s_no_data in body_pass:
+						if str(s_no_data['serialNo']) in error_searial_no:
+							email_serial_no_with_error.append(s_no_data)
+
+					if len(email_serial_no_with_error)!=0:
+						frappe.sendmail(
+							recipients=["ravi.patel@mantratec.com"],
+							subject="Serial no with error response",
+							message="{}".format(str(email_serial_no_with_error))
+						)
+		else:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com"],
+				subject="EVDM request process error",
+				message="{}".format(str(reply))
+			)
+	except Exception as e:
+		reply['message']="Exception"
+		reply['message_traceback']=str(traceback.format_exc())
+		mssage = str(traceback.format_exc())
+		frappe.sendmail(
+			recipients=["ravi.patel@mantratec.com"],
+			subject="AVDM not process due to issue",
+			message="avdm.py - process_one_record <br>{}<br>{}".format(mssage,str(reply))
+		)
+  
+	return reply
+
+
+
+
 
 @frappe.whitelist(allow_guest=True)
-def update_serial_no_records():
+def fetch_sub_serial_no_records():
+	reply={}
+    
+	try:
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 50".format(key_sub_serial_no)
+		list_body_to_process = frappe.db.sql(query,as_dict=1)
+	
+		searil_no_pass = []
+		record_to_be_proccess = []		
+		for process_record in list_body_to_process:
+			body_pass = ast.literal_eval(process_record['error'])
+			record_to_be_proccess.append(body_pass)
+			# for s_no_data in body_pass:
+			searil_no_pass.append(body_pass['serialNo'])
+	
+	
+		#Process for sub serial no
+		creating_url = "http://prathamapi.mantratecapp.com/Production/api/Product/GetConsumeSerialNoDetails"
 
-	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1000".format(key_serial_no)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 1".format(key_token_pratham)
+		token = frappe.db.sql(query,as_dict=1)
+
+		if len(token)==0:
+			generate_token_pratham()
+			return "Token not found"
+
+		headers = {
+			"accept": "application/json",
+			"Token": token[0]['error']
+		}
+  
+		reply['request_url']=creating_url
+		reply['request_header']=headers
+		reply['request_body']=searil_no_pass  
+
+		response1 = requests.post(creating_url, headers=headers, json=searil_no_pass)
+		reply['resposne_status_code']=response1.status_code
+		dc_response_content = response1.content
+		if isinstance(dc_response_content, bytes):
+			dc_response_content = dc_response_content.decode('utf-8')
+		reply['resposne_contennt']=dc_response_content
+
+		if response1.status_code==200:
+			#Get all serial number response in this.
+			dc_response_json = json.loads(dc_response_content)
+			reply['response']=dc_response_json
+			if len(dc_response_json)!=0:
+				body=[]
+				all_serial_no_response = recoursion_all_serial_no(dc_response_json)
+				process_serial_no = all_serial_no_response.keys()
+				#Check all parent serial no
+				for sr_no in process_serial_no:
+					#Find serial no from pass list
+					for sr_no_record in record_to_be_proccess:
+						#If same serial no found then prepare body to register on server
+						if sr_no==sr_no_record['serialNo']:
+							for single_serial_no in all_serial_no_response[sr_no]:
+								obj={}
+								obj['serialNo']=single_serial_no #child serial no
+								obj['model']=sr_no_record["model"]
+								obj['custName']=sr_no_record["custName"]
+								obj['dcNo']=sr_no_record["dcNo"]
+								obj['dcDate']=sr_no_record["dcDate"]
+								obj['mastCode']="0"
+								obj['subModelType']="0"
+								body.append(obj)
+			
+								doc = frappe.new_doc("Sub Serial No")
+								doc.parent_serial_no = sr_no #main serial no
+								doc.item_code = sr_no_record["item_code"]
+								doc.model = sr_no_record["model"]
+								doc.customer_name = sr_no_record["custName"]
+								doc.dc = sr_no_record["dcNo"]
+								doc.dcdate = sr_no_record["dcDate"]
+								doc.custom_marked_in_avdm = 0
+								doc.insert(ignore_permissions=True)
+
+			#Create body and pass in same way as main serial no
+			cunk_size = 100
+			body_send = []
+			record_found = False
+
+			for index, record in enumerate(body):
+				body_send.append(record)
+				if index%cunk_size==0:
+					reply['chunk_send_{}'.format(str(index))]="Cunk Send"
+					# errorLog(key_body_process,str(body_send)) #Comment
+					errorLog('Sub-serial-no',str(body_send))
+					record_found = True
+					body_send = []
+
+			if len(body_send)!=0:
+				record_found = True
+				# errorLog(key_body_process,str(body_send))#Comment
+				errorLog("Sub-serial-no",str(body_send))
+			#If any record is found then 5 min cron set on
+			if record_found:
+				query = "UPDATE `tabScheduled Job Type` SET `stopped`=0 WHERE `method` = '{}'".format('mantra_dev.backend_code.avdm.process_one_record')
+				records = frappe.db.sql(query,as_dict=1)
+
+    
+			#Delete serial number which is process
+			for err_name in list_body_to_process:
+				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])
+				records_deleted = frappe.db.sql(query,as_dict=1)
+
+		else:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com"],
+				subject="EVDM-sub serial request not process",
+				message="fetch_sub_serial_no_records <br>{}<br>{}".format(mssage,str(reply))
+			)
+
+	except Exception as e:
+		reply['message']="Exception"
+		reply['message_traceback']=str(traceback.format_exc())
+		mssage = str(traceback.format_exc())
+		frappe.sendmail(
+			recipients=["ravi.patel@mantratec.com"],
+			subject="EVDM-sub serial not process due to issue",
+			message="avdm.py - process_one_record <br>{}<br>{}".format(mssage,str(reply))
+		)
+
+
+@frappe.whitelist(allow_guest=True)
+def recoursion_all_serial_no(body_pass):
+	# pass_string = "[{\"SerialNo\":\"9346518\",\"Model\":\"BionicFP6\",\"Consume\":[{\"SerialNo\":\"9182844\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333\",\"Model\":\"BioNICF6\",\"Consume\":[]}]},{\"SerialNo\":\"9346518\",\"Model\":\"BionicFP6\",\"Consume\":[{\"SerialNo\":\"9182844\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333\",\"Model\":\"BioNICF6\",\"Consume\":[{\"SerialNo\":\"9182844-1\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333-2\",\"Model\":\"BioNICF6\",\"Consume\":[]}]}]},{\"SerialNo\":\"9401893\",\"Model\":\"BioNIC8-W\",\"Consume\":[{\"SerialNo\":\"9175427\",\"Model\":\"MFS100V2\",\"Consume\":[{\"SerialNo\":\"22222\",\"Model\":\"MF2222\",\"Consume\":[]}]}]}]"
+	# body_pass = ast.literal_eval(pass_string)
+	
+	final_data = {}
+	for rec in body_pass:
+		final_data[rec['SerialNo']] = process_all_level_serial_no(device=rec,data=[])
+
+	return final_data
+
+def process_all_level_serial_no(device, data):
+    
+    for sub_device in device.get("Consume", []):
+        data.append(sub_device["SerialNo"])
+        process_all_level_serial_no(sub_device,data)
+
+    return data
+
+
+@frappe.whitelist(allow_guest=True)
+def update_serial_no_records(limit):
+
+	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT {}".format(key_serial_no,limit)
 	serial_no_list = frappe.db.sql(query)
  
 	if len(serial_no_list)==0:

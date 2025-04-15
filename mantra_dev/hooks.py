@@ -126,29 +126,21 @@ scheduler_events = {
             "mantra_dev.backend_code.api.notify_purchase_managers", # To send notification to Purchase manage if PO schedule date is due today.
         ],
         "0 8 * * *": [
-            "mantra_dev.backend_code.minop.employee_remain_bank_account",
-            "mantra_dev.backend_code.globle.check_system_status",
+            "mantra_dev.backend_code.reminder.employee_remain_bank_account",
+            "mantra_dev.backend_code.reminder.check_system_status",
+            "mantra_dev.backend_code.reminder.employee_names_validation_and_notify",
         ],
-        # "0 20 * * *": [
-        #     "mantra_dev.mantra_dev.page.payment.payment.email_payment_entry"
-        # ],
     },
-	"daily": [
+    "hourly_long": [
+		"mantra_dev.backend_code.reminder.check_last_backup_time_and_notify",
+	],
+	"daily_long": [
         #This log will clear beny process files log every day at night.
 		"mantra_dev.backend_code.globle.clear_beny_file_process_log"
 	],
     "weekly_long":[
-        "mantra_dev.backend_code.globle.weekly_check"
+        "mantra_dev.backend_code.reminder.weekly_check_checkpoints"
     ]
-# 	"hourly": [
-# 		"mantra_dev.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"mantra_dev.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"mantra_dev.tasks.monthly"
-# 	],
 }
 
 override_whitelisted_methods = {

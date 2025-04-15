@@ -1,4 +1,7 @@
 frappe.ui.form.on('Employee', {
+	onload(frm) {
+		frm.set_df_property('prefered_contact_email', 'reqd', 1);
+	},
 	refresh(frm) {
 
         frm.add_custom_button(("Send salary slip mail"), () => {
@@ -159,6 +162,18 @@ frappe.ui.form.on('Employee', {
 	    })
 	},
 	validate(frm) {
+
+		if (frm.doc.prefered_contact_email === "Company Email" && !frm.doc.company_email) {
+			frappe.throw("Company Email is required because it is selected as the Preferred Contact Email.");
+		}
+		if (frm.doc.prefered_contact_email === "Personal Email" && !frm.doc.personal_email) {
+			frappe.throw("Personal Email is required because it is selected as the Preferred Contact Email.");
+		}
+		if (frm.doc.prefered_contact_email === "User ID" && !frm.doc.user_id) {
+			frappe.throw("User ID is required because it is selected as the Preferred Contact Email.");
+		}
+
+
 		const nameRegex = /^[A-Za-z\s]+$/;
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  
