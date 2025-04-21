@@ -5,6 +5,27 @@ import requests # type: ignore
 from frappe.utils import get_url # type: ignore
 
 
+
+def create_todo(description,allocated_to,date=None,status='Open',priority='Medium',reference_type='',reference_name=''):
+    
+    if date==None:
+        date = frappe.utils.nowdate()
+    
+    todo = frappe.get_doc({
+        "doctype": "ToDo",
+        "description": description,
+        "allocated_to": allocated_to,  # Assign to user
+        "status": status,
+        "priority": priority,         # Options: Low, Medium, High
+        "date": date,
+        "reference_type": reference_type,
+        "reference_name": reference_name
+    })
+    todo.insert(ignore_permissions=True)
+    return f"ToDo created with name: {todo.name}"
+
+
+
 @frappe.whitelist(allow_guest=True)
 def check_system_status():
 

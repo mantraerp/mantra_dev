@@ -124,6 +124,7 @@ scheduler_events = {
         ],
         "0 7 * * *": [
             "mantra_dev.backend_code.api.notify_purchase_managers", # To send notification to Purchase manage if PO schedule date is due today.
+            "mantra_dev.backend_code.reminder.check_duplicate_payment_entry_alert", #To check multiple payment entry
         ],
         "0 8 * * *": [
             "mantra_dev.backend_code.reminder.employee_remain_bank_account",

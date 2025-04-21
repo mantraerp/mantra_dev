@@ -9,6 +9,9 @@ from frappe.utils import flt # type: ignore
 class CustomPurchaseOrder(PurchaseOrder):
 	def on_submit(self):
 		super().on_submit()
+		if po_form := frappe.db.get_value("PO Form Approval", {"purchase_order": self.name, "docstatus": 0}, "name"):
+			po_form_doc = frappe.get_doc("PO Form Approval", po_form)
+			po_form_doc.submit()
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow and self.custom_purchase_type == "Service Order":

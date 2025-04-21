@@ -174,7 +174,7 @@ frappe.ui.form.on("Purchase Order", {
                 // Fetch document details via Frappe backend
                 let response = await new Promise((resolve, reject) => {
                     frappe.call({
-                        method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                        method: "mantra_dev.backend_code.detail_popup.fetch_document_details",
                         args: {
                             doctype: "Purchase Order",
                             docname: frm.doc.name
@@ -286,8 +286,6 @@ frappe.ui.form.on("Purchase Order", {
             },
             __("Utility"));
         }
-
-        
     },    
     before_save: function (frm) {
         frm.doc.items.forEach((item) => {

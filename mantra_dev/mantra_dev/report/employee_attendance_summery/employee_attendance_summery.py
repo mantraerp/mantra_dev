@@ -25,6 +25,8 @@ def get_columns():
         {"label": "Total Days", "fieldname": "total_days", "fieldtype": "Data", "width": 200},
         {"label": "Joining Date", "fieldname": "date_of_joining", "fieldtype": "Date", "width": 200},
         {"label": "Dyas Diff(From 1st Day Of Month to Joining Date)", "fieldname": "days_difference", "fieldtype": "Data", "width": 200},
+        {"label": "Relieving Date", "fieldname": "relieving_date", "fieldtype": "Date", "width": 200},
+        {"label": "Dyas Diff(From Last Day to Reliving Day)", "fieldname": "rel_days_difference", "fieldtype": "Data", "width": 200},
     ]
 
 def get_data(filters):
@@ -47,7 +49,9 @@ def get_data(filters):
             at.employee AS employee_code,
             at.employee_name,
             DATE(emp.date_of_joining) AS date_of_joining,
-            DATEDIFF(emp.date_of_joining, DATE_FORMAT(emp.date_of_joining, '%Y-%m-01')) AS days_difference,    
+            DATEDIFF(emp.date_of_joining, DATE_FORMAT(emp.date_of_joining, '%Y-%m-01')) AS days_difference,
+            DATE(emp.relieving_date) AS relieving_date,
+            ABS(DATEDIFF(emp.relieving_date, '{to_date}')) AS rel_days_difference,
             SUM(
                 CASE
                     WHEN at.custom_minop_status IN ("P","PW","PH","W","WH","H","HW") AND at.status = 'Half Day' THEN 0.5
@@ -122,7 +126,8 @@ def send_employee_attendace_summery_report_mail(filters):
         'W': 'No.OF WeekOff',
         'no_of_paiddays': 'No.Of Paiddays',
         'total_days': 'Total(days)',
-        'difference': 'Days Difference (From 1st Day Of Month to Joining Date)'
+        'difference': 'Days Difference (From 1st Day Of Month to Joining Date)',
+        "relieving_difference": 'Relieving Diff. (From Relieving Date to Last Day Of Month)'
     }
 
     attendance_status_count_list = {
@@ -133,9 +138,10 @@ def send_employee_attendace_summery_report_mail(filters):
         'H': 0,
         'no_of_paiddays': 0,
         'total_days': date_diff(filters.get('to_date'), filters.get('from_date')) + 1,
-        'difference': 0
+        'difference': 0,
+        'relieving_difference': 0
     }
-    employee_doc = frappe.db.get_value("Employee", filters.get('employee'), ["employee_name", "prefered_email","date_of_joining"], as_dict=True)
+    employee_doc = frappe.db.get_value("Employee", filters.get('employee'), ["employee_name", "prefered_email","date_of_joining","relieving_date"], as_dict=True)
 
     if not employee_doc.get("employee_name"):
         return "Employee Name is not found"
@@ -145,13 +151,20 @@ def send_employee_attendace_summery_report_mail(filters):
 
     if not employee_doc.get("date_of_joining"):
         return "Date Of Joining is not set in Employee"
-
+    
 
     joining_date = getdate(employee_doc.get('date_of_joining'))
     first_day = joining_date.replace(day=1)
     days_difference = (joining_date - first_day).days
 
     attendance_status_count_list['difference'] = days_difference
+
+    rel_date = None
+    if employee_doc.get("relieving_date"):
+        rel_date = getdate(employee_doc.get("relieving_date"))
+        last_day = get_last_day(rel_date)
+        rel_days_difference = abs((last_day - rel_date).days)
+        attendance_status_count_list['relieving_difference'] = rel_days_difference
 
     conditions = f"at.docstatus = 1 AND at.attendance_date BETWEEN '{filters.get('from_date')}' AND '{filters.get('to_date')}' AND at.employee = '{filters.get('employee')}'"
     query = f"""
@@ -215,8 +228,8 @@ def send_employee_attendace_summery_report_mail(filters):
         html = f"""
             <b>Employee Code:</b> {filters.get('employee')}<br>
             <b>Employee Name:</b> {employee_doc.get("employee_name")}<br>
-            <b>Date Of Joining:</b> {frappe.utils.format_date(joining_date)}<br>
-            <b>Days Difference (From 1st Day Of Month to Joining Date):</b> <span style="color:red;">{days_difference}</span><br>
+            <b>Date Of Joining:</b> {frappe.utils.format_date(joining_date) if joining_date else ''}<br>
+            <b>Relieving Date:</b> {frappe.utils.format_date(rel_date) if rel_date else ''}<br>
             <b>Date Range:</b> {frappe.utils.format_date(filters.get("from_date"))} to {frappe.utils.format_date(filters.get("to_date"))}
             <br>
             <h4>Attendance Summury:</h4>

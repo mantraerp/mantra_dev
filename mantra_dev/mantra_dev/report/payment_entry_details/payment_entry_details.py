@@ -97,7 +97,7 @@ def get_data():
 		FROM 
 			`tabPayment Entry` as py
 		WHERE
-			py.docstatus = 1
+			py.workflow_state IN ('Checked')
 	"""
 
 	data = frappe.db.sql(data,as_dict=True)

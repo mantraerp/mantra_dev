@@ -8,7 +8,7 @@ frappe.ui.form.on('Purchase Invoice', {
                 event.preventDefault();
             }
         });
-///////////////////////////////////
+    ///////////////////////////////////
 
         if(frm.is_new()){
             frm.set_query('custom_invoice_type', () => {
@@ -49,7 +49,7 @@ frappe.ui.form.on('Purchase Invoice', {
             try {
                 let response = await new Promise((resolve, reject) => {
                     frappe.call({
-                        method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                        method: "mantra_dev.backend_code.detail_popup.fetch_document_details",
                         args: {
                             doctype: "Purchase Invoice",
                             docname: frm.doc.name

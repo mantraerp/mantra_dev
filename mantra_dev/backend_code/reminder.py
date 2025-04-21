@@ -6,7 +6,7 @@ import re
 import os
 from datetime import datetime, timedelta
 from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url # type: ignore
-
+from frappe.utils import today, add_days # type: ignore
 
 employee_mail = ['hrops@mantratec.com','anil.vadhel@mantratec.com','mukund.kotadia@mantratec.com','anurag@mantratec.com','ravi.patel@mantratec.com']
 
@@ -260,56 +260,141 @@ def employee_names_validation_and_notify():
   
 @frappe.whitelist(allow_guest=True)
 def check_last_backup_time_and_notify():
-   try:
-       backup_path = frappe.get_site_path("private", "backups")
-       latest_time = None
+	try:
+		backup_path = frappe.get_site_path("private", "backups")
+		latest_time = None
 
-       if not os.path.exists(backup_path):
-           subject="Backup Alert: Folder Missing"
-           message="<b>Backup folder not found at path:</b><br>{}".format(backup_path)
-      
-       # Find the latest modified file in the backup directory
-       for file in os.listdir(backup_path):
-           file_path = os.path.join(backup_path, file)
-           if os.path.isfile(file_path):
-               modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
-               if not latest_time or modified_time > latest_time:
-                   latest_time = modified_time
+		subject=""
+		message=""
+		if not os.path.exists(backup_path):
+			subject="Backup Alert: Folder Missing"
+			message="<b>Backup folder not found at path:</b><br>{}".format(backup_path)
+		
+		# Find the latest modified file in the backup directory
+		for file in os.listdir(backup_path):
+			file_path = os.path.join(backup_path, file)
+			if os.path.isfile(file_path):
+				modified_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+				if not latest_time or modified_time > latest_time:
+					latest_time = modified_time
 
-       if not latest_time:
-           subject="Backup Alert: No Files Found"
-           message="No backup files found in <b>{}</b>".format(backup_path)
-      
-       # Calculate the time difference
-       current_time = datetime.now()
-       diff = current_time - latest_time
-       hours_since_backup = int(diff.total_seconds() // 3600)
+		if not latest_time:
+			subject="Backup Alert: No Files Found"
+			message="No backup files found in <b>{}</b>".format(backup_path)
+		
+		# Calculate the time difference
+		current_time = datetime.now()
+		diff = current_time - latest_time
+		hours_since_backup = int(diff.total_seconds() // 3600)
 
-       if diff > timedelta(hours=6):
-           subject= f"Backup Alert: More than {hours_since_backup} Hour(s) Since Last Backup"
-           message = f"""
-               <b>Backup Alert:</b><br><br>
-               Last backup was taken at <b>{latest_time.strftime('%Y-%m-%d %H:%M:%S')}</b><br>
-               Time since last backup: <b>{hours_since_backup} hour(s)</b><br><br>
-               Please ensure backup is running on schedule.
-           """
-       frappe.sendmail(
-           recipients=["ravi.patel@mantratec.com"],  # Add relevant email
-           subject= subject,
-           message=message
-       )
+		if diff > timedelta(hours=12):
+			subject= f"Backup Alert: More than {hours_since_backup} Hour(s) Since Last Backup"
+			message = f"""
+				<b>Backup Alert:</b><br><br>
+				Last backup was taken at <b>{latest_time.strftime('%Y-%m-%d %H:%M:%S')}</b><br>
+				Time since last backup: <b>{hours_since_backup} hour(s)</b><br><br>
+				Please ensure backup is running on schedule.
+			"""
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com"],
+				subject= subject,
+				message=message
+			)
 
-       return f"Backup alert sent."
-      
-   except Exception as e:
-       frappe.sendmail(
-           recipients=["ravi.patel@mantratec.com"],
-           subject="Error: Could not check last backup time",
-           message=f"""
-               An error occurred while checking the last backup time:<br><br>
-               <b>Error:</b> {str(e)}<br><br>
-               <b>Traceback:</b><br>
-               <pre>{frappe.get_traceback()}</pre>
-           """
-       )
-       return "Error occurred. Notification sent."
+		return f"Backup alert sent."
+		
+	except Exception as e:
+		frappe.sendmail(
+			recipients=["ravi.patel@mantratec.com"],
+			subject="Error: Could not check last backup time",
+			message=f"""
+				An error occurred while checking the last backup time:<br><br>
+				<b>Error:</b> {str(e)}<br><br>
+				<b>Traceback:</b><br>
+				<pre>{frappe.get_traceback()}</pre>
+			"""
+		)
+		return "Error occurred. Notification sent."
+
+
+@frappe.whitelist()
+def check_duplicate_payment_entry_alert():
+    try:
+        yesterday = add_days(today(), -1)
+
+        # Fetch Payment Entries modified yesterday and not canceled
+        payment_entries = frappe.get_all(
+            "Payment Entry",
+            filters={
+                "modified": ["between", [yesterday + " 00:00:00", yesterday + " 23:59:59"]],
+                "docstatus": ["!=", 2]
+            },
+            fields=["name"]
+        )
+
+        email_recipients = ["ravi.patel@mantratec.com"]  # Change this to your recipient list
+        email_subject = "Multiple Payment Entries Created"
+        email_body = ""
+
+        multiple_entries_found = False  # Track if we need to send an email
+        reference_payment_map = {}  # Dictionary to store Payment Entries by reference
+
+        # Fetch references from child table
+        for pe in payment_entries:
+            payment_doc = frappe.get_doc("Payment Entry", pe.name)
+            for ref in payment_doc.references:
+                reference_key = f"{ref.reference_doctype}::{ref.reference_name}"
+                
+                # Fetch all non-canceled Payment Entries related to this reference_name
+                related_payment_entries = frappe.get_all(
+                    "Payment Entry",
+                    filters={
+                        "name": ["in", frappe.get_all(
+                            "Payment Entry Reference",
+                            filters={"reference_name": ref.reference_name},
+                            pluck="parent"  # Get related Payment Entry names
+                        )],
+                        "docstatus": ["!=", 2]  # Exclude canceled Payment Entries
+                    },
+                    fields=["name"],
+                )
+
+                # Store Payment Entries in a dictionary
+                if reference_key not in reference_payment_map:
+                    reference_payment_map[reference_key] = set()
+
+                reference_payment_map[reference_key].update([entry["name"] for entry in related_payment_entries])
+
+        # Check if any reference has multiple Payment Entries
+        for reference, payments in reference_payment_map.items():
+            if len(payments) > 1:
+                multiple_entries_found = True
+                reference_doctype, reference_name = reference.split("::")
+                email_body += f"<h4>{reference_doctype}: {reference_name}</h4>"
+                email_body += "<ul>"
+                for payment_entry in payments:
+                    email_body += f"<li>Payment Entry: {payment_entry}</li>"
+                email_body += "</ul>"
+
+        # If multiple Payment Entries exist, send an email
+        if multiple_entries_found:
+            try:
+                frappe.sendmail(
+                    recipients=email_recipients,
+                    subject=email_subject,
+                    message=email_body
+                )
+                return "Email sent successfully"
+            except Exception as e:
+                frappe.log_error(f"Failed to send email: {str(e)}", "check_duplicate_payment_entry_alert")
+                return "Error sending email. Logged error."
+        
+        return "No multiple Payment Entries found"
+    
+    except Exception as e:
+        frappe.sendmail(
+			recipients=email_recipients,
+			subject="Error in check_duplicate_payment_entry_alert - reminder: {}".format(str(e)),
+			message=str(traceback.format_exc())
+		)
+        return "Error occurred. Logged error."
