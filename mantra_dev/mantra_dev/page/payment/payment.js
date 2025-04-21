@@ -4,7 +4,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         title: 'Payment Page',
         single_column: true
     });
-
+    frappe.breadcrumbs.add("", "");
     this.lastSelectedPayrollEntry = '';
     this.lastSelectedBankAccount='';
     let filterContainer = $('<div class="filter-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: space-between;"></div>').appendTo(page.body);
@@ -32,139 +32,215 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
     var tableContainer = $(`<div id="group-table-container" style="max-height:500px; overflow-y:auto; scrollbar-width: none;">
   </div>`).appendTo(page.body);
 
-    this.form = new frappe.ui.FieldGroup({
-        fields: [
-			{
-				label: __("Use Payroll Entry"),
-				fieldname: "use_payroll_entry",
-				fieldtype: "Check",
-				class:'use-payroll-id',
-				default: 0,
-				change: () => {
-                    $(tableContainer).hide();
-                    let usePayroll = this.form.get_value("use_payroll_entry");
-                    let isPayrollEnabled = usePayroll == 1;
+  this.form = new frappe.ui.FieldGroup({
+    fields: [
+        {
+            label: __("Use Payroll Entry"),
+            fieldname: "use_payroll_entry",
+            fieldtype: "Check",
+            class:'use-payroll-id',
+            default: 0,
+            change: () => {
+                $(tableContainer).hide();
+                let usePayroll = this.form.get_value("use_payroll_entry");
+                let isPayrollEnabled = usePayroll == 1;
+              
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
                 
-                    // Toggle visibility of fields
-                    this.form.set_df_property("bank", "hidden", isPayrollEnabled);
-                    this.form.set_df_property("bank_account", "hidden", isPayrollEnabled);
-                    this.form.set_df_property("payroll_entry", "hidden", !isPayrollEnabled);
-                
-                    // Reset values
-                    this.form.set_value("bank", "");
+            
+                if(!isPayrollEnabled){
+                    this.form.set_value("filter_month",monthNames[new Date().getMonth()])
+                }
+            
+                // Toggle visibility of fields
+                this.form.set_df_property("bank", "hidden", isPayrollEnabled);
+                this.form.set_df_property("bank_account", "hidden", isPayrollEnabled);
+                this.form.set_df_property("payroll_entry", "hidden", !isPayrollEnabled);
+            
+                // Reset values
+                this.form.set_value("bank", "");
+                this.form.set_value("bank_account", "");
+                this.form.set_value("payroll_entry", isPayrollEnabled ? "" : null);
+            
+                // Reset transaction summary
+                resetSummary()
+            }
+        },
+        {
+            fieldtype: "Column Break"
+        },
+        {
+            label: __("Month"),
+            fieldname: "filter_month",
+            fieldtype: "Select",
+            depends_on: "use_payroll_entry",
+            options: [
+                { label: "January", value: "January" },
+                { label: "February", value: "February" },
+                { label: "March", value: "March" },
+                { label: "April", value: "April" },
+                { label: "May", value: "May" },
+                { label: "June", value: "June" },
+                { label: "July", value: "July" },
+                { label: "August", value: "August" },
+                { label: "September", value: "September" },
+                { label: "October", value: "October" },
+                { label: "November", value: "November" },
+                { label: "December", value: "December" }
+            ],
+            default: (() => {
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                return monthNames[new Date().getMonth()];
+            })(),
+            change: () => {
+                this.form.set_value("payroll_entry", ""); 
+            }
+        },
+        {
+            label: __("Bank"),
+            fieldname: "bank",
+            fieldtype: "Link",
+            options: "Bank",
+            reqd: 1,
+            change: () => {
+                let selectedBank = this.form.get_value("bank");
+                bank = selectedBank;
+            
+                if (!selectedBank) {
                     this.form.set_value("bank_account", "");
-                    this.form.set_value("payroll_entry", isPayrollEnabled ? "" : null);
-                
-                    // Reset transaction summary
+                    $(tableContainer).hide();
+            
                     resetSummary()
+                } else if (this.form.get_value("bank_account")) {
+                    this.form.set_value("bank_account", "");
                 }
-			},
-            {
-                fieldtype: "Column Break"
-            },
-            {
-                label: __("Bank"),
-                fieldname: "bank",
-                fieldtype: "Link",
-                options: "Bank",
-                reqd: 1,
-                change: () => {
-                    let selectedBank = this.form.get_value("bank");
-                    bank = selectedBank;
-                
-                    if (!selectedBank) {
-                        this.form.set_value("bank_account", "");
-                        $(tableContainer).hide();
-                
-                        resetSummary()
-                    } else if (this.form.get_value("bank_account")) {
-                        this.form.set_value("bank_account", "");
-                    }
+            }
+        },
+        {
+            fieldtype: "Column Break"
+        },
+        {
+            label: __("Payroll Entry"),
+            fieldname: "payroll_entry",
+            fieldtype: "Link",
+            options: "Payroll Entry",
+            hidden: true,  // Initially hidden
+            reqd: 1,
+            depends_on: "use_payroll_entry",
+            // get_query: () => {
+            // 	return {
+            // 		filters: {
+            // 			status: "Submitted",
+            // 			custom_salary_slip_file_generated:0,
+            //             custom_payroll_entry_approved:1
+            // 		}
+            // 	};
+            // },
+            get_query: () => {
+                const monthMap = {
+                    January: [1, 31],
+                    February: [2, 28],
+                    March: [3, 31],
+                    April: [4, 30],
+                    May: [5, 31],
+                    June: [6, 30],
+                    July: [7, 31],
+                    August: [8, 31],
+                    September: [9, 30],
+                    October: [10, 31],
+                    November: [11, 30],
+                    December: [12, 31]
+                };
+            
+                let selectedMonth = this.form.get_value("filter_month") || "January";
+                let year = new Date().getFullYear();
+                const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                if (selectedMonth === "February" && isLeapYear) {
+                    monthMap["February"][1] = 29;
                 }
+            
+                let [monthNumber, daysInMonth] = monthMap[selectedMonth];
+                let startDate = frappe.datetime.obj_to_str(new Date(year, monthNumber - 1, 1));
+                let endDate = frappe.datetime.obj_to_str(new Date(year, monthNumber - 1, daysInMonth));
+            
+                return {
+                    filters: {
+                        status: "Submitted",
+                        custom_salary_slip_file_generated: 0,
+                        custom_payroll_entry_approved: 1,
+                        start_date: [">=",startDate],
+                        end_date:["<=",endDate]
+                    }
+                };
             },
-			{
-				label: __("Payroll Entry"),
-				fieldname: "payroll_entry",
-				fieldtype: "Link",
-				options: "Payroll Entry",
-				hidden: true,  // Initially hidden
-				reqd: 1,
-				depends_on: "use_payroll_entry",
-				get_query: () => {
-					return {
-						filters: {
-							status: "Submitted",
-							custom_salary_slip_file_generated:0,
-                            custom_payroll_entry_approved:1
-						}
-					};
-				},
-                change: () => {
-                    let selectedPayrollEntry = this.form.get_value("payroll_entry");
-                    if (this.lastSelectedPayrollEntry !== selectedPayrollEntry) {
-                        this.lastSelectedPayrollEntry = selectedPayrollEntry; // Store last selected value
-        
-                        if (selectedPayrollEntry) {
-                            this.fetchPayrollEntries(selectedPayrollEntry);
-                        } else {
-                            $(tableContainer).empty();
-                            resetSummary();
-                        }
-                    }
-                }
-			},
-            {
-                fieldtype: "Column Break"
-            },
-            {
-                label: __("Bank Account"),
-                fieldname: "bank_account",
-                fieldtype: "Link",
-                options: "Bank Integration",
-                reqd: 1,
-                depends_on: "bank",
-                get_query: () => {
-                    let selectedBank = this.form.get_value("bank");
-                    if (!selectedBank) {
-                        return { filters: { name: ["=", ""] } };
-                    }
-                    return {
-                        filters: {
-                            bank: selectedBank,
-                            payments: 1,
-                            enabled: 1
-                        }
-                    };
-                },
-                change: () => {
-                    let selectedBank = this.form.get_value("bank");
-                    let selectedBankAccount = this.form.get_value("bank_account");
-                
-                    // Prevent duplicate calls
-                    if (this.lastSelectedBankAccount === selectedBankAccount) {
-                        return; // Do nothing if the value hasn't changed
-                    }
-                    this.lastSelectedBankAccount = selectedBankAccount; // Store the last selected value
-                
-                    if (selectedBankAccount && !selectedBank) {
-                        frappe.msgprint(__('Please select a bank before selecting a bank account.'));
-                        this.form.set_value("bank_account", "");
-                        return;
-                    }
-                
-                    if (selectedBankAccount) {
-                        $("#export-to-excel").show();
-                        this.fetchPaymentEntries(selectedBankAccount);
+            change: () => {
+                let selectedPayrollEntry = this.form.get_value("payroll_entry");
+                if (this.lastSelectedPayrollEntry !== selectedPayrollEntry) {
+                    this.lastSelectedPayrollEntry = selectedPayrollEntry;
+    
+                    if (selectedPayrollEntry) {
+                        this.fetchPayrollEntries(selectedPayrollEntry);
                     } else {
-                        $(tableContainer).hide();
-                        $("#export-to-excel").hide();
+                        $(tableContainer).empty();
                         resetSummary();
                     }
                 }
+            }
+        },
+        {
+            label: __("Bank Account"),
+            fieldname: "bank_account",
+            fieldtype: "Link",
+            options: "Bank Integration",
+            reqd: 1,
+            depends_on: "bank",
+            get_query: () => {
+                let selectedBank = this.form.get_value("bank");
+                if (!selectedBank) {
+                    return { filters: { name: ["=", ""] } };
+                }
+                return {
+                    filters: {
+                        bank: selectedBank,
+                        payments: 1,
+                        enabled: 1
+                    }
+                };
             },
-        ],
-        body: filterContainer
-    });
+            change: () => {
+                let selectedBank = this.form.get_value("bank");
+                let selectedBankAccount = this.form.get_value("bank_account");
+            
+                if (this.lastSelectedBankAccount === selectedBankAccount) {
+                    return; // Do nothing if the value hasn't changed
+                }
+                this.lastSelectedBankAccount = selectedBankAccount; // Store the last selected value
+            
+                if (selectedBankAccount && !selectedBank) {
+                    frappe.msgprint(__('Please select a bank before selecting a bank account.'));
+                    this.form.set_value("bank_account", "");
+                    return;
+                }
+            
+                if (selectedBankAccount) {
+                    $("#export-to-excel").show();
+                    this.fetchPaymentEntries(selectedBankAccount);
+                } else {
+                    $(tableContainer).hide();
+                    $("#export-to-excel").hide();
+                    resetSummary();
+                }
+            }
+        },
+    ],
+    body: filterContainer
+});
     this.form.make();
     document.addEventListener("change", function (event) {
         const target = event.target;
@@ -821,7 +897,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
             // Fetch document details via Frappe backend
             let response = await new Promise((resolve, reject) => {
                 frappe.call({
-                    method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                    method: "mantra.backend_code.detail_popup.fetch_document_details",
                     args: {
                         doctype: "Purchase Order",
                         docname: poId

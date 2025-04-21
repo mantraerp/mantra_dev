@@ -4,7 +4,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
 		title: 'Payment Page Approver',
 		single_column: true
 	});
-   
+    frappe.breadcrumbs.add("", "");
     let filterContainer = $('<div class="filter-container" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; justify-content: space-between;"></div>').appendTo(page.body);
     
     let transaction_summary_table = $(`<table id="transaction-summary-table" style="margin-bottom: 20px; width: 100%; border-collapse: collapse;font-family: var(--font-stack);">
@@ -663,7 +663,7 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
             // Fetch document details via Frappe backend
             let response = await new Promise((resolve, reject) => {
                 frappe.call({
-                    method: "mantra_dev.backend_code.purchase_order.purchase_order.fetch_document_details",
+                    method: "mantra.backend_code.detail_popup.fetch_document_details",
                     args: {
                         doctype: "Purchase Order",
                         docname: poId

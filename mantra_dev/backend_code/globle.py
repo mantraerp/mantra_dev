@@ -25,65 +25,6 @@ def create_todo(description,allocated_to,date=None,status='Open',priority='Mediu
     return f"ToDo created with name: {todo.name}"
 
 
-
-@frappe.whitelist(allow_guest=True)
-def check_system_status():
-
-	reply={}
-	reply['UAT']="Not working"
-
-	reply['message']=""
-
-	if not frappe.db.get_single_value("ERP Settings", "get_system_status_notification"):
-		return "System status not on"
-
-	email_list = frappe.db.get_single_value("ERP Settings", "system_status_notification_users").replace("\n", ",")
-	email_receipient = email_list.split(",")
-
-	if len(email_receipient)==0:
-		return "No email found"
-
- # check_system_status
-	reply = system_call(reply,"http://192.168.5.78:8000/login#login",'UAT')
-	reply = system_call(reply,"http://192.168.5.56:8000/#login",'Smart Identity (IBU)')
-	reply = system_call(reply,"http://192.168.5.56:8001/#login",'Mitras Global') 
-	reply = system_call(reply,"http://192.168.5.56:8002/#login",'Mewruk')
-	reply = system_call(reply,"http://192.168.5.56:8007/#login",'VAPT')
-	reply = system_call(reply,"http://192.168.5.56:8008/#login",'Mefron')
-	reply = system_call(reply,"http://192.168.5.56:8004/#login",'Servico')
-	reply = system_call(reply,"http://192.168.5.56:8005/#login",'Mocula')
-	reply = system_call(reply,"http://192.168.5.56:8006/#login",'Mupizo')
- 
- 
-	keys = reply.keys()
-	email_message_body=""
-	for ky in keys:
-		if ky != 'message':
-			email_message_body = "{}<b>{}</b>: {}<br>".format(email_message_body,ky,reply[ky])
-
-	email_message_body = "<br><br><br><br>{}<b>{}</b>: {}".format(email_message_body,'message',reply['message'])
-
-	frappe.sendmail(
-		recipients=email_receipient,
-		subject="System status {}".format(frappe.utils.nowdate()),
-		message=email_message_body
-	)
-
-	frappe.enqueue(permission_count, queue='long', timeout=10000)
-	return reply
-
-def system_call(reply,url,key):
-	reply[key]="Not working"
-	try:
-		response = requests.post(url)
-		if response.status_code == 200:
-			reply[key]="Working"
-	except Exception as e:
-		reply[key]="Not working"
-		reply['message'] = "{}<br><br><b>{} traceable error</b>:<br>{}".format(reply['message'],key,str(traceback.format_exc()))
- 
-	return reply
-
 def site_base_url():
 	siteurl = get_url()
 	if siteurl=="http://192.168.1.38:8001":

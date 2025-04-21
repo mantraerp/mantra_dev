@@ -6,8 +6,7 @@ import re
 import os
 from datetime import datetime, timedelta
 from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url # type: ignore
-from frappe.utils import today, add_days # type: ignore
-
+from frappe.utils import today, add_days, get_url # type: ignore
 employee_mail = ['hrops@mantratec.com','anil.vadhel@mantratec.com','mukund.kotadia@mantratec.com','anurag@mantratec.com','ravi.patel@mantratec.com']
 
 
@@ -352,12 +351,13 @@ def check_duplicate_payment_entry_alert():
                         "name": ["in", frappe.get_all(
                             "Payment Entry Reference",
                             filters={"reference_name": ref.reference_name},
-                            pluck="parent"  # Get related Payment Entry names
+                            pluck=["parent"]
                         )],
-                        "docstatus": ["!=", 2]  # Exclude canceled Payment Entries
+						"docstatus": ["!=", 2],
+						"workflow_state": ["not in", ["Rejected"]]
                     },
                     fields=["name"],
-                )
+                )   
 
                 # Store Payment Entries in a dictionary
                 if reference_key not in reference_payment_map:
@@ -398,3 +398,68 @@ def check_duplicate_payment_entry_alert():
 			message=str(traceback.format_exc())
 		)
         return "Error occurred. Logged error."
+    
+    
+@frappe.whitelist(allow_guest=True)
+def notify_disabled_items_in_active_boms():
+    try:
+        # Step 1: Get disabled items
+        disabled_items = frappe.get_all("Item", filters={"disabled": 1}, pluck="name")
+        if not disabled_items:
+            return
+
+        # Step 2: Query active BOMs that use these items
+        bom_items = frappe.db.sql("""
+            SELECT bi.parent AS bom_name, bi.item_code
+            FROM `tabBOM Item` bi
+            INNER JOIN `tabBOM` b ON bi.parent = b.name
+            WHERE bi.item_code IN %(disabled_items)s
+            AND b.is_active = 1 AND b.docstatus != "Cancelled"
+        """, {"disabled_items": disabled_items}, as_dict=True)
+
+        if not bom_items:
+            return
+
+        # Step 3: Prepare data
+        body = "<b>The following disabled items are used in active BOMs:</b><br><br>"
+        body += "<b>Total BOM Entries: {}</b><br><br>".format(len(bom_items))
+        body += "<b>Disabled items should not be used in Active BOMs.</b><br><br>"
+
+        body += """<table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td style="width: 30%"><strong>Item Code</strong></td>
+                    <td style="width: 50%"><strong>BOM</strong></td>
+                </tr>
+            """
+
+        for row in bom_items:
+            body += """<tr>
+                <td>
+                    <a href="{0}/app/item/{1}">{1}</a>
+                </td>
+                <td>
+                    <a href="{0}/app/bom/{2}">{2}</a>
+                </td>
+            </tr>""".format(get_url(), row.item_code, row.bom_name)
+
+        body += "</tbody></table>"
+
+        recipients = ['ravi.patel@mantratec.com']
+
+        # Step 4: Send Email
+        frappe.sendmail(
+            recipients=recipients,
+            subject="Disabled Items Found in Active BOMs",
+            message=body
+        )
+
+        return "Process done {}".format(len(bom_items))
+
+    except Exception as e:
+        frappe.sendmail(
+            recipients=recipients,
+            subject="Error while checking Disabled Items in Active BOMs",
+            message="{}<br>{}".format(str(e),str(traceback.format_exc())),
+        )
+

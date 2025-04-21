@@ -22,17 +22,17 @@ app_include_js = [
 doctype_js = {
     "Material Request": "public/js/material_request_changes.js",
     "Stock Entry": "public/js/stock_entry.js",
-    "Payment Entry": "public/js/payment_entry.js",
-    "Purchase Invoice": "public/js/purchase_invoce.js",
+    # "Payment Entry": "public/js/payment_entry.js",
+    # "Purchase Invoice": "public/js/purchase_invoce.js",
     "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
     "Subcontracting Order": "public/js/subcontracting_order.js",
     "Journal Entry": "public/js/journal_entry.js",
-    "Purchase Receipt": "public/js/purchase_receipt.js",
+    # "Purchase Receipt": "public/js/purchase_receipt.js",
     "Sales Invoice": "public/js/sales_invoice.js",
     "Tax Category": "public/js/tax_category.js",
-    "Payment Request": "public/js/payment_request.js",
+    # "Payment Request": "public/js/payment_request.js",
     "Sales Order": "public/js/sales_order.js",
-    "Purchase Order": "public/js/purchase_order.js",
+    # "Purchase Order": "public/js/purchase_order.js",
     "Employee": "public/js/employee.js",
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
@@ -47,11 +47,11 @@ doctype_js = {
 }
 doctype_list_js = {
     "Material Request" : "public/js/material_request.js",
-    "Payment Entry": "public/js/payment_entry.js",
+    # "Payment Entry": "public/js/payment_entry.js",
     "Delivery Note": "public/js/delivery_note.js",
     "Item" : "public/js/item_list.js",
-    "Purchase Order": "public/js/purchase_order_list.js",
-    "Purchase Invoice": "public/js/purchase_invoice_list.js",
+    # "Purchase Order": "public/js/purchase_order_list.js",
+    # "Purchase Invoice": "public/js/purchase_invoice_list.js",
     # "Employee Advance": "public/js/employee_advance_list.js",
 }
 
@@ -62,8 +62,8 @@ override_doctype_class = {
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
     "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
-    "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
-    "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
+    # "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
+    # "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
 }
 
 # Document Events
@@ -122,31 +122,12 @@ scheduler_events = {
         "30 23 * * *": [
             "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"
         ],
-        "0 7 * * *": [
-            "mantra_dev.backend_code.api.notify_purchase_managers", # To send notification to Purchase manage if PO schedule date is due today.
-            "mantra_dev.backend_code.reminder.check_duplicate_payment_entry_alert", #To check multiple payment entry
-        ],
-        "0 8 * * *": [
-            "mantra_dev.backend_code.reminder.employee_remain_bank_account",
-            "mantra_dev.backend_code.reminder.check_system_status",
-            "mantra_dev.backend_code.reminder.employee_names_validation_and_notify",
-        ],
     },
-    "hourly_long": [
-		"mantra_dev.backend_code.reminder.check_last_backup_time_and_notify",
-	],
-	"daily_long": [
-        #This log will clear beny process files log every day at night.
-		"mantra_dev.backend_code.globle.clear_beny_file_process_log"
-	],
-    "weekly_long":[
-        "mantra_dev.backend_code.reminder.weekly_check_checkpoints"
-    ]
 }
 
 override_whitelisted_methods = {
 	"erpnext.selling.doctype.sales_order.sales_order.create_stock_reservation_entries":"mantra_dev.backend_code.sales_orders.sales_orders.create_stock_reservation_entries",
-    "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt":"mantra_dev.overrides.purchase_order.override_make_purchase_receipt"
+    # "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt":"mantra_dev.overrides.purchase_order.override_make_purchase_receipt"
 }
 
 

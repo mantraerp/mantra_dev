@@ -34,11 +34,11 @@ erpnext.accounts.doctype.bank_account.bank_account.BankAccount.on_trash = mantra
 
 erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items = mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.create_stock_reservation_entries_for_so_items
 
-erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
+# erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
 
-erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.pr_required = mantra_dev.purchase_invoice.PurchaseInvoice.pr_required
+# erpnext.accounts.doctype.purchase_invoice.purchase_invoice.PurchaseInvoice.pr_required = mantra_dev.purchase_invoice.PurchaseInvoice.pr_required
 
-erpnext.stock.doctype.purchase_receipt.purchase_receipt.PurchaseReceipt.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
+# erpnext.stock.doctype.purchase_receipt.purchase_receipt.PurchaseReceipt.po_required = mantra_dev.purchase_invoice.PurchaseInvoice.po_required
 
 erpnext.stock.doctype.shipment.shipment.Shipment.on_submit = mantra_dev.backend_code.shipment.shipment.Shipment.on_submit
 
