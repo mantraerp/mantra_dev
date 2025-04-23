@@ -229,8 +229,12 @@ frappe.ui.form.on('Employee', {
 				);
 			}
 		}
+
+		if (frm.doc.custom_pf_type === "No PF") {
+			frm.set_value("provident_fund_account", "");
+		}
  
-		if (pf_account) {
+		if (frm.doc.custom_pf_type !== "No PF" && pf_account) {
 			const pfRegex = /^[A-Za-z0-9]{22}$/;
 			if (!pfRegex.test(pf_account)) {
 				frappe.throw(
@@ -240,6 +244,7 @@ frappe.ui.form.on('Employee', {
 				);
 			}
 		}
+ 
  
 		if (ifsc_code) {
 			const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;

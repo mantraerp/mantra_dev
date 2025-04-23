@@ -377,16 +377,16 @@ def get_bene_file(delimiter='|'):
                     bank_approve_error.append(dynamicerror7)
                     
                     
-                    frappe.sendmail(
-                        recipients=['ravi.patel@mantratec.com'],
-                        subject="Beny response detail",
-                        message="bank_approve_error {} <br> record error:{}".format(str(bank_approve_error),str(data_dict[8]))
-                    )
-                    
-                    
                     wantToReject = True
                     if str(data_dict[8]) in bank_approve_error:
                         wantToReject = False
+                        
+                    if wantToReject:
+                        frappe.sendmail(
+                            recipients=['ravi.patel@mantratec.com'],
+                            subject="Beny response detail",
+                            message="bank_approve_error {} <br> record error:{}".format(str(bank_approve_error),str(data_dict[8]))
+                        )                        
 
                     bank_account_no = data_dict[5]
                     bank_account_doc = frappe.db.get_value(

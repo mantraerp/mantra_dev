@@ -15,6 +15,8 @@ key_token_pratham = "TOKENAVDMPRATHAM"
 key_body_process = "BODYPROCESSAVDM"
 key_serial_no = "SERIALNOAVDM"
 key_sub_serial_no = "SUBSERIALNO"
+key_sub_item_code_find = "SUBSERIALNOITEMCODEFIND"
+
 key_dc_no = "DCNOAVDM"
 # email_send = False
 
@@ -49,6 +51,10 @@ def login_to_avdm(transaction_date):
 			return reply
 
 		try:
+      
+			query = "DELETE FROM `tabError Log` WHERE `method`='{}'".format(key_sub_item_code_find)
+			records_deleted = frappe.db.sql(query,as_dict=1)
+      
 			generate_token()
 			generate_token_pratham()
 			process_dc_list(dc_list)
@@ -548,25 +554,25 @@ def fetch_sub_serial_no_records():
 									# body.append(obj)
 
 									try:
-										doc = frappe.new_doc("Sub Serial No")
-										doc.parent_serial_no = str(sr_no)
-										doc.serial_no = sub_serial_no
-										doc.item_code = str(sr_no_record["item_code"])
-										doc.sub_item_code = single_serial_no[sub_serial_no]         
-										doc.model = str(sr_no_record["model"])
-										doc.sub_model = ""
-										doc.customer_name = str(sr_no_record["custName"])
-										doc.dc = str(sr_no_record["dcNo"])
-										doc.dcdate = str(sr_no_record["dcDate"])
-										doc.custom_marked_in_avdm = False
-										doc.find_item_mode = False
-										doc.insert(ignore_permissions=True)
+										if not frappe.db.exists("Sub Serial No", sub_serial_no):
+											doc = frappe.new_doc("Sub Serial No")
+											doc.parent_serial_no = str(sr_no)
+											doc.serial_no = sub_serial_no
+											doc.item_code = str(sr_no_record["item_code"])
+											doc.sub_item_code = single_serial_no[sub_serial_no]         
+											doc.model = str(sr_no_record["model"])
+											doc.sub_model = ""
+											doc.customer_name = str(sr_no_record["custName"])
+											doc.dc = str(sr_no_record["dcNo"])
+											doc.dcdate = str(sr_no_record["dcDate"])
+											doc.custom_marked_in_avdm = False
+											doc.find_item_mode = False
+											doc.insert(ignore_permissions=True)
 									except Exception as e:
 										return str(e)
-									return "one"
          
 
-			return body
+			# return body
 			#Create body and pass in same way as main serial no
 			# cunk_size = 50
 			# body_send = []
@@ -595,8 +601,9 @@ def fetch_sub_serial_no_records():
 			#Delete serial number which is process
 			for err_name in list_body_to_process:
 				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])
-				records_deleted = frappe.db.sql(query,as_dict=1)
+				# records_deleted = frappe.db.sql(query,as_dict=1)
 
+			return "Body process sucessfully."
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
@@ -651,6 +658,121 @@ def process_all_level_serial_no(device, data):
         process_all_level_serial_no(sub_device,data)
 
     return data
+
+
+
+
+#Check all sub serial number item code and model number code
+@frappe.whitelist(allow_guest=True)
+def sub_serial_item_code_and_model():
+
+	reply={}
+	reply["Process_status"]="Serial no sub model and item code finding"
+	try:
+		query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_sub_item_code_find)
+		list_body_to_process = frappe.db.sql(query,as_dict=1)
+		reply["Process_data"]=len(list_body_to_process)
+		for process_record in list_body_to_process:
+			frappe.enqueue(sub_serial_item_code_and_model_adding, queue='short', timeout=3600,serial_no=process_record['name'])      
+			frappe.enqueue(sub_serial_item_code_and_model_checking, queue='long', timeout=3600,doc_name=process_record['name'])
+
+	except Exception as e:
+		reply['message']=str(e)
+		mssage = str(traceback.format_exc())
+		reply['message_traceback']=mssage
+  
+	return reply
+
+def sub_serial_item_code_and_model_adding(serial_no):
+    errorLog(key_sub_item_code_find,str(serial_no))
+    return True
+
+def sub_serial_item_code_and_model_checking(doc_name):
+	query = "SELECT * from `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name`='{}'".format(doc_name)
+	list_serial_no = frappe.db.sql(query,as_dict=1)
+ 
+	for serial_no_record in list_serial_no:
+		query = "SELECT * from `tabItem` WHERE `name`='{}'".format(serial_no_record['sub_item_code'])
+		list_item = frappe.db.sql(query,as_dict=1)
+
+		if len(list_item)==0:
+			query_update = "UPDATE `tabSub Serial No` SET `remark`='NOITEMCODEFOUND' WHERE `name`='{}'".format(doc_name)
+			update_item_detail = frappe.db.sql(query_update,as_dict=1)
+		else:
+			for item in list_item:
+				if item['custom_reference_model_no'] not in ['',None," "]:
+					query_update = "UPDATE `tabSub Serial No` SET `sub_model`='{}', `find_item_model`=1 WHERE `name`='{}'".format(doc_name)
+					update_item_detail = frappe.db.sql(query_update,as_dict=1)
+				else:
+					query_update = "UPDATE `tabSub Serial No` SET `remark`='NOMODELNOFOUND' WHERE `name`='{}'".format(doc_name)
+					update_item_detail = frappe.db.sql(query_update,as_dict=1)
+
+	return "Process document {}".format(doc_name)
+     
+@frappe.whitelist()
+def notify_items_not_found_in_erp():
+	email_recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com"]
+
+	try:
+		# Fetch disabled and approved bank accounts
+		bank_accounts = frappe.get_all(
+			"Bank Account",
+			filters={
+				"disabled": 1,
+				"docstatus": 1,
+				"workflow_state":"Approved",
+			},
+			fields=["name", "account_name", "bank", "bank_account_no"]
+		)
+
+		if not bank_accounts:
+			return "No matching bank accounts found."
+
+		body = "<b>List of Approved but Disabled Bank Accounts:</b><br><br>"
+		body += "<b>Total Approved but Disabled Bank Accounts: {}</b><br><br>".format(len(bank_accounts))
+
+		body += """<table style="width: 100%;">
+			<tbody>
+				<tr>
+					<td style="width: 30%"><strong>Account Name</strong></td>
+					<td style="width: 30%"><strong>Bank Account No</strong></td>
+					<td style="width: 30%"><strong>Doc</strong></td>
+				</tr>
+			"""
+
+		for row in bank_accounts:
+			body += """<tr>
+				<td>
+					{0}
+				</td>
+				<td>
+					{1}
+				</td>
+				<td>
+					<a href="{2}/app/bank-account/{3}">{3}</a>
+				</td>
+			</tr>""".format(row.account_name, row.bank_account_no, site_base_url(),row.name)
+
+		body += "</tbody></table>"
+
+		frappe.sendmail(
+			recipients=email_recipients,
+			subject="Approved & Disabled Bank Accounts Report",
+			message=body
+		)
+
+	except Exception as e:
+		frappe.sendmail(
+			recipients=['ravi.patel@mantratec.com'],
+			subject="Error while checking Disabled Items in Active BOMs",
+			message="{}<br>{}".format(str(e),str(traceback.format_exc())),
+		)
+
+	return "Email sent successfully!"
+
+
+
+
 
 
 #Update serial number tick in DB
