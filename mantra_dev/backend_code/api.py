@@ -28,6 +28,207 @@ from frappe.utils import today, get_link_to_form,add_days # type: ignore
 
 
 
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.api.create_user_for_employees
+@frappe.whitelist(allow_guest=True)
+def create_user_for_employees():
+    frappe.enqueue(create_users_from_employees, queue="long", timeout=3600)
+    return "Creating User For Employee Started"
+
+def create_users_from_employees():
+    frappe.set_user("Administrator")
+    created_user = []
+    not_created_user = [] 
+    
+    employees = frappe.get_all("Employee", filters={'status': "Active"}, fields=["name", "employee_name", "user_id", "company_email", "personal_email","pan_number","date_of_birth","first_name"])
+
+    allowed_domain = "@mantratec.com"
+
+    for employee in employees:
+        user_password = "Employee@2025"
+        if employee.get("pan_number"):
+            user_password = employee.get("pan_number")
+        else:
+            if employee.get("date_of_birth"):
+                dob = re.sub(r'\D', '', str(employee.get("date_of_birth")))
+                name = employee.get("first_name").lower().replace(" ", "")
+                user_password = f"{name}@{dob}"
+        if employee.get("user_id"):
+            not_created_user.append(employee["name"])
+            continue
+        if not employee.get("company_email"):
+            not_created_user.append(employee["name"])
+            continue
+        if not employee["company_email"].endswith(allowed_domain):
+            not_created_user.append(employee["name"])
+            continue
+
+        if not frappe.db.exists("User", {"email": ["in", [employee["company_email"], employee["personal_email"]]]}):
+            try:
+                user = frappe.get_doc({
+                    "doctype": "User",
+                    "email": employee["company_email"],
+                    "first_name": employee["employee_name"].split(" ")[0],
+                    "last_name": " ".join(employee["employee_name"].split(" ")[1:]),
+                    "enabled": 1,
+                    "user_type": "System User",
+                    "send_welcome_email": 0,
+                })
+                user.insert(ignore_permissions=True)
+
+                user.new_password = user_password
+                user.append("roles", {"role": "Mantra User"})
+                
+                # Fetch all available modules
+                all_modules = frappe.get_all("Module Def", pluck="name")
+
+                # Set all modules to be blocked
+                user.set("block_modules", [{"module": module} for module in all_modules])
+                user.save()
+                
+
+
+                emp = frappe.get_doc("Employee", employee["name"])
+                emp.user_id = user.email
+                emp.add_comment(
+                    "Comment",
+                    text=f"User {user.name} has been created and linked using auto script with password: {user_password}"
+                )
+                emp.save()
+                created_user.append(employee["name"])
+
+            except Exception as e:
+                frappe.db.commit()
+                
+                errorLog('User Creation Error',str(f"User created and linked for Employee: {created_user} and user not created for employee:{not_created_user} and the error is {str(frappe.get_traceback())}"),False)
+
+                frappe.log_error(message=str(e), title="User Creation Error")
+                return e, f"User created and linked for Employee: {created_user} and user not created for employee:{not_created_user}"
+        else:
+            not_created_user.append(employee["name"]) 
+    
+    frappe.db.commit()
+    errorLog('User Created log',str(f"User created and linked for Employee: {created_user} and user not created for employee:{not_created_user}"),False)
+
+    recipients = ["helpdesk1.erp@mantratec.com", "ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"]
+    
+    subject = "User Creation Summary"
+    message = f"""
+    <h3>User Creation Summary</h3>
+    <p><strong>Users created and linked for Employees:</strong></p>
+    <ul>
+        {''.join(f"<li>{emp}</li>" for emp in created_user)}
+    </ul>
+    <p><strong>Users NOT created for Employees:</strong></p>
+    <ul>
+        {''.join(f"<li>{emp}</li>" for emp in not_created_user)}
+    </ul>
+    """
+
+    frappe.sendmail(
+        recipients=recipients,
+        subject=subject,
+        message=message,
+    )
+    return f"User created and linked for Employee: {created_user} and user not created for employee:{not_created_user}"
+
+
+
+
+
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.api.enqueue_sales_order_mapping_job
+@frappe.whitelist(allow_guest=True)
+def enqueue_sales_order_mapping_job():
+    frappe.enqueue("mantra_dev.backend_code.api.process_sales_order_mappings", queue="long", timeout=3600)
+    return "Enqueued first job to process Sales Orders"
+
+@frappe.whitelist()
+def process_sales_order_mappings():
+    try:
+        sales_order_list = frappe.db.sql('''
+            SELECT name, customer FROM `tabSales Order` WHERE docstatus = 1 LIMIT 20
+        ''', as_dict=True)
+
+
+        for so in sales_order_list:
+            so["items"] = []
+            so_items = frappe.get_doc("Sales Order", so.name)
+            for j in so_items.items:
+                if j.item_code not in so["items"]:
+                    so["items"].append(j.item_code)
+                if j.bom_no:
+                    bom_items = frappe.get_doc("BOM", j.bom_no)
+                    for k in bom_items.items:
+                        if k.item_code not in so["items"]:
+                            so["items"].append(k.item_code)
+
+        if sales_order_list:
+            # Enqueue first SO with remaining list
+            first = sales_order_list.pop(0)
+            frappe.enqueue(
+                "mantra_dev.backend_code.api.create_item_customer_mapping_document",
+                queue="long",
+                timeout=3600,
+                sales_order_single_entry=first,
+                remaining_sales_orders=sales_order_list
+            )
+    except Exception:
+        errorLog('Failed processing Sales Orders',str(frappe.get_traceback()),False)
+        # frappe.log_error(frappe.get_traceback(), "Failed processing Sales Orders")
+        
+
+
+def create_item_customer_mapping_document(sales_order_single_entry, remaining_sales_orders=None):
+    try:
+        for item_code in sales_order_single_entry.get("items", []):
+            try:
+                mapping_exists = frappe.db.exists("Item Customer Mapping", item_code)
+                if not mapping_exists:
+                    doc = frappe.new_doc("Item Customer Mapping")
+                    doc.item = item_code
+                    doc.append("customer_and_reference", {
+                        "customer": sales_order_single_entry.get("customer"),
+                        "reference": sales_order_single_entry.get("name"),
+                    })
+                    doc.insert(ignore_permissions=True)
+                else:
+                    doc = frappe.get_doc("Item Customer Mapping", item_code)
+                    existing = [d.customer for d in doc.customer_and_reference]
+                    if sales_order_single_entry.get("customer") not in existing:
+                        doc.append("customer_and_reference", {
+                            "customer": sales_order_single_entry.get("customer"),
+                            "reference": sales_order_single_entry.get("name"),
+                        })
+                        doc.save(ignore_permissions=True)
+            except Exception:
+                errorLog(f"Error in item mapping for item: {item_code}",str(frappe.get_traceback()),False)
+                # frappe.log_error(frappe.get_traceback(), f"Error in item mapping for item: {item_code}")
+
+
+        if remaining_sales_orders:
+            next_so = remaining_sales_orders.pop(0)
+            frappe.enqueue(
+                "mantra_dev.backend_code.api.create_item_customer_mapping_document",
+                queue="long",
+                timeout=3600,
+                sales_order_single_entry=next_so,
+                remaining_sales_orders=remaining_sales_orders
+            )
+
+    except Exception:
+        errorLog(f"Error processing SO: {sales_order_single_entry.get('name')}",str(frappe.get_traceback()),False)
+        # frappe.log_error(frappe.get_traceback(), f"Error processing SO: {sales_order_single_entry.get('name')}")
+
+
+
+
+
+
+
+
+
+
+
+
 
 @frappe.whitelist()
 def add_hold_reason_comment(doc_name, action, reason):
@@ -243,7 +444,7 @@ def notify_purchase_managers():
         message=message
     )
 
-    frappe.log_error(f"Sent overdue PO notification to: {', '.join(recipients)}", "Purchase Order Reminder")
+    errorLog('Sent overdue PO notification',str(f"Sent overdue PO notification to: {', '.join(recipients)}"),False)
 
 @frappe.whitelist()
 def get_user_expense_claims(user):

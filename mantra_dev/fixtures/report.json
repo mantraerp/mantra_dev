@@ -1509,7 +1509,7 @@
   "javascript": null,
   "json": null,
   "letter_head": "Salary Slip",
-  "modified": "2024-12-17 12:59:12.652825",
+  "modified": "2025-04-25 19:29:11.910066",
   "module": "Mantra Dev",
   "name": "Minimum Stock Level",
   "prepared_report": 0,
@@ -1578,12 +1578,6 @@
     "parent": "Minimum Stock Level",
     "parentfield": "roles",
     "parenttype": "Report",
-    "role": "Employee"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
     "role": "Stock User (Internal)"
    },
    {
@@ -1645,12 +1639,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Sales Executive"
-   },
-   {
-    "parent": "Minimum Stock Level",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "All"
    }
   ]
  },
@@ -2831,6 +2819,198 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "QC User"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2025-04-25 16:42:41.894164",
+  "module": "Mantra Dev",
+  "name": "Document Workflow TAT Report",
+  "prepared_report": 1,
+  "query": null,
+  "ref_doctype": "Version",
+  "reference_report": null,
+  "report_name": "Document Workflow TAT Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Document Workflow TAT Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Document Workflow TAT Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Administrator"
+   }
+  ]
+ },
+ {
+  "add_total_row": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": "Salary Slip",
+  "modified": "2025-04-28 15:33:35.862115",
+  "module": "Mantra Dev",
+  "name": "Item QC Update",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item",
+  "reference_report": null,
+  "report_name": "Item QC Update",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Maintenance User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "SCM - Manager"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User (Internal)"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Creator"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales Executive"
+   },
+   {
+    "parent": "Item QC Update",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
    }
   ]
  }

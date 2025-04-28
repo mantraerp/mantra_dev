@@ -48,8 +48,12 @@ def get_purchase_order_against_details(purchase_order_id):
 			"demand": 0
 		})
 
+	# price_comparison = [{
+	# 	'supplier_name': purchase_order_doc.supplier_name,
+	# 	'payment_terms': frappe.db.get_value("Supplier", purchase_order_doc.supplier, "payment_terms") or ''
+	# }]
 	price_comparison = [{
-		'supplier_name': purchase_order_doc.supplier_name,
+		'supplier': purchase_order_doc.supplier_name,
 		'payment_terms': frappe.db.get_value("Supplier", purchase_order_doc.supplier, "payment_terms") or ''
 	}]
 

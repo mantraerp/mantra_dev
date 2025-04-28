@@ -127,7 +127,8 @@ scheduler_events = {
 
 override_whitelisted_methods = {
 	"erpnext.selling.doctype.sales_order.sales_order.create_stock_reservation_entries":"mantra_dev.backend_code.sales_orders.sales_orders.create_stock_reservation_entries",
-    # "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt":"mantra_dev.overrides.purchase_order.override_make_purchase_receipt"
+    # "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt":"mantra_dev.overrides.purchase_order.override_make_purchase_receipt",
+    # "erpnext.setup.doctype.employee.employee.create_user":"mantra_dev.overrides.employee.create_user",
 }
 
 

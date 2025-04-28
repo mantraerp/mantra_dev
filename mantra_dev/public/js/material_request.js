@@ -60,6 +60,22 @@ frappe.ui.form.on('Material Request', {
                 }
             });
         }
+    },
+    onload:function(frm) {
+
+        //Romit changes
+        // frappe.call({
+        //     method:"mantra_dev.mantra_dev.doctype.product.product.get_purpose_list",
+        //     args: {
+        //         user:frappe.session.user,
+        //     },
+        //     callback:function(response) {
+        //         if (response.message) {
+        //             letallowed_options=response.message;
+        //             frm.set_df_property('material_request_type', 'options', allowed_options);
+        //         }
+        //     }
+        // });
     }
 });
 function openQuickEntryForm(frm) {

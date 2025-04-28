@@ -1,0 +1,32 @@
+{
+ "_seen": "[\"Administrator\"]",
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-24 16:10:29.647110",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-04-24 16:10:59.046714",
+ "modified_by": "Administrator",
+ "module": "Mantra Dev",
+ "name": "Departmental Warehouse Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

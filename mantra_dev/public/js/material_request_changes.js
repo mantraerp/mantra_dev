@@ -7,18 +7,7 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on('Material Request', {
 
-
-
-
-
-
-
-
-
-
     after_save(frm){
-
-
         let approvers = [
             frm.doc.custom_approver_1,
             frm.doc.custom_approver_2,
@@ -221,18 +210,18 @@ frappe.ui.form.on('Material Request', {
 
 	onload: function (frm) {
 
-	if(frm.doc.custom_department){
-			frm.fields_dict["custom_expense_grouping"].get_query = function () {
-				let selected_department = frm.doc.custom_department;
-				if (!selected_department) {
-					return {};
-				}
-				return {
-					filters: {
-						name: ["in", get_selected_values(selected_department)]
+		if(frm.doc.custom_department){
+				frm.fields_dict["custom_expense_grouping"].get_query = function () {
+					let selected_department = frm.doc.custom_department;
+					if (!selected_department) {
+						return {};
 					}
+					return {
+						filters: {
+							name: ["in", get_selected_values(selected_department)]
+						}
+					};
 				};
-			};
 		}
 
 
@@ -277,6 +266,33 @@ frappe.ui.form.on('Material Request', {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+
+        //Romit changes
+        // frappe.call({
+        //     method:"mantra_dev.mantra_dev.doctype.product.product.get_purpose_list",
+        //     args: {
+        //         user:frappe.session.user,
+        //     },
+        //     callback:function(response) {
+        //         if (response.message) {
+        //             letallowed_options=response.message;
+        //             frm.set_df_property('material_request_type', 'options', allowed_options);
+        //         }
+        //     }
+        // });
+
+		// letrestricted_roles= ["Purchase Manager", "Purchase User"];
+        // // Check if the current user has any restricted role
+        // lethas_restricted_role=restricted_roles.some(role=>frappe.user_roles.includes(role));
+        // if (!has_restricted_role) {
+        //     // Hide the "Create" button
+        //     // if (frm.custom_buttons && frm.custom_buttons["Create"]) {
+        //         frm.custom_buttons["Create"].hide();
+        //     // }
+        // }
+
+
+
 	},
 
 	company: function (frm) {

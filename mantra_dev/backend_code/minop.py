@@ -13,7 +13,7 @@ from mantra_dev.backend_code.globle import errorLog,errorLogExites,site_base_url
 
 
 #To create entry in erro log
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def minop_hook(**kwargs):
 
 	parameters=frappe._dict(kwargs)

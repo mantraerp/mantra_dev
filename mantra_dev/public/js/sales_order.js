@@ -139,39 +139,44 @@ frappe.ui.form.on('Sales Order', {
             }
         }
     },	
-    before_save(frm){
-        frm.doc.items.forEach((item) => {
-            if(item.custom_is_service_item==1){
-                item.delivered_qty=item.qty
+	before_save: async function(frm) {
+        const itemPromises = frm.doc.items.map(async (item) => {
+            if (item.custom_is_service_item == 1) {
+                item.delivered_qty = item.qty;
             }
             if (item.item_code) {
-                frappe.call({
-                    method: "frappe.client.get_value",
-                    args: {
-                        doctype: "Item",
-                        fieldname: ["custom_sales_item_name", "item_name"],
-                        filters: {
-                            name: item.item_code
-                        },
-                    },
-                    callback: function (r) {
-                        var po_code = r.message.custom_sales_item_name;
-                        // Set the sales person field in the Lead form
-                        if(item.custom_item_description== undefined || item.custom_item_description==""){
-                            if (po_code) {
-                                item.custom_item_description = po_code
-                            }
-                            else {
-                                item.custom_item_description = r.message.item_name
-                            }
-                        }
-                    },
-                });
+                try {
 
+					// change permission query Sales user - read perrmission
+                    const r = await frappe.call({
+                        method: "frappe.client.get_value",
+                        args: {
+                            doctype: "Item",
+                            fieldname: ["custom_sales_item_name", "item_name", "custom_rma_enable"],
+                            filters: {
+                                name: item.item_code
+                            },
+                        },
+                    });
+
+                    const po_code = r.message.custom_sales_item_name;
+
+                    if (!item.custom_item_description) {
+                        item.custom_item_description = po_code || r.message.item_name;
+                    }
+
+                    if (r.message.custom_rma_enable && (!item.custom_warranty_time_periodin_months || item.custom_warranty_time_periodin_months === '')) {
+                        throw new Error(__('Warranty Time Period is mandatory for item {0}', [item.item_code]));
+                    }
+                } catch (error) {
+                    frappe.throw(error.message);
+                }
             }
-        })
-        refresh_field("items")
-        
+        });
+
+        await Promise.all(itemPromises);
+        // refresh_field("items")
+
     },
     before_submit: function (frm) {
         var items = frm.doc.items.length
@@ -611,19 +616,30 @@ function objectToList(obj, type) {
     }
 }
 frappe.ui.form.on('Sales Order Item', {
+	item_code: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.item_code) return;
+
+        frappe.db.get_value('Item', row.item_code, ['custom_rma_enable', 'custom_default_rd'])
+            .then(r => {
+                if (r.message) {
+                    const { custom_rma_enable, custom_default_rd } = r.message;
+                    if (custom_rma_enable) {
+                        frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', custom_default_rd);
+                    } else {
+                        frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', '');
+                    }
+                }
+            });
+    },
 	qty(frm) {
-        // delivered_qty
-		// your code here
         frm.doc.items.forEach((item) => {
             if(item.custom_is_service_item==1){
                 item.delivered_qty=item.qty
             }
-            
-            
         })
         refresh_field("items")
 	},
-
 })
 
 
