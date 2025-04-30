@@ -139,45 +139,50 @@ frappe.ui.form.on('Sales Order', {
             }
         }
     },	
-	before_save: async function(frm) {
-        const itemPromises = frm.doc.items.map(async (item) => {
-            if (item.custom_is_service_item == 1) {
-                item.delivered_qty = item.qty;
-            }
-            if (item.item_code) {
-                try {
+	before_save: async function (frm) {
+		const itemPromises = frm.doc.items.map(async (item) => {
 
-					// change permission query Sales user - read perrmission
-                    const r = await frappe.call({
-                        method: "frappe.client.get_value",
-                        args: {
-                            doctype: "Item",
-                            fieldname: ["custom_sales_item_name", "item_name", "custom_rma_enable"],
-                            filters: {
-                                name: item.item_code
-                            },
-                        },
-                    });
+			if (item.custom_is_service_item == 1) {
+				item.delivered_qty = item.qty;
+			}
+			if (item.item_code) {
+				try {
+					const r = await frappe.db.get_value('Item', item.item_code, [
+						'custom_sales_item_name',
+						'item_name',
+						'custom_rma_enable',
+						'custom_avdm_enable',
+					]);
 
-                    const po_code = r.message.custom_sales_item_name;
+					const {
+						custom_sales_item_name,
+						item_name,
+						custom_rma_enable,
+						custom_avdm_enable,
+					} = r.message;
 
-                    if (!item.custom_item_description) {
-                        item.custom_item_description = po_code || r.message.item_name;
-                    }
+					// Set custom_item_description if not already set
+					if (!item.custom_item_description) {
+						item.custom_item_description = custom_sales_item_name || item_name;
+					}
+	
+					// Validate warranty time period if RD is enabled
+					if (custom_avdm_enable && (!item.custom_rd_service_time_period || item.custom_rd_service_time_period === '')) {
+						throw new Error(__('RD time period is mandatory for item {0}', [item.item_code]));
+					}
 
-                    if (r.message.custom_rma_enable && (!item.custom_warranty_time_periodin_months || item.custom_warranty_time_periodin_months === '')) {
-                        throw new Error(__('Warranty Time Period is mandatory for item {0}', [item.item_code]));
-                    }
-                } catch (error) {
-                    frappe.throw(error.message);
-                }
-            }
-        });
+					if (custom_rma_enable && (!item.custom_warranty_time_periodin_months || item.custom_warranty_time_periodin_months === '')) {
+						throw new Error(__('Warranty time period is mandatory for item {0}', [item.item_code]));
+					}
+				} catch (error) {
+					frappe.throw(error.message);
+				}
+			}
+		});
 
-        await Promise.all(itemPromises);
-        // refresh_field("items")
-
-    },
+		await Promise.all(itemPromises);
+		refresh_field("items");
+	},
     before_submit: function (frm) {
         var items = frm.doc.items.length
         var item_code = []
@@ -186,38 +191,35 @@ frappe.ui.form.on('Sales Order', {
                 item_code.push(item.item_code)
             }
         })
-        console.log(item_code)
-        console.log(items)
         if (items != item_code.length) {
             frappe.throw("Please enter vaild Item Code")
-            // validate:false
         }
         if (frm.doc.total == 0) {
             frm.set_value("per_billed", 100)
         }
-        
     },
 	after_save(frm){
 		if (frm.doc.items){
-		new_delivered_qty = 0
-		for(i=0; i<frm.doc.items.length; i++){
-			console.log(frm.doc.items[i].custom_is_service_item);
-			if (frm.doc.items[i].custom_is_service_item){
-			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+			new_delivered_qty = 0
+			for(i=0; i<frm.doc.items.length; i++)
+			{
+				if (frm.doc.items[i].custom_is_service_item){
+					new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
+				}
+				// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
 			}
-			// frm.doc.per_delivered = (delivered_qty / tot_qty) * 100
-		}
-		// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
-		frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
-		// cur_frm.refresh_fields('per_delivered');
-				// frm.refresh();
+			// frm.doc.per_delivered = (new_delivered_qty / frm.doc.total_qty) * 100
+			if (new_delivered_qty!=0){
+				frappe.db.set_value("Sales Order",frm.doc.name,"per_delivered",(new_delivered_qty / frm.doc.total_qty) * 100)
+			}
+			// cur_frm.refresh_fields('per_delivered');
+					// frm.refresh();
 		}
 	},
 	after_workflow_action(frm){
 		if (frm.doc.items){
 		new_delivered_qty = 0
 		for(i=0; i<frm.doc.items.length; i++){
-			console.log(frm.doc.items[i].custom_is_service_item);
 			if (frm.doc.items[i].custom_is_service_item){
 			new_delivered_qty = new_delivered_qty + frm.doc.items[i].delivered_qty
 			}
@@ -617,20 +619,56 @@ function objectToList(obj, type) {
 }
 frappe.ui.form.on('Sales Order Item', {
 	item_code: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
+        
+		let row = locals[cdt][cdn];
         if (!row.item_code) return;
 
-        frappe.db.get_value('Item', row.item_code, ['custom_rma_enable', 'custom_default_rd'])
+        frappe.db.get_value('Item', row.item_code, ['custom_avdm_enable','custom_default_rd','custom_rma_enable', 'custom_default_warranty'])
             .then(r => {
                 if (r.message) {
-                    const { custom_rma_enable, custom_default_rd } = r.message;
-                    if (custom_rma_enable) {
-                        frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', custom_default_rd);
-                    } else {
+
+                    const { custom_avdm_enable,custom_default_rd,custom_rma_enable,custom_default_warranty } = r.message;
+
+					if (custom_avdm_enable) 
+					{
+						// RD (EVDM) is enable
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_reqd('custom_rd_service_time_period', true);
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_display('custom_rd_service_time_period', true);
+
+						if (custom_default_rd) {
+							frappe.model.set_value(cdt, cdn, 'custom_rd_service_time_period', custom_default_rd);
+						}else{
+							frappe.model.set_value(cdt, cdn, 'custom_rd_service_time_period', '');
+						}
+                    } 
+					else 
+					{
+						// AVDM is not enable in item master
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_reqd('custom_rd_service_time_period', false);
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_display('custom_rd_service_time_period', false);
+                        frappe.model.set_value(cdt, cdn, 'custom_rd_service_time_period', '');
+                    }
+
+					if (custom_rma_enable) 
+					{
+						// RMA is enable
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_reqd('custom_warranty_time_periodin_months', true);
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_display('custom_warranty_time_periodin_months', true);
+
+						if (custom_default_rd) {
+							frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', custom_default_warranty);
+						}else{
+							frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', '');
+						}
+                    } 
+					else 
+					{
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_reqd('custom_warranty_time_periodin_months', false);
+						frm.fields_dict['items'].grid.grid_rows_by_docname[cdn].toggle_display('custom_warranty_time_periodin_months', false);
                         frappe.model.set_value(cdt, cdn, 'custom_warranty_time_periodin_months', '');
                     }
                 }
-            });
+		});
     },
 	qty(frm) {
         frm.doc.items.forEach((item) => {

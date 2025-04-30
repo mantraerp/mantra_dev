@@ -1966,7 +1966,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             d = frappe.get_doc(i.reference_doctype, i.reference_name)
             
             t_date = ""
-            if i.reference_doctype in ["Purchase Invoice","Employee Advance","Expense Claim"]:
+            if i.reference_doctype in ["Purchase Invoice","Employee Advance","Expense Claim","Journal Entry"]:
                 t_date = d.posting_date
             else:
                 t_date = d.transaction_date

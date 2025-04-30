@@ -135,101 +135,6 @@ def create_users_from_employees():
 
 
 
-# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.api.enqueue_sales_order_mapping_job
-@frappe.whitelist(allow_guest=True)
-def enqueue_sales_order_mapping_job():
-    frappe.enqueue("mantra_dev.backend_code.api.process_sales_order_mappings", queue="long", timeout=3600)
-    return "Enqueued first job to process Sales Orders"
-
-@frappe.whitelist()
-def process_sales_order_mappings():
-    try:
-        sales_order_list = frappe.db.sql('''
-            SELECT name, customer FROM `tabSales Order` WHERE docstatus = 1 LIMIT 20
-        ''', as_dict=True)
-
-
-        for so in sales_order_list:
-            so["items"] = []
-            so_items = frappe.get_doc("Sales Order", so.name)
-            for j in so_items.items:
-                if j.item_code not in so["items"]:
-                    so["items"].append(j.item_code)
-                if j.bom_no:
-                    bom_items = frappe.get_doc("BOM", j.bom_no)
-                    for k in bom_items.items:
-                        if k.item_code not in so["items"]:
-                            so["items"].append(k.item_code)
-
-        if sales_order_list:
-            # Enqueue first SO with remaining list
-            first = sales_order_list.pop(0)
-            frappe.enqueue(
-                "mantra_dev.backend_code.api.create_item_customer_mapping_document",
-                queue="long",
-                timeout=3600,
-                sales_order_single_entry=first,
-                remaining_sales_orders=sales_order_list
-            )
-    except Exception:
-        errorLog('Failed processing Sales Orders',str(frappe.get_traceback()),False)
-        # frappe.log_error(frappe.get_traceback(), "Failed processing Sales Orders")
-        
-
-
-def create_item_customer_mapping_document(sales_order_single_entry, remaining_sales_orders=None):
-    try:
-        for item_code in sales_order_single_entry.get("items", []):
-            try:
-                mapping_exists = frappe.db.exists("Item Customer Mapping", item_code)
-                if not mapping_exists:
-                    doc = frappe.new_doc("Item Customer Mapping")
-                    doc.item = item_code
-                    doc.append("customer_and_reference", {
-                        "customer": sales_order_single_entry.get("customer"),
-                        "reference": sales_order_single_entry.get("name"),
-                    })
-                    doc.insert(ignore_permissions=True)
-                else:
-                    doc = frappe.get_doc("Item Customer Mapping", item_code)
-                    existing = [d.customer for d in doc.customer_and_reference]
-                    if sales_order_single_entry.get("customer") not in existing:
-                        doc.append("customer_and_reference", {
-                            "customer": sales_order_single_entry.get("customer"),
-                            "reference": sales_order_single_entry.get("name"),
-                        })
-                        doc.save(ignore_permissions=True)
-            except Exception:
-                errorLog(f"Error in item mapping for item: {item_code}",str(frappe.get_traceback()),False)
-                # frappe.log_error(frappe.get_traceback(), f"Error in item mapping for item: {item_code}")
-
-
-        if remaining_sales_orders:
-            next_so = remaining_sales_orders.pop(0)
-            frappe.enqueue(
-                "mantra_dev.backend_code.api.create_item_customer_mapping_document",
-                queue="long",
-                timeout=3600,
-                sales_order_single_entry=next_so,
-                remaining_sales_orders=remaining_sales_orders
-            )
-
-    except Exception:
-        errorLog(f"Error processing SO: {sales_order_single_entry.get('name')}",str(frappe.get_traceback()),False)
-        # frappe.log_error(frappe.get_traceback(), f"Error processing SO: {sales_order_single_entry.get('name')}")
-
-
-
-
-
-
-
-
-
-
-
-
-
 @frappe.whitelist()
 def add_hold_reason_comment(doc_name, action, reason):
     """
@@ -391,60 +296,6 @@ def search_item_names2(search_term):
 
     return matched_items
 
-
-
-# "mantra_dev.backend_code.api.notify_purchase_managers"
-@frappe.whitelist()
-def notify_purchase_managers():
-    """Send email to Purchase Managers for Purchase Orders without any Purchase Receipt."""
-
-    # Fetch overdue POs that have no linked PR at all
-    overdue_pos = frappe.db.sql("""
-        SELECT po.name, po.supplier, po.schedule_date 
-        FROM `tabPurchase Order` po
-        WHERE po.schedule_date < %s 
-        AND po.docstatus = 1
-        AND NOT EXISTS (
-            SELECT 1 FROM `tabPurchase Receipt Item` pri
-            JOIN `tabPurchase Receipt` pr ON pr.name = pri.parent
-            WHERE pri.purchase_order = po.name
-        )
-    """, (today(),), as_dict=True)
-
-    # return overdue_pos
-    if not overdue_pos:
-        return  # No overdue POs found, exit early
-
-    # Get active Purchase Managers
-    purchase_managers = frappe.get_all(
-        "Has Role",
-        filters={"role": "Purchase Manager"},
-        fields=["parent"]
-    )
-
-    recipients = [
-        user["parent"]
-        for user in purchase_managers
-        if frappe.db.get_value("User", user["parent"], "enabled")
-    ]
-
-    if not recipients:
-        return  # No active Purchase Managers found
-
-    # Generate Email Message
-    message = "<h3>Overdue Purchase Orders</h3><p>The following POs are overdue and have no Purchase Receipt created:</p><ul>"
-    for po in overdue_pos:
-        message += f"<li>{get_link_to_form('Purchase Order', po['name'])} - {po['supplier']} (Scheduled: {po['schedule_date']})</li>"
-    message += "</ul>"
-
-    # Send Email
-    frappe.sendmail(
-        recipients=recipients,
-        subject="Overdue Purchase Orders - Action Required",
-        message=message
-    )
-
-    errorLog('Sent overdue PO notification',str(f"Sent overdue PO notification to: {', '.join(recipients)}"),False)
 
 @frappe.whitelist()
 def get_user_expense_claims(user):
@@ -806,9 +657,9 @@ def share_document(doctype,name,users,read,write,share,everyone):
     users = json.loads(users)
     for i in users:
         frappe.share.add_docshare(
-            doctype, name, i, read=read, write=write, share=share, everyone=everyone, flags={"ignore_share_permission": True}
+            doctype, name, i, read=read, write=write, share=share, submit=1, everyone=everyone, flags={"ignore_share_permission": True}
         )
-    return "Successfully shared this expense claim with the approvers."
+    return "Successfully shared this document with the approvers."
 
 @frappe.whitelist()
 def get_verification_users(expense_grouping_master=None,department=None):

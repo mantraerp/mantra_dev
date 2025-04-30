@@ -19,9 +19,6 @@ frappe.ui.form.on('Delivery Note', {
         // frm.add_custom_button(("Delivery Label"), () => {
         //     window.open(`https://mantratec.milaap.ai/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery%20Note&name=${frm.doc.name}&format=Delivery Label&no_letterhead=1&letterhead=Delivery Challan&settings=%7B%7D&_lang=en`)
         // },('Print Options'));
-
-
-
     },
     onload(frm) {
         frm.set_query('set_warehouse', () => {
@@ -171,7 +168,6 @@ frappe.listview_settings['Delivery Note'] = {
                 }
             });
 
-            // Show the dialog
             d.show();
         });
 

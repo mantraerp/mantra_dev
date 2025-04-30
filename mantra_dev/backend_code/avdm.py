@@ -606,14 +606,21 @@ def sub_serial_item_code_and_model_checking(doc_name):
 			return "Item code not found"   
 		else:
 			for item in list_item:
-				if item['custom_reference_model_no'] not in ['',None," "]:
-					query_update = "UPDATE `tabSub Serial No` SET `sub_model`='{}', `find_item_model`=1, `remark`='' WHERE `name`='{}'".format(str(item['custom_reference_model_no']),doc_name)
+
+				# if item['custom_submodel_avdm_enable']:
+				if item['custom_reference_submodel_no'] not in ['',None," "]:
+					query_update = "UPDATE `tabSub Serial No` SET `sub_model`='{}', `find_item_model`=1, `remark`='' WHERE `name`='{}'".format(str(item['custom_reference_submodel_no']),doc_name)
 					update_item_detail = frappe.db.sql(query_update,as_dict=1)
 					return "Item detail update"
 				else:
 					query_update = "UPDATE `tabSub Serial No` SET `remark`='{}' WHERE `name`='{}'".format(key_sub_item_code_model_error_find,doc_name)
 					update_item_detail = frappe.db.sql(query_update,as_dict=1)
 					return "Model number not found"
+				# else:
+				# 		query_update = "UPDATE `tabSub Serial No` SET `find_item_model`=1,`custom_marked_in_avdm`=1 `remark`='SUBCODENOTREGINEVDM' WHERE `name`='{}'".format(str(item['custom_reference_submodel_no']),doc_name)
+				# 		update_item_detail = frappe.db.sql(query_update,as_dict=1)
+				# 		return "Item detail update"
+
 
 	return "Process document {}".format(doc_name)
      

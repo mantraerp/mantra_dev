@@ -22,17 +22,12 @@ app_include_js = [
 doctype_js = {
     "Material Request": "public/js/material_request_changes.js",
     "Stock Entry": "public/js/stock_entry.js",
-    # "Payment Entry": "public/js/payment_entry.js",
-    # "Purchase Invoice": "public/js/purchase_invoce.js",
     "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
     "Subcontracting Order": "public/js/subcontracting_order.js",
     "Journal Entry": "public/js/journal_entry.js",
-    # "Purchase Receipt": "public/js/purchase_receipt.js",
     "Sales Invoice": "public/js/sales_invoice.js",
     "Tax Category": "public/js/tax_category.js",
-    # "Payment Request": "public/js/payment_request.js",
     "Sales Order": "public/js/sales_order.js",
-    # "Purchase Order": "public/js/purchase_order.js",
     "Employee": "public/js/employee.js",
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
@@ -42,16 +37,12 @@ doctype_js = {
     "Item": "public/js/item.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
-
-    # "Delivery Note": "public/js/delivery_note.js",
 }
 doctype_list_js = {
     "Material Request" : "public/js/material_request.js",
     # "Payment Entry": "public/js/payment_entry.js",
-    "Delivery Note": "public/js/delivery_note.js",
+    # "Delivery Note": "public/js/delivery_note.js",
     "Item" : "public/js/item_list.js",
-    # "Purchase Order": "public/js/purchase_order_list.js",
-    # "Purchase Invoice": "public/js/purchase_invoice_list.js",
     # "Employee Advance": "public/js/employee_advance_list.js",
 }
 

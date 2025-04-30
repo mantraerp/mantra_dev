@@ -1,15 +1,15 @@
 frappe.ui.form.on("Purchase Order", {
     onload: function (frm) {
-        if (frm.doc.docstatus !== 1 && !frm.doc.custom_purchase_person) {
-            frappe.call({
-                method : 'mantra_dev.overrides.purchase_order.get_purchase_person',
-                callback : function(r){
-                    if(r.message){
-                        frm.set_value('custom_purchase_person', r.message);
-                    }
-                }
-            });
-        }
+        // if (frm.doc.docstatus !== 1 && !frm.doc.custom_purchase_person) {
+        //     frappe.call({
+        //         method : 'mantra_dev.overrides.purchase_order.get_purchase_person',
+        //         callback : function(r){
+        //             if(r.message){
+        //                 frm.set_value('custom_purchase_person', r.message);
+        //             }
+        //         }
+        //     });
+        // }
         frm.set_query("set_warehouse", () => {
             return {
                 filters: {
