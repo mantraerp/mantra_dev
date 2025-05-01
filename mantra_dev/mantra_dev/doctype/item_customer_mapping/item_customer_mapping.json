@@ -8,7 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item",
-  "customer_and_reference"
+  "customer_and_reference",
+  "purchase_reference"
  ],
  "fields": [
   {
@@ -24,11 +25,17 @@
    "label": "Customer and Reference",
    "options": "Customer Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_reference",
+   "fieldtype": "Table",
+   "label": "Purchase Reference",
+   "options": "Purchase Reference"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-25 16:50:53.687395",
+ "modified": "2025-05-01 12:03:26.093599",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Item Customer Mapping",

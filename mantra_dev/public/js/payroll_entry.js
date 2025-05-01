@@ -32,6 +32,24 @@ frappe.ui.form.on("Payroll Entry", {
             });
         },('Utility'));
 
+
+        frm.add_custom_button(("Show Salary Register Report"), () => {
+            const start_date = frm.doc.start_date
+            const end_date = frm.doc.end_date
+            const payroll = frm.doc.name
+
+            if (!payroll || !start_date || !end_date){
+                frappe.msgprint("Make sure payroll entry is saved and start date and end date is set.")
+                return;
+            }
+            frappe.set_route('query-report', 'Mantra Salary Register', {
+                from_date: start_date,
+                to_date: end_date,
+                payroll_entry: payroll
+            });
+        },('Utility'))
+
+
         if (frappe.user.has_role("Accounts - Banking Manager")) {
             frm.add_custom_button(("Create payment entry file"), () => {
 

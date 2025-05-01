@@ -1,8 +1,8 @@
 app_name = "mantra_dev"
 app_title = "Mantra Dev"
-app_publisher = "Foram Shah"
+app_publisher = "Mantra"
 app_description = "Mantra Dev"
-app_email = "foram@sanskartechnolab.com"
+app_email = "info@mantratec.com"
 app_license = "mit"
 # required_apps = []
 
@@ -20,7 +20,6 @@ app_include_js = [
 
 # include js in doctype views
 doctype_js = {
-    # "Material Request": "public/js/material_request_changes.js",
     "Stock Entry": "public/js/stock_entry.js",
     "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
     "Subcontracting Order": "public/js/subcontracting_order.js",
@@ -34,14 +33,10 @@ doctype_js = {
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
     "Salary Slip": "public/js/salary_slip.js",
-    # "Item": "public/js/item.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
 doctype_list_js = {
-    # "Material Request" : "public/js/material_request.js",
-    # "Item" : "public/js/item_list.js",
-    # "Employee Advance": "public/js/employee_advance_list.js",
 }
 
 
