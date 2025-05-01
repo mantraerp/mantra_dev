@@ -133,6 +133,46 @@ def create_users_from_employees():
 
 
 
+@frappe.whitelist()
+def warehouse_manager_data_fetch_material_request(warehouse):
+    warehouse_manager = []
+
+    wm = frappe.db.sql("select warehouse_manager from `tabWarehouse Manager` where parent = %s ",(warehouse))
+                
+    # for record in wm:
+    #         warehouse_manager.append(record)
+
+    return wm
+
+
+# def get_verification_users(expense_grouping_master=None,department=None):
+@frappe.whitelist()
+def get_verification_users_material(expense_grouping_master=None, department=None):
+    doc = frappe.get_all(
+        "Expense Verification Flow",
+        filters={
+            "select_department": department,
+            "select_expense_grouping": expense_grouping_master,
+        },
+        fields=[
+            "verifier",
+            "approver",
+            "validation_1",
+            "validation_2",
+            "auditor",
+            "approver_role_1",
+            "approver_role_2",
+            "approver_role_3",
+            "approver_role_4",
+            "approver_role_5",
+        ],
+    )
+
+    if not doc:
+        return None  # Return None if no records are found
+
+    return doc[0]  # Return the first matching document
+
 
 
 @frappe.whitelist()
@@ -212,37 +252,6 @@ def send_payment_request_alert():
         return "Error occurred. Logged error."
 
 
-
-# def get_verification_users(expense_grouping_master=None,department=None):
-@frappe.whitelist()
-def get_verification_users_material(expense_grouping_master=None, department=None):
-    doc = frappe.get_all(
-        "Expense Verification Flow",
-        filters={
-            "select_department": department,
-            "select_expense_grouping": expense_grouping_master,
-        },
-        fields=[
-            "verifier",
-            "approver",
-            "validation_1",
-            "validation_2",
-            "auditor",
-            "approver_role_1",
-            "approver_role_2",
-            "approver_role_3",
-            "approver_role_4",
-            "approver_role_5",
-        ],
-    )
-
-    if not doc:
-        return None  # Return None if no records are found
-
-    return doc[0]  # Return the first matching document
-
-
-
 # Use in sales invoice to fetch new account from sales person.
 @frappe.whitelist(allow_guest=True)
 def sales_invoice_get_account(custom_sales_person):
@@ -252,49 +261,6 @@ def sales_invoice_get_account(custom_sales_person):
         return ""
     return overdue_pos[0]['custom_bank_account']
 
-
-@frappe.whitelist()
-def search_item_names(search_term):
-    # Sanitize the search_term (remove all non-alphanumerics, lowercase)
-    sanitized_search = re.sub(r'[^a-zA-Z0-9]', '', search_term).lower()
-
-    if not sanitized_search:
-        return []
-
-    # Use raw SQL to fetch item names and filter them after cleaning
-    result = frappe.db.sql("""
-        SELECT item_name FROM `tabItem`
-        WHERE disabled = 0
-    """, as_dict=True)
-
-    # Filter in Python after cleaning each item name
-    matched_items = []
-    for row in result:
-        clean_item_name = re.sub(r'[^a-zA-Z0-9]', '', row.item_name).lower()
-        if sanitized_search in clean_item_name:
-            matched_items.append(row.item_name)
-
-    return matched_items
-@frappe.whitelist()
-def search_item_names2(search_term):
-    # sanitized_search = re.sub(r'[^a-zA-Z0-9]', '', search_term).lower()
-    
-    # items = frappe.get_all("Item", fields=["item_name"], limit_page_length=1000)
-
-    # matched_items = []
-    # for item in items:
-    #     clean_item_name = re.sub(r'[^a-zA-Z0-9]', '', item.item_name).lower()
-    #     if sanitized_search in clean_item_name:
-    #         matched_items.append(item.item_name)
-
-
-    matched_items = []
-    query = " SELECT item_name FROM `tabItem` WHERE `item_name` LIKE '%{}%'".format(search_term)
-    items = frappe.db.sql(query, as_dict=True)
-    for item in items:
-        matched_items.append(item['item_name'])
-
-    return matched_items
 
 
 @frappe.whitelist()
@@ -651,15 +617,6 @@ def create_new_expense_type(name):
 def expense_reject_status(doc_name,status):
     frappe.db.set_value("Expense Claim",doc_name,"approval_status",status)
     return "Success"
-
-@frappe.whitelist()
-def share_document(doctype,name,users,read,write,share,everyone):
-    users = json.loads(users)
-    for i in users:
-        frappe.share.add_docshare(
-            doctype, name, i, read=read, write=write, share=share, submit=1, everyone=everyone, flags={"ignore_share_permission": True}
-        )
-    return "Successfully shared this document with the approvers."
 
 @frappe.whitelist()
 def get_verification_users(expense_grouping_master=None,department=None):
@@ -1330,16 +1287,6 @@ def warehouse_manager_data_fetch_stock_entry(mr_no):
     # Assign the string to frappe.response["message"]
     return wm    
 
-@frappe.whitelist()
-def warehouse_manager_data_fetch_material_request(warehouse):
-    warehouse_manager = []
-
-    wm = frappe.db.sql("select warehouse_manager from `tabWarehouse Manager` where parent = %s ",(warehouse))
-                
-    # for record in wm:
-    #         warehouse_manager.append(record)
-
-    return wm
 
 @frappe.whitelist()
 def get_opration_approver(department):

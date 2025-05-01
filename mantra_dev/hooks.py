@@ -20,7 +20,7 @@ app_include_js = [
 
 # include js in doctype views
 doctype_js = {
-    "Material Request": "public/js/material_request_changes.js",
+    # "Material Request": "public/js/material_request_changes.js",
     "Stock Entry": "public/js/stock_entry.js",
     "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
     "Subcontracting Order": "public/js/subcontracting_order.js",
@@ -34,15 +34,13 @@ doctype_js = {
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
     "Salary Slip": "public/js/salary_slip.js",
-    "Item": "public/js/item.js",
+    # "Item": "public/js/item.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
 doctype_list_js = {
-    "Material Request" : "public/js/material_request.js",
-    # "Payment Entry": "public/js/payment_entry.js",
-    # "Delivery Note": "public/js/delivery_note.js",
-    "Item" : "public/js/item_list.js",
+    # "Material Request" : "public/js/material_request.js",
+    # "Item" : "public/js/item_list.js",
     # "Employee Advance": "public/js/employee_advance_list.js",
 }
 
@@ -53,8 +51,6 @@ override_doctype_class = {
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
     "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
-    # "Purchase Order":"mantra_dev.overrides.purchase_order.CustomPurchaseOrder",
-    # "Purchase Receipt":"mantra_dev.overrides.purchase_receipt.CustomPurchaseReceipt"
 }
 
 # Document Events

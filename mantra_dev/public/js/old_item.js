@@ -87,7 +87,6 @@ frappe.ui.form.on('Item', {
                 method: "mantra_dev.backend_code.item.item.fetch_item_used_as_raw_material_in_bom",
                 args: { item_code: frm.doc.name },
                 callback: function (r) {
-                    console.log(r.message);
                     if (r.message.length > 0){
                         var data_list = r.message;
                         var d = new frappe.ui.Dialog({
