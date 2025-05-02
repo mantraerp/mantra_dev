@@ -325,7 +325,10 @@ def cron_sync_attendance():
 	'''
 
 	limit_records = 7
-	query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0 AND `emp_id` NOT IN (SELECT error FROM `tabError Log` WHERE method='{}') LIMIT {}".format(employee_key_token,limit_records)
+	query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0 AND `emp_id` NOT IN (SELECT error FROM `tabError Log` WHERE method='{}') GROUP BY emp_id LIMIT {}".format(employee_key_token,limit_records)
+	
+	# frappe.log_error("query",query)
+	# return
 	employee_id_list = frappe.db.sql(query,as_dict=True)
 	
  
@@ -380,11 +383,11 @@ def create_attendance(rec):
 				reply["message"] = f"Attendance already exists for {att_doc.emp_id} on {att_doc.at_date}. Skipping."
 				return reply
 
-			joining_date = frappe.get_value("Employee", {"name": att_doc.emp_id}, "date_of_joining")
-			j_date = getdate(joining_date)
-			if getdate(att_doc.at_date) < j_date:
-				reply["message"] = f"Skip attendance records for {att_doc.at_date}.Skip...."
-				return reply
+			# joining_date = frappe.get_value("Employee", {"name": att_doc.emp_id}, "date_of_joining")
+			# j_date = getdate(joining_date)
+			# if getdate(att_doc.at_date) < j_date:
+			# 	reply["message"] = f"Skip attendance records for {att_doc.at_date}.Skip...."
+			# 	return reply
 
 
 			attendance = frappe.new_doc("Attendance")
