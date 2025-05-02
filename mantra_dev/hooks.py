@@ -27,7 +27,7 @@ doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
     "Tax Category": "public/js/tax_category.js",
     "Sales Order": "public/js/sales_order.js",
-    "Employee": "public/js/employee.js",
+    # "Employee": "public/js/employee.js",
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",

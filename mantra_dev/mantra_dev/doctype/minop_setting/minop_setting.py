@@ -348,7 +348,7 @@ def cron_sync_attendance():
 		query = "SELECT name,emp_id FROM `tabAttendance Error Log` WHERE `sync`=0"
 		employee_id_list = frappe.db.sql(query,as_dict=True)
 		if len(employee_id_list)!=0:
-			send_error_mail("Unsync attendance records: Attendance Error Log","332")
+			send_error_mail("Unsync attendance records: Attendance Error Log",str(employee_id_list))
 			
 	for at in attendances:
 		frappe.enqueue(create_attendance, rec=at['name'], queue='long', timeout=10000)

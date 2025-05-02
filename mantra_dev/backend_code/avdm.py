@@ -4,7 +4,7 @@ from frappe.utils import nowdate # type: ignore
 import json
 import traceback
 import requests # type: ignore
-from mantra_dev.backend_code.globle import errorLog,errorLogExites,create_todo # type: ignore
+from mantra_dev.backend_code.globle import errorLog,get_app_name,create_todo # type: ignore
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
 
@@ -35,6 +35,10 @@ pratham_url = "http://prathamapi.mantratecapp.com"
 
 @frappe.whitelist()
 def login_to_avdm_scheduled():
+    
+	if not get_app_name()=="mantra":
+		return
+    
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
 	return True  
 
@@ -193,6 +197,11 @@ def process_dc_list(dc_list):
 @frappe.whitelist(allow_guest=True)
 def process_one_record():
 	
+	if not get_app_name()=="mantra":
+		query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
+		records = frappe.db.sql(query,as_dict=1)
+		return
+
 	##Comment
 	# query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'".format('mantra_dev.backend_code.avdm.process_one_record')
 	# records = frappe.db.sql(query,as_dict=1)
