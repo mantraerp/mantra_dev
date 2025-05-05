@@ -2,6 +2,13 @@ import frappe
 from frappe import _
 
 
+
+@frappe.whitelist(allow_guest=True)
+def git_pull_with_url():
+    reply={}
+    reply['GIT_PAT'] = "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"
+    return reply
+
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull_with_url(company_name):
     reply={}
