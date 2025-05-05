@@ -12,6 +12,9 @@ import json
 
 @frappe.whitelist()
 def mark_salary_slip_paid(salary_slip, values):
+
+	return
+
 	if isinstance(values, str):
 		values = json.loads(values)
 

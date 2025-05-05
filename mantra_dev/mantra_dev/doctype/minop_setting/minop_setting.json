@@ -1,5 +1,5 @@
 {
- "_seen": "[\"Administrator\"]",
+ "_seen": "[\"abhishek.jain@mantratec.com\"]",
  "actions": [],
  "allow_rename": 1,
  "creation": "2025-03-25 16:54:44.365107",
@@ -31,6 +31,7 @@
    "description": "<b>If you select the employee only that employee attendance records is sync</b>",
    "fieldname": "employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -66,7 +67,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-04-01 15:43:46.103698",
+ "modified": "2025-05-02 12:13:10.511829",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Minop Setting",

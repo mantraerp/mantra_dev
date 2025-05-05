@@ -30,8 +30,11 @@ def sync_employee_status(PunchID):
 	reply["message"]=""
     
 	try:
-		endpoints = frappe.db.get_single_value("ERP Settings","end_point")
-		key = frappe.db.get_single_value("ERP Settings","key")
+		# endpoints = frappe.db.get_single_value("ERP Settings","end_point")
+		# key = frappe.db.get_single_value("ERP Settings","key")
+  
+		endpoints = "https://merp.minopcloud.com/api/"
+		key = "nBpnKvx+hRQ/BDwDeNx/+N8+YxVJWHeG3F1HyRaBqoMVIot3erGo6HyIXg6Z1Ef6"
 
 		url = f"{endpoints}/Transaction/GetERPEmployeeDataApi"
 		headers = {
@@ -159,7 +162,8 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 			return reply
 
 	
-	endpoints = frappe.db.get_single_value("ERP Settings","end_point")
+	# endpoints = frappe.db.get_single_value("ERP Settings","end_point")
+	endpoints = "https://merp.minopcloud.com/api/"
 	url = f"{endpoints}Transaction/GetERPProcessdataApi"
 	if Emp_Code!="0":
 		emp_status = frappe.get_value("Employee",{"name":Emp_Code},"status")
@@ -271,7 +275,8 @@ def url_featching_process(record):
 	reply["status_code"]=200
 	reply["message"]=""
 
-	key = frappe.db.get_single_value("ERP Settings","key")
+	# key = frappe.db.get_single_value("ERP Settings","key")
+	key = "nBpnKvx+hRQ/BDwDeNx/+N8+YxVJWHeG3F1HyRaBqoMVIot3erGo6HyIXg6Z1Ef6"
 	headers = {
 		"Apisubkey" : key
 	}
@@ -366,6 +371,8 @@ def cron_sync_attendance():
 
 	return True
 
+
+@frappe.whitelist(allow_guest=True)
 def create_attendance(rec):
 	'''
 		Create the attendance function	
@@ -380,6 +387,8 @@ def create_attendance(rec):
 		if att_doc:
 			exist = frappe.db.exists("Attendance",{"employee":att_doc.emp_id,"attendance_date": att_doc.at_date})
 			if exist:
+				query = """UPDATE `tabAttendance Error Log` SET `sync` = 1, `remark`='DUPLICATE' WHERE `name` = %s"""
+				frappe.db.sql(query,rec,as_dict=True)
 				reply["message"] = f"Attendance already exists for {att_doc.emp_id} on {att_doc.at_date}. Skipping."
 				return reply
 
@@ -472,13 +481,20 @@ def create_attendance(rec):
     
 			attendance.save(ignore_permissions=True)
 			attendance.submit()
-			
+
 			query = """UPDATE `tabAttendance Error Log` SET `sync` = 1 WHERE `name` = %s"""
 			frappe.db.sql(query,rec,as_dict=True)
 		else:
 			send_error_mail("Error Create the Employee Attendance. Recrod not found.create_attendance",rec)
 	
 	except Exception as e:
+
+		if "can not be less than employee" in str(e):
+			query = """UPDATE `tabAttendance Error Log` SET `sync` = 1, `remark`='JOINOREXITDATE' WHERE `name` = %s"""
+			frappe.db.sql(query,rec,as_dict=True)
+			reply['message']='Join and exit date are not allow'
+			return reply
+     
 		error_message = "{}<br>create_attendance<br><br>{}".format(str(e),str(traceback.format_exc()))
 		send_error_mail("Error Create the Employee Attendance",error_message)
 		reply["status_code"]=500

@@ -32,7 +32,7 @@ doctype_js = {
     "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
     "Payroll Entry": "public/js/payroll_entry.js",
-    "Salary Slip": "public/js/salary_slip.js",
+    # "Salary Slip": "public/js/salary_slip.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
 }

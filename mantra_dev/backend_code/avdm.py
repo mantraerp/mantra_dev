@@ -4,7 +4,7 @@ from frappe.utils import nowdate # type: ignore
 import json
 import traceback
 import requests # type: ignore
-from mantra_dev.backend_code.globle import errorLog,get_app_name,create_todo # type: ignore
+from mantra.backend_code.globle import errorLog,get_app_name,create_todo # type: ignore
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
 
@@ -36,9 +36,12 @@ pratham_url = "http://prathamapi.mantratecapp.com"
 @frappe.whitelist()
 def login_to_avdm_scheduled():
     
+# https://mantratec.milaap.ai/api/method/mantra_dev.backend_code.avdm.login_to_avdm_scheduled
+
 	if not get_app_name()=="mantra":
 		return
     
+	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
 	return True  
 
@@ -52,7 +55,7 @@ def login_to_avdm(transaction_date):
     #To create ToDo list
 	todo_description = "EVDM Process {}".format(str(transaction_date))
 	allocated_to="ravi.patel@mantratec.com"
-	frappe.enqueue(create_todo, queue='long', timeout=600, description=todo_description,allocated_to=allocated_to,date=frappe.utils.nowdate(),status='Open',priority='Low',reference_type='',reference_name='')
+	# frappe.enqueue(create_todo, queue='long', timeout=600, description=todo_description,allocated_to=allocated_to,date=frappe.utils.nowdate(),status='Open',priority='Low',reference_type='',reference_name='')
 
 	delivery_note_number_proccess = [] #reset globle variable
  
@@ -409,8 +412,9 @@ def fetch_sub_serial_no_records():
 
 	reply={}
 	reply["Process_status"]="Serial no sub"
+	limit_records = 250
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 25".format(key_sub_serial_no)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT {}".format(key_sub_serial_no,limit_records)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Process_data"]=len(list_body_to_process)
 
@@ -517,7 +521,7 @@ def fetch_sub_serial_no_records():
 				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])
 				records_deleted = frappe.db.sql(query,as_dict=1)
 
-			return "Body process sucessfully."
+			return "Body process sucessfully {}.".format(limit_records)
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json

@@ -13,7 +13,8 @@
   "half_day",
   "leave_type",
   "leave",
-  "sync"
+  "sync",
+  "remark"
  ],
  "fields": [
   {
@@ -64,11 +65,17 @@
    "fieldtype": "Check",
    "label": "Sync",
    "read_only": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remark",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-01 12:21:29.413461",
+ "modified": "2025-05-02 15:25:29.100883",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Attendance Error Log",

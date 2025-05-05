@@ -149,8 +149,7 @@
   {
    "fieldname": "requester",
    "fieldtype": "Data",
-   "label": "Requester",
-   "read_only": 1
+   "label": "Requester"
   },
   {
    "fieldname": "approved_by",
@@ -238,7 +237,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-28 16:17:49.964165",
+ "modified": "2025-05-02 14:42:39.757730",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "PO Form Approval",

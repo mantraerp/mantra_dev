@@ -4,7 +4,7 @@
 import frappe
 import re
 import datetime
-from frappe.utils import get_first_day, get_last_day, date_diff,getdate
+from frappe.utils import get_first_day, get_last_day, date_diff,getdate # type: ignore
 
 
 def execute(filters=None):
@@ -23,10 +23,10 @@ def get_columns():
         {"label": "No.OF WeekOff", "fieldname": "no_of_weekoff", "fieldtype": "Data", "width": 200},
         {"label": "No.Of Paiddays", "fieldname": "no_of_paiddays", "fieldtype": "Data", "width": 200},
         {"label": "Total Days", "fieldname": "total_days", "fieldtype": "Data", "width": 200},
-        {"label": "Joining Date", "fieldname": "date_of_joining", "fieldtype": "Date", "width": 200},
-        {"label": "Dyas Diff(From 1st Day Of Month to Joining Date)", "fieldname": "days_difference", "fieldtype": "Data", "width": 200},
-        {"label": "Relieving Date", "fieldname": "relieving_date", "fieldtype": "Date", "width": 200},
-        {"label": "Dyas Diff(From Last Day to Reliving Day)", "fieldname": "rel_days_difference", "fieldtype": "Data", "width": 200},
+        # {"label": "Joining Date", "fieldname": "date_of_joining", "fieldtype": "Date", "width": 200},
+        # {"label": "Dyas Diff(From 1st Day Of Month to Joining Date)", "fieldname": "days_difference", "fieldtype": "Data", "width": 200},
+        # {"label": "Relieving Date", "fieldname": "relieving_date", "fieldtype": "Date", "width": 200},
+        # {"label": "Dyas Diff(From Last Day to Reliving Day)", "fieldname": "rel_days_difference", "fieldtype": "Data", "width": 200},
     ]
 
 def get_data(filters):

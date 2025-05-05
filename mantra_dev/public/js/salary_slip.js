@@ -1,5 +1,7 @@
 frappe.ui.form.on("Salary Slip", {
     refresh: function(frm) {
+
+        if (["HR User","HR OPS User","HR OPS Manager","HR Manager"].some(role => frappe.user.has_role(role))) {
             frm.add_custom_button("Send salary slip mail", function() {
                 frappe.call({
                     method: "mantra_dev.backend_code.salary_slip.employee_prefere_email_id",
@@ -18,14 +20,17 @@ frappe.ui.form.on("Salary Slip", {
                     },
                 })
             }, "Utility");
+        }
+        
 
-
+        if (["Accounts - Banking Manager"].some(role => frappe.user.has_role(role))) {
             // Check if status is Submitted (1) and payment status is not "Success"
             if (frm.doc.status == "Submitted" && frm.doc.custom_payment_status != "Success") {
                 frm.add_custom_button("Mark as Paid", function() {                
                     show_payment_dialog(frm);
                 }, "Utility");
             }
+        }
     }
 });
 
@@ -115,7 +120,6 @@ function show_email_dialog(email,frm) {
             //     return;
             // }
 
-            // console.log("GGGGGGGGGGGGGGGGGGGG");
             frappe.call({
                 method: "mantra_dev.backend_code.salary_slip.email_salary_slip_single_without_restriction",
                 args: {

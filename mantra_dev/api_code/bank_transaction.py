@@ -1634,7 +1634,14 @@ def get_icici_bank_file_background(delimiter='|'):
                             if ERP_status == "Success":
                                 document = frappe.get_doc("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027")
                                 if document.custom_sent_payment_advice == 1:
-                                    send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15],"")
+                                    query = "SELECT custom_payment_advice_send FROM `tabPayment Entry` WHERE `name`='{}'".format(data_dict[15])
+                                    mdf = frappe.db.sql(query, as_dict=True)
+                                    if len(mdf)!=0:
+                                        if mdf[0]['custom_payment_advice_send'] in [0,'0',False]:
+                                            send_payment_advice_email(data_dict[0], data_dict[3], data_dict[5], data_dict[20], data_dict[1], data_dict[27], data_dict[4], data_dict[6], data_dict[28], data_dict[3],data_dict[25], data_dict[15],"")
+
+
+
 
 
                     elif frappe.db.exists("Salary Slip", data_dict[15]):
@@ -2196,7 +2203,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
 
     message = "Please find the attached payment advice."
-    subject = "Payment Advice"
+    subject = "Payment Advice : {} Amount: {}".format(payment_data['beneficiary_name'],payment_data['amount'])
     
     if frappe.db.exists("Email Template","Payment Advice"):
         doc_args = {"supplier_name": benifecery_name,}
@@ -2210,7 +2217,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
     # Step 2: Generate PDF from the HTML
     pdf_data = get_pdf(html_content)
-
+    frappe.log_error("Email send subjecct",subject)
     # Step 3: Send email with PDF attachment
     try:
         if email:
@@ -2225,6 +2232,11 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             )
             send = flush()
             frappe.msgprint(f"Payment advice email sent successfully to {email}.")
+            #update payment entry mail tick so its send once only
+            query = "UPDATE `tabPayment Entry` SET `custom_payment_advice_send`=1 WHERE `name`='{}'".format(payment_entry)
+            mdf = frappe.db.sql(query, as_dict=True)
+            frappe.log_error("Email send","")
+
         else:
             frappe.sendmail(
                 recipients=["abhishek.jain@mantratec.com"],
