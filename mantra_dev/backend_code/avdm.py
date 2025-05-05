@@ -35,12 +35,10 @@ pratham_url = "http://prathamapi.mantratecapp.com"
 
 @frappe.whitelist()
 def login_to_avdm_scheduled():
-    
-# https://mantratec.milaap.ai/api/method/mantra_dev.backend_code.avdm.login_to_avdm_scheduled
 
 	if not get_app_name()=="mantra":
 		return
-    
+
 	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
 	return True  
@@ -216,6 +214,10 @@ def process_one_record():
 @frappe.whitelist(allow_guest=True)
 def process_one_record_background():
 	
+
+	if not get_app_name()=="mantra":
+		return
+
 	# return
 	reply= {}
 	try:
