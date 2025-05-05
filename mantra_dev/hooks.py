@@ -31,7 +31,7 @@ doctype_js = {
     "Bank Account": "public/js/bank_account.js",
     "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
-    "Payroll Entry": "public/js/payroll_entry.js",
+    # "Payroll Entry": "public/js/payroll_entry.js",
     # "Salary Slip": "public/js/salary_slip.js",
     "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
@@ -92,9 +92,9 @@ doc_events = {
 scheduler_events = {
 
     "cron": {
-        "0/1 * * * *": [
-            "mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process"
-        ],
+        # "0/1 * * * *": [
+        #     "mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process"
+        # ],
         "0/2 * * * *": [
             "mantra_dev.backend_code.avdm.process_one_record"
         ],        
