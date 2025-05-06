@@ -225,6 +225,8 @@ def process_one_record_background():
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Body process"]=len(list_body_to_process)
 	
+		# list_body_to_process=[]
+ 
 		#If all body process then start update serial no in DB
 		if len(list_body_to_process)==0:
 			reply["going_to_inner"]=len(list_body_to_process)
@@ -256,7 +258,7 @@ def process_one_record_background():
 			frappe.enqueue(notify_items_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_model_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_fail_sr_registration_in_erp, queue='long', timeout=3600)
-			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = '{}'".format('mantra_dev.backend_code.avdm.process_one_record')
+			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 			dn_no_list = frappe.db.sql(query)
 			return "All task are done cron stop call"
 
@@ -279,7 +281,7 @@ def process_one_record_background():
 			"accept": "application/json",
 			"Authorization": f"Bearer {token[0]['error']}"
 		}
-		reply['message']="Going to register serial no body on server"
+		reply['message']="Going to register serial no body on server key {}".format(key_body_process)
 		# return process_request(process_record=list_body_to_process[0],creating_url=creating_url,headers=headers)
 		for process_record in list_body_to_process:
 			frappe.enqueue(process_request, queue='long', timeout=3600,process_record=process_record,creating_url=creating_url,headers=headers)
@@ -305,11 +307,23 @@ def process_request(process_record,creating_url,headers):
 		body_pass = ast.literal_eval(process_record['error'])
 		process_dc_of_serial={}
 		body_pass_avdm = []
+		body_not_process = []
 		for s_no_data in body_pass:
 			process_dc_of_serial[s_no_data['serialNo']]=s_no_data['dcNo']
 			s_no_data['dcDate'] = date_convert(s_no_data['dcDate'])
-			if int(s_no_data['model']) != 13:
-				body_pass_avdm.append(s_no_data)
+			try:
+				if str(s_no_data['model']) != '13':
+					body_pass_avdm.append(s_no_data)
+			except Exception as e:
+				body_not_process.append(s_no_data)
+
+		if len(body_not_process)!=0:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com"],
+				subject="Error Criticle: Serial number not process",
+				message="{}".format(str(body_not_process))
+			)
+
 
 		if len(body_pass_avdm)==0:
 			#Once process delete record from error log
@@ -322,6 +336,12 @@ def process_request(process_record,creating_url,headers):
 		reply['request_header']=headers
 		reply['request_body']=body_pass_avdm
 
+		# body_json = str(json.dumps(body_pass_avdm))
+		# body_json = str(body_pass_avdm).replace("'","\"")
+		# body_json = [{"mastCode": "0", "serialNo": "9456165", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457534", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9357470", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9430108", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455670", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9429512", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9380028", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431459", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455804", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9429550", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431828", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9440241", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455714", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455625", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431837", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9440458", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457304", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457017", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431752", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431466", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455734", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9453344", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9434746", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431355", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455776", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457129", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2411109989", "custName": "Shenzhen One Plus One Wireless Communication Technology Co., Ltd.", "dcNo": "M/DC/25-26/01789", "dcDate": "2025-05-05T15:44:42.750330Z", "model": "11", "subModelType": "0", "item_code": "P2615"}, {"mastCode": "0", "serialNo": "9436940", "custName": "OM ONLINE KENDRA", "dcNo": "M/DC/25-26/01768", "dcDate": "2025-05-05T15:06:28.602007Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9438075", "custName": "MS ENTERPRISE", "dcNo": "M/DC/25-26/01769", "dcDate": "2025-05-05T15:05:37.727826Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351286", "custName": "IBRAHIM ALI - MAHARAJGANJ", "dcNo": "M/DC/25-26/01770", "dcDate": "2025-05-05T15:04:47.192537Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351026", "custName": "RAJ KUMAR PAL", "dcNo": "M/DC/25-26/01771", "dcDate": "2025-05-05T15:03:38.742814Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2411109997", "custName": "DHWANISH SHAH", "dcNo": "M/DC/25-26/01765", "dcDate": "2025-05-05T15:01:39.385418Z", "model": "MOXA73", "subModelType": "0", "item_code": "P1381"}, {"mastCode": "0", "serialNo": "9355164", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351565", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351507", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2501103517", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103518", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103519", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103495", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501104035", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501104036", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103606", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103913", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103668", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103486", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103462", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103612", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103496", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103469", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103475", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}]
+  
+  
+		# reply['request_dump']=body_json
 		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
 		reply['resposne_status_code']=response1.status_code
 
@@ -434,6 +454,9 @@ def fetch_sub_serial_no_records():
 			record_to_be_proccess.append(body_pass)
 			searil_no_pass.append(body_pass['serialNo'])
 
+
+		if len(searil_no_pass)==0:
+			return "No serial number found"
 
 		#Process for sub serial no
 		creating_url = "{}/Production/api/Product/GetConsumeSerialNoDetails".format(pratham_url)

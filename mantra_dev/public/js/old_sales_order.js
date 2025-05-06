@@ -1,6 +1,7 @@
 frappe.ui.form.on('Sales Order', {
     onload: function (frm) {
-        setTimeout(() => {
+
+		setTimeout(() => {
             frm.set_query('customer', () => {
                 return {
                     filters: {
@@ -8,7 +9,8 @@ frappe.ui.form.on('Sales Order', {
                     }
                 };
             });
-        }, 1000); // 1000 milliseconds = 1 second   
+        }, 1000);
+
         frm.set_query('set_warehouse', () => {
             return {
                 filters: {
