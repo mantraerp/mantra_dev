@@ -3,12 +3,15 @@
 
 import frappe
 from frappe import _
-from frappe.utils import format_datetime, time_diff_in_seconds, getdate, format_duration
+from frappe.utils import flt, time_diff_in_seconds, getdate
 
 
 def execute(filters=None):
-    columns, data = get_data_and_column(filters)
-    return columns, data
+    columns, data, report_summary_data = get_data_and_column(filters)
+    
+    report_summary = get_report_summary(report_summary_data)
+
+    return columns, data, None, None, report_summary
 
 
 def get_data_and_column(filters):
@@ -19,8 +22,10 @@ def get_data_and_column(filters):
         if transition.custom_exempted == 1:
             exempted.append({'state':transition.state,'next_state':transition.next_state})
 
-    workflow_status_list = tuple(set(i.state for i in workflow.states))
-    
+    workflow_status_list = tuple(dict.fromkeys(i.state for i in workflow.states))
+
+    report_summary_data = frappe._dict()
+
     columns = [
         {
             "label": _("DocType"),
@@ -47,11 +52,22 @@ def get_data_and_column(filters):
 
     for wo in workflow_status_list:
         columns.append({
-            "label": _(f"{wo}"),
-            "fieldname": wo.lower().replace(" ", "_"),
+            "label": _(f"{wo} Actual Time"),
+            "fieldname": wo.lower().replace(" ", "_")+'_actual_time',
             "fieldtype": "Duration",
-            "width": 150,
+            "width": 250,
         })
+        columns.append({
+            "label": _(f"{wo} Diff Time"),
+            "fieldname": wo.lower().replace(" ", "_")+'_diff_time',
+            "fieldtype": "Duration",
+            "width": 250,
+        })
+        report_summary_data[wo.lower().replace(" ", "_")] = {
+            "actual_time": 0,
+            "diff_time": 0,
+            "count": 0
+        }
 
     columns += [{
         "label": _("Default Time"),
@@ -83,7 +99,7 @@ def get_data_and_column(filters):
     doc_list = frappe.db.get_list(
         filters.doctype,
         filters=list_filters,
-        order_by="creation ASC",
+        order_by="creation DESC",
         fields=["name", "creation", "owner"],
     )
 
@@ -135,22 +151,31 @@ def get_data_and_column(filters):
                         flag = False
 
                 if flag:
-                    row_data[(row.content).lower().replace(" ", "_")] = time_diff(get_hms(submition_date, row.creation),default_time)
+                    row_data[(row.content).lower().replace(" ", "_")+'_actual_time'] = get_hms(submition_date, row.creation)
+                    row_data[(row.content).lower().replace(" ", "_")+'_diff_time'] = time_diff(get_hms(submition_date, row.creation),default_time)
+
+                    if (row.content).lower().replace(" ", "_") in report_summary_data:
+                        report_summary_data[(row.content).lower().replace(" ", "_")]['actual_time'] += get_hms(submition_date, row.creation)
+                        report_summary_data[(row.content).lower().replace(" ", "_")]['diff_time'] += time_diff(get_hms(submition_date, row.creation),default_time)
+                        report_summary_data[(row.content).lower().replace(" ", "_")]['count'] += 1
+
                     row_data["default_time"] += default_time
                     row_data["time_variance"] += time_diff(get_hms(submition_date, row.creation),default_time)
                     row_data["diff"] +=  get_hms(submition_date, row.creation)
-
-
 
             previous_state = row.content
             submition_date = row.creation
         data.append(row_data)
 
-    return columns, data
+    return columns, data, report_summary_data
 
 
 def get_hms(date1, date2):
     diff_seconds = abs(time_diff_in_seconds(date1, date2))
+    
+    if abs(diff_seconds/3600) >= 24:
+        diff_seconds = (diff_seconds/24) * 10
+
     return diff_seconds
 
 
@@ -167,3 +192,26 @@ def time_diff(time_taken,default_duration):
 
     time_difference =  default_duration - time_taken
     return time_difference
+
+
+def get_report_summary(report_summary_data):
+    if not report_summary_data:
+        return None
+    
+    report_summary = []
+
+    for key, value in report_summary_data.items():
+        report_summary.append({
+            "value": flt(value["actual_time"]/value["count"]) if value["count"] else 0,
+            "indicator": "Purple",
+            "label": _(key.replace("_", " ").title()) + " Actual Time",
+            "datatype": "Duration",
+        })
+        report_summary.append({
+            "value": flt(value["diff_time"]/value["count"]) if value["count"] else 0,
+            "indicator": "Green" if value["count"] and (value["diff_time"]/value["count"]) >= 0 else "Red",
+            "label": _(key.replace("_", " ").title()) + " Diff Time",
+            "datatype": "Duration",
+        })
+
+    return report_summary

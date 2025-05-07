@@ -50,5 +50,15 @@ frappe.query_reports["Document Workflow TAT Report"] = {
         }
         
         return value;
-    }
+    },
+	onload: function (report) {
+		const style = `
+			<style>
+				.report-summary .summary-value.purple {
+					color: #17a2b8 !important;
+				}
+			</style>
+		`;
+		$('head').append(style);
+	}	
 };

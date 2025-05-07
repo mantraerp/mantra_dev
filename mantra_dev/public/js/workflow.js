@@ -91,6 +91,119 @@ class WorkflowOverride extends frappe.ui.form.States {
 									});
 									dialog.show();
 								}
+								else if (me.frm.doc.doctype === "Job Offer" && (d.action === "Hold" || d.action == 'Reject')) {
+									let dialog = new frappe.ui.Dialog({
+										title: __(d.action == 'Hold' ? "Enter Reason for On Hold" : "Enter Reason for Rejected"),
+										fields: [
+											{
+												fieldname: "reason",
+												fieldtype: "Data",
+												label: __("Reason"),
+												reqd: 1,
+											},
+										],
+										primary_action_label: __("Submit"),
+										primary_action(values) {
+											if (!values.reason) {
+												frappe.msgprint(__("Please enter a reason."));
+												return;
+											}
+
+											frappe.dom.freeze();
+											frappe.call({
+												method: "recruitment.backend_code.job_offer.job_offer.handle_workflow_action_for_job_offer",
+												args: {
+													doc_name: me.frm.doc.name,
+													action: d.action == 'Hold' ? "on_hold" : "reject",
+													reason: values.reason,
+												},
+												callback: function (r) {
+													frappe.dom.unfreeze();
+													me.frm.reload_doc();
+													me.frm.script_manager.trigger("before_workflow_action").then(() => {
+														frappe
+															.xcall("frappe.model.workflow.apply_workflow", {
+																doc: me.frm.doc,
+																action: d.action,
+															})
+															.then((doc) => {
+																frappe.model.sync(doc);
+																me.frm.refresh();
+																me.frm.selected_workflow_action = null;
+																me.frm.script_manager.trigger("after_workflow_action");
+															})
+															.finally(() => {
+																frappe.dom.unfreeze();
+															});
+													});
+
+
+												},
+											});
+
+											dialog.hide();
+										},
+									});
+
+									dialog.show();
+								}
+								else if (me.frm.doc.doctype === "Job Requisition" && d.action == 'Reject') {
+									let dialog = new frappe.ui.Dialog({
+										title: __("Enter Reason for Rejected"),
+										fields: [
+											{
+												fieldname: "reason",
+												fieldtype: "Data",
+												label: __("Reason"),
+												reqd: 1,
+											},
+										],
+										primary_action_label: __("Submit"),
+										primary_action(values) {
+											if (!values.reason) {
+												frappe.msgprint(__("Please enter a reason."));
+												return;
+											}
+
+											frappe.dom.freeze();
+											frappe.call({
+												method: "recruitment.backend_code.job_requisition.job_requisition.handle_workflow_action",
+												args: {
+													doc_name: me.frm.doc.name,
+													action: "reject",
+													reason: values.reason
+												},
+
+												callback: function (r) {
+													frappe.dom.unfreeze();
+													me.frm.reload_doc();
+													me.frm.script_manager.trigger("before_workflow_action").then(() => {
+														frappe
+															.xcall("frappe.model.workflow.apply_workflow", {
+																doc: me.frm.doc,
+																action: d.action,
+															})
+															.then((doc) => {
+																frappe.model.sync(doc);
+																me.frm.refresh();
+																me.frm.selected_workflow_action = null;
+																me.frm.script_manager.trigger("after_workflow_action");
+															})
+															.finally(() => {
+																frappe.dom.unfreeze();
+															});
+													});
+
+
+												},
+											});
+
+											dialog.hide();
+										},
+									});
+
+									dialog.show();
+								}
 								else{
 								// action to perform if Yes is selected
                                 //transition start

@@ -30,7 +30,7 @@ doctype_js = {
     "Bank Account": "public/js/bank_account.js",
     # "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
-    "Project":"public/js/project.js",
+    # "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
 doctype_list_js = {

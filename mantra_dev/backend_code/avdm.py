@@ -236,6 +236,13 @@ def process_one_record_background():
 			if len(serial_subserial_no_list)!=0:
 				return fetch_sub_serial_no_records()
 
+
+			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
+			list_body_to_process = frappe.db.sql(query,as_dict=1)
+			if len(list_body_to_process)!=0:
+				return sub_serial_item_code_and_model()
+
+
 			#Start process sub serial no
 			query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN (SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_try_register)
 			item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
@@ -258,6 +265,8 @@ def process_one_record_background():
 			frappe.enqueue(notify_items_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_model_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_fail_sr_registration_in_erp, queue='long', timeout=3600)
+   
+
 			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 			dn_no_list = frappe.db.sql(query)
 			return "All task are done cron stop call"
@@ -805,7 +814,7 @@ def prepare_body_to_upload_subsr():
     
 ##############################################################
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def notify_fail_sr_registration_in_erp():
 
 	email_recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","sajal.chandrawanshi@mantratec.com"]
