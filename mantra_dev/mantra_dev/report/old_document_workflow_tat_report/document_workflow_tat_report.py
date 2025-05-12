@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, time_diff_in_seconds, getdate
+from frappe.utils import flt, time_diff_in_seconds, getdate # type: ignore
 
 
 def execute(filters=None):
@@ -207,11 +207,11 @@ def get_report_summary(report_summary_data):
             "label": _(key.replace("_", " ").title()) + " Actual Time",
             "datatype": "Duration",
         })
-        report_summary.append({
-            "value": flt(value["diff_time"]/value["count"]) if value["count"] else 0,
-            "indicator": "Green" if value["count"] and (value["diff_time"]/value["count"]) >= 0 else "Red",
-            "label": _(key.replace("_", " ").title()) + " Diff Time",
-            "datatype": "Duration",
-        })
+        # report_summary.append({
+        #     "value": flt(value["diff_time"]/value["count"]) if value["count"] else 0,
+        #     "indicator": "Green" if value["count"] and (value["diff_time"]/value["count"]) >= 0 else "Red",
+        #     "label": _(key.replace("_", " ").title()) + " Diff Time",
+        #     "datatype": "Duration",
+        # })
 
     return report_summary

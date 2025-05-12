@@ -1379,42 +1379,6 @@
   ]
  },
  {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "Salary Slip",
-  "modified": "2025-02-05 16:50:43.782330",
-  "module": "Mantra Dev",
-  "name": "Workflow TAT Report",
-  "prepared_report": 1,
-  "query": null,
-  "ref_doctype": "Version",
-  "reference_report": null,
-  "report_name": "Workflow TAT Report",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Workflow TAT Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "System Manager"
-   },
-   {
-    "parent": "Workflow TAT Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Administrator"
-   }
-  ]
- },
- {
   "add_total_row": 1,
   "columns": [],
   "disabled": 0,
@@ -2729,42 +2693,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "QC User"
-   }
-  ]
- },
- {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "Salary Slip",
-  "modified": "2025-04-25 16:42:41.894164",
-  "module": "Mantra Dev",
-  "name": "Document Workflow TAT Report",
-  "prepared_report": 1,
-  "query": null,
-  "ref_doctype": "Version",
-  "reference_report": null,
-  "report_name": "Document Workflow TAT Report",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Document Workflow TAT Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "System Manager"
-   },
-   {
-    "parent": "Document Workflow TAT Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Administrator"
    }
   ]
  },

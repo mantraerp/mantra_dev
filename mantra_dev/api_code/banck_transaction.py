@@ -1700,6 +1700,11 @@ def get_icici_bank_file_background(delimiter='|'):
                                     "custom_rejection_reason":data_dict[25],
                                     "custom_payment_status": "Fail",
                                 })
+                            elif data_dict[23]=="P":
+                                frappe.db.set_value("Salary Slip", data_dict[17], {
+                                    "custom_rejection_reason":data_dict[24],
+                                    "custom_payment_status": "Fail",
+                                })                                
                             else:
                                 frappe.db.set_value("Salary Slip", data_dict[17], {
                                     "custom_payment_status": "Fail",

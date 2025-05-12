@@ -1,7 +1,7 @@
 {
  "add_total_row": 1,
  "columns": [],
- "creation": "2025-04-25 16:41:18.302187",
+ "creation": "2025-05-02 12:22:04.768127",
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "Salary Slip",
  "letterhead": null,
- "modified": "2025-04-25 16:42:41.894164",
+ "modified": "2025-05-08 15:14:32.570881",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Document Workflow TAT Report",
@@ -26,5 +26,6 @@
   {
    "role": "Administrator"
   }
- ]
+ ],
+ "timeout": 0
 }

@@ -17,7 +17,7 @@ import requests # type: ignore
 from datetime import datetime
 import traceback
 from num2words import num2words # type: ignore
-from mantra_dev.backend_code.globle import errorLog,errorLogExites # type: ignore
+from mantra.backend_code.globle import errorLog,errorLogExites,get_app_name # type: ignore
 
 
 @frappe.whitelist(allow_guest=True)
@@ -1514,6 +1514,10 @@ def get_pnb_file():
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
     
+    
+    if not get_app_name()=="mantra":
+        return
+    
     frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
     frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
     return True
@@ -1672,7 +1676,7 @@ def get_icici_bank_file_background(delimiter='|'):
                                 else:
                                     ERP_status = "Authorization Pending"
 
-                        # Update Salary Slip
+                            # Update Salary Slip
                             frappe.db.set_value("Salary Slip", data_dict[15], {
                                 "custom_payment_status": ERP_status,
                                 "custom_payment_ref_no": data_dict[21],
@@ -1683,7 +1687,7 @@ def get_icici_bank_file_background(delimiter='|'):
                                 "custom_utr_no":  data_dict[28],
                                 "custom_rejection_reason":rejection_reason,
                             })
-                        # frappe.db.commit()
+                            # frappe.db.commit()
 
                     else:
                         if frappe.db.exists("Payment Entry", data_dict[17]):
@@ -1710,6 +1714,11 @@ def get_icici_bank_file_background(delimiter='|'):
                             if data_dict[24]=="P":
                                 frappe.db.set_value("Salary Slip", data_dict[17], {
                                     "custom_rejection_reason":data_dict[25],
+                                    "custom_payment_status": "Fail",
+                                })
+                            elif data_dict[23]=="P":
+                                frappe.db.set_value("Salary Slip", data_dict[17], {
+                                    "custom_rejection_reason":data_dict[24],
                                     "custom_payment_status": "Fail",
                                 })
                             else:

@@ -12,7 +12,7 @@ frappe.query_reports["Document Workflow TAT Report"] = {
 			"reqd": 1,
 			get_query: function () {
 				return {
-					query: "mantra_dev.mantra_dev.report.workflow_tat_report.workflow_tat_report.get_dt_query",
+					query: "mantra.mantra.report.workflow_tat_report.workflow_tat_report.get_dt_query",
 				};
 			},
 		},

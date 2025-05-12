@@ -10,6 +10,7 @@ def create_purchase_order_expected_date(doc,method=None):
             purchase_order = frappe.new_doc("Purchase Order Expected Date")
             purchase_order.purchase_order = doc.name
             purchase_order.item_code = item.item_code
+            purchase_order.owner=frappe.session.user
             purchase_order.qty = item.qty
             purchase_order.expected_qty = item.qty
             purchase_order.total_qty = item.qty

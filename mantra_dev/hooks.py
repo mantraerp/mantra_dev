@@ -89,9 +89,6 @@ doc_events = {
 scheduler_events = {
 
     "cron": {
-        # "0/1 * * * *": [
-        #     "mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process"
-        # ],
         "0/2 * * * *": [
             "mantra_dev.backend_code.avdm.process_one_record"
         ],        
