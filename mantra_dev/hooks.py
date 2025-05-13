@@ -26,11 +26,8 @@ doctype_js = {
     "Journal Entry": "public/js/journal_entry.js",
     "Sales Invoice": "public/js/sales_invoice.js",
     "Tax Category": "public/js/tax_category.js",
-    # "Sales Order": "public/js/sales_order.js",
     "Bank Account": "public/js/bank_account.js",
-    # "Supplier": "public/js/supplier.js",
     "Quality Inspection": "public/js/quality_inspection.js",
-    # "Project":"public/js/project.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
 doctype_list_js = {

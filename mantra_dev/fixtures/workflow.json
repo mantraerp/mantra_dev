@@ -4645,11 +4645,26 @@
   "doctype": "Workflow",
   "document_type": "Payroll Entry",
   "is_active": 1,
-  "modified": "2025-04-07 19:11:37.646067",
+  "modified": "2025-05-12 19:56:37.424840",
   "name": "Payroll Entry",
   "override_status": 0,
   "send_email_alert": 0,
   "states": [
+   {
+    "allow_edit": "HR OPS User",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Draft",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
    {
     "allow_edit": "HR OPS Manager",
     "avoid_status_override": 0,
@@ -4676,6 +4691,36 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Approved",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Accounts Manager",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Bank Checker",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Reviewed",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -4709,36 +4754,6 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "Accounts Manager",
-    "avoid_status_override": 0,
-    "doc_status": "1",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Payroll Entry",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "state": "Approved",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "HR OPS User",
-    "avoid_status_override": 0,
-    "doc_status": "0",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Payroll Entry",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "state": "Draft",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
    }
   ],
   "transitions": [
@@ -4757,6 +4772,20 @@
     "workflow_builder_id": null
    },
    {
+    "action": "Review",
+    "allow_self_approval": 1,
+    "allowed": "Bank Maker",
+    "condition": null,
+    "custom_default_time": null,
+    "custom_exempted": 0,
+    "next_state": "Reviewed",
+    "parent": "Payroll Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Approved",
+    "workflow_builder_id": null
+   },
+   {
     "action": "Checked",
     "allow_self_approval": 1,
     "allowed": "Bank Checker",
@@ -4767,7 +4796,7 @@
     "parent": "Payroll Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "Approved",
+    "state": "Reviewed",
     "workflow_builder_id": null
    },
    {
