@@ -13,19 +13,19 @@ app_license = "mit"
 # app_include_css = "/assets/mantra_dev/css/mantra_dev.css"
 app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
-    "/assets/mantra_dev/js/email_button.js",
-    "/assets/mantra_dev/js/workflow.js",
+    # "/assets/mantra_dev/js/email_button.js",
+    # "/assets/mantra_dev/js/workflow.js",
     ]
 
 
 # include js in doctype views
 doctype_js = {
-    "Stock Entry": "public/js/stock_entry.js",
-    "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
-    "Subcontracting Order": "public/js/subcontracting_order.js",
-    "Journal Entry": "public/js/journal_entry.js",
+    # "Stock Entry": "public/js/stock_entry.js",
+    # "Subcontracting Receipt": "public/js/subcontracting_receipt.js",
+    # "Subcontracting Order": "public/js/subcontracting_order.js",
+    # "Journal Entry": "public/js/journal_entry.js",
     "Sales Invoice": "public/js/sales_invoice.js",
-    "Tax Category": "public/js/tax_category.js",
+    # "Tax Category": "public/js/tax_category.js",
     "Bank Account": "public/js/bank_account.js",
     "Quality Inspection": "public/js/quality_inspection.js",
     "Expense Claim": "public/js/expense_claim.js",
