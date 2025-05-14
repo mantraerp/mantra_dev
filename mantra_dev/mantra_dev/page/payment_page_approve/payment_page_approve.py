@@ -44,11 +44,11 @@ def approve_payment_entries(payment_entry_ids):
             # Ensure document exists before modifying it
             if frappe.db.exists("Payment Entry", payment_entry_id):
                 frappe.db.set_value("Payment Entry", payment_entry_id, "workflow_state", "Approved")
-                current_user = frappe.session.user
-                frappe.set_user("Administrator")
+                # current_user = frappe.session.user
+                # frappe.set_user("Administrator")
                 doc = frappe.get_doc("Payment Entry",payment_entry_id)
                 doc.submit()
-                frappe.set_user(current_user)
+                # frappe.set_user(current_user)
 
         return "Success"
 
@@ -66,11 +66,11 @@ def hold_payment_entries(payment_entry_ids):
             # Ensure document exists before modifying it
             if frappe.db.exists("Payment Entry", payment_entry_id):
                 frappe.db.set_value("Payment Entry", payment_entry_id, "workflow_state", "On Hold")
-                current_user = frappe.session.user
-                frappe.set_user("Administrator")
+                # current_user = frappe.session.user
+                # frappe.set_user("Administrator")
                 doc = frappe.get_doc("Payment Entry",payment_entry_id)
                 doc.submit()
-                frappe.set_user(current_user)
+                # frappe.set_user(current_user)
 
         return "Success"
 

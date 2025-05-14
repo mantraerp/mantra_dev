@@ -1,5 +1,5 @@
 {
- "_seen": "[\"abhishek.jain@mantratec.com\", \"Administrator\"]",
+ "_seen": "[\"Administrator\"]",
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_rename": 1,
@@ -14,9 +14,8 @@
  "fields": [
   {
    "fieldname": "file_from",
-   "fieldtype": "Select",
-   "label": "File From",
-   "options": "Mantra\nMefron"
+   "fieldtype": "Data",
+   "label": "File From"
   },
   {
    "fieldname": "file_type",
@@ -32,7 +31,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-24 12:40:21.657693",
+ "modified": "2025-05-13 16:40:04.843670",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Integration Log",

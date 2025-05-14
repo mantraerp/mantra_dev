@@ -1,4 +1,51 @@
 frappe.ui.form.on('Bank Account', {
+    refresh: function (frm) {
+        if(frappe.session.user==="abhishek.jain@mantratec.com"||frappe.session.user==="Administrator")
+        {
+            frm.add_custom_button("Create beny with A (New)", function() {
+                frappe.call({
+                    method: "mantra_dev.api_code.banck_transaction.upload_beneficiary_file",
+                    args: {
+                        doc_name: frm.doc.name,
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            console.log(r.message);
+                            frappe.msgprint(r.message);
+                        }
+                    }
+                });
+            }, "Utility");
+            frm.add_custom_button("Create beny with M (Modified)", function() {
+                frappe.call({
+                    method: "mantra_dev.api_code.banck_transaction.upload_beneficiary_file_for_modified_doc",
+                    args: {
+                        doc_name: frm.doc.name,
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            console.log(r.message);
+                            frappe.msgprint(r.message);
+                        }
+                    }
+                });
+            }, "Utility");
+            frm.add_custom_button("Create beny with D (DELETE)", function() {
+                frappe.call({
+                    method: "mantra_dev.api_code.banck_transaction.upload_beneficiary_file_for_cancelled_doc",
+                    args: {
+                        doc_name: frm.doc.name,
+                    },
+                    callback: function (r) {
+                        if (r.message) {
+                            console.log(r.message);
+                            frappe.msgprint(r.message);
+                        }
+                    }
+                });
+            }, "Utility");
+        }
+    },
     before_workflow_action(frm) {
         // Upload Approved Beneficiary file on Snorkel
         if (frm.doc.workflow_state === "Pending" && frm.selected_workflow_action === 'Approve') {
@@ -66,5 +113,4 @@ frappe.ui.form.on('Bank Account', {
             frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
         }
     },
-
 });
