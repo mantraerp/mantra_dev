@@ -2226,7 +2226,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 
     # Step 2: Generate PDF from the HTML
     pdf_data = get_pdf(html_content)
-    frappe.log_error("Email send subjecct",subject)
+    # frappe.log_error("Email send subjecct",subject)
     # Step 3: Send email with PDF attachment
     try:
         if email:
