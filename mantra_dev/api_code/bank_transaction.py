@@ -323,6 +323,7 @@ def get_bene_file(delimiter='|'):
             
             if file_name.startswith("585730452"):
                 #Call funcation to send in mefron server
+                csv_file_path = os.path.join(folder_path, file_name)
                 send_file(csv_file_path,file_name)
             else:
                 csv_file_path = os.path.join(folder_path, file_name)
@@ -1820,7 +1821,9 @@ def send_file(file_path,file_name):
         return
 
 
-    
+    # errorLog('MefronFileSend',file_name,True)
+
+
     # URL to send the POST request
     url = "http://192.168.5.56:8008/api/method/mefron_dev.backend_code.api.recive_file"
 
@@ -1830,11 +1833,14 @@ def send_file(file_path,file_name):
         with open(file_path, "rb") as file:
             # Prepare the file payload
             files = {"file": file}
+            # errorLog('MefronFileSendPath',str(file_path),True)
+
             data = {"file_type": "Reverse MIS"}
             # Send POST request
             response = requests.post(url, files=files, data=data)
             
             if response.status_code == 200:
+                # errorLog('File uploaded successfully!',file_name,True)
                 # print("File uploaded successfully!")
                 mefron_files = frappe.db.sql('''select file_name from `tabBank Integration Log` where file_from="Mefron"''',as_list=True)
                 count = 0

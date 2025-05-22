@@ -8,6 +8,8 @@ from mantra.backend_code.globle import errorLog,get_app_name,create_todo # type:
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
 
+from mantra_dev.backend_code.serialno import serial_no_scheduled # type: ignore
+
 
 delivery_note_number_proccess = []
 key_token = "TOKENAVDM"
@@ -41,7 +43,12 @@ def login_to_avdm_scheduled():
 
 	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
+	frappe.enqueue(serial_no_scheduled, queue='long', timeout=3600)
+
+
 	return True  
+
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-05-20
 
 @frappe.whitelist(allow_guest=True)
 def process_to_avdm_for_date(transaction_date):
@@ -125,25 +132,35 @@ def process_dc_list(dc_list):
 				dc_item = dc_doc.items
 				for i in dc_item:
 					if i.custom_abdm_enable == 1 and i.custom_reference_model_no:
+						sr_list = []
 						if i.serial_no:
 							sr_no = i.serial_no
 							serial_no = sr_no.replace("\n", ",")
 							serial_no_list = serial_no.split(",")
 
 							for s_no in serial_no_list:
-								data = {
-									"mastCode": "0",
-									"serialNo": str(s_no),
-									"custName": str(dc_doc.customer_name),
-									"dcNo": str(dc_doc.name),
-									"dcDate": f"{dc_doc.posting_date}T{dc_doc.posting_time}Z",
-									"model": str(i.custom_reference_model_no),
-									"subModelType": "0"
-								}
+								sr_list.append( str(s_no))
 
-								body.append(data)
-								data['item_code']=i.item_code
-								errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
+						bundle_sr_no = process_dc_bundle(dc_doc.name)
+						for s_no in bundle_sr_no:
+							if s_no['serial_no'] not in sr_list:
+								if s_no['item_code'] not in i.item_code:
+										sr_list.append(str(s_no['serial_no']))
+						
+						for s_no in sr_list:
+							data = {
+								"mastCode": "0",
+								"serialNo": str(s_no),
+								"custName": str(dc_doc.customer_name),
+								"dcNo": str(dc_doc.name),
+								"dcDate": f"{dc_doc.posting_date}T{dc_doc.posting_time}Z",
+								"model": str(i.custom_reference_model_no),
+								"subModelType": "0"
+							}
+
+							body.append(data)
+							data['item_code']=i.item_code
+							errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
 
 			cunk_size = 50
 
@@ -184,6 +201,26 @@ def process_dc_list(dc_list):
 		)
 		
 	return reply
+
+
+def process_dc_bundle(dc_no):
+	
+	query = """
+		SELECT 
+			sbbi.serial_no,
+			sbb.item_code
+		FROM 
+			`tabSerial and Batch Bundle` sbb
+		JOIN 
+			`tabSerial and Batch Entry` sbbi 
+			ON sbbi.parent = sbb.name
+		WHERE 
+			sbb.voucher_type = 'Delivery Note'
+			AND sbb.voucher_no = '{}'
+		""".format(dc_no)
+	list_body_to_process = frappe.db.sql(query,as_dict=1)
+	return list_body_to_process
+
 
 # def add_sub_serial_no_entry(data):
 # 	errorLog(key_sub_serial_no,str(data))
@@ -499,13 +536,25 @@ def fetch_sub_serial_no_records():
 			#Get all serial number response in this.
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
+
+			if isinstance(dc_response_json, dict):
+				if dc_response_json['isSuccess'] in [False,"False",0,"false"]:
+					frappe.sendmail(
+						recipients=["ravi.patel@mantratec.com"],
+						subject="Return Sucess is false",
+						message="fetch_sub_serial_no_records <br>{}".format(str(reply))
+					)
+					dc_response_json = []
+
+
 			if len(dc_response_json)!=0:
+				# if dc_response_json['isSuccess'] in [True,"True",1,"true"]:
 				body=[]
 				all_serial_no_response = recoursion_all_serial_no(dc_response_json)
 				process_serial_no = all_serial_no_response.keys()
 				#Check all parent serial no
 				for sr_no in process_serial_no:
-					#Find serial no from pass list
+				#Find serial no from pass list
 					for sr_no_record in record_to_be_proccess:
 						#If same serial no found then prepare body to register on server
 						if sr_no==sr_no_record['serialNo']:
@@ -549,7 +598,12 @@ def fetch_sub_serial_no_records():
 											subject="Error: EVDM-sub-serial-error",
 											message="fetch_sub_serial_no_records <br>{}<br>{}<br>{}".format(str(reply),str(e),str(str(traceback.format_exc())))
 										)
-
+				# else:
+				# 	frappe.sendmail(
+				# 		recipients=["ravi.patel@mantratec.com"],
+				# 		subject="Not Sucess: EVDM serial detail not found",
+				# 		message="fetch_sub_serial_no_records <br><br>{}".format(str(reply))
+				# 	)
 			#Delete serial number which is process
 			for err_name in list_body_to_process:
 				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])

@@ -1,6 +1,6 @@
 frappe.ui.form.on('Bank Account', {
     refresh: function (frm) {
-        if(frappe.session.user==="abhishek.jain@mantratec.com"||frappe.session.user==="Administrator")
+        if(frappe.session.user==="abhishek.jain@mantratec.com"||frappe.session.user==="anurag@mantratec.com"||frappe.session.user==="Administrator")
         {
             frm.add_custom_button("Create beny with A (New)", function() {
                 frappe.call({
