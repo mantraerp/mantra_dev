@@ -813,7 +813,7 @@ def icici_file_create(bank_account, payment_entry_list, delimiter='|'):
                 input_date = payment_entry.posting_date.strftime('%Y-%m-%d')
                 date = datetime.today().strftime('%d-%b-%Y')
                 # date = datetime.strptime(input_date, "%Y-%m-%d").strftime("%d-%b-%Y")
-                remarks = payment_entry.remarks.replace('\n', ' ') if payment_entry.remarks else ""
+                remarks = payment_entry.remarks.replace('\n', ' ')[:100] if payment_entry.remarks else ""
                 ifsc = frappe.db.get_value("Bank Account", payment_entry.party_bank_account, "custom_ifsc") or ""
 
                 total_amount += amt
@@ -1681,7 +1681,7 @@ def get_icici_bank_file_background(delimiter='|'):
                             else:
                                 rejection_reason = data_dict[24]
 
-                            query = "UPDATE `tabPayment Entry` SET `custom_payment_status_`='Fail', `custom_rejection_reason`='{}' WHERE `name`='{}'".format(str(rejection_reason)[0:150],str(data_dict[17]))
+                            query = "UPDATE `tabPayment Entry` SET `custom_payment_status_`='Fail', `custom_rejection_reason`='{}' WHERE `name`='{}'".format(str(rejection_reason)[0:110],str(data_dict[17]))
                             update_work_flow_state = frappe.db.sql(query, as_dict=True) 
 
                             current_user = frappe.session.user
@@ -2239,7 +2239,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
             #update payment entry mail tick so its send once only
             query = "UPDATE `tabPayment Entry` SET `custom_payment_advice_send`=1 WHERE `name`='{}'".format(payment_entry)
             mdf = frappe.db.sql(query, as_dict=True)
-            frappe.log_error("Email send","")
+            # frappe.log_error("Email send","")
 
         else:
             frappe.sendmail(

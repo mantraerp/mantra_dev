@@ -41,7 +41,7 @@ def process_serial_no_for_date(transaction_date):
 
 		for i in dc_list:
 			frappe.enqueue(process_dc, job_name='SRExp',queue='long', timeout=3600,dc_no=i.name)
-		process_dc(dc_list)
+		# process_dc(dc_list)
 		return reply
 
 	except Exception as e:
@@ -56,7 +56,7 @@ def process_serial_no_for_date(transaction_date):
 	
 	return reply   
 
-# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/02632
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/02734
 
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
@@ -90,8 +90,8 @@ def process_dc_item(dc_item,dc_doc):
 					sr_no_list.append(str(s_no['serial_no']))
 
 	for s_no in sr_no_list:
-		return process_dc_date_information(dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no)
-		# frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no)
+		# return process_dc_date_information(dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no)
+		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no)
 
 	return "DC item process"
 
@@ -109,15 +109,30 @@ def process_dc_date_information(dc_item,dc_doc,sr_no):
 		new_warranty_date = ""
 		if dc_item.custom_warranty_time_periodin_months:
 			first_obj = str(dc_item.custom_warranty_time_periodin_months).split(" ")[0]
-			# if str(first_obj).lower not in ["no","not","","0"]:
-			if not str(first_obj).lower.startswith("no","not","","0"):
+			reply['f_o']=first_obj
+			first_obj = first_obj.replace(' ', ' ')
+			first_obj = first_obj.replace('\n', ' ')
+			first_obj = first_obj.replace('\r', ' ')
+			first_obj = str(first_obj).split(" ")[0]
+			reply['first_obj']=str(first_obj)
+			reply['first_obj_lower']=str(first_obj).lower()
+
+			if str(first_obj).lower() not in ["no","not","","0",None]:
 				new_warranty_date = add_months(dc_doc.posting_date, int(first_obj))
 
 		new_rd_date = ""
 		if dc_item.custom_rd_service_time_period:
 			first_obj = str(dc_item.custom_rd_service_time_period).split(" ")[0]
-			if not str(first_obj).lower.startswith("no","not","","0"):
+			reply['s_o']=first_obj
+			first_obj = first_obj.replace(' ', ' ')
+			first_obj = first_obj.replace('\n', ' ')
+			first_obj = first_obj.replace('\r', ' ')
+			first_obj = str(first_obj).split(" ")[0]
+			reply['second_obj']=first_obj
+
+			if str(first_obj).lower() not in ["no","not","","0",None]:			
 				new_rd_date = add_months(dc_doc.posting_date, int(first_obj))
+
 		reply["new_warranty_date"]=new_warranty_date
 		reply["new_rd_date"]=new_rd_date
 
