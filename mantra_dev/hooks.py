@@ -6,11 +6,7 @@ app_email = "info@mantratec.com"
 app_license = "mit"
 # required_apps = []
 
-# Includes in <head>
-# ---------1------
 
-# include js, css files in header of0 desk.html
-# app_include_css = "/assets/mantra_dev/css/mantra_dev.css"
 app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
     "/assets/mantra_dev/js/email_button.js",
@@ -25,9 +21,6 @@ doctype_js = {
     # "Quality Inspection": "public/js/quality_inspection.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
-doctype_list_js = {
-}
-
 
 # Override standard doctype classes
 override_doctype_class = {
@@ -42,18 +35,6 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-    # "Sales Invoice": {
-    #     "on_submit": "mantra_dev.backend_code.sales_invoice.sales_invoice.make_dc"
-    # },
-    # "Delivery Note": {
-    #     "on_update": "mantra_dev.backend_code.delivery_note.delivery_note.update_darft_delivered_qty",
-    #     "on_insert": "mantra_dev.backend_code.delivery_note.delivery_note.update_darft_delivered_qty",
-    #     "on_submit": "mantra_dev.backend_code.delivery_note.delivery_note.set_darft_delivered_qty",
-    #     "on_trash":"mantra_dev.backend_code.delivery_note.delivery_note.set_darft_delivered_qty",
-    # },
-    # # "Subcontracting Receipt": {
-    #     "before_submit": "mantra_dev.backend_code.subcontracting.subcontracting_receipt.make_stock_entry"
-    # }
     "Bank Transaction": {
 		"on_update_after_submit": "mantra_dev.overrides.bank_transaction.on_update_after_submit",
 	},
@@ -95,8 +76,6 @@ scheduler_events = {
 
 override_whitelisted_methods = {
 	"erpnext.selling.doctype.sales_order.sales_order.create_stock_reservation_entries":"mantra_dev.backend_code.sales_orders.sales_orders.create_stock_reservation_entries",
-    # "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt":"mantra_dev.overrides.purchase_order.override_make_purchase_receipt",
-    # "erpnext.setup.doctype.employee.employee.create_user":"mantra_dev.overrides.employee.create_user",
 }
 
 
@@ -111,7 +90,6 @@ fixtures = [
     {"dt": "Client Script", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Property Setter", "filters": [["module", "in", ["Mantra Dev"]]]},
     {"dt": "Custom DocPerm",},
-    # {"dt": "Document Naming Rule"},
     {"dt": "Role",},
 ]
 
