@@ -22,7 +22,7 @@ app_include_js = [
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
     "Bank Account": "public/js/bank_account.js",
-    "Quality Inspection": "public/js/quality_inspection.js",
+    # "Quality Inspection": "public/js/quality_inspection.js",
     "Expense Claim": "public/js/expense_claim.js",
 }
 doctype_list_js = {
