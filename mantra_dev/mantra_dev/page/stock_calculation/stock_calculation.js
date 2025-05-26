@@ -118,7 +118,7 @@ frappe.pages['stock-calculation'].on_page_load = function(wrapper) {
             args: {
                 doctype: 'Item',
                 fields: ['item_name'],
-                limit_page_length: 1000,
+                // limit_page_length: 1000,
                 filters:filters
             },
             callback: function(response) {
