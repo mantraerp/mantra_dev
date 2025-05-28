@@ -57,7 +57,6 @@ frappe.ui.form.on('Bank Account', {
                     },
                     callback: function (r) {
                         if (r.message) {
-                            console.log(r.message);
                             frappe.msgprint(r.message);
                         }
                     }
@@ -100,7 +99,6 @@ frappe.ui.form.on('Bank Account', {
                     },
                     callback: function (r) {
                         if (r.message) {
-                            console.log(r.message);
                             frappe.msgprint(r.message);
                         }
                     }
@@ -111,6 +109,27 @@ frappe.ui.form.on('Bank Account', {
     after_save(frm){
         if (frm.doc.party_type === "Supplier"){
             frappe.db.set_value('Supplier', frm.doc.party, "custom_update_data", 1)
+        }
+    },
+    custom_ifsc(frm){
+        let value = frm.doc.custom_ifsc || "";
+        if (value.length > 10) {
+            console.log("Value is longer than 10 characters");
+            // You can also do something like:
+            // frappe.validated = false; to stop form submission
+            frappe.call({
+                method: "mantra.backend_code.globle.branch_name_using_ifsc",
+                args: { 
+                    ifsc:frm.doc.custom_ifsc,
+                },
+                freeze: true,
+                freeze_message: "Check IFSC code wait...",
+                callback: function (r) {
+                    console.log(String(r.message));
+                    frm.set_value('custom_branch_location', String(r.message));
+                    // frm.doc.custom_branch_location = r.message
+                }
+            });
         }
     },
 });
