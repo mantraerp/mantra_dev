@@ -10,20 +10,20 @@ app_license = "mit"
 app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
     "/assets/mantra_dev/js/email_button.js",
-    "/assets/mantra_dev/js/workflow.js",
+    # "/assets/mantra_dev/js/workflow.js",
     ]
 
 
 # include js in doctype views
 doctype_js = {
     "Sales Invoice": "public/js/sales_invoice.js",
-    "Bank Account": "public/js/bank_account.js",
-    "Expense Claim": "public/js/expense_claim.js",
+    # "Bank Account": "public/js/bank_account.js",
+    # "Expense Claim": "public/js/expense_claim.js",
 }
 
 # Override standard doctype classes
 override_doctype_class = {
-    "Material Request": "mantra_dev.material_request.MaterialRequest",
+    # "Material Request": "mantra_dev.material_request.MaterialRequest",
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
     # "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
@@ -34,25 +34,7 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-    # "Bank Transaction": {
-	# 	"on_update_after_submit": "mantra_dev.overrides.bank_transaction.on_update_after_submit",
-	# },
-    # "Purchase Order": {
-    #     "on_submit": "mantra_dev.backend_code.purchase_order.purchase_order.create_purchase_order_expected_date",
-    #     "on_cancel": "mantra_dev.backend_code.purchase_order.purchase_order.cancel_purchase_order_expected_date"
-    # },
-    # "Purchase Receipt": {
-    #     "on_submit": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_purchase_order_expected_date",
-    #     "on_cancel": "mantra_dev.backend_code.purchase_receipt.purchase_receipt.update_cancel_purchase_order_expected_date" 
-    # },
-    # "Purchase Invoice":{
-    #     "on_update": "mantra_dev.purchase_invoice.override_validate_due_date",
-    # },
-    # "Stock Entry":{
-    #     "on_submit":"mantra_dev.backend_code.qc_module.send_notification_on_submit",
-    #     "on_cancel":"mantra_dev.backend_code.qc_module.revert_auto_transfer_stock",
-    #     "on_trash": "mantra_dev.backend_code.qc_module.restore_qc_quantities_on_delete"
-    # },
+   
 }
 
 # Scheduled Tasks
