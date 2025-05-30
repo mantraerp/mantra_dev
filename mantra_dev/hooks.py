@@ -10,7 +10,7 @@ app_license = "mit"
 app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
     "/assets/mantra_dev/js/email_button.js",
-    # "/assets/mantra_dev/js/workflow.js",
+    "/assets/mantra_dev/js/workflow.js",
     ]
 
 
@@ -23,10 +23,8 @@ doctype_js = {
 
 # Override standard doctype classes
 override_doctype_class = {
-    # "Material Request": "mantra_dev.material_request.MaterialRequest",
     "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
     "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
-    # "Bank Transaction": "mantra_dev.overrides.bank_transaction.CustomBankTransaction",
 }
 
 # Document Events

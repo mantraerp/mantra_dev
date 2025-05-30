@@ -183,15 +183,84 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
                 let selectedPayrollEntry = this.form.get_value("payroll_entry");
                 if (this.lastSelectedPayrollEntry !== selectedPayrollEntry) {
                     this.lastSelectedPayrollEntry = selectedPayrollEntry;
-    
+            
                     if (selectedPayrollEntry) {
-                        this.fetchPayrollEntries(selectedPayrollEntry);
-                    } else {
+                        frappe.db.get_list("Payroll Entry", {
+                            filters: {
+                                name: selectedPayrollEntry,
+                                status: "Submitted",
+                                custom_salary_slip_file_generated: 0,
+                                custom_payroll_entry_approved: 1
+                            },
+                            fields: ["start_date", "end_date"]
+                        }).then((result) => {
+                            if (!result || result.length === 0) {
+                                frappe.msgprint("Invalid Payroll Entry selected.");
+                                this.form.set_value("payroll_entry", null);
+                                $(tableContainer).empty();
+                                resetSummary();
+                                return;
+                            }
+                    
+                            const { start_date, end_date } = result[0];
+                    
+                            const monthMap = {
+                                January: [1, 31], February: [2, 28], March: [3, 31],
+                                April: [4, 30], May: [5, 31], June: [6, 30],
+                                July: [7, 31], August: [8, 31], September: [9, 30],
+                                October: [10, 31], November: [11, 30], December: [12, 31]
+                            };
+                    
+                            let selectedMonth = this.form.get_value("filter_month") || "January";
+                            let year = new Date().getFullYear();
+                            const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                            if (selectedMonth === "February" && isLeapYear) {
+                                monthMap["February"][1] = 29;
+                            }
+                    
+                            let [monthNumber, daysInMonth] = monthMap[selectedMonth];
+                            let startDateObj = new Date(start_date);
+                            let endDateObj = new Date(end_date);
+                            let startLimitObj = new Date(year, monthNumber - 1, 1);
+                            let endLimitObj = new Date(year, monthNumber - 1, daysInMonth);
+                    
+                            if (startDateObj <= endLimitObj && endDateObj >= startLimitObj) {
+                                this.fetchPayrollEntries(selectedPayrollEntry);
+                            } else {
+                                frappe.msgprint(
+                                    `Payroll Entry <b>${selectedPayrollEntry}</b> is outside the selected month: ${selectedMonth}<br>
+                                    Payroll Entry Date Range: ${formatDate(startDateObj)} to ${formatDate(endDateObj)}<br>
+                                    Allowed Range: ${formatDate(startLimitObj)} to ${formatDate(endLimitObj)}`
+                                );
+                                this.form.set_value("payroll_entry", null);
+                                $(tableContainer).empty();
+                                resetSummary();
+                            }
+                    
+                            function formatDate(dateObj) {
+                                return `${String(dateObj.getDate()).padStart(2, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dateObj.getFullYear()}`;
+                            }
+                        });
+                    }
+                     else {
                         $(tableContainer).empty();
                         resetSummary();
                     }
                 }
             }
+            // change: () => {
+            //     let selectedPayrollEntry = this.form.get_value("payroll_entry");
+            //     if (this.lastSelectedPayrollEntry !== selectedPayrollEntry) {
+            //         this.lastSelectedPayrollEntry = selectedPayrollEntry;
+    
+            //         if (selectedPayrollEntry) {
+            //             this.fetchPayrollEntries(selectedPayrollEntry);
+            //         } else {
+            //             $(tableContainer).empty();
+            //             resetSummary();
+            //         }
+            //     }
+            // }
         },
         {
             label: __("Bank Account"),
