@@ -39,15 +39,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-02-18 18:04:45.573275",
-  "name": "Account Approve",
-  "style": "",
-  "workflow_state_name": "Account Approve"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2025-03-03 15:32:45.149520",
   "name": "Rework",
   "style": "",
@@ -173,15 +164,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "remove",
-  "modified": "2024-01-25 17:56:40.645048",
-  "name": "Rejected",
-  "style": "Danger",
-  "workflow_state_name": "Rejected"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "",
   "modified": "2024-04-03 12:07:13.447231",
   "name": "Posted in Tally",
@@ -196,6 +178,42 @@
   "name": "Draft",
   "style": "",
   "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-02 14:42:58.877490",
+  "name": "Approval Pending by HoD",
+  "style": "",
+  "workflow_state_name": "Approval Pending by HoD"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-02 14:43:07.648176",
+  "name": "Approval Pending by Travel Desk User",
+  "style": "",
+  "workflow_state_name": "Approval Pending by Travel Desk User"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-02-18 18:04:45.573275",
+  "name": "Account Approve",
+  "style": "",
+  "workflow_state_name": "Account Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2024-01-25 17:56:40.645048",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
  },
  {
   "docstatus": 0,

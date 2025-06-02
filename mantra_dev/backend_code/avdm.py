@@ -4,11 +4,13 @@ from frappe.utils import nowdate # type: ignore
 import json
 import traceback
 import requests # type: ignore
-from mantra.backend_code.globle import errorLog,get_app_name,create_todo # type: ignore
+from mantra.backend_code.globle import errorLog,get_app_name,create_todo,send_error_message_to_developer # type: ignore
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
 
 from mantra_dev.backend_code.serialno import serial_no_scheduled # type: ignore
+
+
 
 
 delivery_note_number_proccess = []
@@ -44,7 +46,6 @@ def login_to_avdm_scheduled():
 	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
 	frappe.enqueue(serial_no_scheduled, queue='long', timeout=3600)
-
 
 	return True  
 
@@ -91,18 +92,10 @@ def login_to_avdm(transaction_date):
 			reply['message']="Exception"
 			reply['message_traceback']=str(traceback.format_exc())
 			mssage = str(traceback.format_exc())
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="AVDM not process due to exception",
-				message="avdm.py - login_to_avdm <br>{}".format(mssage)
-			)
+			send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
 	else:
 		reply['message']="AVDM setting is not enable"
-		frappe.sendmail(
-			recipients=["ravi.patel@mantratec.com"],
-			subject="AVDM settings is not enable",
-			message="avdm.py - login_to_avdm"
-		)
+		send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
 		
 	return reply   
 
@@ -162,7 +155,7 @@ def process_dc_list(dc_list):
 							data['item_code']=i.item_code
 							errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
 
-			cunk_size = 50
+			cunk_size = 25
 
 			body_send = []
 			for index, record in enumerate(body):
@@ -186,19 +179,11 @@ def process_dc_list(dc_list):
 		except Exception as e:
 			reply['message']="Exception"
 			reply['message_traceback']=str(traceback.format_exc())
-			mssage = str(traceback.format_exc())
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="AVDM not process due to exception-Delivery note",
-				message="avdm.py - process_dc_list <br>{}".format(mssage)
-			)
+			send_error_message_to_developer("AVDM not process due to exception-Delivery note","avdm.py - process_dc_list <br>{}".format(str(traceback.format_exc())))
+
 	else:
 		reply['message']="AVDM setting is not enable"
-		frappe.sendmail(
-			recipients=["ravi.patel@mantratec.com"],
-			subject="AVDM settings is not enable",
-			message="avdm.py - process_dc_list"
-		)
+		send_error_message_to_developer("AVDM settings is not enable","avdm.py - process_dc_list")
 		
 	return reply
 
@@ -220,16 +205,6 @@ def process_dc_bundle(dc_no):
 		""".format(dc_no)
 	list_body_to_process = frappe.db.sql(query,as_dict=1)
 	return list_body_to_process
-
-
-# def add_sub_serial_no_entry(data):
-# 	errorLog(key_sub_serial_no,str(data))
-# 	return True
-
-
-
-
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -267,18 +242,18 @@ def process_one_record_background():
 		#If all body process then start update serial no in DB
 		if len(list_body_to_process)==0:
 			reply["going_to_inner"]=len(list_body_to_process)
+
 			#Start fetching sub-serial no
 			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_sub_serial_no)
 			serial_subserial_no_list = frappe.db.sql(query)
 			if len(serial_subserial_no_list)!=0:
 				return fetch_sub_serial_no_records()
 
-
+			#Find sub serial number model number and fill it
 			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
 			list_body_to_process = frappe.db.sql(query,as_dict=1)
 			if len(list_body_to_process)!=0:
 				return sub_serial_item_code_and_model()
-
 
 			#Start process sub serial no
 			query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN (SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_try_register)
@@ -303,7 +278,6 @@ def process_one_record_background():
 			frappe.enqueue(notify_model_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_fail_sr_registration_in_erp, queue='long', timeout=3600)
    
-
 			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 			dn_no_list = frappe.db.sql(query)
 			return "All task are done cron stop call"
@@ -328,20 +302,13 @@ def process_one_record_background():
 			"Authorization": f"Bearer {token[0]['error']}"
 		}
 		reply['message']="Going to register serial no body on server key {}".format(key_body_process)
-		# return process_request(process_record=list_body_to_process[0],creating_url=creating_url,headers=headers)
 		for process_record in list_body_to_process:
 			frappe.enqueue(process_request, queue='long', timeout=3600,process_record=process_record,creating_url=creating_url,headers=headers)
 
 	except Exception as e:
 			reply['message']=str(e)
-			mssage = str(traceback.format_exc())
-			reply['message_traceback']=mssage
-
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="Error: AVDM not process due to issue",
-				message="process_one_record_background <br>{}".format(str(reply))
-			)
+			reply['message_traceback']=str(traceback.format_exc())
+			send_error_message_to_developer("Error: AVDM not process due to issue","process_one_record_background <br>{}".format(str(reply)))
 
 	return reply
 
@@ -357,6 +324,25 @@ def process_request(process_record,creating_url,headers):
 		for s_no_data in body_pass:
 			process_dc_of_serial[s_no_data['serialNo']]=s_no_data['dcNo']
 			s_no_data['dcDate'] = date_convert(s_no_data['dcDate'])
+
+			#get expire date for serial no
+			#rdEndDate = amc_expiry_date
+			#SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='9408938'
+			query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='{}'".format(s_no_data['serialNo'])
+			sr_no_details = frappe.db.sql(query_update,as_dict=1)
+			if len(sr_no_details)!=0:
+				rd_end_date = sr_no_details[0]['amc_expiry_date']
+				if rd_end_date not in ["",None," ","None"]:
+					s_no_data['rdEndDate'] = sr_no_details[0]['amc_expiry_date']
+			else:
+				#If serial number not found in main then search it in sub serial number
+				query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSub Serial No` WHERE `name`='{}'".format(s_no_data['serialNo'])
+				sr_no_details = frappe.db.sql(query_update,as_dict=1)
+				if len(sr_no_details)!=0:
+					rd_end_date = sr_no_details[0]['amc_expiry_date']
+					if rd_end_date not in ["",None," ","None"]:
+						s_no_data['rdEndDate'] = sr_no_details[0]['amc_expiry_date']
+
 			try:
 				if str(s_no_data['model']) != '13':
 					body_pass_avdm.append(s_no_data)
@@ -364,12 +350,7 @@ def process_request(process_record,creating_url,headers):
 				body_not_process.append(s_no_data)
 
 		if len(body_not_process)!=0:
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="Error Criticle: Serial number not process",
-				message="{}".format(str(body_not_process))
-			)
-
+			send_error_message_to_developer("Error Criticle: Serial number not process","{}".format(str(body_not_process)))
 
 		if len(body_pass_avdm)==0:
 			#Once process delete record from error log
@@ -382,11 +363,6 @@ def process_request(process_record,creating_url,headers):
 		reply['request_header']=headers
 		reply['request_body']=body_pass_avdm
 
-		# body_json = str(json.dumps(body_pass_avdm))
-		# body_json = str(body_pass_avdm).replace("'","\"")
-		# body_json = [{"mastCode": "0", "serialNo": "9456165", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457534", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9357470", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9430108", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455670", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9429512", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9380028", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431459", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455804", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9429550", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431828", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9440241", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455714", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455625", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431837", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9440458", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457304", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457017", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431752", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431466", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455734", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9453344", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9434746", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9431355", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9455776", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9457129", "custName": "A TO Z DIGITAL SOLUTION", "dcNo": "M/DC/25-26/01784", "dcDate": "2025-05-05T15:48:09.987150Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2411109989", "custName": "Shenzhen One Plus One Wireless Communication Technology Co., Ltd.", "dcNo": "M/DC/25-26/01789", "dcDate": "2025-05-05T15:44:42.750330Z", "model": "11", "subModelType": "0", "item_code": "P2615"}, {"mastCode": "0", "serialNo": "9436940", "custName": "OM ONLINE KENDRA", "dcNo": "M/DC/25-26/01768", "dcDate": "2025-05-05T15:06:28.602007Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9438075", "custName": "MS ENTERPRISE", "dcNo": "M/DC/25-26/01769", "dcDate": "2025-05-05T15:05:37.727826Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351286", "custName": "IBRAHIM ALI - MAHARAJGANJ", "dcNo": "M/DC/25-26/01770", "dcDate": "2025-05-05T15:04:47.192537Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351026", "custName": "RAJ KUMAR PAL", "dcNo": "M/DC/25-26/01771", "dcDate": "2025-05-05T15:03:38.742814Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2411109997", "custName": "DHWANISH SHAH", "dcNo": "M/DC/25-26/01765", "dcDate": "2025-05-05T15:01:39.385418Z", "model": "MOXA73", "subModelType": "0", "item_code": "P1381"}, {"mastCode": "0", "serialNo": "9355164", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351565", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "9351507", "custName": "The Karur Vysya Bank Ltd,", "dcNo": "M/DC/25-26/01739", "dcDate": "2025-05-05T14:57:08.333313Z", "model": "17", "subModelType": "0", "item_code": "P1961"}, {"mastCode": "0", "serialNo": "2501103517", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103518", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103519", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103495", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501104035", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501104036", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103606", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103913", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103668", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103486", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103462", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103612", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103496", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103469", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}, {"mastCode": "0", "serialNo": "2501103475", "custName": "ANALOGICS TECH INDIA LIMITED", "dcNo": "M/DC/25-26/01760", "dcDate": "2025-05-05T14:55:22.541359Z", "model": "18", "subModelType": "0", "item_code": "P2275"}]
-  
-  
 		# reply['request_dump']=body_json
 		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
 		reply['resposne_status_code']=response1.status_code
@@ -438,12 +414,7 @@ def process_request(process_record,creating_url,headers):
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="Error: EVDM request process error",
-				message="{}".format(str(reply))
-			)
-
+			send_error_message_to_developer("Error: EVDM request process error","{}".format(str(reply)))
 		try:
 			todo = frappe.get_doc({
 					"doctype": "EVDM Sync Log",
@@ -462,12 +433,7 @@ def process_request(process_record,creating_url,headers):
 		reply['message']=str(e)
 		mssage = str(traceback.format_exc())
 		reply['message_traceback']=mssage
-		
-		frappe.sendmail(
-			recipients=["ravi.patel@mantratec.com"],
-			subject="Error: AVDM not process due to issue",
-			message="process_request <br>{}".format(str(reply))
-		)
+		send_error_message_to_developer("Error: AVDM not process due to issue","process_request <br>{}".format(str(reply)))
 
 	return reply
 
@@ -490,13 +456,7 @@ def fetch_sub_serial_no_records():
 		record_to_be_proccess = []		
 		# for process_record in list_body_to_process:
 		for index, process_record in enumerate(list_body_to_process):      
-			body_pass = ast.literal_eval(process_record['error'])   
-			# if index==0:
-			# 	body_pass['serialNo']="9346518"
-			# if index==1:
-			# 	body_pass['serialNo']="9401893"
-			# if index==2:
-			# 	body_pass['serialNo']="121212"
+			body_pass = ast.literal_eval(process_record['error'])  
 			record_to_be_proccess.append(body_pass)
 			searil_no_pass.append(body_pass['serialNo'])
 
@@ -539,13 +499,8 @@ def fetch_sub_serial_no_records():
 
 			if isinstance(dc_response_json, dict):
 				if dc_response_json['isSuccess'] in [False,"False",0,"false"]:
-					frappe.sendmail(
-						recipients=["ravi.patel@mantratec.com"],
-						subject="Return Sucess is false",
-						message="fetch_sub_serial_no_records <br>{}".format(str(reply))
-					)
+					send_error_message_to_developer("Return Sucess is false","fetch_sub_serial_no_records <br>{}".format(str(reply)))
 					dc_response_json = []
-
 
 			if len(dc_response_json)!=0:
 				# if dc_response_json['isSuccess'] in [True,"True",1,"true"]:
@@ -592,12 +547,11 @@ def fetch_sub_serial_no_records():
 											doc.custom_marked_in_avdm = False
 											doc.find_item_mode = False
 											doc.insert(ignore_permissions=True)
+											frappe.enqueue(update_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
+
 									except Exception as e:
-										frappe.sendmail(
-											recipients=["ravi.patel@mantratec.com"],
-											subject="Error: EVDM-sub-serial-error",
-											message="fetch_sub_serial_no_records <br>{}<br>{}<br>{}".format(str(reply),str(e),str(str(traceback.format_exc())))
-										)
+										send_error_message_to_developer("Error: EVDM-sub-serial-error","fetch_sub_serial_no_records <br>{}<br>{}<br>{}".format(str(reply),str(e),str(str(traceback.format_exc()))))
+
 				# else:
 				# 	frappe.sendmail(
 				# 		recipients=["ravi.patel@mantratec.com"],
@@ -613,11 +567,7 @@ def fetch_sub_serial_no_records():
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
-			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com"],
-				subject="Error: EVDM-sub serial request not process",
-				message="fetch_sub_serial_no_records <br>{}".format(str(reply))
-			)
+			send_error_message_to_developer("Error: EVDM-sub serial request not process","fetch_sub_serial_no_records <br>{}".format(str(reply)))
 
 		todo = frappe.get_doc({
 			"doctype": "EVDM Sync Log",
@@ -634,17 +584,20 @@ def fetch_sub_serial_no_records():
 		reply['message']=str(e)
 		mssage = str(traceback.format_exc())
 		reply['message_traceback']=mssage
-		
-		frappe.sendmail(
-			recipients=["ravi.patel@mantratec.com"],
-			subject="Error: EVDM-sub serial not process due to issue exception",
-			message="fetch_sub_serial_no_records <br>{}<br>{}".format(mssage,str(reply))
-		)
+		send_error_message_to_developer("Error: EVDM-sub serial not process due to issue exception","fetch_sub_serial_no_records <br>{}<br>{}".format(mssage,str(reply)))
+
 	return reply
 
+def update_serial_no_dates(main_serial_no,sub_serial_no):
+	query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='{}'".format(main_serial_no)
+	sr_no_details = frappe.db.sql(query_update,as_dict=1)
+	if len(sr_no_details)!=0:
+		query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}',`warranty_expiry_date`='{}' WHERE `name`='{}'".format(sr_no_details[0]['amc_expiry_date'],sr_no_details[0]['warranty_expiry_date'],sub_serial_no)
+		sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+	return True
+
+
 def recoursion_all_serial_no(body_pass):
-	# pass_string = "[{\"SerialNo\":\"9346518\",\"Model\":\"BionicFP6\",\"Consume\":[{\"SerialNo\":\"9182844\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333\",\"Model\":\"BioNICF6\",\"Consume\":[]}]},{\"SerialNo\":\"9346518\",\"Model\":\"BionicFP6\",\"Consume\":[{\"SerialNo\":\"9182844\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333\",\"Model\":\"BioNICF6\",\"Consume\":[{\"SerialNo\":\"9182844-1\",\"Model\":\"MFS100V2\",\"Consume\":[]},{\"SerialNo\":\"9255333-2\",\"Model\":\"BioNICF6\",\"Consume\":[]}]}]},{\"SerialNo\":\"9401893\",\"Model\":\"BioNIC8-W\",\"Consume\":[{\"SerialNo\":\"9175427\",\"Model\":\"MFS100V2\",\"Consume\":[{\"SerialNo\":\"22222\",\"Model\":\"MF2222\",\"Consume\":[]}]}]}]"
-	# body_pass = ast.literal_eval(pass_string)
 	
 	final_data = {}
 	for rec in body_pass:
@@ -657,7 +610,6 @@ def process_all_level_serial_no(device, data):
     for sub_device in device.get("Consume", []):
         objDict={}
         objDict[sub_device["SerialNo"]]=sub_device["OdooId"]
-        # data.append(sub_device["SerialNo"])
         data.append(objDict)
         
         process_all_level_serial_no(sub_device,data)
@@ -694,6 +646,7 @@ def sub_serial_item_code_and_model_adding(serial_no):
     return True
 
 def sub_serial_item_code_and_model_checking(doc_name):
+
 	query = "SELECT * from `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name`='{}'".format(doc_name)
 	list_serial_no = frappe.db.sql(query,as_dict=1)
  
@@ -707,7 +660,6 @@ def sub_serial_item_code_and_model_checking(doc_name):
 			return "Item code not found"   
 		else:
 			for item in list_item:
-
 				# if item['custom_submodel_avdm_enable']:
 				if item['custom_reference_submodel_no'] not in ['',None," "]:
 					query_update = "UPDATE `tabSub Serial No` SET `sub_model`='{}', `find_item_model`=1, `remark`='' WHERE `name`='{}'".format(str(item['custom_reference_submodel_no']),doc_name)
@@ -834,7 +786,6 @@ def prepare_body_to_upload_subsr():
 
 	body = []
 	for rec in item_sub_serial_no_list:
- 
 		data = {
 			"mastCode": "0",
 			"serialNo": str(rec['name']),
@@ -847,7 +798,7 @@ def prepare_body_to_upload_subsr():
 		body.append(data)
 		errorLog(key_subsr_try_register,str(rec['name']))
 
-	cunk_size = 50
+	cunk_size = 25
 
 	body_send = []
 	for index, record in enumerate(body):

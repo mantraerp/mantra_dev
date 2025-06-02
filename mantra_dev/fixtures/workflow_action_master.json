@@ -93,9 +93,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.663510",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
+  "modified": "2025-05-30 19:34:49.349005",
+  "name": "Submit",
+  "workflow_action_name": "Submit"
  },
  {
   "docstatus": 0,
@@ -103,5 +103,12 @@
   "modified": "2024-01-25 17:56:40.664115",
   "name": "Reject",
   "workflow_action_name": "Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-01-25 17:56:40.663510",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
  }
 ]
