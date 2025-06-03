@@ -49,7 +49,7 @@ def login_to_avdm_scheduled():
 
 	return True  
 
-# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-05-20
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
 
 @frappe.whitelist(allow_guest=True)
 def process_to_avdm_for_date(transaction_date):
@@ -207,6 +207,9 @@ def process_dc_bundle(dc_no):
 	return list_body_to_process
 
 
+
+
+
 @frappe.whitelist(allow_guest=True)
 def process_one_record():
 	
@@ -223,6 +226,7 @@ def process_one_record():
 	frappe.enqueue(process_one_record_background, queue='long', timeout=3600)
 	return "process start in background"
 
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_one_record_background
 @frappe.whitelist(allow_guest=True)
 def process_one_record_background():
 	
@@ -333,7 +337,7 @@ def process_request(process_record,creating_url,headers):
 			if len(sr_no_details)!=0:
 				rd_end_date = sr_no_details[0]['amc_expiry_date']
 				if rd_end_date not in ["",None," ","None"]:
-					s_no_data['rdEndDate'] = sr_no_details[0]['amc_expiry_date']
+					s_no_data['rdEndDate'] = str(sr_no_details[0]['amc_expiry_date'])
 			else:
 				#If serial number not found in main then search it in sub serial number
 				query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSub Serial No` WHERE `name`='{}'".format(s_no_data['serialNo'])
@@ -341,7 +345,7 @@ def process_request(process_record,creating_url,headers):
 				if len(sr_no_details)!=0:
 					rd_end_date = sr_no_details[0]['amc_expiry_date']
 					if rd_end_date not in ["",None," ","None"]:
-						s_no_data['rdEndDate'] = sr_no_details[0]['amc_expiry_date']
+						s_no_data['rdEndDate'] = str(sr_no_details[0]['amc_expiry_date'])
 
 			try:
 				if str(s_no_data['model']) != '13':
