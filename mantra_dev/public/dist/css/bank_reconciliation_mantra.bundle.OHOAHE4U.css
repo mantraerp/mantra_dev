@@ -1,4 +1,4 @@
-/* ../../../../../tmp/tmp-2754-qOJgSr4byxt6/mantra_dev/mantra_dev/public/scss/bank_reconciliation_mantra.bundle.css */
+/* ../../../../../tmp/tmp-2687-p5MNTlh0KGnq/mantra_dev/mantra_dev/public/scss/bank_reconciliation_mantra.bundle.css */
 .p-10 {
   padding: 10px;
 }
@@ -17,7 +17,7 @@
   cursor: pointer;
 }
 .list-panel > .sort-by > .sort-by-title {
-  padding: 10px 10px 10px 0;
+  padding: 10px 0 10px 10px;
   color: var(--text-muted);
 }
 .list-panel > .list-container {
@@ -29,7 +29,7 @@
   border-bottom: 1px solid var(--gray-200);
 }
 .list-panel > .list-container > .transaction-row.active {
-  border-right: 6px solid var(--primary);
+  border-left: 6px solid var(--primary);
 }
 .list-panel > .list-container > .transaction-row > div {
   padding: 4px 10px;
@@ -65,7 +65,7 @@
 .actions-panel > .tab-content * .frappe-control[data-fieldname=submit_transaction],
 .actions-panel > .tab-content * .btn-primary[data-fieldname=bt_reconcile],
 .actions-panel > .tab-content * .btn-primary[data-fieldname=create] {
-  float: left;
+  float: right;
 }
 .actions-panel > .tab-content * .dt-scrollable {
   height: calc(100vh - 550px) !important;
@@ -141,4 +141,4 @@
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
-/*# sourceMappingURL=bank_reconciliation_mantra.bundle.L52RLMYV.css.map */
+/*# sourceMappingURL=bank_reconciliation_mantra.bundle.OHOAHE4U.css.map */
