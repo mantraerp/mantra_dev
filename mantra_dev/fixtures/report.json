@@ -1961,108 +1961,6 @@
   ]
  },
  {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-07-12 13:15:37.075544",
-  "module": "Mantra Dev",
-  "name": "Item Category Stock Balance Report",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Item Group",
-  "reference_report": null,
-  "report_name": "Item Category Stock Balance Report",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Desk User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Item Manager"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Sales Executive"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Manufacturing User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts SO Approval"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Item Category Stock Balance Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts SO Approval"
-   }
-  ]
- },
- {
   "add_total_row": 0,
   "columns": [],
   "disabled": 0,
@@ -2651,6 +2549,108 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Accounts Expense Executive"
+   }
+  ]
+ },
+ {
+  "add_total_row": 1,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "Yes",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-07-12 13:15:37.075544",
+  "module": "Mantra Dev",
+  "name": "Item Category Stock Balance Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Item Group",
+  "reference_report": null,
+  "report_name": "Item Category Stock Balance Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Desk User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Item Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Sales Executive"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Manufacturing User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock Manager"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Stock User"
+   },
+   {
+    "parent": "Item Category Stock Balance Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts SO Approval"
    }
   ]
  },

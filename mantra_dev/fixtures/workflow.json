@@ -4660,7 +4660,7 @@
   "doctype": "Workflow",
   "document_type": "Payroll Entry",
   "is_active": 1,
-  "modified": "2025-06-05 13:17:00.210413",
+  "modified": "2025-06-06 13:34:44.001836",
   "name": "Payroll Entry",
   "override_status": 0,
   "send_email_alert": 0,
@@ -4812,7 +4812,7 @@
     "parent": "Payroll Entry",
     "parentfield": "transitions",
     "parenttype": "Workflow",
-    "state": "For Review",
+    "state": "Approved",
     "workflow_builder_id": null
    },
    {
