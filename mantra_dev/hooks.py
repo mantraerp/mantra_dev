@@ -16,15 +16,15 @@ app_include_js = [
 
 # include js in doctype views
 doctype_js = {
-    "Sales Invoice": "public/js/sales_invoice.js",
+    # "Sales Invoice": "public/js/sales_invoice.js",
     # "Bank Account": "public/js/bank_account.js",
     # "Expense Claim": "public/js/expense_claim.js",
 }
 
 # Override standard doctype classes
 override_doctype_class = {
-    "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
-    "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
+    # "Subcontracting Order": "mantra_dev.backend_code.subcontracting.subcontracting_order.SubcontractingOrder",
+    # "Stock Reservation Entry": "mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry.StockReservationEntry",
 }
 
 # Document Events
@@ -54,7 +54,7 @@ scheduler_events = {
 }
 
 override_whitelisted_methods = {
-	"erpnext.selling.doctype.sales_order.sales_order.create_stock_reservation_entries":"mantra_dev.backend_code.sales_orders.sales_orders.create_stock_reservation_entries",
+	# "erpnext.selling.doctype.sales_order.sales_order.create_stock_reservation_entries":"mantra_dev.backend_code.sales_orders.sales_orders.create_stock_reservation_entries",
 }
 
 

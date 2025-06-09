@@ -165,19 +165,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-03-08 17:19:25.858649",
-  "name": "Initiated",
-  "style": "Danger",
-  "workflow_state_name": "Initiated"
+  "modified": "2025-02-18 18:04:45.573275",
+  "name": "Account Approve",
+  "style": "",
+  "workflow_state_name": "Account Approve"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-02-18 18:04:45.573275",
-  "name": "Account Approve",
-  "style": "",
-  "workflow_state_name": "Account Approve"
+  "modified": "2024-03-08 17:19:25.858649",
+  "name": "Initiated",
+  "style": "Danger",
+  "workflow_state_name": "Initiated"
  },
  {
   "docstatus": 0,
@@ -254,19 +254,19 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "question-sign",
-  "modified": "2024-01-25 17:56:40.643417",
-  "name": "Pending",
-  "style": "",
-  "workflow_state_name": "Pending"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "ok-sign",
   "modified": "2024-01-25 17:56:40.644234",
   "name": "Approved",
   "style": "Success",
   "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2024-01-25 17:56:40.643417",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
  }
 ]
