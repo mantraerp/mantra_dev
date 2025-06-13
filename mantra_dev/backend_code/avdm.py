@@ -69,7 +69,6 @@ def login_to_avdm(transaction_date):
 	reply={}
 
 	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
-		
 		dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
 		reply["Total DC"]=len(dc_list)
 		if len(dc_list)==0:
@@ -98,6 +97,22 @@ def login_to_avdm(transaction_date):
 		send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
 		
 	return reply   
+
+@frappe.whitelist(allow_guest=True)
+def process_single_dc(dc_no):
+    
+	if get_app_name()!="mantra":
+		return "Application is not mantra"
+    
+	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
+	if len(dc_list)!=0:
+		generate_token()
+		generate_token_pratham()
+		process_dc_list(dc_list)
+		return "DC found. Background process start"
+
+	return "DC not found"
+
 
 def process_dc_list(dc_list):
 

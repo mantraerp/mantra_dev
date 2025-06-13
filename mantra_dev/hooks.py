@@ -47,6 +47,9 @@ scheduler_events = {
         "0/5 * * * *": [
             "mantra_dev.api_code.bank_transaction.get_icici_bank_file",
         ],
+        "15 23 * * *": [
+            "mantra_dev.backend_code.serialno.serial_no_scheduled"
+        ],
         "30 23 * * *": [
             "mantra_dev.backend_code.avdm.login_to_avdm_scheduled"
         ],

@@ -45,12 +45,12 @@ def process_serial_no_for_date(transaction_date):
 
 	return reply   
 
-# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/02734
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/03196
 
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
 
-	if not get_app_name()=="mantra":
+	if get_app_name()!="mantra":
 		return "App is not mantra"
 
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
@@ -60,9 +60,22 @@ def process_dc(dc_no):
 
 	return "DC Process"
 
+
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc_item?dc_no=M/DC/25-26/02734
 def process_dc_item(dc_item,dc_doc):
 	sr_no_list=[]
 	dc_doc_items = frappe.get_doc("Delivery Note Item", dc_item)
+ 
+	item_detail = frappe.get_doc("Item", dc_doc_items.item_code)
+	if item_detail.custom_avdm_enable in [True,1]:
+		if dc_doc_items.custom_rd_service_time_period in [None,""," ","None"]:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
+				subject="Alert: serial number process without date DC : {}".format(dc_doc.name),
+				message="Item Code:{}".format(str(dc_doc_items.item_code))
+			)
+			return
+ 
 	if dc_doc_items.serial_no:
 		sr_no = dc_doc_items.serial_no
 		serial_no = sr_no.replace("\n", ",")
@@ -131,7 +144,16 @@ def process_dc_date_information(dc_item,dc_doc,sr_no):
 			query_update = query_update.replace("',)","')")
 			serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
 			reply["o1_amc_expiry_date"]="new_rd_date"
-
+		else:
+			item_detail = frappe.get_doc("Item", dc_item.item_code)
+			if item_detail.custom_avdm_enable in [True,1]:
+				if dc_item.custom_rd_service_time_period in [None,""," ","None"]:
+					frappe.sendmail(
+						recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
+						subject="Alert: serial number process without date DC : {} ({})".format(dc_doc.name,str(dc_item.item_code)),
+						message="Item Code:{}".format(str(dc_item.item_code))
+					)
+					return
 
 	except Exception as e:
 		reply['message']="Exception"

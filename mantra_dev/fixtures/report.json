@@ -2067,7 +2067,7 @@
   "javascript": null,
   "json": null,
   "letter_head": "Delivery Challan",
-  "modified": "2025-03-03 15:26:02.453923",
+  "modified": "2025-06-13 15:23:05.911123",
   "module": "Mantra Dev",
   "name": "QC Stock Details",
   "prepared_report": 0,
@@ -2089,6 +2089,12 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "QC User"
+   },
+   {
+    "parent": "QC Stock Details",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "QC Manager"
    }
   ]
  },
