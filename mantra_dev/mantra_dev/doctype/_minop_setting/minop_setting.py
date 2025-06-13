@@ -227,7 +227,6 @@ def get_attendance_process(fromdatetime,todatetime,Emp_Code=None,department=None
 
 def start_url_fetching_cron(value):
 	query = "UPDATE `tabScheduled Job Type` SET `stopped`={} WHERE `method` = '{}'".format(value,'mantra_dev.mantra_dev.doctype.minop_setting.minop_setting.url_cron_process')
-	# frappe.log_error("query",query)
 	records = frappe.db.sql(query,as_dict=1)
 	frappe.db.commit()
 	return True

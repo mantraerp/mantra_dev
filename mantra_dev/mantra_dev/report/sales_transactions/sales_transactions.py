@@ -172,7 +172,7 @@ def get_data(filters):
 	""".format(conditions=conditions)
 
 
-	frappe.log_error("query",str(q))
+	# frappe.log_error("query",str(q))
 
 
 	data = frappe.db.sql("""
