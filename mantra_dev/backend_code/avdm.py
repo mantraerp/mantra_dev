@@ -45,7 +45,7 @@ def login_to_avdm_scheduled():
 
 	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
-	frappe.enqueue(serial_no_scheduled, queue='long', timeout=3600)
+	# frappe.enqueue(serial_no_scheduled, queue='long', timeout=3600)
 
 	return True  
 
