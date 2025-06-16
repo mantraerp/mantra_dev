@@ -120,15 +120,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-04-14 14:08:43.421613",
-  "name": "Send to Team Leader",
-  "style": "",
-  "workflow_state_name": "Send to Team Leader"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2024-02-08 15:11:17.680685",
   "name": "BU Rejection",
   "style": "",
@@ -196,6 +187,15 @@
   "name": "Cancelled",
   "style": "Danger",
   "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-04-14 14:08:43.421613",
+  "name": "Send to Team Leader",
+  "style": "",
+  "workflow_state_name": "Send to Team Leader"
  },
  {
   "docstatus": 0,
