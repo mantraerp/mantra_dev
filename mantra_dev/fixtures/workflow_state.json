@@ -236,15 +236,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "ok-sign",
   "modified": "2024-01-25 17:56:40.644234",
   "name": "Approved",
@@ -254,11 +245,11 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "question-sign",
-  "modified": "2024-01-25 17:56:40.643417",
-  "name": "Pending",
+  "icon": "",
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
   "style": "",
-  "workflow_state_name": "Pending"
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
@@ -268,5 +259,14 @@
   "name": "Reviewed",
   "style": "",
   "workflow_state_name": "Reviewed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2024-01-25 17:56:40.643417",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
  }
 ]
