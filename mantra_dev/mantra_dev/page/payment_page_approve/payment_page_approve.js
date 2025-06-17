@@ -575,6 +575,20 @@ frappe.pages['payment-page-approve'].on_page_load = function(wrapper) {
                                 </tr>
                             </tbody>
                         </table>
+                         <br>
+                         <table class="custom-details-table">
+                            <thead>
+                                <tr>
+                                    <th>Unallocated Amount</th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                <td style="text-align:left;">${format_currency(customDetails.unallocated_amount.toFixed(2), 'INR', precision=2) || ""}</td>
+                             </tr>
+                            </tbody>
+                        </table>
                     `;
     
                     let d = new frappe.ui.Dialog({
