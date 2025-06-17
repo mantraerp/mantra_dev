@@ -1514,21 +1514,27 @@ def get_icici_bank_file_background(delimiter='|'):
 	try:
 		# Get the path to the folder containing the files
 		folder_path = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_pull_path")
-		# /home/mantra/ICICI_Bank_integration/epayments/PayReport
-		# Specify the path to the backup folder
 		backup_folder = frappe.db.get_value("Bank Integration", "Mantra - ICICI Bank Limited - 018951000027", "file_backup_path")
-		# /home/mantra/ICICI_Bank_Backup
-		# print("Folder path:", folder_path)
-		# print("Backup folder:", backup_folder)
 
 
-
+		one_hour_ago = datetime.now() - timedelta(hours=1)
 		filersreturn = []
 		for file_name in os.listdir(folder_path):
-			if file_name.endswith('.txt'):
-				if not errorLogExites('PAYMENTPROCESSFILE',file_name):
-					filersreturn.append(file_name)
-					errorLog('PAYMENTPROCESSFILE',file_name,True)
+			csv_file_path = os.path.join(folder_path, file_name)
+			modification_time = datetime.fromtimestamp(os.path.getmtime(csv_file_path))
+			if modification_time >= one_hour_ago:
+				if file_name.endswith('.txt'):
+					if not errorLogExites('PAYMENTPROCESSFILE',file_name):
+						filersreturn.append(file_name)
+						errorLog('PAYMENTPROCESSFILE',file_name,True)
+
+
+		# filersreturn = []
+		# for file_name in os.listdir(folder_path):
+		# 	if file_name.endswith('.txt'):
+		# 		if not errorLogExites('PAYMENTPROCESSFILE',file_name):
+		# 			filersreturn.append(file_name)
+		# 			errorLog('PAYMENTPROCESSFILE',file_name,True)
 
 		if len(filersreturn)==0:
 			return "No files found."
