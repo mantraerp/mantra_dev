@@ -11319,7 +11319,7 @@
   "parent": "Stock Entry Type",
   "permlevel": 0,
   "print": 0,
-  "read": 1,
+  "read": 0,
   "report": 0,
   "role": "Purchase User",
   "select": 1,

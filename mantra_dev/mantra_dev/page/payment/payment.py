@@ -1,4 +1,5 @@
 import frappe # type: ignore
+from frappe import _
 
 @frappe.whitelist()
 def select_payment_entry(bank_account):
@@ -119,7 +120,6 @@ def send_excel_email(user_email, filename, filedata, subject):
         frappe.throw("Failed to send email: " + str(e))
 
 
-from frappe import _
 @frappe.whitelist()
 def get_payment_entry_reference_details(payment_entry):
     try:
@@ -278,6 +278,7 @@ def get_payment_entry_reference_details(payment_entry):
 
                 # Handling "Purchase Invoice" references
                 if ref_doctype == "Purchase Invoice":
+                    amount = ref_row.get("allocated_amount") or 0
                     po_doc = frappe.db.sql("""
                         SELECT DISTINCT purchase_order FROM `tabPurchase Invoice Item`
                         WHERE parent = %s AND purchase_order IS NOT NULL
@@ -310,13 +311,13 @@ def get_payment_entry_reference_details(payment_entry):
 
                     mr_name = mr_doc[0]["material_request"] if mr_doc else None
 
-                    related_docs = [{"doctype": "Purchase Invoice", "docname": ref_docname}]
+                    related_docs = [{"doctype": "Purchase Invoice", "docname": ref_docname,"amount":amount}]
                     if pr_name:
-                        related_docs.append({"doctype": "Purchase Receipt", "docname": pr_name})
+                        related_docs.append({"doctype": "Purchase Receipt", "docname": pr_name,"amount":frappe.db.get_value("Purchase Receipt",pr_name,'grand_total')})
                     if po_name:
-                        related_docs.append({"doctype": "Purchase Order", "docname": po_name})
+                        related_docs.append({"doctype": "Purchase Order", "docname": po_name,"amount":frappe.db.get_value("Purchase Order",po_name,'grand_total')})
                     if mr_name:
-                        related_docs.append({"doctype": "Material Request", "docname": mr_name})
+                        related_docs.append({"doctype": "Material Request", "docname": mr_name,"amount":0})
 
                     for doc in related_docs:
                         docname = doc["docname"]
@@ -335,6 +336,7 @@ def get_payment_entry_reference_details(payment_entry):
 
                         reference_details.append({
                             "Document ID": f"{doctype}",
+                            "Amount":doc["amount"] or 0,
                             "Document": docname,
                             "Created On": created_on,
                             "Submitted On": submitted_on,
@@ -347,6 +349,7 @@ def get_payment_entry_reference_details(payment_entry):
 
                 # Handling "Expense Claim" references
                 elif ref_doctype == "Expense Claim":
+                    amount = ref_row.get("allocated_amount") or 0
                     expense_claim_details = frappe.db.sql("""
                         SELECT name, employee, status FROM `tabExpense Claim`
                         WHERE name = %s
@@ -363,6 +366,7 @@ def get_payment_entry_reference_details(payment_entry):
                         reference_details.append({
                             "Document ID": "Expense Claim",
                             "Document": ref_docname,
+                            "Amount": amount,
                             "doctype": ref_doctype,
                             "Created On": created_on,
                             "Submitted On": submitted_on,
@@ -374,6 +378,7 @@ def get_payment_entry_reference_details(payment_entry):
 
                 # Handling "Employee Advance" references
                 elif ref_doctype == "Employee Advance":
+                    amount = ref_row.get("allocated_amount") or 0
                     employee_advance_details = frappe.db.sql("""
                         SELECT name, employee, advance_amount,purpose, status FROM `tabEmployee Advance`
                         WHERE name = %s
@@ -390,6 +395,7 @@ def get_payment_entry_reference_details(payment_entry):
                         reference_details.append({
                             "Document ID": "Employee Advance",
                             "Document": ref_docname,
+                            "Amount":amount,
                             "doctype": ref_doctype,
                             "Employee": employee,
                             "Amount Approved": employee_advance["advance_amount"],
@@ -402,6 +408,7 @@ def get_payment_entry_reference_details(payment_entry):
                         })
 
                 elif ref_doctype == "Purchase Order":
+                    amount = ref_row.get("allocated_amount") or 0
                     po_name = ref_docname
                   
                     po_approval_form = frappe.db.sql("""
@@ -441,6 +448,7 @@ def get_payment_entry_reference_details(payment_entry):
                         reference_details.append({
                             "Document ID": f"{doctype}",
                             "Document": docname,
+                            "Amount": amount or 0,
                             "Created On": created_on,
                             "Submitted On": submitted_on,
                             "Purpose": purpose,
@@ -463,6 +471,7 @@ def get_payment_entry_reference_details(payment_entry):
     except Exception as e:
         frappe.log_error(f"Error in get_payment_entry_reference_details: {str(e)}")
         return {"error": _(f"Error fetching approval details: {str(e)}")}
+
 
 
 @frappe.whitelist()

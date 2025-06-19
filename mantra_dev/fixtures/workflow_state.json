@@ -228,15 +228,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2024-03-12 16:25:57.261501",
   "name": "Checked",
   "style": "Success",
@@ -246,10 +237,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:05:19.885801",
-  "name": "Reviewed",
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
   "style": "",
-  "workflow_state_name": "Reviewed"
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
@@ -259,6 +250,15 @@
   "name": "Approved",
   "style": "Success",
   "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:05:19.885801",
+  "name": "Reviewed",
+  "style": "",
+  "workflow_state_name": "Reviewed"
  },
  {
   "docstatus": 0,
