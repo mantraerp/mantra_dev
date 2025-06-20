@@ -86,7 +86,7 @@ def process_dc_item(dc_item,dc_doc):
 	bundle_sr_no = process_dc_bundle(dc_doc.name)
 	for s_no in bundle_sr_no:
 		if s_no['serial_no'] not in sr_no_list:
-			if s_no['item_code'] not in dc_doc_items.item_code:
+			if s_no['item_code'] == dc_doc_items.item_code:
 					sr_no_list.append(str(s_no['serial_no']))
 
 	for s_no in sr_no_list:

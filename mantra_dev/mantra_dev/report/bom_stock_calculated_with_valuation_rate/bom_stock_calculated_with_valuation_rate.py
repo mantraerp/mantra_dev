@@ -23,26 +23,53 @@ def execute(filters=None):
     for item_data in route_data:
         item_code, bom_code, qty = item_data.get('item'), item_data.get('bom'), item_data.get('qty')
         
-        if bom_code:
-            bom_exists = frappe.db.exists("BOM", bom_code)
-            if not bom_exists:
-                continue
-            
+        if bom_code and not frappe.db.exists("BOM", bom_code):
+            continue
+
         materials = get_raw_materials_for_bom(bom_code) if bom_code else [{'item_code': item_code, 'qty': qty, 'parent': None}]
 
         for material in materials:
             material_item_code = material.get('item_code')
             bom_qty = frappe.db.get_value("BOM", material.get('parent'), 'quantity') or 1
             material_qty = round((flt(material.get('qty'), 2) / flt(bom_qty, 2)) * qty, 2) if bom_code else qty
-            
-            warehouse_condition, args = get_warehouse_conditions(material_item_code, warehouse_list)
-            valuation_rate = frappe.db.sql(
-                """
-                SELECT SUM(stock_value_difference) / SUM(actual_qty)
-                FROM `tabStock Ledger Entry`
-                WHERE item_code = %s {warehouse_condition} AND is_cancelled = 0
-                """.format(warehouse_condition=warehouse_condition), args
-            )[0][0] or 0
+
+            valuation_rates = []
+
+            if warehouse_list:
+                for wh in warehouse_list:
+                    result = frappe.db.sql(
+                        """
+                        SELECT valuation_rate
+                        FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
+                        WHERE
+                            item_code = %s
+                            AND warehouse = %s
+                            AND valuation_rate >= 0
+                            AND is_cancelled = 0
+                        ORDER BY posting_datetime DESC, creation DESC
+                        LIMIT 1
+                        """,
+                        (material_item_code, wh),
+                    )
+                    valuation_rate = result[0][0] if result else 0
+                    valuation_rates.append(valuation_rate)
+
+                total_valuation_rate = sum(valuation_rates) / len(valuation_rates) if valuation_rates else 0
+            else:
+                result = frappe.db.sql(
+                    """
+                    SELECT valuation_rate
+                    FROM `tabStock Ledger Entry` FORCE INDEX (item_warehouse)
+                    WHERE
+                        item_code = %s
+                        AND valuation_rate >= 0
+                        AND is_cancelled = 0
+                    ORDER BY posting_datetime DESC, creation DESC
+                    LIMIT 1
+                    """,
+                    (material_item_code,),
+                )
+                total_valuation_rate = result[0][0] if result else 0
 
             stock_data = get_stock_data(material_item_code, warehouse_list, from_date)
             shortage_qty = max(0, material_qty - (stock_data['available_qty'] + stock_data['transit_qty']))
@@ -54,19 +81,20 @@ def execute(filters=None):
                 **stock_data,
                 'shortage_qty': shortage_qty,
                 'total_qty': material_qty,
-                'valuation_rate': valuation_rate * material_qty
+                'valuation_rate': total_valuation_rate * material_qty
             }
 
             existing_row = next((row for row in data if row['raw_material_item'] == material_item_code), None)
             if existing_row:
                 existing_row[item_code] = existing_row.get(item_code, 0) + material_qty
                 existing_row['total_qty'] += material_qty
-                existing_row['valuation_rate'] = valuation_rate * existing_row['total_qty']
+                existing_row['valuation_rate'] = total_valuation_rate * existing_row['total_qty']
                 existing_row['shortage_qty'] = max(0, existing_row['total_qty'] - (existing_row['available_qty'] + existing_row['transit_qty']))
             else:
                 data.append(row_data)
-    
+
     return columns, data
+
 
 def get_warehouse_conditions(item_code, warehouse_list):
     if warehouse_list:
