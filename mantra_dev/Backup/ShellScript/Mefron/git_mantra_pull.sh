@@ -12,6 +12,7 @@ LOG_FILE="/home/mantra/scripts/mantra_pull.log"
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Mefron" >> "$LOG_FILE" 2>&1
 cd '/home/mefron-bench/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -21,6 +22,7 @@ echo "$DATE2 - End mantra pull in Mefron" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Smart identity" >> "$LOG_FILE" 2>&1
 cd '/home/mantrasmartidentity_india/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -32,6 +34,7 @@ echo "$DATE2 - End mantra pull in Smart identity" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Mitras globle" >> "$LOG_FILE" 2>&1
 cd '/home/mitras_global/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -42,6 +45,7 @@ echo "$DATE2 - End mantra pull in Mitras globle" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Mewurk" >> "$LOG_FILE" 2>&1
 cd '/home/mewurk/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -52,6 +56,7 @@ echo "$DATE2 - End mantra pull in Mewurk" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Mocula" >> "$LOG_FILE" 2>&1
 cd '/home/mocula/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -62,6 +67,7 @@ echo "$DATE2 - End mantra pull in Mocula" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Mupizo" >> "$LOG_FILE" 2>&1
 cd '/home/mupizo/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -73,6 +79,7 @@ echo "$DATE2 - End mantra pull in Mupizo" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in Fzco" >> "$LOG_FILE" 2>&1
 cd '/home/fzco/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
@@ -83,6 +90,7 @@ echo "$DATE2 - End mantra pull in Fzco" >> "$LOG_FILE" 2>&1
 DATE2=$(date '+%F_%H:%M:%S')
 echo "$DATE2 - Start mantra pull in fzco dubai" >> "$LOG_FILE" 2>&1
 cd '/home/frappe-bench/apps/mantra/'
+git reset --hard
 git clean -fd
 git pull https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_REPO} $BRANCH
 DATE3=$(date '+%F_%H:%M:%S')
