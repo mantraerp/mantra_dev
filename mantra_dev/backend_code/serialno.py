@@ -71,10 +71,25 @@ def process_dc_item(dc_item,dc_doc):
 		if dc_doc_items.custom_rd_service_time_period in [None,""," ","None"]:
 			frappe.sendmail(
 				recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
-				subject="Alert: serial number process without date DC : {}".format(dc_doc.name),
+				subject="Alert: serial number RD enable but month not set : {}".format(dc_doc.name),
 				message="Item Code:{}".format(str(dc_doc_items.item_code))
 			)
 			return
+
+	if item_detail.custom_rma_enable in [True,1]:
+		if dc_doc_items.custom_warranty_time_periodin_months in [None,""," ","None"]:
+			frappe.sendmail(
+				recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
+				subject="Alert: serial number RMA enable but month not set : {}".format(dc_doc.name),
+				message="Item Code:{}".format(str(dc_doc_items.item_code))
+			)
+			# return
+ 
+ 
+ 
+ 
+ 
+ 
  
 	if dc_doc_items.serial_no:
 		sr_no = dc_doc_items.serial_no
@@ -90,11 +105,11 @@ def process_dc_item(dc_item,dc_doc):
 					sr_no_list.append(str(s_no['serial_no']))
 
 	for s_no in sr_no_list:
-		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no)
+		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
 
 	return "DC item process"
 
-def process_dc_date_information(dc_item,dc_doc,sr_no):
+def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 
 	if not get_app_name()=="mantra":
 		return "App is not mantra"
@@ -104,6 +119,7 @@ def process_dc_date_information(dc_item,dc_doc,sr_no):
 	reply={}
 	try:
 		new_warranty_date = ""
+		# if item_detail.custom_rma_enable in [True,1]:
 		if dc_item.custom_warranty_time_periodin_months:
 			first_obj = str(dc_item.custom_warranty_time_periodin_months).split(" ")[0]
 			reply['f_o']=first_obj
@@ -118,17 +134,18 @@ def process_dc_date_information(dc_item,dc_doc,sr_no):
 				new_warranty_date = add_months(dc_doc.posting_date, int(first_obj))
 
 		new_rd_date = ""
-		if dc_item.custom_rd_service_time_period:
-			first_obj = str(dc_item.custom_rd_service_time_period).split(" ")[0]
-			reply['s_o']=first_obj
-			first_obj = first_obj.replace(' ', ' ')
-			first_obj = first_obj.replace('\n', ' ')
-			first_obj = first_obj.replace('\r', ' ')
-			first_obj = str(first_obj).split(" ")[0]
-			reply['second_obj']=first_obj
+		if item_detail.custom_avdm_enable in [True,1]:
+			if dc_item.custom_rd_service_time_period:
+				first_obj = str(dc_item.custom_rd_service_time_period).split(" ")[0]
+				reply['s_o']=first_obj
+				first_obj = first_obj.replace(' ', ' ')
+				first_obj = first_obj.replace('\n', ' ')
+				first_obj = first_obj.replace('\r', ' ')
+				first_obj = str(first_obj).split(" ")[0]
+				reply['second_obj']=first_obj
 
-			if str(first_obj).lower() not in ["no","not","","0",None]:	
-				new_rd_date = add_months(dc_doc.posting_date, int(first_obj))
+				if str(first_obj).lower() not in ["no","not","","0",None]:	
+					new_rd_date = add_months(dc_doc.posting_date, int(first_obj))
 
 		reply["new_warranty_date"]=new_warranty_date
 		reply["new_rd_date"]=new_rd_date
@@ -144,16 +161,6 @@ def process_dc_date_information(dc_item,dc_doc,sr_no):
 			query_update = query_update.replace("',)","')")
 			serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
 			reply["o1_amc_expiry_date"]="new_rd_date"
-		else:
-			item_detail = frappe.get_doc("Item", dc_item.item_code)
-			if item_detail.custom_avdm_enable in [True,1]:
-				if dc_item.custom_rd_service_time_period in [None,""," ","None"]:
-					frappe.sendmail(
-						recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
-						subject="Alert: serial number process without date DC : {} ({})".format(dc_doc.name,str(dc_item.item_code)),
-						message="Item Code:{}".format(str(dc_item.item_code))
-					)
-					return
 
 	except Exception as e:
 		reply['message']="Exception"

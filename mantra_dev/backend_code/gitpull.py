@@ -3,6 +3,24 @@ from frappe import _
 import os
 
 
+
+@frappe.whitelist(allow_guest=True)
+def mantra_repo_git_push():
+    os.popen('sh /home/mantra/scripts/git_push.sh')
+    return "Mantra export customisation and git push"
+
+
+@frappe.whitelist(allow_guest=True)
+def mantra_dev_repo_git_push():
+    os.popen('sh /home/mantra/scripts/git_push_mantra_dev.sh')
+    return "Mantra dev export customisation and git push"
+
+
+
+
+
+
+
 @frappe.whitelist(allow_guest=True)
 def mantra_git_pull_with_url(url):
     os.popen('sh {}'.format(url))

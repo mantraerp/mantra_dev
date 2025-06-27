@@ -502,7 +502,7 @@ frappe.pages['payment-page-approve'].on_page_load = function (wrapper) {
 
                 let referenceDetails = r.message.reference_details || [];
                 let customDetails = r.message.custom_details || {};
-                
+
                 const pivotDoctypes = [
                     "Material Request",
                     "Purchase Order",
@@ -541,6 +541,8 @@ frappe.pages['payment-page-approve'].on_page_load = function (wrapper) {
                         }
                     });
 
+
+
                     for (const row of groupedRows) {
                         pivotRows += "<tr>";
                         for (const dt of pivotDoctypes) {
@@ -561,19 +563,28 @@ frappe.pages['payment-page-approve'].on_page_load = function (wrapper) {
                                             <b style="font-size:15px;">${docLink}</b><br>
                                             <small><b>Created:</b> ${item["Created On"] || "-"}</small><br>
                                             <small><b>Submitted:</b> ${item["Submitted On"] || "-"}</small><br>
-                                            <small><b>Amount:</b> ${format_currency((item['Amount'] || 0).toFixed(2), 'INR', 2) || "-"}</small><br>
                                         </div>
                                         ${item["Purpose"] ? `<div style="margin-bottom:8px;font-size:15px;"><small><b>Purchase Remark:</b> ${item["Purpose"]}</small></div>` : ""}
                                         <div style="margin-bottom:8px;">
                                             <small><b>Approvers:</b></small><br>
-                                            <div style="font-size:15px; color: #ccc;">${item["Approvers"] || "No Approvers"}</div>
+                                            <div style="font-size:15px; color: var(--text-color) !important">${item["Approvers"] || "No Approvers"}</div>
                                         </div>
                                         ${dt === "Purchase Invoice" && attachments ? `<div style="margin-bottom:8px;"><small><b>Attachments:</b></small><br><div style="font-size:15px;">${attachments}</div></div>` : ""}
                                         ${poButton}
                                     </td>
                                 `;
+
+
+                                if (dt === "Purchase Order" || dt === "Purchase Invoice") {
+                                    pivotRows += `<td style="vertical-align: top;">${format_currency((item['Amount'] || 0).toFixed(2), 'INR', 2)}</td>`;
+                                }
+
                             } else {
+
                                 pivotRows += `<td></td>`;
+                                if (dt === "Purchase Order" || dt === "Purchase Invoice") {
+                                    pivotRows += `<td></td>`;
+                                }
                             }
                         }
                         pivotRows += "</tr>";
@@ -694,7 +705,14 @@ frappe.pages['payment-page-approve'].on_page_load = function (wrapper) {
                         <div class="section-title">Reference Details</div>
                         <table class="reference-pivot">
                             <thead>
-                                <tr><th>Material Request</th><th>Purchase Order</th><th>Purchase Invoice</th><th>Purchase Receipt</th></tr>
+                               <tr>
+                                    <th>Material Request</th>
+                                    <th>Purchase Order</th>
+                                    <th>Purchase Order Amount</th>
+                                    <th>Purchase Invoice</th>
+                                    <th>Purchase Invoice Amount</th>
+                                    <th>Purchase Receipt</th>
+                                </tr>
                             </thead>
                             <tbody>${pivotRows}</tbody>
                         </table>
@@ -949,7 +967,7 @@ frappe.pages['payment-page-approve'].on_page_load = function (wrapper) {
                             docname: poId
                         },
                         callback: function (r) {
-                            
+
                             if (r.message) {
                                 resolve(r.message);
                             } else {

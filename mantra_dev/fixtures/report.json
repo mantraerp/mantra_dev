@@ -220,84 +220,6 @@
   "javascript": null,
   "json": null,
   "letter_head": null,
-  "modified": "2024-08-06 10:54:36.663305",
-  "module": "Mantra Dev",
-  "name": "Delivery Note Report",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Delivery Note",
-  "reference_report": null,
-  "report_name": "Delivery Note Report",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock User"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Delivery User"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Delivery Manager"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "SCM - Manager"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Purchase User"
-   },
-   {
-    "parent": "Delivery Note Report",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Stock Manager"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
   "modified": "2024-05-24 16:28:37.989687",
   "module": "Mantra Dev",
   "name": "Stock Reservation deatils",
@@ -829,60 +751,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Accounts Expense Executive"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2024-07-11 17:36:10.131949",
-  "module": "Mantra Dev",
-  "name": "Sales by Cost Center and Salesperson",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Sales Person",
-  "reference_report": null,
-  "report_name": "Sales by Cost Center and Salesperson",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Sales by Cost Center and Salesperson",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales User"
-   },
-   {
-    "parent": "Sales by Cost Center and Salesperson",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Master Manager"
-   },
-   {
-    "parent": "Sales by Cost Center and Salesperson",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Sales Manager"
-   },
-   {
-    "parent": "Sales by Cost Center and Salesperson",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "All"
-   },
-   {
-    "parent": "Sales by Cost Center and Salesperson",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts SO Approval"
    }
   ]
  },
@@ -1504,48 +1372,6 @@
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "",
-  "modified": "2025-02-25 17:01:38.251005",
-  "module": "Mantra Dev",
-  "name": "Payment Entry Details",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Payment Entry",
-  "reference_report": null,
-  "report_name": "Payment Entry Details",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "Payment Entry Details",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "Payment Entry Details",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts - Banking Manager"
-   },
-   {
-    "parent": "Payment Entry Details",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   }
-  ]
- },
- {
-  "add_total_row": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
   "filters": [
    {
     "default": "Today",
@@ -2033,48 +1859,6 @@
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "Accounts SO Approval"
-   }
-  ]
- },
- {
-  "add_total_row": 1,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "Yes",
-  "javascript": null,
-  "json": null,
-  "letter_head": "Sales Invoice",
-  "modified": "2024-03-29 11:36:35.008079",
-  "module": "Mantra Dev",
-  "name": "BUwise Sales",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Sales Invoice",
-  "reference_report": null,
-  "report_name": "BUwise Sales",
-  "report_script": null,
-  "report_type": "Script Report",
-  "roles": [
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts User"
-   },
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Accounts Manager"
-   },
-   {
-    "parent": "BUwise Sales",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Employee Self Service"
    }
   ]
  }
