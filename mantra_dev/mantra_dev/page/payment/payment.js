@@ -1011,11 +1011,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
         .appendTo(buttonContainer);
 
     //Comment for live
-    // if (['hiren@mefron.com', 'bhavyen@mefron.com'].includes(frappe.session.user)) {
-
-
-
-    if (['hiren@mantratec.com', 'bhavyen@mantratec.com', 'abhishek.jain@mantratec.com'].includes(frappe.session.user)) {
+    if (['hiren@mantratec.com', 'bhavyen@mantratec.com', 'abhishek.jain@mantratec.com','hiren@mefron.com', 'bhavyen@mefron.com','abhishek.jain@mefron.com'].includes(frappe.session.user)) {
         let make_payment_btn = $(`<button style="margin-top:10px;" class="btn btn-primary">Make Payment</button>`)
             .appendTo(buttonContainer);
 
