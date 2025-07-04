@@ -18,9 +18,9 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Stock Entry",
-  "modified": "2024-04-16 13:38:18.423558",
+  "modified": "2025-07-02 12:36:53.265001",
   "name": "Stock Entry",
-  "source": "Image"
+  "source": "HTML"
  },
  {
   "align": "Left",
@@ -64,9 +64,9 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Delivery Challan",
-  "modified": "2024-11-14 16:00:20.059568",
+  "modified": "2025-07-02 12:34:20.396638",
   "name": "Delivery Challan",
-  "source": "Image"
+  "source": "HTML"
  },
  {
   "align": "Left",
@@ -74,7 +74,7 @@
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Letter Head",
-  "footer": "<div> <div style=\"opacity: 0.8; border-top: 1px solid black; border-bottom: 1px solid black; padding-bottom: 10px; text-align: center;\"> <p>Registered Office Address: B-203, 2nd Floor, Shapath Hexa, Near Gujarat High Court, Opp. Kargil Petrol Pump,S.G. Highway,Sola, Ahmedabad, Gujarat - 380060, India</p> </div> <div style=\"opacity: 0.8;\"> <p>{{doc.name}}</p> </div> </div>",
+  "footer": "<div> \n    <div style=\"opacity: 0.8; border-top: 1px solid black; border-bottom: 1px solid black; padding-bottom: 10px; text-align: center;\"> \n        {% set company_address = frappe.db.get_value('Address', {'is_your_company_address': 1, 'is_primary_address': 1}, \n                                ['address_line1', 'address_line2', 'city', 'state', 'country', 'pincode'], as_dict=True) %}\n        <p>Registered Office Address: {{ company_address.address_line1 }}{% if company_address.address_line2 %}, {{ company_address.address_line2 }}{% endif %}{% if company_address.city %}, {{ company_address.city }}{% endif %}{% if company_address.state %}, {{ company_address.state }}{% endif %}{% if company_address.pincode %} - {{ company_address.pincode }}{% endif %}{% if company_address.country %}, {{ company_address.country }}{% endif %}</p>\n    </div> \n    <div style=\"opacity: 0.8;\"> <p>{{doc.name}}</p> </div> \n</div>",
   "footer_align": "Left",
   "footer_image": null,
   "footer_image_height": 0.0,
@@ -87,32 +87,9 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Purchase Order",
-  "modified": "2024-10-09 18:45:49.264482",
+  "modified": "2025-07-02 12:31:30.783282",
   "name": "Purchase Order",
-  "source": "Image"
- },
- {
-  "align": "Left",
-  "content": "<div style=\"display: flex;\n    border-top: 1px solid black;\n    border-right: 1px solid black;\n    border-left: 1px solid black;\n    justify-content: space-between;\n    align-items: center;\">\n    <div style=\"width: 22%; padding: 20px;\">\n        <img style=\"height: 40px; width: 170px;\" src=\"/files/Mantra-Logo_1.png\">\n        <p style=\"margin: 0; padding-top: 10px; font-size: 10px;\">\n            <b>CIN No.: U72200GJ2006PTC048092</b>\n        </p>\n    </div>\n    {% set company =\n            frappe.db.get_value('Address', doc.company_address, ['address_title', 'address_type',\n            'address_line1', 'address_line2', 'city', 'country', 'state','pincode',\n            'gstin','custom_contact_person_name','custom_mobile_no']) %}\n    {% set pan_no = frappe.db.get_value('Company', doc.company, ['pan']) %}\n    <div style=\"width: 50%;\n      text-align: center;\n      padding: 0px !important;\n      border-left: none;\">\n        <div style=\"text-align: center;\">\n            <p style=\"margin: 0; font-size: 20px;\">\n                {{company[0] or ''}}\n            </p>\n            <p style=\"margin: 0;\"><b>(ISO 9000:2015 COMPANY)</b></p>\n            <p style=\"margin: 0;\">{{company[2] or ''}}</p>\n            <p style=\"margin: 0;\">{{company[3] or ''}} </p>\n            <p style=\"margin: 0;\">{{company[4] or ''}}, {{company[6] or ''}}, {{company[5] or ''}} {{company[7] or ''}}</p>\n            <p style=\"margin: 0;\"><b>GSTIN: {{company[8] or ''}}</b></p>\n            <p style=\"margin: 0;\"><b>PAN No:{{pan_no or ''}}</b></p>\n        </div>\n    </div>\n    <div style=\"width: 30%;\">\n\n\n        {% set einvoice = frappe.db.get_value('Sales Invoice', doc.custom_sales_invoice_no, ['irn']) %}\n       \n        {% if einvoice %}\n        {% set e_invoice_log = frappe.db.get_value( \"e-Invoice Log\", einvoice, (\"invoice_data\", \"signed_qr_code\"),as_dict=True ) %}\n        {%- set invoice_data = dict(json.loads(e_invoice_log.invoice_data)) -%}\n        \n\n        {% set base ='data:image/png;base64' %}\n        \n        <img src=\"{{base}},{{ get_qr_code(e_invoice_log.signed_qr_code, scale=2) }}\" style=\"width: 135px; height:135px; float: right; margin-right: 30px;\" class=\"qrcode\">\n        {% else %}\n        <div> </div>\n        {% endif %}\n\n\n    </div>\n</div>",
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Letter Head",
-  "footer": "<p style=\"margin-top: 0;\">THIS IS A COMPUTER GENERATED INVOICE AND DOES NOT REQUIRE A SIGNATURE</p>",
-  "footer_align": "Left",
-  "footer_image": null,
-  "footer_image_height": 0.0,
-  "footer_image_width": 0.0,
-  "footer_script": null,
-  "footer_source": "HTML",
-  "header_script": null,
-  "image": null,
-  "image_height": 0.0,
-  "image_width": 0.0,
-  "is_default": 0,
-  "letter_head_name": "DC Invoice",
-  "modified": "2024-06-20 17:34:34.647331",
-  "name": "DC Invoice",
-  "source": "Image"
+  "source": "HTML"
  },
  {
   "align": "Left",
@@ -133,9 +110,32 @@
   "image_width": 0.0,
   "is_default": 0,
   "letter_head_name": "Sales Invoice",
-  "modified": "2024-11-08 11:50:51.450245",
+  "modified": "2025-07-02 12:35:18.979266",
   "name": "Sales Invoice",
-  "source": "Image"
+  "source": "HTML"
+ },
+ {
+  "align": "Left",
+  "content": "<div style=\"display: flex;\n    border-top: 1px solid black;\n    border-right: 1px solid black;\n    border-left: 1px solid black;\n    justify-content: space-between;\n    align-items: center;\">\n    <div style=\"width: 22%; padding: 20px;\">\n        <img style=\"height: 40px; width: 170px;\" src=\"/files/Mantra-Logo_1.png\">\n        <p style=\"margin: 0; padding-top: 10px; font-size: 10px;\">\n            <b>CIN No.: U72200GJ2006PTC048092</b>\n        </p>\n    </div>\n    {% set company =\n            frappe.db.get_value('Address', doc.company_address, ['address_title', 'address_type',\n            'address_line1', 'address_line2', 'city', 'country', 'state','pincode',\n            'gstin','custom_contact_person_name','custom_mobile_no']) %}\n    {% set pan_no = frappe.db.get_value('Company', doc.company, ['pan']) %}\n    <div style=\"width: 50%;\n      text-align: center;\n      padding: 0px !important;\n      border-left: none;\">\n        <div style=\"text-align: center;\">\n            <p style=\"margin: 0; font-size: 20px;\">\n                {{company[0] or ''}}\n            </p>\n            <p style=\"margin: 0;\"><b>(ISO 9000:2015 COMPANY)</b></p>\n            <p style=\"margin: 0;\">{{company[2] or ''}}</p>\n            <p style=\"margin: 0;\">{{company[3] or ''}} </p>\n            <p style=\"margin: 0;\">{{company[4] or ''}}, {{company[6] or ''}}, {{company[5] or ''}} {{company[7] or ''}}</p>\n            <p style=\"margin: 0;\"><b>GSTIN: {{company[8] or ''}}</b></p>\n            <p style=\"margin: 0;\"><b>PAN No:{{pan_no or ''}}</b></p>\n        </div>\n    </div>\n    <div style=\"width: 30%;\">\n\n\n        {% set einvoice = frappe.db.get_value('Sales Invoice', doc.custom_sales_invoice_no, ['irn']) %}\n       \n        {% if einvoice %}\n        {% set e_invoice_log = frappe.db.get_value( \"e-Invoice Log\", einvoice, (\"invoice_data\", \"signed_qr_code\"),as_dict=True ) %}\n        {%- set invoice_data = dict(json.loads(e_invoice_log.invoice_data)) -%}\n        \n\n        {% set base ='data:image/png;base64' %}\n        \n        <img src=\"{{base}},{{ get_qr_code(e_invoice_log.signed_qr_code, scale=2) }}\" style=\"width: 135px; height:135px; float: right; margin-right: 30px;\" class=\"qrcode\">\n        {% else %}\n        <div> </div>\n        {% endif %}\n\n\n    </div>\n</div>",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Letter Head",
+  "footer": "<p style=\"margin-top: 0;\">THIS IS A COMPUTER GENERATED INVOICE AND DOES NOT REQUIRE A SIGNATURE</p>",
+  "footer_align": "Left",
+  "footer_image": null,
+  "footer_image_height": 0.0,
+  "footer_image_width": 0.0,
+  "footer_script": null,
+  "footer_source": "HTML",
+  "header_script": null,
+  "image": null,
+  "image_height": 0.0,
+  "image_width": 0.0,
+  "is_default": 0,
+  "letter_head_name": "DC Invoice",
+  "modified": "2025-07-02 12:36:05.079426",
+  "name": "DC Invoice",
+  "source": "HTML"
  },
  {
   "align": "Left",
@@ -143,7 +143,7 @@
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Letter Head",
-  "footer": "<div style=\"opacity: 0.8; border-top: 1px solid black; margin: 0 15px;\"></div>\n    <table width=\"96%\" style=\"margin: auto;\">\n        <tbody><tr>\n            <td style=\"padding: 2px !important; color: black; font-family: Arial, sans-serif; font-size: 9px; vertical-align: top;\">\n                Registered Office Address :\n            </td>\n            <td style=\"padding: 2px 2px 10px 2px !important; color: black; font-family: Arial, sans-serif; font-size: 9px;\">\n                B-203, 2nd Floor, Shapath Hexa, Near Gujarat High Court, Opp. Kargil Petrol Pump, S.G. Highway, Sola, Ahmedabad, Gujarat - 380060, India<br>\n                Tel: +91 79 6450 6243 / 40088667 &bull; Fax Number: +91 79 4004 4043<br>\n                Email: mantra@mantratec.com &bull; website: www.mantratec.com\n            </td>\n        </tr>\n    </tbody></table>\n\n\n    ",
+  "footer": "<div style=\"opacity: 0.8; border-top: 1px solid black; margin: 0 15px;\"></div>\n\n            {% set company_link = frappe.db.get_value('Company', doc.company, [\n            'email', 'website', 'phone_no', 'fax'], as_dict=True) %}\n            {% set company_address = frappe.db.get_value('Address', {'is_your_company_address': 1, 'is_primary_address':\n            1},\n            ['address_line1', 'address_line2', 'city', 'state', 'country', 'pincode'], as_dict=True) %}\n            <table width=\"96%\" style=\"margin: auto;\">\n    <tbody>\n        <tr>\n            <td style=\"padding: 2px !important; color: black; font-family: Arial, sans-serif; font-size: 9px; vertical-align: top;\">\n                Registered Office Address :\n            </td><td style=\"padding: 2px 2px 10px 2px !important; color: black; font-family: Arial, sans-serif; font-size: 9px;\">\n                {{ company_address.address_line1 }}{% if company_address.address_line2 %}, {{\n                company_address.address_line2 }}{% endif %}{% if company_address.city %}, {{ company_address.city }}{%\n                endif %}{% if company_address.state %}, {{ company_address.state }}{% endif %}{% if\n                company_address.pincode %} - {{ company_address.pincode }}{% endif %}{% if company_address.country %},\n                {{ company_address.country }}{% endif %}<br>\n\n                {% if company_link.phone_no %}Tel: {{ company_link.phone_no }}{% endif %}{% if company_link.phone_no and\n                company_link.fax %} &bull; {% endif %}{% if company_link.fax %}Fax Number: {{ company_link.fax }}{%\n                endif %}{% if company_link.phone_no or company_link.fax %}<br>{% endif %}\n\n                {% if company_link.email %}Email: {{ company_link.email }}{% endif %}{% if company_link.email and\n                company_link.website %} &bull; {% endif %}{% if company_link.website %}website: {{ company_link.website\n                }}{% endif %}\n            </td>\n        </tr>\n    </tbody>\n</table>",
   "footer_align": "Left",
   "footer_image": null,
   "footer_image_height": 0.0,
@@ -156,8 +156,8 @@
   "image_width": 0.0,
   "is_default": 1,
   "letter_head_name": "Salary Slip",
-  "modified": "2024-11-28 11:21:10.769079",
+  "modified": "2025-07-02 12:31:39.362054",
   "name": "Salary Slip",
-  "source": "Image"
+  "source": "HTML"
  }
 ]
