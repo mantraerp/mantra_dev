@@ -1,21 +1,19 @@
-import frappe
-from frappe import _
-
+import frappe # type: ignore
+from frappe import _ # type: ignore
 
 
 @frappe.whitelist(allow_guest=True)
-def git_pull_with_url():
+def mantra_git_detail(company_name=None):
     reply={}
-    reply['GIT_PAT'] = "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"
-    return reply
-
-@frappe.whitelist(allow_guest=True)
-def mantra_git_pull_with_url(company_name):
-    reply={}
-    reply['password'] = "E&rp@_5546"
-    reply['git_url'] = "https://mantraerp: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@github.com/mantraerp/mantra_dev.git"
-    reply['company'] = company_name
+    reply['GIT_TOKEN'] = "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"
     reply['GIT_USERNAME'] = "mantraerp"
-    reply['GIT_PAT'] = "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"
+    reply['GIT_REPO'] = ""
+    reply['GIT_BRANCH'] = "main"
+
+    if company_name=="mantra":
+        reply['GIT_REPO'] = "github.com/mantraerp/mantra.git"
+    elif company_name=="mantra_dev":
+        reply['GIT_REPO'] = "github.com/mantraerp/mantra_dev.git"
+
 
     return reply
