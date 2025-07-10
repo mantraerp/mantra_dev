@@ -611,8 +611,16 @@ def update_serial_no_dates(main_serial_no,sub_serial_no):
 	query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='{}'".format(main_serial_no)
 	sr_no_details = frappe.db.sql(query_update,as_dict=1)
 	if len(sr_no_details)!=0:
-		query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}',`warranty_expiry_date`='{}' WHERE `name`='{}'".format(sr_no_details[0]['amc_expiry_date'],sr_no_details[0]['warranty_expiry_date'],sub_serial_no)
-		sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+		amc = sr_no_details[0]['amc_expiry_date']
+		warranty = sr_no_details[0]['warranty_expiry_date']
+		if amc not in ['None',None,""]:
+			query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(amc,sub_serial_no)
+			sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+		if warranty not in ['None',None,""]:
+			query_update_sub_date = "UPDATE `tabSub Serial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(warranty,sub_serial_no)
+			sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+		# query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}',`warranty_expiry_date`='{}' WHERE `name`='{}'".format(sr_no_details[0]['amc_expiry_date'],sr_no_details[0]['warranty_expiry_date'],sub_serial_no)
+		# sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
 	return True
 
 
