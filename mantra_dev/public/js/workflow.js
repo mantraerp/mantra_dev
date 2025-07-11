@@ -32,7 +32,7 @@ class WorkflowOverride extends frappe.ui.form.States {
 					added = true;
 					me.frm.page.add_action_item(__(d.action), function () {
 						
-                        frappe.confirm('Are you sure you want to proceed?',
+                        frappe.confirm('Are you sure you want to proceed?.',
                             () => {
 
 								if (me.frm.doc.doctype === "Purchase Order" && d.action === "Hold") {
@@ -202,6 +202,67 @@ class WorkflowOverride extends frappe.ui.form.States {
 										},
 									});
 
+									dialog.show();
+								}
+								else if (me.frm.doc.doctype === "Sales Order" && ["Approve", "Review"].includes(d.action)) {
+									const customer = me.frm.doc.customer || '-';
+									const total_qty = me.frm.doc.total_qty || 0;
+									const grand_total = me.frm.doc.grand_total || 0;
+
+									const dialog = new frappe.ui.Dialog({
+										title: 'Sales Order Summary',
+										fields: [
+											{
+												fieldtype: 'HTML',
+												fieldname: 'summary_html',
+												options: `
+													<table style="width:100%; border-collapse: collapse; margin-bottom: 15px;">
+														<tr>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Customer</b></td>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${customer}</td>
+														</tr>
+														<tr>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Total Qty</b></td>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${total_qty}</td>
+														</tr>
+														<tr>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Grand Total</b></td>
+															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${frappe.format(grand_total, { fieldtype: 'Currency' })}</td>
+														</tr>
+													</table>
+												`
+											}
+										],
+										primary_action_label: 'Submit',
+										primary_action() {
+											frappe.dom.unfreeze();
+											me.frm.reload_doc();
+											me.frm.script_manager.trigger("before_workflow_action").then(() => {
+												frappe
+													.xcall("frappe.model.workflow.apply_workflow", {
+														doc: me.frm.doc,
+														action: d.action,
+													})
+													.then((doc) => {
+														frappe.model.sync(doc);
+														me.frm.refresh();
+														me.frm.selected_workflow_action = null;
+														me.frm.script_manager.trigger("after_workflow_action");
+														frappe.msgprint(`Sales Order ${d.action} done successfully.`);
+													})
+													.finally(() => {
+														frappe.dom.unfreeze();
+													});
+											});
+											dialog.hide();
+										},
+
+										secondary_action_label: 'Cancel',
+										secondary_action() {
+											frappe.msgprint("Submission aborted.");
+											dialog.hide();
+										}
+									});
 									dialog.show();
 								}
 								else{
