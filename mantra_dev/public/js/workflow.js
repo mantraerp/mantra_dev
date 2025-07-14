@@ -209,30 +209,68 @@ class WorkflowOverride extends frappe.ui.form.States {
 									const total_qty = me.frm.doc.total_qty || 0;
 									const grand_total = me.frm.doc.grand_total || 0;
 
+									const summaryTable = `
+										<table style="width:100%; border-collapse: collapse; margin-bottom: 15px;">
+											<tr>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: left;"><b>Customer</b></td>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: right;">${customer}</td>
+											</tr>
+											<tr>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: left;"><b>Total Qty</b></td>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: right;">${total_qty}</td>
+											</tr>
+											<tr>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: left;"><b>Grand Total</b></td>
+												<td style="border: 1px solid #ccc; padding: 8px; text-align: right;">${frappe.format(grand_total, { fieldtype: 'Currency' })}</td>
+											</tr>
+										</table>
+									`;
+
+									// Build items table
+									const items = me.frm.doc.items || [];
+									let itemsTable = `
+										<table style="width:100%; border-collapse: collapse; margin-bottom: 15px;">
+											<tr>
+												<th style="border: 1px solid #ccc; padding: 8px;">Item Name (Item Code)</th>
+												<th style="border: 1px solid #ccc; padding: 8px;">Warranty (Months)</th>
+												<th style="border: 1px solid #ccc; padding: 8px;">RD (Months)</th>
+												<th style="border: 1px solid #ccc; padding: 8px;">Qty</th>
+												<th style="border: 1px solid #ccc; padding: 8px;">Rate</th>
+												<th style="border: 1px solid #ccc; padding: 8px;">Amount</th>
+											</tr>
+									`;
+									items.forEach(item => {
+										itemsTable += `
+											<tr>
+												<td style="border: 1px solid #ccc; padding: 8px;">${item.item_name || ""} (${item.item_code || ""})</td>
+												<td style="border: 1px solid #ccc; padding: 8px;">${item.custom_warranty_time_periodin_months || "-"}</td>
+												<td style="border: 1px solid #ccc; padding: 8px;">${item.custom_rd_service_time_period || "-"}</td>
+												<td style="border: 1px solid #ccc; padding: 8px;">${item.qty || ""}</td>
+												<td style="border: 1px solid #ccc; padding: 8px;">${frappe.format(item.rate, { fieldtype: 'Currency' })}</td>
+												<td style="border: 1px solid #ccc; padding: 8px;">${frappe.format(item.amount, { fieldtype: 'Currency' })}</td>
+											</tr>
+										`;
+									});
+									itemsTable += `</table>`;
+
+									const custom_html = `
+										<div style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Sales Order Details</div>
+										<div style="font-size: 1.1em; font-weight: bold; margin: 15px 0 5px 0;">${me.frm.doc.name}</div>
+										${summaryTable}
+										<div style="font-size: 1.1em; font-weight: bold; margin: 15px 0 5px 0;">Items:</div>
+										${itemsTable}
+									`;
+
 									const dialog = new frappe.ui.Dialog({
-										title: 'Sales Order Summary',
+										title: '', // Title is now in the HTML
 										fields: [
 											{
 												fieldtype: 'HTML',
 												fieldname: 'summary_html',
-												options: `
-													<table style="width:100%; border-collapse: collapse; margin-bottom: 15px;">
-														<tr>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Customer</b></td>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${customer}</td>
-														</tr>
-														<tr>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Total Qty</b></td>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${total_qty}</td>
-														</tr>
-														<tr>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;"><b>Grand Total</b></td>
-															<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${frappe.format(grand_total, { fieldtype: 'Currency' })}</td>
-														</tr>
-													</table>
-												`
+												options: custom_html
 											}
 										],
+										size: 'large',
 										primary_action_label: 'Submit',
 										primary_action() {
 											frappe.dom.unfreeze();
@@ -262,6 +300,7 @@ class WorkflowOverride extends frappe.ui.form.States {
 											frappe.msgprint("Submission aborted.");
 											dialog.hide();
 										}
+										
 									});
 									dialog.show();
 								}

@@ -1956,7 +1956,7 @@ def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecer
 	#Get beneficary name
 	# benifecery_name if benifecery_name else "-"
 	# if beneficiary_name in ['-',' ',None,'None','null']:
-	benifecery_name = '-'
+	# benifecery_name = '-'
 	if benifecery_code not in ['-',' ',None,'None','null']:
 		directory_sql = "SELECT supplier_name FROM `tabSupplier` WHERE `name`='{}'".format(benifecery_code)
 		directory_list = frappe.db.sql(directory_sql, as_dict=True)

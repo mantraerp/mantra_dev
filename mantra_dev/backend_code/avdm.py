@@ -406,7 +406,7 @@ def process_request(process_record,creating_url,headers):
 				error_searial_no = []
 				for i in dc_response_json:
 					if int(i['errorCode'])==0:
-						errorLog(key_serial_no,str(i['devicesr']))
+						errorLog(key_serial_no,str(i['devicesr'])) #insert into error log to update tick
 						if process_dc_of_serial[i['devicesr']] not in delivery_note_number_proccess:
 							process_dc_no.append(process_dc_of_serial[i['devicesr']])
 							delivery_note_number_proccess.append(process_dc_of_serial[i['devicesr']])
@@ -920,6 +920,9 @@ def update_serial_no_records(limit):
 		query_update = "UPDATE `tabSub Serial No` SET `custom_marked_in_avdm`=1 WHERE `name` IN {}".format(flat_list2)
 		query_update = query_update.replace("',)","')")
 		serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
+
+		#Update in So Serial Number Log
+
 
   
 		#Delete updated serial number from log
