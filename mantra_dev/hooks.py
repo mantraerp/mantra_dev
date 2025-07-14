@@ -11,7 +11,7 @@ app_include_css = "bank_reconciliation_mantra.bundle.css"
 app_include_js = [
     "/assets/mantra_dev/js/email_button.js",
     "/assets/mantra_dev/js/workflow.js",
-    ]
+]
 
 
 # include js in doctype views

@@ -32,7 +32,7 @@ class WorkflowOverride extends frappe.ui.form.States {
 					added = true;
 					me.frm.page.add_action_item(__(d.action), function () {
 						
-                        frappe.confirm('Are you sure you want to proceed?.',
+                        frappe.confirm('Are you sure you want to proceed.?',
                             () => {
 
 								if (me.frm.doc.doctype === "Purchase Order" && d.action === "Hold") {
