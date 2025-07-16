@@ -21,6 +21,8 @@ key_body_process = "BODYPROCESSAVDM"
 key_serial_no = "SERIALNOAVDM"
 key_dc_no = "DCNOAVDM"
 
+print_log = False
+
 
 #Main serial number to add in list to find its sub serial number
 key_sub_serial_no = "SUBSERIALNO"
@@ -382,9 +384,17 @@ def process_request(process_record,creating_url,headers):
 		reply['request_header']=headers
 		reply['request_body']=body_pass_avdm
 
+		if print_log:
+			frappe.log_error("AVDM Request URL",str(creating_url))
+			frappe.log_error("AVDM Request Header",str(headers))
+			frappe.log_error("AVDM Request Body",str(body_pass_avdm))
+
 		# reply['request_dump']=body_json
 		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
 		reply['resposne_status_code']=response1.status_code
+
+		if print_log:
+			frappe.log_error("AVDM Response status code",str(response1.status_code))
 
 		dc_response_content = response1.content
 		if isinstance(dc_response_content, bytes):
@@ -433,7 +443,7 @@ def process_request(process_record,creating_url,headers):
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
-			send_error_message_to_developer("Error: EVDM request process error","{}".format(str(reply)))
+			send_error_message_to_developer("Error: AVDM request process error","{}".format(str(reply)))
 		try:
 			todo = frappe.get_doc({
 					"doctype": "EVDM Sync Log",
