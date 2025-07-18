@@ -1,7 +1,7 @@
 {
  "absolute_value": 0,
  "align_labels_right": 0,
- "creation": "2025-07-08 18:20:59.058744",
+ "creation": "2025-07-14 09:23:33.560668",
  "css": "* {\n  color: black;\n}\n\ntable {\n  border: 1px solid transparent;\n}\n\n.print-heading {\n  display: none;\n}\n\n.page-header,\n.page-header-space {\n  /*height: 150px!important;*/\n  /*padding-bottom:150px!important*/\n}\n\n.page-footer,\n.page-footer-space {\n  /*height: 120px;\n    */\n}\n\n.page-footer {\n  position: fixed;\n  bottom: 0;\n  width: 100%;\n  margin: auto;\n}\n\n.page-break-before {\n  page-break-before: always;\n}\n\n.page-header {\n  position: fixed;\n  top: 0mm;\n  display: block;\n  width: 100%;\n  border-bottom: 0 !important;\n  color: #ffffff;\n  margin-left: 0px !important;\n  padding-left: 0 !important;\n}\n\n.print-format .print-format-preview {\n  padding-left: 0px !important;\n  width: 98%;\n}\n\n.test-table {\n  color: black !important;\n  width: 100%;\n  border-collapse: collapse;\n}\n\n.test-table td {\n  text-align: left;\n  /*border-top: 1px solid black;\n    */\n  border-bottom: 1px solid black;\n  border-left: 1px solid black;\n  border-right: 1px solid black;\n}\n\n.test-table td:nth-child(1) {\n  width: 20%;\n  min-width: 150px;\n}\n\n.test-table td:nth-child(2) {\n  width: 20%;\n  min-width: 150px;\n}\n\n.test-table td:nth-child(3) {\n  width: 60%;\n}\n\n@page {\n  size: A4 potrait;\n  margin: 10mm;\n  margin-top: 2055mm;\n}\n\n@media print {\n  thead {\n    display: table-header-group;\n  }\n\n  tfoot {\n    display: table-footer-group;\n  }\n\n  .page-header,\n  .page-header-space {\n    height: 66px;\n    border-bottom: 0 !important;\n  }\n\n  .page-header,\n  .page-footer-space {\n    /*height:120px;*/\n    height: 40px;\n    /*margin-top:400px;*/\n  }\n\n  @media print {\n    .page-break-before {\n      page-break-before: always;\n    }\n\n    .page-header {\n      display: block;\n      /*height: 300px;*/\n      /*margin-bottom: 300px;*/\n    }\n\n    .print-format .print-format-preview {\n      padding-left: 0px !important;\n      padding-top: 0px !important;\n    }\n  }\n\n  button {\n    display: none;\n  }\n\n  body {\n    margin: 0;\n  }\n}\n\n.page-header {\n  margin-top: 0px !important;\n  height: 300px;\n  margin-bottom: 300px;\n}\n\n.text-center h4 {\n  display: none;\n}\n\nbody {\n  counter-reset: page;\n}\n\n.page-no::after {\n  counter-increment: page;\n  content: \"Page \" counter(page);\n}\n\n/* \n.table-styles {\n    width: 103%;\n     !important margin-top: -11px;\n     !important margin-left: -11px !important\n} */\n\n.gap {\n  padding: 5px !important;\n}",
  "custom_format": 1,
  "default_print_language": "en",
@@ -17,7 +17,7 @@
  "margin_left": 15.0,
  "margin_right": 15.0,
  "margin_top": 15.0,
- "modified": "2025-07-11 16:45:39.068325",
+ "modified": "2025-07-17 10:08:52.792627",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Delivery Challan-1",
