@@ -254,7 +254,7 @@ def process_one_record_background():
 	# return
 	reply= {}
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 5".format(key_body_process)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 4".format(key_body_process)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Body process"]=len(list_body_to_process)
 	
