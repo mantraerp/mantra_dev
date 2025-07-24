@@ -19,13 +19,15 @@ def serial_no_scheduled():
 	frappe.enqueue(process_serial_no_for_date, queue='long', timeout=3600,transaction_date=nowdate())
 	return True  
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def process_serial_no_for_date(transaction_date):
-    
+
 	if not get_app_name()=="mantra":
 		return
- 
-	reply={}		
+
+	errorLog("Serial no date update on server",str(transaction_date))
+
+	reply={}
 	dc_list =frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
 	reply["Total DC"]=len(dc_list)
 	if len(dc_list)==0:
@@ -98,13 +100,27 @@ def process_dc_item(dc_item,dc_doc):
 		for s_no in serial_no_list:
 			sr_no_list.append(str(s_no))
 
-	bundle_sr_no = process_dc_bundle(dc_doc.name)
-	for s_no in bundle_sr_no:
-		if s_no['serial_no'] not in sr_no_list:
-			if s_no['item_code'] == dc_doc_items.item_code:
-					sr_no_list.append(str(s_no['serial_no']))
+	if dc_doc_items.serial_and_batch_bundle:
+		bundle_sr_no = process_dc_bundle(dc_doc.name,dc_doc_items.serial_and_batch_bundle)
+		for s_no in bundle_sr_no:
+			if s_no['serial_no'] not in sr_no_list:
+				if s_no['item_code'] == dc_doc_items.item_code:
+						sr_no_list.append(str(s_no['serial_no']))
 
-	for s_no in sr_no_list:
+
+	#Remove duplicate
+	unique_list = []
+	seen = set()
+
+	for item in sr_no_list:
+		if item not in seen:
+			seen.add(item)
+			unique_list.append(item)
+
+
+	for s_no in unique_list:
+		# if s_no=="9767518":
+			# errorLog("SRDetail",str(dc_doc_items.name))
 		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
 
 	return "DC item process"
@@ -114,6 +130,7 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 	if not get_app_name()=="mantra":
 		return "App is not mantra"
 
+	sr_no = sr_no.replace("',)","')")
 	# custom_warranty_time_periodin_months = warranty_expiry_date
 	# custom_rd_service_time_period = amc_expiry_date
 	reply={}
@@ -136,31 +153,47 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 		new_rd_date = ""
 		if item_detail.custom_avdm_enable in [True,1]:
 			if dc_item.custom_rd_service_time_period:
-				first_obj = str(dc_item.custom_rd_service_time_period).split(" ")[0]
-				reply['s_o']=first_obj
-				first_obj = first_obj.replace(' ', ' ')
-				first_obj = first_obj.replace('\n', ' ')
-				first_obj = first_obj.replace('\r', ' ')
-				first_obj = str(first_obj).split(" ")[0]
-				reply['second_obj']=first_obj
+				second_obj = str(dc_item.custom_rd_service_time_period).split(" ")[0]
+				reply['s_o']=second_obj
+				second_obj = second_obj.replace(' ', ' ')
+				second_obj = second_obj.replace('\n', ' ')
+				second_obj = second_obj.replace('\r', ' ')
+				second_obj = str(second_obj).split(" ")[0]
+				reply['second_obj']=second_obj
 
-				if str(first_obj).lower() not in ["no","not","","0",None]:	
-					new_rd_date = add_months(dc_doc.posting_date, int(first_obj))
+				if str(second_obj).lower() not in ["no","not","","0",None]:	
+					new_rd_date = add_months(dc_doc.posting_date, int(second_obj))
 
 		reply["new_warranty_date"]=new_warranty_date
 		reply["new_rd_date"]=new_rd_date
+
+# 
+
+		# frappe.set_user("srnbot@mantratec.com")
+		# doc_sr = frappe.get_doc("Serial No", sr_no)
 
 		if new_warranty_date!="":
 			query_update = "UPDATE `tabSerial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sr_no)
 			query_update = query_update.replace("',)","')")
 			serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
-			reply["o1_warranty_expiry_date"]="new_warranty_date"
+			reply["o1_warranty_expiry_date"]=query_update
+			
+			# new_warranty_date = new_warranty_date.replace("',)","')")
+			# doc_sr.warranty_expiry_date = new_warranty_date
+			# reply["rma_date"]=new_warranty_date
 
 		if new_rd_date!="":
 			query_update = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_rd_date,sr_no)
 			query_update = query_update.replace("',)","')")
 			serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
-			reply["o1_amc_expiry_date"]="new_rd_date"
+			reply["o1_amc_expiry_date"]=query_update
+
+			# new_rd_date = new_rd_date.replace("',)","')")
+			# doc_sr.amc_expiry_date = new_rd_date
+			# reply["rd_date"]=new_rd_date
+
+		# doc_sr.save()
+		# errorLog("SRDetail",str(reply))
 
 	except Exception as e:
 		reply['message']="Exception"
@@ -170,7 +203,7 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 	return reply
 
 
-def process_dc_bundle(dc_no):
+def process_dc_bundle(dc_no,sbb_name):
 	
 	query = """
 		SELECT 
@@ -184,7 +217,8 @@ def process_dc_bundle(dc_no):
 		WHERE 
 			sbb.voucher_type = 'Delivery Note'
 			AND sbb.voucher_no = '{}'
-		""".format(dc_no)
+			AND sbb.name = '{}'
+		""".format(dc_no,sbb_name)
 	list_body_to_process = frappe.db.sql(query,as_dict=1)
 	return list_body_to_process
 

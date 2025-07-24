@@ -925,7 +925,7 @@ frappe.pages['payment'].on_page_load = function (wrapper) {
             primary_action_label: 'Submit',
             primary_action(values) {
                 frappe.call({
-                    method: "mantra_dev.mantra_dev.page.payment_page_approve.payment_page_approve.update_payment_entry_remark",
+                    method: "mantra.mantra.page.payment_page_approve.payment_page_approve.update_payment_entry_remark",
                     args: {
                         payment_entry: paymentEntryId,
                         remark: values.remark
@@ -1276,7 +1276,7 @@ function selectPaymentEntry(data, bank_account) {
 
             if($('.frappe-control[data-fieldname="use_payroll_entry"] input[type="checkbox"]').prop('checked') == true){
                 frappe.call({
-                    method: "mantra_dev.api_code.bank_transaction.generate_payroll_payment_file",
+                    method: "mantra.api_code.bank_transaction.generate_payroll_payment_file",
                     args: {
                         payroll_entry: bank_account,
                         create_only_file: 0,
@@ -1306,7 +1306,7 @@ function selectPaymentEntry(data, bank_account) {
                 });
             }else{
                 frappe.call({
-                    method: "mantra_dev.api_code.bank_transaction.upload_file",
+                    method: "mantra.api_code.bank_transaction.upload_file",
                     args: {
                         payment_entry_list: data,
                         bank_account: bank_account,

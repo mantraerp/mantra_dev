@@ -28,7 +28,7 @@ def bulk_upload_beneficiary_file2():
 
 	directory_list = frappe.db.sql(directory_sql, as_dict=True)
 	# for rrecord in directory_list:
-	#     frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
+	#     frappe.enqueue(upload_beneficiary_file,queue='default',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
 
 		
 	return len(directory_list)
@@ -37,7 +37,7 @@ def bulk_upload_beneficiary_file2():
 def bulk_upload_beneficiary_file(bank_account_list):
 	# errorLog("Bene bulk upload")
 	for rrecord in bank_account_list:
-		frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord)
+		frappe.enqueue(upload_beneficiary_file,queue='default',job_name="Bank approve",timeout=100000,doc_name=rrecord)
 	return True
 
 # Upload Approved Beneficiary file on Snorkel with Indicator A
@@ -1501,8 +1501,8 @@ def get_pnb_file():
 @frappe.whitelist()
 def get_icici_bank_file(delimiter='|'):
 	
-	frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
-	frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
+	frappe.enqueue(get_bene_file,queue='default',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+	frappe.enqueue(get_icici_bank_file_background,queue='default',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
 	return True
 
 

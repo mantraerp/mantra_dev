@@ -28,7 +28,7 @@ def bulk_upload_beneficiary_file2():
 
 	directory_list = frappe.db.sql(directory_sql, as_dict=True)
 	# for rrecord in directory_list:
-	#     frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
+	#     frappe.enqueue(upload_beneficiary_file,queue='default',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
 
 		
 	return len(directory_list)
@@ -37,7 +37,7 @@ def bulk_upload_beneficiary_file2():
 def bulk_upload_beneficiary_file(bank_account_list):
 	# errorLog("Bene bulk upload")
 	for rrecord in bank_account_list:
-		frappe.enqueue(upload_beneficiary_file,queue='long',job_name="Bank approve",timeout=100000,doc_name=rrecord)
+		frappe.enqueue(upload_beneficiary_file,queue='default',job_name="Bank approve",timeout=100000,doc_name=rrecord)
 	return True
 
 # Upload Approved Beneficiary file on Snorkel with Indicator A
@@ -536,6 +536,58 @@ def send_otp(email):
 		frappe.msgprint("User with email {} does not exist".format(email))
 		return "Error"
 # this function for a email formate  
+
+
+# @frappe.whitelist(allow_guest=True)
+# def send_otp_test(email=None):
+    
+# 	frappe.set_user("Administrator")
+# 	email = "ravi.patel@mantratec.com"
+# 	# frappe.msgprint(email)
+# 	filters = {
+# 		"name": email,
+# 		"enabled":1
+# 	}
+# 	#check user are exists or not
+# 	userexists = frappe.db.exists("User", filters)
+# 	# If record exists, return True
+# 	if userexists:
+# 		otpsend = frappe.db.exists("Email OTP", {"email_id":email})
+# 		numeric_characters = string.digits
+# 		alphabet_characters = string.ascii_letters
+	
+# 		# Generate the OTP with 2 numeric characters and 1 alphabetical character
+# 		otp1 = ''.join(random.choices(numeric_characters, k=2)) + random.choice(alphabet_characters)
+# 		otp2 = random.choice(numeric_characters) + ''.join(random.choices(alphabet_characters, k=2))
+
+		
+# 		email_otp=otp1+otp2
+# 		if otpsend:
+# 			# Update Send otp Log
+# 			new_otp=frappe.get_doc("Email OTP",email)
+# 			new_otp.email_otp=email_otp
+# 			new_otp.datetime=now()
+# 			new_otp.save(ignore_permissions=True)
+# 			frappe.db.commit()
+# 			full_name=new_otp.full_name
+# 			send_email(email,email_otp,full_name)
+# 		else:
+# 			# Create Send otp Log
+# 			# frappe.msgprint("new login")
+# 			new_otp=frappe.new_doc("Email OTP")
+# 			new_otp.email_id=email
+# 			new_otp.email_otp=email_otp
+# 			new_otp.datetime=now()
+# 			new_otp.insert(ignore_permissions=True)
+# 			frappe.db.commit()
+# 			full_name=new_otp.full_name
+# 			send_email(email,email_otp,full_name)
+# 		flush()
+# 		return "Done"
+# 	else:
+# 		frappe.msgprint("User with email {} does not exist".format(email))
+# 		return "Error"
+
 
 def send_email(email,email_otp,full_name):
 	
@@ -1515,8 +1567,8 @@ def get_icici_bank_file(delimiter='|'):
 	if not get_app_name()=="mantra":
 		return
 	
-	frappe.enqueue(get_bene_file,queue='long',job_name="Beny file process",timeout=100000,delimiter=delimiter)
-	frappe.enqueue(get_icici_bank_file_background,queue='long',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
+	frappe.enqueue(get_bene_file,queue='default',job_name="Beny file process",timeout=100000,delimiter=delimiter)
+	frappe.enqueue(get_icici_bank_file_background,queue='default',job_name="ICICI file process",timeout=100000,delimiter=delimiter)
 	return True
 
 

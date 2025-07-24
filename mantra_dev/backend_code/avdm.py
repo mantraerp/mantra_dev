@@ -151,13 +151,24 @@ def process_dc_list(dc_list):
 							for s_no in serial_no_list:
 								sr_list.append( str(s_no))
 
-						bundle_sr_no = process_dc_bundle(dc_doc.name)
+						bundle_sr_no = process_dc_bundle(dc_doc.name,i.serial_and_batch_bundle)
 						for s_no in bundle_sr_no:
 							if s_no['serial_no'] not in sr_list:
 								if s_no['item_code'] == i.item_code:
-										sr_list.append(str(s_no['serial_no']))
-						
-						for s_no in sr_list:
+									sr_list.append(str(s_no['serial_no']))
+
+
+						#Remove duplicate
+						unique_list = []
+						seen = set()
+
+						for item in sr_list:
+							if item not in seen:
+								seen.add(item)
+								unique_list.append(item)
+
+
+						for s_no in unique_list:
 							data = {
 								"mastCode": "0",
 								"serialNo": str(s_no),
@@ -205,7 +216,7 @@ def process_dc_list(dc_list):
 	return reply
 
 
-def process_dc_bundle(dc_no):
+def process_dc_bundle(dc_no,sbb_name):
 	
 	query = """
 		SELECT 
@@ -219,7 +230,8 @@ def process_dc_bundle(dc_no):
 		WHERE 
 			sbb.voucher_type = 'Delivery Note'
 			AND sbb.voucher_no = '{}'
-		""".format(dc_no)
+			AND sbb.name = '{}'   
+		""".format(dc_no,sbb_name)
 	list_body_to_process = frappe.db.sql(query,as_dict=1)
 	return list_body_to_process
 
