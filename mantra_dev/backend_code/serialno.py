@@ -36,7 +36,7 @@ def process_serial_no_for_date(transaction_date):
 
 	try:
 		for i in dc_list:
-			frappe.enqueue(process_dc, job_name='SRExp',queue='long', timeout=3600,dc_no=i.name)
+			frappe.enqueue(process_dc, job_name='DC',queue='long', timeout=1000,dc_no=i.name)
 
 		return reply
 
@@ -58,7 +58,7 @@ def process_dc(dc_no):
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
 	dc_item = dc_doc.items
 	for i in dc_item:
-		frappe.enqueue(process_dc_item, job_name='SRExp',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
 
 	return "DC Process"
 

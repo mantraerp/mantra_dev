@@ -242,6 +242,8 @@ def process_dc_bundle(dc_no,sbb_name):
 @frappe.whitelist(allow_guest=True)
 def process_one_record():
 	
+	# return
+ 
 	if not get_app_name()=="mantra":
 		query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 		records = frappe.db.sql(query,as_dict=1)
@@ -266,7 +268,7 @@ def process_one_record_background():
 	# return
 	reply= {}
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 4".format(key_body_process)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 10".format(key_body_process)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Body process"]=len(list_body_to_process)
 	
@@ -604,7 +606,7 @@ def fetch_sub_serial_no_records():
 				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])
 				records_deleted = frappe.db.sql(query,as_dict=1)
 
-			return "Body process sucessfully {}.".format(limit_records)
+			return "Body process sucessfully {}. Key name : SUBSERIALNO".format(limit_records)
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
@@ -619,7 +621,7 @@ def fetch_sub_serial_no_records():
 			"response": str(reply['response']),
 			"call_type": "Sub-serial no body",
 		})
-		todo.insert(ignore_permissions=True)
+		# todo.insert(ignore_permissions=True)
 
 	except Exception as e:
 		reply['message']=str(e)
