@@ -83,12 +83,18 @@ class WorkflowOverride extends frappe.ui.form.States {
 										});
 										dialog.show();
 									}
+									else{
+										frappe.call({
+											method: "mantra.overrides.purchase_receipt.cancel_receipt",
+											args: { name: me.frm.doc.name },
+											freeze: true,
+											callback: function () {
+												me.frm.reload_doc();
+											}
+										});	
+									}
 								}
 							});
-						}
-						if (me.frm.doctype === "Purchase Receipt" && d.action === "Cancel") 
-						{
-							return
 						}
 						else
 						{

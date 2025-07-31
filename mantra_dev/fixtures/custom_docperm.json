@@ -7183,7 +7183,7 @@
   "docstatus": 0,
   "doctype": "Custom DocPerm",
   "email": 0,
-  "export": 0,
+  "export": 1,
   "if_owner": 0,
   "import": 0,
   "modified": "2024-02-12 16:23:50.795101",
