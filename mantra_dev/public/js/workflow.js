@@ -403,30 +403,93 @@ class WorkflowOverride extends frappe.ui.form.States {
 										});
 										dialog.show();
 									}
-									else{
-									// action to perform if Yes is selected
-									//transition start
-									// set the workflow_action for use in form scripts
-									frappe.dom.freeze();
-									me.frm.selected_workflow_action = d.action;
-									me.frm.script_manager.trigger("before_workflow_action").then(() => {
-										frappe
-											.xcall("frappe.model.workflow.apply_workflow", {
-												doc: me.frm.doc,
-												action: d.action,
-											})
-											.then((doc) => {
-												frappe.model.sync(doc);
-												me.frm.refresh();
-												me.frm.selected_workflow_action = null;
-												me.frm.script_manager.trigger("after_workflow_action");
-											})
-											.finally(() => {
-												frappe.dom.unfreeze();
-											});
+									else if (me.frm.doc.doctype === "Travel Request") {
+
+										frappe.dom.freeze();
+										me.frm.selected_workflow_action = d.action;
+
+										me.frm.script_manager.trigger("before_workflow_action").then(() => {
+											frappe
+												.xcall("frappe.model.workflow.apply_workflow", {
+													doc: me.frm.doc,
+													action: d.action,
+												})
+												.then((doc) => {
+
+													frappe.model.sync(doc);
+													frappe.call({
+														method: "mantra.backend_code.travel_request.travel_request.send_travel_email",
+														args: {
+															docname: me.frm.doc.name,
+															doctype: me.frm.doc.doctype,
+															action: d.action,
+															state: d.state
+														},
+													});
+													me.frm.refresh();
+													me.frm.selected_workflow_action = null;
+													me.frm.script_manager.trigger("after_workflow_action");
+												})
+												.finally(() => {
+													frappe.dom.unfreeze();
+												});
 										});
 									}
+									else if (me.frm.doc.doctype === "Expense Claim") {
 
+										frappe.dom.freeze();
+										me.frm.selected_workflow_action = d.action;
+										me.frm.script_manager.trigger("before_workflow_action").then(() => {
+											frappe
+												.xcall("frappe.model.workflow.apply_workflow", {
+													doc: me.frm.doc,
+													action: d.action,
+												})
+												.then((doc) => {
+
+													frappe.model.sync(doc);
+													frappe.call({
+														method: "mantra.backend_code.travel_request.travel_request.send_expense_email",
+														args: {
+															docname: me.frm.doc.name,
+															doctype: me.frm.doc.doctype,
+															action: d.action,
+															state: d.state
+														},
+													});
+													me.frm.refresh();
+													me.frm.selected_workflow_action = null;
+													me.frm.script_manager.trigger("after_workflow_action");
+												})
+												.finally(() => {
+													frappe.dom.unfreeze();
+												});
+										});
+									}
+									else
+									{
+										// action to perform if Yes is selected
+										//transition start
+										// set the workflow_action for use in form scripts
+										frappe.dom.freeze();
+										me.frm.selected_workflow_action = d.action;
+										me.frm.script_manager.trigger("before_workflow_action").then(() => {
+											frappe
+												.xcall("frappe.model.workflow.apply_workflow", {
+													doc: me.frm.doc,
+													action: d.action,
+												})
+												.then((doc) => {
+													frappe.model.sync(doc);
+													me.frm.refresh();
+													me.frm.selected_workflow_action = null;
+													me.frm.script_manager.trigger("after_workflow_action");
+												})
+												.finally(() => {
+													frappe.dom.unfreeze();
+												});
+											});
+									}
 								}, () => {
 									// action to perform if No is selected
 							});
