@@ -47,7 +47,7 @@ def process_serial_no_for_date(transaction_date):
 
 	return reply   
 
-# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/03196
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/06983
 
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
@@ -67,7 +67,7 @@ def process_dc(dc_no):
 def process_dc_item(dc_item,dc_doc):
 	sr_no_list=[]
 	dc_doc_items = frappe.get_doc("Delivery Note Item", dc_item)
- 
+
 	item_detail = frappe.get_doc("Item", dc_doc_items.item_code)
 	if item_detail.custom_avdm_enable in [True,1]:
 		if dc_doc_items.custom_rd_service_time_period in [None,""," ","None"]:
@@ -86,13 +86,13 @@ def process_dc_item(dc_item,dc_doc):
 				message="Item Code:{}".format(str(dc_doc_items.item_code))
 			)
 			# return
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
 	if dc_doc_items.serial_no:
 		sr_no = dc_doc_items.serial_no
 		serial_no = sr_no.replace("\n", ",")
@@ -161,8 +161,12 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 				second_obj = str(second_obj).split(" ")[0]
 				reply['second_obj']=second_obj
 
-				if str(second_obj).lower() not in ["no","not","","0",None]:	
-					new_rd_date = add_months(dc_doc.posting_date, int(second_obj))
+				if str(second_obj).lower() not in ["no","not","","0",None]:
+					if int(second_obj)==12:
+						second_obj = 15
+					else:
+						second_obj = int(second_obj)	
+					new_rd_date = add_months(dc_doc.posting_date, second_obj)
 
 		reply["new_warranty_date"]=new_warranty_date
 		reply["new_rd_date"]=new_rd_date
