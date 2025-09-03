@@ -44,13 +44,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-02-12 13:03:01.436096",
-  "name": "Resubmit",
-  "workflow_action_name": "Resubmit"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-03-13 18:22:09.862223",
   "name": "To Check",
   "workflow_action_name": "To Check"
@@ -72,13 +65,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.664614",
-  "name": "Review",
-  "workflow_action_name": "Review"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-04-02 16:51:33.422502",
   "name": "Cancel",
   "workflow_action_name": "Cancel"
@@ -96,6 +82,20 @@
   "modified": "2025-05-30 19:34:49.349005",
   "name": "Submit",
   "workflow_action_name": "Submit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-02-12 13:03:01.436096",
+  "name": "Resubmit",
+  "workflow_action_name": "Resubmit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-01-25 17:56:40.664614",
+  "name": "Review",
+  "workflow_action_name": "Review"
  },
  {
   "docstatus": 0,

@@ -1,12 +1,13 @@
 import frappe # type: ignore
 from frappe import _ # type: ignore
-from frappe.utils import nowdate # type: ignore
+from frappe.utils import nowdate,today # type: ignore
 import json
 import traceback
 import requests # type: ignore
 from mantra.backend_code.globle import errorLog,get_app_name,create_todo,send_error_message_to_developer # type: ignore
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
+from datetime import datetime, timezone
 
 from mantra_dev.backend_code.serialno import serial_no_scheduled # type: ignore
 
@@ -307,14 +308,18 @@ def process_one_record_background():
 			dn_no_list = frappe.db.sql(query)
 			if len(dn_no_list)!=0:
 				return update_delivery_note_records()
- 				
+
 			#stop cron all record are process
 			frappe.enqueue(notify_items_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_model_not_found_in_erp, queue='long', timeout=3600)
 			frappe.enqueue(notify_fail_sr_registration_in_erp, queue='long', timeout=3600)
-   
+
 			query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 			dn_no_list = frappe.db.sql(query)
+
+
+			#Check serial no
+			frappe.enqueue(compare_erp_and_avdm_serial_nos, queue='long', timeout=3600)
 			return "All task are done cron stop call"
 
 		# Comment
@@ -1088,3 +1093,143 @@ def date_convert(timestamp):
 	hours = hours.zfill(2)
 	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
 	return formatted_timestamp
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def compare_erp_and_avdm_serial_nos():
+	"""Compare ERP vs AVDM serial numbers for today and email mismatches"""
+
+	try:
+		erp_serials = get_today_delivery_items_serial_nos() or []
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), "Error Fetching ERP Serials")
+		return {"error": f"Failed to fetch ERP serials: {str(e)}"}
+
+	url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/AVDMCheck"
+
+	# input_date = "24-08-21"  # Example fixed input
+	input_date = datetime.strptime(today(), "%Y-%m-%d").strftime("%d-%m-%y")
+	dt = datetime.strptime(input_date, "%d-%m-%y")
+	now = datetime.now(timezone.utc)
+	dt = dt.replace(hour=now.hour, minute=now.minute, second=now.second, microsecond=now.microsecond)
+	today_iso = dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+
+	payload = {"date": today_iso}
+	headers = {
+		"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IkVycFVzZXIiLCJuYmYiOjE3NTM3NjUyMzYsImV4cCI6MTc1NjQ0MzYzNiwiaWF0IjoxNzUzNzY1MjM2fQ.3HI-9YTfPOA-XEORDagz2xwMnYRp-OeGaQ6f_GtQSsY",
+		"Content-Type": "application/json"
+	}
+
+	try:
+		response = requests.post(url, json=payload, headers=headers, timeout=30, verify=False)
+		if response.status_code != 200:
+			frappe.log_error(f"Status: {response.status_code}, Text: {response.text}", "AVDM API Error")
+			return {"error": f"AVDM API returned status {response.status_code}"}
+
+		try:
+			avdm_data = response.json()
+		except Exception:
+			frappe.log_error(f"Raw Response: {response.text}", "AVDM JSON Decode Error")
+			return {"error": "AVDM API did not return valid JSON", "raw_response": response.text}
+
+		avdm_serials = []
+		if isinstance(avdm_data, dict):
+			avdm_serials = avdm_data.get("dvcSerial", [])
+		elif isinstance(avdm_data, list):
+			avdm_serials = [row.get("dvcSerial") for row in avdm_data if isinstance(row, dict) and row.get("dvcSerial")]
+
+		# Compare
+		erp_exists = [s for s in erp_serials if s not in avdm_serials]
+		avdm_exists = [s for s in avdm_serials if s not in erp_serials]
+
+		#Send mail only if mismatch found
+		if erp_exists or avdm_exists:
+			send_mismatch_mail(erp_exists, avdm_exists)
+
+		return {
+			"ERP serial No Not Exists in AVDM": erp_exists,
+			"AVDM serial no not exists in ERP": avdm_exists
+		}
+
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), "Compare ERP vs AVDM Error")
+		return {"error": str(e)}
+
+
+def get_today_delivery_items_serial_nos():
+	query = """
+	SELECT 
+		dni.item_code,
+		SUM(dni.qty) AS total_qty,
+		CASE 
+			WHEN dni.serial_and_batch_bundle IS NOT NULL AND dni.serial_and_batch_bundle != '' THEN 
+				GROUP_CONCAT(DISTINCT sbbi.serial_no ORDER BY sbbi.serial_no SEPARATOR ',')
+			WHEN dni.serial_no IS NOT NULL AND dni.serial_no != '' THEN 
+				dni.serial_no
+			ELSE NULL
+		END AS serial_nos
+	FROM 
+		`tabDelivery Note Item` dni
+	JOIN 
+		`tabDelivery Note` dn 
+		ON dn.name = dni.parent
+	LEFT JOIN 
+		`tabSerial and Batch Bundle` sbb
+		ON sbb.name = dni.serial_and_batch_bundle
+	LEFT JOIN 
+		`tabSerial and Batch Entry` sbbi
+		ON sbbi.parent = sbb.name
+	WHERE 
+		dn.posting_date = %s
+		AND dn.is_return = 0
+		AND dn.docstatus = 1
+		AND dni.custom_abdm_enable = 1
+	GROUP BY 
+		dni.item_code
+	"""
+	data = frappe.db.sql(query, (today(),), as_dict=True)
+
+	# Flatten ERP serial numbers
+	erp_serials = []
+	for row in data:
+		if row.get("serial_nos"):
+			erp_serials.extend(row["serial_nos"].split(","))
+	return list(set(erp_serials))  # unique
+
+
+
+
+def send_mismatch_mail(erp_missing, avdm_missing):
+    """Send email when ERP vs AVDM mismatch is found"""
+
+    subject = "ERP vs AVDM Serial Mismatch Alert"
+    recipients = ["ravi.patel@mantratec.com"]
+
+    message = f"""
+    <h3>ERP vs AVDM Serial Mismatch</h3>
+    <p><b>ERP Not Exists in AVDM:</b></p>
+    <pre>{", ".join(erp_missing) if erp_missing else "None"}</pre>
+    <p><b>AVDM Not Exists in ERP:</b></p>
+    <pre>{", ".join(avdm_missing) if avdm_missing else "None"}</pre>
+    <br>
+    <p>Regards,<br>ERPNext System</p>
+    """
+
+    try:
+        frappe.sendmail(
+            recipients=recipients,
+            subject=subject,
+            message=message
+        )
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Mismatch Email Error")
+        return False
+    return True

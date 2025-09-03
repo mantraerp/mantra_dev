@@ -3,8 +3,6 @@ import erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry # t
 # import mantra_dev.backend_code.stock_reservation_entry
 import mantra_dev.backend_code.stock_reservation_entry.stock_reservation_entry # type: ignore
 
-import erpnext.accounts.doctype.purchase_invoice.purchase_invoice # type: ignore
-import mantra_dev.purchase_invoice # type: ignore
 
 import erpnext.stock.doctype.purchase_receipt.purchase_receipt # type: ignore
 import mantra_dev.purchase_receipt # type: ignore
