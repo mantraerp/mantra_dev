@@ -156,19 +156,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:50:55.498030",
-  "name": "Cancelled",
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "Hold",
   "style": "Danger",
-  "workflow_state_name": "Cancelled"
+  "workflow_state_name": "Hold"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:52:23.832985",
-  "name": "Hold",
+  "modified": "2024-04-02 16:50:55.498030",
+  "name": "Cancelled",
   "style": "Danger",
-  "workflow_state_name": "Hold"
+  "workflow_state_name": "Cancelled"
  },
  {
   "docstatus": 0,

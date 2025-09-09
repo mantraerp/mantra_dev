@@ -1113,7 +1113,20 @@ def compare_erp_and_avdm_serial_nos():
 		frappe.log_error(frappe.get_traceback(), "Error Fetching ERP Serials")
 		return {"error": f"Failed to fetch ERP serials: {str(e)}"}
 
-	url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/AVDMCheck"
+	reply = {}
+
+
+	query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 1".format(key_token)
+	token = frappe.db.sql(query,as_dict=1)
+
+	if len(token)==0:
+		generate_token()
+		reply['Token_error']="Token not found"
+		return reply
+
+	url = "{}/ErptoAVDM/AVDMCheck".format(evdm_url)
+
+	# url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/AVDMCheck"
 
 	# input_date = "24-08-21"  # Example fixed input
 	input_date = datetime.strptime(today(), "%Y-%m-%d").strftime("%d-%m-%y")
@@ -1124,14 +1137,14 @@ def compare_erp_and_avdm_serial_nos():
 
 	payload = {"date": today_iso}
 	headers = {
-		"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IkVycFVzZXIiLCJuYmYiOjE3NTM3NjUyMzYsImV4cCI6MTc1NjQ0MzYzNiwiaWF0IjoxNzUzNzY1MjM2fQ.3HI-9YTfPOA-XEORDagz2xwMnYRp-OeGaQ6f_GtQSsY",
-		"Content-Type": "application/json"
+		"accept": "application/json",
+		"Authorization": f"Bearer {token[0]['error']}"
 	}
 
 	try:
 		response = requests.post(url, json=payload, headers=headers, timeout=30, verify=False)
 		if response.status_code != 200:
-			frappe.log_error(f"Status: {response.status_code}, Text: {response.text}", "AVDM API Error")
+			frappe.log_error("AVDM API Error compare",f"Status: {response.status_code}, Text: {response.text}")
 			return {"error": f"AVDM API returned status {response.status_code}"}
 
 		try:

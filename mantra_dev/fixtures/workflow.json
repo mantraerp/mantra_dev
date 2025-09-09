@@ -2874,13 +2874,13 @@
   "doctype": "Workflow",
   "document_type": "Payment Request",
   "is_active": 1,
-  "modified": "2025-06-10 17:23:18.670162",
+  "modified": "2025-09-08 10:03:17.718431",
   "name": "Payment Request Approval",
   "override_status": 0,
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Payment Creator",
+    "allow_edit": "Purchase User",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -2910,7 +2910,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Payment Approver",
+    "allow_edit": "Purchase User",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -2925,7 +2925,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Payment Approver",
+    "allow_edit": "Bank Checker",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -2940,7 +2940,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Accounts - Banking Manager",
+    "allow_edit": "Bank Checker",
     "avoid_status_override": 0,
     "doc_status": "1",
     "is_optional_state": 0,
@@ -2983,28 +2983,13 @@
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
-   },
-   {
-    "allow_edit": "Accounts Manager",
-    "avoid_status_override": 0,
-    "doc_status": "0",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Payment Request Approval",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "state": "Reviewed",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
    }
   ],
   "transitions": [
    {
     "action": "Review",
     "allow_self_approval": 1,
-    "allowed": "Purchase Manager",
+    "allowed": "Purchase User",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -3018,7 +3003,7 @@
    {
     "action": "Reject",
     "allow_self_approval": 1,
-    "allowed": "Purchase Manager",
+    "allowed": "Purchase User",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -3032,7 +3017,7 @@
    {
     "action": "Approve",
     "allow_self_approval": 1,
-    "allowed": "Payment Approver",
+    "allowed": "Purchase Manager",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -3046,7 +3031,7 @@
    {
     "action": "Reject",
     "allow_self_approval": 1,
-    "allowed": "Payment Approver",
+    "allowed": "Purchase Manager",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -3060,7 +3045,7 @@
    {
     "action": "Resubmit",
     "allow_self_approval": 1,
-    "allowed": "Payment Creator",
+    "allowed": "All",
     "condition": null,
     "custom_default_time": null,
     "custom_exempted": 0,
@@ -3074,7 +3059,7 @@
    {
     "action": "Initiate",
     "allow_self_approval": 1,
-    "allowed": "Accounts - Banking Manager",
+    "allowed": "Bank Maker",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -3102,7 +3087,7 @@
    {
     "action": "Cancel",
     "allow_self_approval": 1,
-    "allowed": "All",
+    "allowed": "Bank Maker",
     "condition": null,
     "custom_default_time": null,
     "custom_exempted": 0,
@@ -3116,7 +3101,7 @@
    {
     "action": "Hold",
     "allow_self_approval": 1,
-    "allowed": "All",
+    "allowed": "Bank Maker",
     "condition": null,
     "custom_default_time": 21600.0,
     "custom_exempted": 0,
@@ -4965,7 +4950,7 @@
   "doctype": "Workflow",
   "document_type": "Payroll Entry",
   "is_active": 1,
-  "modified": "2025-07-05 17:23:08.943296",
+  "modified": "2025-09-04 16:58:02.359155",
   "name": "Payroll Entry",
   "override_status": 0,
   "send_email_alert": 0,
@@ -5046,21 +5031,6 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Bank Checker",
-    "avoid_status_override": 0,
-    "doc_status": "1",
-    "is_optional_state": 0,
-    "message": null,
-    "next_action_email_template": null,
-    "parent": "Payroll Entry",
-    "parentfield": "states",
-    "parenttype": "Workflow",
-    "state": "Reviewed",
-    "update_field": null,
-    "update_value": null,
-    "workflow_builder_id": null
-   },
-   {
     "allow_edit": "All",
     "avoid_status_override": 0,
     "doc_status": "1",
@@ -5073,6 +5043,21 @@
     "state": "Checked",
     "update_field": "custom_payroll_entry_approved",
     "update_value": "1",
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Bank Checker",
+    "avoid_status_override": 0,
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payroll Entry",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Reviewed",
+    "update_field": null,
+    "update_value": null,
     "workflow_builder_id": null
    },
    {
@@ -5174,6 +5159,20 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "state": "Approved",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "HR OPS User",
+    "condition": null,
+    "custom_default_time": null,
+    "custom_exempted": 0,
+    "next_state": "Cancelled",
+    "parent": "Payroll Entry",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "For Review",
     "workflow_builder_id": null
    }
   ],
