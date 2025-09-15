@@ -37,6 +37,13 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2025-05-30 19:34:49.349005",
+  "name": "Submit",
+  "workflow_action_name": "Submit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2024-04-03 12:06:49.705207",
   "name": "Post in Tally",
   "workflow_action_name": "Post in Tally"
@@ -51,13 +58,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2025-05-30 19:34:49.349005",
-  "name": "Submit",
-  "workflow_action_name": "Submit"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-03-13 18:20:11.458567",
   "name": "Checked",
   "workflow_action_name": "Checked"
@@ -65,16 +65,16 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-03-13 18:21:40.743654",
-  "name": "Hold",
-  "workflow_action_name": "Hold"
+  "modified": "2024-03-26 11:41:04.150116",
+  "name": "Initiate",
+  "workflow_action_name": "Initiate"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-03-26 11:41:04.150116",
-  "name": "Initiate",
-  "workflow_action_name": "Initiate"
+  "modified": "2024-03-13 18:21:40.743654",
+  "name": "Hold",
+  "workflow_action_name": "Hold"
  },
  {
   "docstatus": 0,
