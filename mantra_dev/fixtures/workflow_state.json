@@ -156,19 +156,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:52:23.832985",
-  "name": "Hold",
-  "style": "Danger",
-  "workflow_state_name": "Hold"
+  "modified": "2024-02-08 15:11:17.680685",
+  "name": "BU Rejection",
+  "style": "",
+  "workflow_state_name": "BU Rejection"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:11:17.680685",
-  "name": "BU Rejection",
-  "style": "",
-  "workflow_state_name": "BU Rejection"
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "Hold",
+  "style": "Danger",
+  "workflow_state_name": "Hold"
  },
  {
   "docstatus": 0,

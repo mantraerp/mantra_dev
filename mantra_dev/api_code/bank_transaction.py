@@ -18,7 +18,7 @@ from datetime import datetime
 import traceback
 from num2words import num2words # type: ignore
 from mantra.backend_code.globle import errorLog,errorLogExites,get_app_name,email_subject_text,send_error_message_to_developer # type: ignore
-
+from mantra.api_code.payment_advice import send_payment_advice_email # type: ignore
 
 @frappe.whitelist(allow_guest=True)
 def bulk_upload_beneficiary_file2():
@@ -392,8 +392,8 @@ def get_bene_file(delimiter='|'):
 						wantToReject = False
 						
 						
-					if wantToReject:
-						send_error_message_to_developer("Beny rejected","Resone from bank side:{} <br><br><br> Data row: {} <br><br><br> Error list that are handle:{}".format(str(data_dict[8]),str(data_dict),str(bank_approve_error)))
+					# if wantToReject:
+					# 	send_error_message_to_developer("Beny rejected","Resone from bank side:{} <br><br><br> Data row: {} <br><br><br> Error list that are handle:{}".format(str(data_dict[8]),str(data_dict),str(bank_approve_error)))
 
 					bank_account_no = data_dict[5]
 					bank_account_doc = frappe.db.get_value(
@@ -1978,352 +1978,371 @@ def send_payment_advice_payment_entry(payment_entry,email):
 
 
 
-@frappe.whitelist()
-def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry,email):
+# @frappe.whitelist()
+# def send_payment_advice_email(debit_account_no, amount, date, remarks, benfiecery_account_no, utr_no, payment_mode, ifsc_code, benifecery_code, benifecery_name, instrument_ref_no, payment_entry,email):
 	
-	# email = ""
-	if amount:
-		rupees, paise = divmod(round(float(amount) * 100), 100)
+# 	# email = ""
+# 	if amount:
+# 		rupees, paise = divmod(round(float(amount) * 100), 100)
 			
-		# Convert rupees and paise to words
-		rupees_in_words = num2words(rupees, lang='en_IN')
-		paise_in_words = num2words(paise, lang='en_IN') if paise > 0 else None
+# 		# Convert rupees and paise to words
+# 		rupees_in_words = num2words(rupees, lang='en_IN')
+# 		paise_in_words = num2words(paise, lang='en_IN') if paise > 0 else None
 		
-		# Construct the final string
-		if paise_in_words:
-			amount_words =  f"{rupees_in_words.capitalize()} rupees and {paise_in_words} paise"
-		else:
-			amount_words = f"{rupees_in_words.capitalize()} rupees"
+# 		# Construct the final string
+# 		if paise_in_words:
+# 			amount_words =  f"{rupees_in_words.capitalize()} rupees and {paise_in_words} paise"
+# 		else:
+# 			amount_words = f"{rupees_in_words.capitalize()} rupees"
 	
-	debit_account_no if debit_account_no else "-"
-	amount if amount else "-"
-	date if date else "-"
-	remarks if remarks else "-"
-	benfiecery_account_no if benfiecery_account_no else "-"
-	utr_no if utr_no else "-"
-	payment_mode if payment_mode else "-"
-	ifsc_code if ifsc_code else "-"
-	benifecery_code if benifecery_code else "-"
+# 	debit_account_no if debit_account_no else "-"
+# 	amount if amount else "-"
+# 	date if date else "-"
+# 	remarks if remarks else "-"
+# 	benfiecery_account_no if benfiecery_account_no else "-"
+# 	utr_no if utr_no else "-"
+# 	payment_mode if payment_mode else "-"
+# 	ifsc_code if ifsc_code else "-"
+# 	benifecery_code if benifecery_code else "-"
 
-	#Get beneficary name
-	# benifecery_name if benifecery_name else "-"
-	# if beneficiary_name in ['-',' ',None,'None','null']:
-	# benifecery_name = '-'
-	if benifecery_code not in ['-',' ',None,'None','null']:
-		directory_sql = "SELECT supplier_name FROM `tabSupplier` WHERE `name`='{}'".format(benifecery_code)
-		directory_list = frappe.db.sql(directory_sql, as_dict=True)
-		if len(directory_list)!=0:
-			benifecery_name = directory_list[0]['supplier_name']
+# 	#Get beneficary name
+# 	# benifecery_name if benifecery_name else "-"
+# 	if benifecery_name in ['-',' ',None,'None','null']:
+# 		benifecery_name = '-'
+
+# 	if benifecery_code not in ['-',' ',None,'None','null']:
+# 		directory_sql = "SELECT supplier_name FROM `tabSupplier` WHERE `name`='{}'".format(benifecery_code)
+# 		directory_list = frappe.db.sql(directory_sql, as_dict=True)
+# 		if len(directory_list)!=0:
+# 			benifecery_name = directory_list[0]['supplier_name']
 
 
-	instrument_ref_no if instrument_ref_no else "-"
-	payment_entry if payment_entry else "-"
+# 	instrument_ref_no if instrument_ref_no else "-"
+# 	payment_entry if payment_entry else "-"
 	
 		
 	
-	if not frappe.db.exists("Payment Entry",payment_entry):
-		frappe.sendmail(
-			recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
-			subject="Error in payment advice",
-			message="Payment advice not send becuase payment entry is remove from system. payment entry number {} <br>debit_account_no:{}<br>amount:{}<br>benfiecery_account_no:{}<br>utr_no:{}".format(payment_entry,debit_account_no,amount,benfiecery_account_no,utr_no),
-		)
-		return
+# 	if not frappe.db.exists("Payment Entry",payment_entry):
+# 		frappe.sendmail(
+# 			recipients=["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"],
+# 			subject="Error in payment advice",
+# 			message="Payment advice not send becuase payment entry is remove from system. payment entry number {} <br>debit_account_no:{}<br>amount:{}<br>benfiecery_account_no:{}<br>utr_no:{}".format(payment_entry,debit_account_no,amount,benfiecery_account_no,utr_no),
+# 		)
+# 		return
 
 
 
-	document = frappe.get_doc("Payment Entry",payment_entry)
+# 	document = frappe.get_doc("Payment Entry",payment_entry)
 	
-	if email=="":
-		email = document.contact_email if document.contact_email else ""
+# 	if email=="":
+# 		email = document.contact_email if document.contact_email else ""
 
-	invoices = []
+# 	invoices = []
 
-	if document.references:
-		for i in document.references:
-			d = frappe.get_doc(i.reference_doctype, i.reference_name)
+# 	if document.references:
+# 		for i in document.references:
+# 			d = frappe.get_doc(i.reference_doctype, i.reference_name)
 			
-			t_date = ""
-			if i.reference_doctype in ["Sales Invoice","Purchase Invoice","Employee Advance","Expense Claim","Journal Entry"]:
-				t_date = d.posting_date
-			else:
-				t_date = d.transaction_date
+# 			t_date = ""
+# 			if i.reference_doctype in ["Sales Invoice","Purchase Invoice","Employee Advance","Expense Claim","Journal Entry"]:
+# 				t_date = d.posting_date
+# 			else:
+# 				t_date = d.transaction_date
 
-			x = {
-				"document_no": i.reference_name,
-				"invoice_no": i.bill_no if i.bill_no else "-",
-				"invoice_date": t_date,
-				"paid_amount":i.allocated_amount
-			}
-			invoices.append(x)
-		else:
-			x = {
-				"document_no": "-",
-				"invoice_no": "-",
-				"invoice_date": "-",
-				"paid_amount":"-",
-			}    
+# 			x = {
+# 				"document_no": i.reference_name,
+# 				"invoice_no": i.bill_no if i.bill_no else "-",
+# 				"invoice_date": t_date,
+# 				"paid_amount":i.allocated_amount
+# 			}
+# 			invoices.append(x)
+# 		else:
+# 			x = {
+# 				"document_no": "-",
+# 				"invoice_no": "-",
+# 				"invoice_date": "-",
+# 				"paid_amount":"-",
+# 			}
 
-	payment_data = {
-		# "customer_ref_no": instrument_ref_no,
-		"company_logo": "",  # Path to the ABC Limited Group logo
-		"bank_logo": "",  # Path to the ICICI Bank logo
-		"account_no": debit_account_no if debit_account_no else "-",
-		"value_date": date if date else "-",
-		"beneficiary_code": benifecery_code if benifecery_code else "-",
-		"beneficiary_name": benifecery_name if benifecery_name else "-",
-		"beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
-		"payment_doc_no": payment_entry,
-		"payment_mode": payment_mode if payment_mode else "-",
-		"bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
-		"utr_no": utr_no if utr_no else "-",
-		"remarks": remarks if remarks else "-",
-		"additional_details": "-",
-		"ifsc_code": ifsc_code if ifsc_code else "-",
-		"amount": amount,
-		"amount_words": amount_words if amount_words else "-",
-		"invoices": invoices if invoices else "-"
-	}
+# 	payment_data = {
+# 		# "customer_ref_no": instrument_ref_no,
+# 		"company_logo": "",  # Path to the ABC Limited Group logo
+# 		"bank_logo": "",  # Path to the ICICI Bank logo
+# 		"account_no": debit_account_no if debit_account_no else "-",
+# 		"value_date": date if date else "-",
+# 		"beneficiary_code": benifecery_code if benifecery_code else "-",
+# 		"beneficiary_name": benifecery_name if benifecery_name else "-",
+# 		"beneficiary_account_no": benfiecery_account_no if benfiecery_account_no else "-",
+# 		"payment_doc_no": payment_entry,
+# 		"payment_mode": payment_mode if payment_mode else "-",
+# 		"bank_reference_no": instrument_ref_no if instrument_ref_no else "-",
+# 		"utr_no": utr_no if utr_no else "-",
+# 		"remarks": remarks if remarks else "-",
+# 		"additional_details": "-",
+# 		"ifsc_code": ifsc_code if ifsc_code else "-",
+# 		"amount": amount,
+# 		"amount_words": amount_words if amount_words else "-",
+# 		"invoices": invoices if invoices else "-"
+# 	}
 
-	# Step 1: Prepare the exact HTML layout
-	html_content = f"""
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<title>Payment Advice</title>
-			<style>
-				.content {{
-				text-align: center;
-				margin: 20px 0;
-			}}
-			.container {{
-				width: 80%;
-				margin: 20px auto;
-				border: 1px solid #ddd;
-				padding: 20px;
-				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-			}}
-			body {{
-				font-family: Courier New, Courier, Arial, sans-serif;
-				font-size: 12px;
-				margin: 20px;
-			}}
-			.header {{
-			text-align: center;
-			margin-bottom: 20px;
-			}}
-			.header img {{
-			height: 50px;
-			margin: 0 10px;
-			}}
-			.details {{
-				width: 100%;
-				margin-bottom: 10px;
-				border: none;
-			}}
-			.details td, .details th {{
-				font-size: 9px;
-				padding: 5px;
-				text-align: left;
-				vertical-align: top;
-				border: none;
-			}}
-			.details th {{
-				font-weight: bold;
-				white-space: nowrap;
-			}}
-			.summary {{
-				width: 100%;
-				border-collapse: collapse;
-				margin-top: 10px;
-			}}
-			.summary th, .summary td {{
-				font-size: 9px;
-				padding: 5px;
-				border: 1px solid #000;
-				text-align: left;
-			}}
-			.summary th {{
-				background-color: #f2f2f2;
-			}}
-			.footer {{
-				text-align: center;
-				font-size: 8px;
-				margin-top: 20px;
-				color: #555;
-			}}
-			</style>
-			</head>
-			<body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
+# 	address = "B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G HIGHWAY SOLA,<br>AHMEDABAD, GUJARAT, 380060"
+# 	company_name = "Mantra Softech India Pvt Ltd"
+# 	bank_logo = "http://192.168.1.38:8001/files/icici_logo.png"
+# 	company_logo = "http://192.168.1.38:8001/files/company_print_logo.png"
+
+# 	if get_app_name()=="mefron":
+# 		address = "B-703, 7th Floor, Shapath Hexa, Near Gujarat High Court, Opp. Kargil Petrol Pump,S.G. Highway,Sola, Ahmedabad, Gujarat - 380060, India"
+# 		company_name = "Mefron Technologies India Private Limited"
+# 		bank_logo = "http://192.168.5.56:8008//files/icici_logo.png"
+# 		company_logo = "http://192.168.5.56:8008/files/company_print_logo.png"
+
+
+# 	# Step 1: Prepare the exact HTML layout
+# 	html_content = f"""
+# 		<!DOCTYPE html>
+# 		<html>
+# 		<head>
+# 			<title>Payment Advice</title>
+# 			<style>
+# 				.content {{
+# 				text-align: center;
+# 				margin: 20px 0;
+# 			}}
+# 			.container {{
+# 				width: 80%;
+# 				margin: 20px auto;
+# 				border: 1px solid #ddd;
+# 				padding: 20px;
+# 				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+# 			}}
+# 			body {{
+# 				font-family: Courier New, Courier, Arial, sans-serif;
+# 				font-size: 12px;
+# 				margin: 20px;
+# 			}}
+# 			.header {{
+# 			text-align: center;
+# 			margin-bottom: 20px;
+# 			}}
+# 			.header img {{
+# 			height: 50px;
+# 			margin: 0 10px;
+# 			}}
+# 			.details {{
+# 				width: 100%;
+# 				margin-bottom: 10px;
+# 				border: none;
+# 			}}
+# 			.details td, .details th {{
+# 				font-size: 9px;
+# 				padding: 5px;
+# 				text-align: left;
+# 				vertical-align: top;
+# 				border: none;
+# 			}}
+# 			.details th {{
+# 				font-weight: bold;
+# 				white-space: nowrap;
+# 			}}
+# 			.summary {{
+# 				width: 100%;
+# 				border-collapse: collapse;
+# 				margin-top: 10px;
+# 			}}
+# 			.summary th, .summary td {{
+# 				font-size: 9px;
+# 				padding: 5px;
+# 				border: 1px solid #000;
+# 				text-align: left;
+# 			}}
+# 			.summary th {{
+# 				background-color: #f2f2f2;
+# 			}}
+# 			.footer {{
+# 				text-align: center;
+# 				font-size: 8px;
+# 				margin-top: 20px;
+# 				color: #555;
+# 			}}
+# 			</style>
+# 			</head>
+# 			<body style="font-family: 'Courier New', 'Courier', 'Arial', 'sans-serif';">
 			
-			<table style="border-collapse: collapse; width: 100%;" border="0px">
-			<tbody>
-			<tr>
-			<td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="http://192.168.1.38:8001/files/images.png" alt="" width="188" height="97" /></td>
-			<td style="width: 33.3333%; border-style: none;">
-			<h4 style="text-align: center; margin-bottom: 20px;">Mantra Softech India Pvt Ltd</h4>
-			<p style="text-align: center;">B 203, SHAPATH HEXA, NEAR GUJARAT HIGH COURT, S G
-		HIGHWAY SOLA,<br>AHMEDABAD, GUJARAT, 380060</p>
-			<p style="text-align: center;"></p>
-			<p style="text-align: center;"></p>
-			<p style="text-align: center;"></p>
-			<p style="text-align: center;"></p>
-			</td>
-			<td style="width: 33.3333%;"><img style="float: right;" src="http://192.168.1.38:8001/files/Mantra-Logo_1.png" alt="" width="200" /></td>
-			</tr>
-			</tbody>
-			</table>
+# 			<table style="border-collapse: collapse; width: 100%;" border="0px">
+# 			<tbody>
+# 			<tr>
+# 			<td style="width: 33.3333%; text-align: center;"><img style="float: left;" src="{bank_logo}" alt="" width="188" height="97" /></td>
+# 			<td style="width: 33.3333%; border-style: none;">
+# 			<h4 style="text-align: center; margin-bottom: 20px;">{company_name}</h4>
+# 			<p style="text-align: center;">{address}</p>
+# 			<p style="text-align: center;"></p>
+# 			<p style="text-align: center;"></p>
+# 			<p style="text-align: center;"></p>
+# 			<p style="text-align: center;"></p>
+# 			</td>
+# 			<td style="width: 33.3333%;"><img style="float: right;" src="{company_logo}" alt="" width="200" /></td>
+# 			</tr>
+# 			</tbody>
+# 			</table>
 
 
-				<!-- Payment Advice Title -->
-				<h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
+# 				<!-- Payment Advice Title -->
+# 				<h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">Payment Advice</h3>
 				
-				<!-- Details Table -->
-				<table class="details" style="border : 1px solid black">
-					<tr>
-						<th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
-						<th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
-						<th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
-					</tr>
-				</table>
-				<table class="details">
-					<tr>
-						<td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
-						<td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
-					</tr>
-					<tr>
-						<td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
-						<td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
-					</tr>
-					<tr>
-						<td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
-						<td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
-					</tr>
-					<tr>
-						<td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
-					</tr>
-				</table>
+# 				<!-- Details Table -->
+# 				<table class="details" style="border : 1px solid black">
+# 					<tr>
+# 						<th>Account No.</th><td>:</td><td>{payment_data['account_no']}</td>
+# 						<th>Value Total</th><td>:</td><td>{payment_data['amount']}</td>
+# 						<th>Value Date</th><td>:</td><td>{payment_data['value_date']}</td>
+# 					</tr>
+# 				</table>
+# 				<table class="details">
+# 					<tr>
+# 						<td>Beneficiary Code</td><td>:</td><td>{payment_data['beneficiary_code']}</td>
+# 						<td>Beneficiary Account No.</td><td>:</td><td>{payment_data['beneficiary_account_no']}</td>
+# 					</tr>
+# 					<tr>
+# 						<td>Beneficiary Name</td><td>:</td><td>{payment_data['beneficiary_name']}</td>
+# 						<td>Payment Document No.</td><td>:</td><td>{payment_data['payment_doc_no']}</td>
+# 					</tr>
+# 					<tr>
+# 						<td>Payment Mode</td><td>:</td><td>{payment_data['payment_mode']}</td>
+# 						<td>Bank Reference No.</td><td>:</td><td>{payment_data['bank_reference_no']}</td>
+# 					</tr>
+# 					<tr>
+# 						<td>UTR No.</td><td>:</td><td>{payment_data['utr_no']}</td>
+# 					</tr>
+# 				</table>
 				
-				<!-- Message Section -->
-				<p>
-					Dear Sir/Madam,<br>
-					We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
-					{payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
-					({payment_data['amount_words']}) for the services rendered as mentioned below.
-				</p>
+# 				<!-- Message Section -->
+# 				<p>
+# 					Dear Sir/Madam,<br>
+# 					We have initiated your payment through {payment_data['payment_mode']} with Beneficiary Account No. 
+# 					{payment_data['beneficiary_account_no']} and IFSC {payment_data['ifsc_code']} for the value of ₹{payment_data['amount']} 
+# 					({payment_data['amount_words']}) for the services rendered as mentioned below.
+# 				</p>
+# 		"""
+
+# 	if len(payment_data['invoices'])>0:
+
+# 		html_content += f"""
+# 			<table class="summary">
+# 			<thead>
+# 				<tr>
+# 					<th>Document No.</th>
+# 					<th>Invoice No.</th>
+# 					<th>Invoice Date</th>
+# 					<th>Paid Amount</th>
+# 				</tr>
+# 			</thead>
+# 			<tbody>
+# 		"""
+  
+# 		# Add dynamic rows for invoices
+# 		for invoice in payment_data['invoices']:
+
+# 			if invoice != "-":
+# 				allkeys = invoice.keys()
+# 				document_no = ""
+# 				invoice_no = ""
+# 				invoice_date = ""
+# 				paid_amount = ""
+# 				if "document_no" in allkeys:
+# 					document_no = str(invoice['document_no'])
+# 				if "invoice_no" in allkeys:
+# 					invoice_no = str(invoice['invoice_no'])
+# 				if "invoice_date" in allkeys:
+# 					invoice_date = str(invoice['invoice_date'])        
+# 				if "paid_amount" in allkeys:
+# 					paid_amount = str(invoice['paid_amount'])        
 				
-				<!-- Summary Table -->
-				<table class="summary">
-					<thead>
-						<tr>
-							<th>Document No.</th>
-							<th>Invoice No.</th>
-							<th>Invoice Date</th>
-							<th>Paid Amount</th>
-						</tr>
-					</thead>
-					<tbody>
-		"""
+# 				html_content += f"""
+# 				<tr>
+# 					<td>{document_no}</td>
+# 					<td>{invoice_no}</td>
+# 					<td>{invoice_date}</td>
+# 					<td>₹{paid_amount}</td>
+# 				</tr>
+# 				"""
+ 
+# 		html_content += f"""
+# 			</tbody>
+# 			</table>
+# 		"""
 
-	# Add dynamic rows for invoices
-	for invoice in payment_data['invoices']:
+# 	payment_advice_remark = str(document.custom_payment_advice_remarks).strip()
+ 
+# 	if payment_advice_remark not in ['',None,' ','-','None']:
+# 		html_content += f"""<br><br>
+# 		<div class="footer" style="text-align:left">
+# 			Remark : {payment_advice_remark}
+# 		</div>
+# 		<br>
+# 		"""
+ 
+# 	# Close table and add footer
+# 	html_content += f"""
+# 		<!-- Footer Section -->
+# 		<div class="footer" style="text-align:left">
+# 			Regards<br>Mantra Treasury Team
+# 		</div>
+# 		<div class="footer" style="text-align:left">
+# 			Note : Actual Transaction date may vary based on the actual bank statement.
+# 		</div>
+# 		<div class="footer">
+# 			This is a computer-generated advice and does not require a signature.
+# 		</div>
+# 	</body>
+# 	</html>
+# 	"""
 
-		if invoice != "-":
-			allkeys = invoice.keys()
-			document_no = ""
-			invoice_no = ""
-			invoice_date = ""
-			paid_amount = ""
-			if "document_no" in allkeys:
-				document_no = str(invoice['document_no'])
-			if "invoice_no" in allkeys:
-				invoice_no = str(invoice['invoice_no'])
-			if "invoice_date" in allkeys:
-				invoice_date = str(invoice['invoice_date'])        
-			if "paid_amount" in allkeys:
-				paid_amount = str(invoice['paid_amount'])        
-			
-			html_content += f"""
-			<tr>
-				<td>{document_no}</td>
-				<td>{invoice_no}</td>
-				<td>{invoice_date}</td>
-				<td>₹{paid_amount}</td>
-			</tr>
-			"""
+# 	message = "Please find the attached payment advice."
+# 	subject = "Payment Advice : {} Amount: {}".format(payment_data['beneficiary_name'],payment_data['amount'])
 	
-	# Close table and add footer
-	html_content += f"""
-			</tbody>
-		</table>
-		
-		<!-- Footer Section -->
-		<div class="footer" style="text-align:left">
-			Regards<br>Mantra Treasury Team
-		</div>
-		<div class="footer" style="text-align:left">
-			Note : Actual Transaction date may vary based on the actual bank statement.
-		</div>
-		<div class="footer">
-			This is a computer-generated advice and does not require a signature.
-		</div>
-	
-	</body>
-	</html>
-	"""
-
-
-	message = "Please find the attached payment advice."
-	subject = "Payment Advice : {} Amount: {}".format(payment_data['beneficiary_name'],payment_data['amount'])
-	
-	if frappe.db.exists("Email Template","Payment Advice"):
-		doc_args = {"supplier_name": benifecery_name,}
-		email_template = frappe.get_doc("Email Template", "Payment Advice")
-		message = frappe.render_template(email_template.response, doc_args)
-		subject = frappe.render_template(email_template.subject)    
+# 	if frappe.db.exists("Email Template","Payment Advice"):
+# 		doc_args = {"supplier_name": benifecery_name,}
+# 		email_template = frappe.get_doc("Email Template", "Payment Advice")
+# 		message = frappe.render_template(email_template.response, doc_args)
+# 		subject = frappe.render_template(email_template.subject)    
 	
 
+# 	# Step 2: Generate PDF from the HTML
+# 	pdf_data = get_pdf(html_content)
 
-
-
-	# Step 2: Generate PDF from the HTML
-	pdf_data = get_pdf(html_content)
-	# frappe.log_error("Email send subjecct",subject)
-	# Step 3: Send email with PDF attachment
-	try:
-		if email:
-			frappe.sendmail(
-				recipients=[email],
-				subject=subject,
-				message=message,
-				attachments=[{
-					'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
-					'fcontent': pdf_data
-				}]
-			)
-			send = flush()
-			frappe.msgprint(f"Payment advice email sent successfully to {email}.")
-			#update payment entry mail tick so its send once only
-			query = "UPDATE `tabPayment Entry` SET `custom_payment_advice_send`=1 WHERE `name`='{}'".format(payment_entry)
-			mdf = frappe.db.sql(query, as_dict=True)
-			# frappe.log_error("Email send","")
-
-		else:
-			frappe.sendmail(
-				recipients=["abhishek.jain@mantratec.com"],
-				subject="Supplier email not found in payment entry {}".format(document.name),
-				message="Please find the attached payment advice for payment entry.",
-				attachments=[{
-					'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
-					'fcontent': pdf_data
-				}]
-			)
-	except Exception as e:
-		frappe.sendmail(
-			recipients=['ravi.patel@mantratec.com'],
-			subject="Payment advice error",
-			message="{}<br>{}".format(str(e),str(traceback.format_exc())),
-			attachments=[{
-				'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
-				'fcontent': pdf_data
-			}]
-		)
+# 	# Step 3: Send email with PDF attachment
+# 	try:
+# 		if email:
+# 			frappe.sendmail(
+# 				recipients=[email],
+# 				subject=subject,
+# 				message=message,
+# 				attachments=[{
+# 					'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
+# 					'fcontent': pdf_data
+# 				}]
+# 			)
+# 			send = flush()
+# 			frappe.msgprint(f"Payment advice email sent successfully to {email}.")
+# 			query = "UPDATE `tabPayment Entry` SET `custom_payment_advice_send`=1 WHERE `name`='{}'".format(payment_entry)
+# 			mdf = frappe.db.sql(query, as_dict=True)
+# 		else:
+# 			frappe.sendmail(
+# 				recipients=["abhishek.jain@mantratec.com"],
+# 				subject="Supplier email not found in payment entry {}".format(document.name),
+# 				message="Please find the attached payment advice for payment entry.",
+# 				attachments=[{
+# 					'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
+# 					'fcontent': pdf_data
+# 				}]
+# 			)
+# 	except Exception as e:
+# 		frappe.sendmail(
+# 			recipients=['ravi.patel@mantratec.com'],
+# 			subject="Payment advice error",
+# 			message="{}<br>{}".format(str(e),str(traceback.format_exc())),
+# 			attachments=[{
+# 				'fname': f"Payment_Advice_{payment_data['account_no']}.pdf",
+# 				'fcontent': pdf_data
+# 			}]
+# 		)

@@ -1105,6 +1105,18 @@ def date_convert(timestamp):
 
 @frappe.whitelist(allow_guest=True)
 def compare_erp_and_avdm_serial_nos():
+	input_date = datetime.strptime(today(), "%Y-%m-%d").strftime("%d-%m-%y")
+	dt = datetime.strptime(input_date, "%d-%m-%y")
+	now = datetime.now(timezone.utc)
+	dt = dt.replace(hour=now.hour, minute=now.minute, second=now.second, microsecond=now.microsecond)
+	today_iso = dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+	return compare_erp_and_avdm_serial_nos_transaction_date(today_iso)
+
+    
+    
+@frappe.whitelist(allow_guest=True)
+def compare_erp_and_avdm_serial_nos_transaction_date(transaction_date):
+    
 	"""Compare ERP vs AVDM serial numbers for today and email mismatches"""
 
 	try:
@@ -1129,13 +1141,8 @@ def compare_erp_and_avdm_serial_nos():
 	# url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/AVDMCheck"
 
 	# input_date = "24-08-21"  # Example fixed input
-	input_date = datetime.strptime(today(), "%Y-%m-%d").strftime("%d-%m-%y")
-	dt = datetime.strptime(input_date, "%d-%m-%y")
-	now = datetime.now(timezone.utc)
-	dt = dt.replace(hour=now.hour, minute=now.minute, second=now.second, microsecond=now.microsecond)
-	today_iso = dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
 
-	payload = {"date": today_iso}
+	payload = {"date": transaction_date}
 	headers = {
 		"accept": "application/json",
 		"Authorization": f"Bearer {token[0]['error']}"
@@ -1165,7 +1172,7 @@ def compare_erp_and_avdm_serial_nos():
 
 		#Send mail only if mismatch found
 		if erp_exists or avdm_exists:
-			send_mismatch_mail(erp_exists, avdm_exists)
+			send_mismatch_mail(erp_exists, avdm_exists,transaction_date)
 
 		return {
 			"ERP serial No Not Exists in AVDM": erp_exists,
@@ -1220,11 +1227,11 @@ def get_today_delivery_items_serial_nos():
 
 
 
-def send_mismatch_mail(erp_missing, avdm_missing):
+def send_mismatch_mail(erp_missing, avdm_missing,transaction_date):
     """Send email when ERP vs AVDM mismatch is found"""
 
-    subject = "ERP vs AVDM Serial Mismatch Alert"
-    recipients = ["ravi.patel@mantratec.com"]
+    subject = "ERP vs AVDM Serial Mismatch Alert : {}".format(str(transaction_date).split('T')[0])
+    recipients = ["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","sajal.chandrawanshi@mantratec.com"]
 
     message = f"""
     <h3>ERP vs AVDM Serial Mismatch</h3>
