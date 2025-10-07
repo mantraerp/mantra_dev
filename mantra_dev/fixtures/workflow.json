@@ -4226,7 +4226,7 @@
   "doctype": "Workflow",
   "document_type": "Payment Entry",
   "is_active": 1,
-  "modified": "2025-09-30 11:13:06.558250",
+  "modified": "2025-10-04 17:28:10.432263",
   "name": "Payment Entry-1",
   "override_status": 0,
   "send_email_alert": 0,
@@ -4347,6 +4347,21 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Cancelled",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Accounts Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Payment Entry-1",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Pending",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -4505,6 +4520,20 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "state": "Approved",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Cancel",
+    "allow_self_approval": 1,
+    "allowed": "Accounts User",
+    "condition": "doc.mode_of_payment not in [\"RTGS-H2H\", \"NEFT-H2H\", \"Fund Transfer-H2H\"]\n",
+    "custom_default_time": null,
+    "custom_exempted": 0,
+    "next_state": "Cancelled",
+    "parent": "Payment Entry-1",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Checked",
     "workflow_builder_id": null
    },
    {

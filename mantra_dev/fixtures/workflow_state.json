@@ -129,15 +129,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:52:23.832985",
-  "name": "On Hold",
-  "style": "Danger",
-  "workflow_state_name": "On Hold"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2025-02-06 16:32:18.033564",
   "name": "Approval Pending By Director",
   "style": "Success",
@@ -147,10 +138,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-06-05 13:15:14.338683",
-  "name": "For Review",
-  "style": "",
-  "workflow_state_name": "For Review"
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "On Hold",
+  "style": "Danger",
+  "workflow_state_name": "On Hold"
  },
  {
   "docstatus": 0,
@@ -160,6 +151,15 @@
   "name": "BU Rejection",
   "style": "",
   "workflow_state_name": "BU Rejection"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-06-05 13:15:14.338683",
+  "name": "For Review",
+  "style": "",
+  "workflow_state_name": "For Review"
  },
  {
   "docstatus": 0,
@@ -228,19 +228,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-03-12 16:25:57.261501",
-  "name": "Checked",
-  "style": "Success",
-  "workflow_state_name": "Checked"
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
+  "style": "",
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
+  "modified": "2024-03-12 16:25:57.261501",
+  "name": "Checked",
+  "style": "Success",
+  "workflow_state_name": "Checked"
  },
  {
   "docstatus": 0,
