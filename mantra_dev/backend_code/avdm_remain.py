@@ -58,6 +58,48 @@ def login_to_avdm_scheduled():
 def process_to_avdm_for_date(transaction_date):
 	return login_to_avdm(transaction_date)
 
+
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.remain_dc_to_process?transaction_date=2025-10-01
+
+@frappe.whitelist(allow_guest=True)
+def remain_dc_to_process(start_datetime,end_datetime):
+	# dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0,"custom_marked_in_avdm":0})
+
+	start_datetime = f"{start_datetime} 00:00:00.000000"
+	end_datetime = f"{end_datetime} 23:59:59.000000"
+
+	dc_list = frappe.get_all(
+		"Delivery Note",
+		filters={
+			"modified": ["between", [start_datetime, end_datetime]],
+			"docstatus": 1,
+			"is_return": 0,
+			"custom_marked_in_avdm": 0
+		},
+		fields=["name", "modified"]
+	)
+
+	for dc in dc_list:
+		frappe.enqueue(check_avdm_enable, queue='long', timeout=3600,dc_no=dc.name)
+
+	return len(dc_list)
+
+@frappe.whitelist(allow_guest=True)
+def check_avdm_enable(dc_no):
+	dc_doc = frappe.get_doc("Delivery Note", dc_no)
+	found_issue = False
+	total_count = 0
+	for i in dc_doc.items:
+		if i.custom_abdm_enable == 1 and i.custom_reference_model_no:
+			found_issue = True
+			total_count = total_count + 1
+   
+	if found_issue:
+		frappe.enqueue(process_single_dc, queue='long', timeout=3600,dc_no=dc_no)
+		# send_error_message_to_developer(f"AVDM DC NOT PROCESS : {dc_no}","This is happen due to enable in avdm but not post on avdm")
+
+	return True
+
 @frappe.whitelist()
 def login_to_avdm(transaction_date):
 	
@@ -72,26 +114,8 @@ def login_to_avdm(transaction_date):
 	reply={}
 
 	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
-		# dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
+		dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
 		reply["Total DC"]=len(dc_list)
-		
-		start_datetime = f"{transaction_date} 00:00:00.000000"
-		end_datetime = f"{transaction_date} 23:59:59.000000"
-
-		dc_list = frappe.get_all(
-			"Delivery Note",
-			filters={
-				"modified": ["between", [start_datetime, end_datetime]],
-				"docstatus": 1,
-				"is_return": 0,
-				"custom_marked_in_avdm": 0
-			},
-			fields=["name", "modified"]
-		)
-  
-		reply["Total DC"]=len(dc_list)
-
-
 		if len(dc_list)==0:
 			reply['message']="no delivery note found"
 			errorLog('AVDM-End',transaction_date,False)
@@ -104,7 +128,6 @@ def login_to_avdm(transaction_date):
 			generate_token()
 			generate_token_pratham()
 			process_dc_list(dc_list)
-			frappe.enqueue(todays_proccess_dc_mail, job_name='Mail',queue='long', timeout=3600,dc_list=dc_list,transaction_date=transaction_date)
 
 			errorLog('AVDM-End',transaction_date,False)
 			return reply
@@ -119,47 +142,6 @@ def login_to_avdm(transaction_date):
 		send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
 		
 	return reply   
-
-
-@frappe.whitelist()
-def todays_proccess_dc_mail(dc_list,transaction_date):
-	
-	if not dc_list:
-		return "No items found with ABDM enabled."
-	
-	html_table = f"""
-	<h3>DC process count for : {transaction_date}</h3>
-	<table border="1" cellspacing="0" cellpadding="5">
-	<tr>
-	<th>DC No</th>
-	</tr>
-	"""
-	for item in dc_list:
-		html_table += f"""
-		<tr>
-		<td>{item.name}</td>
-		</tr>
-		"""
-	html_table += "</table>"
-	
-	recipients = ["abhishek.jain@mantratec.com","ravi.patel@mantratec.com"]
-	subject = f"{transaction_date} Process DC : {len(dc_list)}"
-	message = f"""
-		<p>Here is the list of DC process:</p>
-		{html_table}
-		<br>
-		"""
-	
-	frappe.sendmail(
-		recipients=recipients,
-		subject=subject,
-		message=message
-	)
-
-	return f"Email sent successfully to {', '.join(recipients)}"
-
-
-
 
 # http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.update_item_month?transaction_date=2025-06-02
 
@@ -184,6 +166,8 @@ def update_item_month(dc_no,item_code,month):
 		reply['message']="Error : Warrenty time is not match with exting data."
 		return reply
 
+
+
 	dn = frappe.get_doc("Delivery Note", dc_no)
 
 	found_item = False
@@ -193,7 +177,7 @@ def update_item_month(dc_no,item_code,month):
 			itemDetail = frappe.get_doc("Item", item.item_code)
 			if itemDetail.custom_avdm_enable in [1,True]:
 				found_item = True
-				query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}' AND `parent`='{}'".format(month,item.name,dc_no)
+				query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}' AND `parent`='{}'".format(month,item.item_code,dc_no)
 				warrenty_record = frappe.db.sql(query, as_dict=True)
 
 	if not found_item:
@@ -221,7 +205,6 @@ def process_single_dc(dc_no):
 		return "Application is not mantra"
 	
 	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
-
 	if len(dc_list)!=0:
 		generate_token()
 		generate_token_pratham()
@@ -388,7 +371,7 @@ def process_one_record_background():
 				return fetch_sub_serial_no_records()
 
 			#Find sub serial number model number and fill it
-			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
+			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
 			list_body_to_process = frappe.db.sql(query,as_dict=1)
 			if len(list_body_to_process)!=0:
 				return sub_serial_item_code_and_model()
@@ -786,12 +769,10 @@ def sub_serial_item_code_and_model():
 	reply["Process_status"]="Serial no sub model and item code finding"
 	try:
 		query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
-		# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 LIMIT 25"
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
-		frappe.log_error(title='Total Remain',message=len(list_body_to_process))
 		reply["Process_data"]=len(list_body_to_process)
 		for process_record in list_body_to_process:
-			frappe.enqueue(sub_serial_item_code_and_model_adding, queue='long', timeout=3600,serial_no=process_record['name'])      
+			frappe.enqueue(sub_serial_item_code_and_model_adding, queue='short', timeout=3600,serial_no=process_record['name'])      
 			frappe.enqueue(sub_serial_item_code_and_model_checking, queue='long', timeout=3600,doc_name=process_record['name'])
 
 	except Exception as e:
@@ -807,16 +788,15 @@ def sub_serial_item_code_and_model_adding(serial_no):
 
 def sub_serial_item_code_and_model_checking(doc_name):
 
-	query = "SELECT sub_item_code,name from `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name`='{}'".format(doc_name)
+	query = "SELECT * from `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name`='{}'".format(doc_name)
 	list_serial_no = frappe.db.sql(query,as_dict=1)
-	# frappe.log_error(title='AVDMSERIALNOPROCESS',message=str(list_serial_no))
 
 	for serial_no_record in list_serial_no:
-		query = "SELECT custom_reference_submodel_no,name from `tabItem` WHERE `name`='{}'".format(serial_no_record['sub_item_code'])
+		query = "SELECT * from `tabItem` WHERE `name`='{}'".format(serial_no_record['sub_item_code'])
 		list_item = frappe.db.sql(query,as_dict=1)
-#,
+
 		if len(list_item)==0:
-			query_update = "UPDATE `tabSub Serial No` SET `remark`='{}',`fail`=1 WHERE `name`='{}'".format(key_sub_item_code_error_find,doc_name)
+			query_update = "UPDATE `tabSub Serial No` SET `remark`='{}' WHERE `name`='{}'".format(key_sub_item_code_error_find,doc_name)
 			update_item_detail = frappe.db.sql(query_update,as_dict=1)
 			return "Item code not found"   
 		else:
@@ -827,7 +807,7 @@ def sub_serial_item_code_and_model_checking(doc_name):
 					update_item_detail = frappe.db.sql(query_update,as_dict=1)
 					return "Item detail update"
 				else:
-					query_update = "UPDATE `tabSub Serial No` SET `remark`='{}',`fail`=1 WHERE `name`='{}'".format(key_sub_item_code_model_error_find,doc_name)
+					query_update = "UPDATE `tabSub Serial No` SET `remark`='{}' WHERE `name`='{}'".format(key_sub_item_code_model_error_find,doc_name)
 					update_item_detail = frappe.db.sql(query_update,as_dict=1)
 					return "Model number not found"
 				# else:

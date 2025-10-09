@@ -19,6 +19,31 @@ def serial_no_scheduled():
 	frappe.enqueue(process_serial_no_for_date, queue='long', timeout=3600,transaction_date=nowdate())
 	return True  
 
+
+@frappe.whitelist(allow_guest=True)
+def remain_dc_to_process_sr_date(start_datetime,end_datetime):
+
+	start_datetime = f"{start_datetime} 00:00:00.000000"
+	end_datetime = f"{end_datetime} 23:59:59.000000"
+
+	dc_list = frappe.get_all(
+		"Delivery Note",
+		filters={
+			"modified": ["between", [start_datetime, end_datetime]],
+			"docstatus": 1,
+			"is_return": 0,
+			"custom_marked_in_avdm": 0
+		},
+		fields=["name", "modified"]
+	)
+
+	for dc in dc_list:
+		frappe.enqueue(process_dc, job_name='DC',queue='long', timeout=1000,dc_no=dc.name)
+
+	return len(dc_list)
+
+
+
 @frappe.whitelist(allow_guest=True)
 def process_serial_no_for_date(transaction_date):
 
@@ -28,7 +53,22 @@ def process_serial_no_for_date(transaction_date):
 	errorLog("Serial no date update on server",str(transaction_date))
 
 	reply={}
-	dc_list =frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
+	# dc_list =frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
+
+	start_datetime = f"{transaction_date} 00:00:00.000000"
+	end_datetime = f"{transaction_date} 23:59:59.000000"
+
+	dc_list = frappe.get_all(
+		"Delivery Note",
+		filters={
+			"modified": ["between", [start_datetime, end_datetime]],
+			"docstatus": 1,
+			"is_return": 0,
+			"custom_marked_in_avdm": 0
+		},
+		fields=["name", "modified"]
+	)
+
 	reply["Total DC"]=len(dc_list)
 	if len(dc_list)==0:
 		reply['message']="no delivery note found"
@@ -63,6 +103,20 @@ def process_dc(dc_no):
 	return "DC Process"
 
 
+
+@frappe.whitelist(allow_guest=True)
+def process_dc_api(dc_no):
+
+	if get_app_name()!="mantra":
+		return "App is not mantra"
+
+	dc_doc = frappe.get_doc("Delivery Note", dc_no)
+	dc_item = dc_doc.items
+	for i in dc_item:
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+
+	return "DC Process"
+
 # http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc_item?dc_no=M/DC/25-26/02734
 def process_dc_item(dc_item,dc_doc):
 	sr_no_list=[]
@@ -86,12 +140,6 @@ def process_dc_item(dc_item,dc_doc):
 				message="Item Code:{}".format(str(dc_doc_items.item_code))
 			)
 			# return
-
-
-
-
-
-
 
 	if dc_doc_items.serial_no:
 		sr_no = dc_doc_items.serial_no
@@ -119,8 +167,6 @@ def process_dc_item(dc_item,dc_doc):
 
 
 	for s_no in unique_list:
-		# if s_no=="9767518":
-			# errorLog("SRDetail",str(dc_doc_items.name))
 		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
 
 	return "DC item process"
@@ -148,7 +194,10 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 			reply['first_obj_lower']=str(first_obj).lower()
 
 			if str(first_obj).lower() not in ["no","not","","0",None]:
-				new_warranty_date = add_months(dc_doc.posting_date, int(first_obj))
+				month_to_add = int(first_obj)
+				# if month_to_add == 12:
+				# 	month_to_add = 15
+				new_warranty_date = add_months(dc_doc.posting_date, month_to_add)
 
 		new_rd_date = ""
 		if item_detail.custom_avdm_enable in [True,1]:
