@@ -73,7 +73,6 @@ def login_to_avdm(transaction_date):
 
 	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
 		# dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
-		reply["Total DC"]=len(dc_list)
 		
 		start_datetime = f"{transaction_date} 00:00:00.000000"
 		end_datetime = f"{transaction_date} 23:59:59.000000"
@@ -88,7 +87,7 @@ def login_to_avdm(transaction_date):
 			},
 			fields=["name", "modified"]
 		)
-  
+
 		reply["Total DC"]=len(dc_list)
 
 
@@ -785,10 +784,10 @@ def sub_serial_item_code_and_model():
 	reply={}
 	reply["Process_status"]="Serial no sub model and item code finding"
 	try:
-		query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
+		query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 25".format(key_subsr_process)
 		# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 LIMIT 25"
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
-		frappe.log_error(title='Total Remain',message=len(list_body_to_process))
+		# frappe.log_error(title='Total Remain',message=len(list_body_to_process))
 		reply["Process_data"]=len(list_body_to_process)
 		for process_record in list_body_to_process:
 			frappe.enqueue(sub_serial_item_code_and_model_adding, queue='long', timeout=3600,serial_no=process_record['name'])      
