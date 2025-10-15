@@ -2,13 +2,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-09-14 15:24:25.519357",
-  "name": "Process",
-  "workflow_action_name": "Process"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2025-03-03 15:34:27.334443",
   "name": "Return",
   "workflow_action_name": "Return"
@@ -51,13 +44,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-03-13 18:22:09.862223",
-  "name": "To Check",
-  "workflow_action_name": "To Check"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-03-26 11:41:04.150116",
   "name": "Initiate",
   "workflow_action_name": "Initiate"
@@ -86,13 +72,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.664614",
-  "name": "Review",
-  "workflow_action_name": "Review"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-04-02 16:51:33.422502",
   "name": "Cancel",
   "workflow_action_name": "Cancel"
@@ -100,9 +79,23 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.664115",
-  "name": "Reject",
-  "workflow_action_name": "Reject"
+  "modified": "2024-09-14 15:24:25.519357",
+  "name": "Process",
+  "workflow_action_name": "Process"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-03-13 18:22:09.862223",
+  "name": "To Check",
+  "workflow_action_name": "To Check"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-01-25 17:56:40.664614",
+  "name": "Review",
+  "workflow_action_name": "Review"
  },
  {
   "docstatus": 0,
@@ -110,5 +103,12 @@
   "modified": "2024-01-25 17:56:40.663510",
   "name": "Approve",
   "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-01-25 17:56:40.664115",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
  }
 ]
