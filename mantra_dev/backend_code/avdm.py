@@ -285,7 +285,7 @@ def process_dc_list(dc_list):
 							data['item_code']=i.item_code
 							errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
 
-			cunk_size = 25
+			cunk_size = 75
 
 			body_send = []
 			for index, record in enumerate(body):
@@ -511,7 +511,7 @@ def process_request(process_record,creating_url,headers):
 
 		# reply['request_dump']=body_json
 		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
-		reply['resposne_status_code']=response1.status_code
+		reply['resposne_status_code']=str(response1.status_code)
 
 		if print_log:
 			frappe.log_error("AVDM Response status code",str(response1.status_code))
@@ -634,7 +634,7 @@ def fetch_sub_serial_no_records():
 		reply['request_body']=searil_no_pass  
 
 		response1 = requests.post(creating_url, headers=headers, json=searil_no_pass)
-		reply['resposne_status_code']=response1.status_code
+		reply['resposne_status_code']=str(response1.status_code)
 		dc_response_content = response1.content
 		if isinstance(dc_response_content, bytes):
 			dc_response_content = dc_response_content.decode('utf-8')
@@ -1009,7 +1009,7 @@ def notify_fail_sr_registration_in_erp():
 
 		frappe.sendmail(
 			recipients=email_recipients,
-			subject="EVDM : Serial number not register",
+			subject="EVDM: Serial number not register",
 			message=body
 		)
 
@@ -1121,6 +1121,7 @@ def generate_token():
 	password = frappe.db.get_single_value("AVDM Setting", "password")
 
 	login_url = "{}/ErptoAVDM/Login".format(evdm_url)
+	reply['request_url']=login_url
 	login_headers = {
 		"accept": "application/json",
 	}
@@ -1128,6 +1129,7 @@ def generate_token():
 		"username": username,
 		"password": password
 	}
+	reply['request_body']=login_body
 	response = requests.post(login_url, headers=login_headers, json=login_body)
 
 	# Check if the response content is in bytes and decode it
@@ -1135,16 +1137,44 @@ def generate_token():
 	if isinstance(response_content, bytes):
 		response_content = response_content.decode('utf-8')
 	
+	reply['resposne_status_code']=str(response.status_code)
+
 	response_json = json.loads(response_content)
+	reply['response']=str(response_json)
 	details = response_json["details"]
 	api_token = details["_APIToken"]
-	
+
 	reply['api_token']=api_token
 
 	#Delete token and resave in list
 	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 1".format(key_token)
 	records = frappe.db.sql(query,as_dict=1)
 	errorLog(key_token,str(api_token))
+
+
+
+	try:
+		todo = frappe.get_doc({
+				"doctype": "EVDM Sync Log",
+				"url": str(reply['request_url']),
+				"execute": True,
+				"response_status": str(reply['resposne_status_code']),
+				"payload": str(reply['request_body']),
+				"response": str(reply['response']),
+				"call_type": "EVDM Token",
+			})
+		todo.insert(ignore_permissions=True)
+	except Exception as e:
+		frappe.log_error(title="EVDM Token Save exception:",message=str(e))
+
+
+
+
+
+
+
+
+
 
 	return "Token generated and save in log"
 
@@ -1241,28 +1271,43 @@ def compare_erp_and_avdm_serial_nos_transaction_date(transaction_date):
 		return reply
 
 	url = "{}/ErptoAVDM/AVDMCheck".format(evdm_url)
-
-	# url = "https://erptoavdm.aadhaardevice.com/ErptoAVDM/AVDMCheck"
-
-	# input_date = "24-08-21"  # Example fixed input
-
+	reply['request_url']=url
 	payload = {"date": transaction_date}
 	headers = {
 		"accept": "application/json",
 		"Authorization": f"Bearer {token[0]['error']}"
 	}
-
+	reply['request_body']=str(payload)
+	reply['response']=''
+	reply['resposne_status_code']=''
 	try:
 		response = requests.post(url, json=payload, headers=headers, timeout=30, verify=False)
+		reply['resposne_status_code']=str(response.status_code)
 		if response.status_code != 200:
 			frappe.log_error("AVDM API Error compare",f"Status: {response.status_code}, Text: {response.text}")
 			return {"error": f"AVDM API returned status {response.status_code}"}
 
 		try:
 			avdm_data = response.json()
+			reply['response']=str(avdm_data)
 		except Exception:
-			frappe.log_error(f"Raw Response: {response.text}", "AVDM JSON Decode Error")
+			frappe.log_error(message=f"Raw Response: {response.text}", title="AVDM JSON Decode Error")
 			return {"error": "AVDM API did not return valid JSON", "raw_response": response.text}
+	
+		try:
+			todo = frappe.get_doc({
+					"doctype": "EVDM Sync Log",
+					"url": str(reply['request_url']),
+					"execute": True,
+					"response_status": str(reply['resposne_status_code']),
+					"payload": str(reply['request_body']),
+					"response": str(reply['response']),
+					"call_type": "EVDM Check",
+				})
+			todo.insert(ignore_permissions=True)
+		except Exception as e:
+			frappe.log_error(title="EVDM Serial Checking exception:",message=str(e))
+
 
 		avdm_serials = []
 		if isinstance(avdm_data, dict):
