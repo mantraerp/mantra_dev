@@ -119,23 +119,12 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-10-14 13:29:30.190171",
+ "modified": "2025-10-28 15:55:26.830267",
  "modified_by": "Administrator",
  "module": "Mantra Dev",
  "name": "Bank Reconciliation Tool Mantra",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "quick_entry": 1,
  "read_only": 1,
  "sort_field": "modified",
