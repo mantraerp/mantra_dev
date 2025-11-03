@@ -220,7 +220,6 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 		reply["new_warranty_date"]=new_warranty_date
 		reply["new_rd_date"]=new_rd_date
 
-# 
 
 		# frappe.set_user("srnbot@mantratec.com")
 		# doc_sr = frappe.get_doc("Serial No", sr_no)

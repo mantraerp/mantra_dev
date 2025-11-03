@@ -931,7 +931,7 @@ def notify_model_not_found_in_erp():
 
 	except Exception as e:
 		frappe.sendmail(
-			recipients=['ravi.patel@mantratec.com'],
+			recipients=["ravi.patel@mantratec.com","abhishek.jain@mantratec.com","sajal.chandrawanshi@mantratec.com"],
 			subject="Error while checking Item code for pratham",
 			message="{}<br>{}".format(str(e),str(traceback.format_exc())),
 		)
