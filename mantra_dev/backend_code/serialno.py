@@ -10,7 +10,7 @@ from requests.auth import HTTPBasicAuth # type: ignore
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def serial_no_scheduled():
 
 	if not get_app_name()=="mantra":

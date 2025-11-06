@@ -40,7 +40,7 @@ key_subsr_try_register = "REGISUBSR"
 evdm_url = "https://erptoavdm.aadhaardevice.com"
 pratham_url = "http://prathamapi.mantratecapp.com"
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def login_to_avdm_scheduled():
 
 	if not get_app_name()=="mantra":
@@ -156,8 +156,6 @@ def todays_proccess_dc_mail(dc_list,transaction_date):
 	)
 
 	return f"Email sent successfully to {', '.join(recipients)}"
-
-
 
 
 # http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.update_item_month?transaction_date=2025-06-02
@@ -370,7 +368,7 @@ def process_one_record_background():
 	# return
 	reply= {}
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 10".format(key_body_process)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 20".format(key_body_process)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Body process"]=len(list_body_to_process)
 	
@@ -453,6 +451,18 @@ def process_one_record_background():
 
 	return reply
 
+
+@frappe.whitelist(allow_guest=True)
+def process_request_temp(serialNo):
+	query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='{}'".format(serialNo)
+	sr_no_details = frappe.db.sql(query_update,as_dict=1)
+	return sr_no_details
+	if len(sr_no_details)!=0:
+		rd_end_date = sr_no_details[0]['amc_expiry_date']
+		if rd_end_date not in ["",None," ","None"]:
+			return str(sr_no_details[0]['amc_expiry_date'])
+
+
 @frappe.whitelist(allow_guest=True)
 def process_request(process_record,creating_url,headers):
 
@@ -466,6 +476,7 @@ def process_request(process_record,creating_url,headers):
 			process_dc_of_serial[s_no_data['serialNo']]=s_no_data['dcNo']
 			s_no_data['dcDate'] = date_convert(s_no_data['dcDate'])
 
+			found_exp = False
 			#get expire date for serial no
 			#rdEndDate = amc_expiry_date
 			#SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='9408938'
@@ -475,6 +486,7 @@ def process_request(process_record,creating_url,headers):
 				rd_end_date = sr_no_details[0]['amc_expiry_date']
 				if rd_end_date not in ["",None," ","None"]:
 					s_no_data['rdEndDate'] = str(sr_no_details[0]['amc_expiry_date'])
+					found_exp = True
 			else:
 				#If serial number not found in main then search it in sub serial number
 				query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSub Serial No` WHERE `name`='{}'".format(s_no_data['serialNo'])
@@ -483,6 +495,12 @@ def process_request(process_record,creating_url,headers):
 					rd_end_date = sr_no_details[0]['amc_expiry_date']
 					if rd_end_date not in ["",None," ","None"]:
 						s_no_data['rdEndDate'] = str(sr_no_details[0]['amc_expiry_date'])
+						found_exp = True
+
+
+			if not found_exp:
+				frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data['serialNo']))
+				continue
 
 			try:
 				if str(s_no_data['model']) != '13':

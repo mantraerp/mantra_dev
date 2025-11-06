@@ -20,7 +20,7 @@
   "letter_head_name": "Stock Entry",
   "modified": "2025-10-10 14:29:23.531058",
   "name": "Stock Entry",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -43,7 +43,7 @@
   "letter_head_name": "Proforma Invoice",
   "modified": "2025-10-10 14:28:27.364677",
   "name": "Proforma Invoice",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -66,7 +66,7 @@
   "letter_head_name": "Delivery Challan",
   "modified": "2025-10-10 14:28:55.209902",
   "name": "Delivery Challan",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -89,7 +89,7 @@
   "letter_head_name": "Purchase Order",
   "modified": "2025-10-10 14:28:44.921740",
   "name": "Purchase Order",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -112,7 +112,7 @@
   "letter_head_name": "Sales Invoice",
   "modified": "2025-10-10 14:29:10.318597",
   "name": "Sales Invoice",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -135,7 +135,7 @@
   "letter_head_name": "DC Invoice",
   "modified": "2025-10-10 14:30:02.976568",
   "name": "DC Invoice",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -158,7 +158,7 @@
   "letter_head_name": "Salary Slip",
   "modified": "2025-10-10 14:33:11.019050",
   "name": "Salary Slip",
-  "source": "HTML"
+  "source": "Image"
  },
  {
   "align": "Left",
@@ -181,6 +181,6 @@
   "letter_head_name": "Mantra",
   "modified": "2025-10-10 14:29:51.615464",
   "name": "Mantra",
-  "source": "HTML"
+  "source": "Image"
  }
 ]
