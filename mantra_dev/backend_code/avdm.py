@@ -499,7 +499,7 @@ def process_request(process_record,creating_url,headers):
 
 
 			if not found_exp:
-				frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data['serialNo']))
+				frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data))
 				continue
 
 			try:
@@ -875,7 +875,7 @@ def notify_items_not_found_in_erp():
 			return "No remaining item code found."
 
 		body = "<b>List of item code which is not found in erp:</b><br><br>"
-		body += "<b>Total : {}</b><br><br>".format(len(bank_accounts))
+		body += "<b>List of item code which is not found in erp but received from pratham with sub-serial no<br><br>Total : {}</b><br><br>".format(len(bank_accounts))
 
 		body += """<table style="width: 100%;">
 			<tbody>
@@ -925,7 +925,7 @@ def notify_model_not_found_in_erp():
 		if not bank_accounts:
 			return "No remaining item code found."
 
-		body = "<b>List of Item code model number which is not found in erp:</b><br><br>"
+		body = "<b>List of Item code model number which is not found in pratham but set in ERP:</b><br><br>"
 		body += "<b>Total : {}</b><br><br>".format(len(bank_accounts))
 
 		body += """<table style="width: 100%;">
@@ -1046,6 +1046,7 @@ def notify_fail_sr_registration_in_erp():
 @frappe.whitelist(allow_guest=True)
 def update_serial_no_records(limit):
 
+	# limit = 5000
 	reply={}
 	reply["Process_status"]="Serial update process"
 	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT {}".format(key_serial_no,limit)
