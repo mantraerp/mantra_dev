@@ -1,8 +1,8 @@
 import frappe # type: ignore
-import num2words # type: ignore
+# import num2words # type: ignore
 import random
 import shutil
-from frappe.email.email_body import get_pdf # type: ignore
+# from frappe.email.email_body import get_pdf # type: ignore
 import os
 import csv
 import json
@@ -20,18 +20,7 @@ from num2words import num2words # type: ignore
 from mantra.backend_code.globle import errorLog,errorLogExites,get_app_name,email_subject_text,send_error_message_to_developer # type: ignore
 from mantra.api_code.payment_advice import send_payment_advice_email # type: ignore
 
-@frappe.whitelist(allow_guest=True)
-def bulk_upload_beneficiary_file2():
-	
-	#directory_sql = "SELECT name FROM `tabBank Account` WHERE `custom_beneficiary_file_uploaded`=0 AND `workflow_state`='Approved' AND `is_company_account`=0 AND `modified` >= '2025-01-07 00:00:21.876091' LIMIT 200"
-	directory_sql = "SELECT name FROM `tabBank Account` WHERE `workflow_state`='Approved' AND `is_company_account`=0 AND `custom_remark` IS NULL LIMIT 200"
 
-	directory_list = frappe.db.sql(directory_sql, as_dict=True)
-	# for rrecord in directory_list:
-	#     frappe.enqueue(upload_beneficiary_file,queue='default',job_name="Bank approve",timeout=100000,doc_name=rrecord['name'])
-
-		
-	return len(directory_list)
 
 @frappe.whitelist(allow_guest=True)
 def bulk_upload_beneficiary_file(bank_account_list):
@@ -536,58 +525,6 @@ def send_otp(email):
 		frappe.msgprint("User with email {} does not exist".format(email))
 		return "Error"
 # this function for a email formate  
-
-
-# @frappe.whitelist(allow_guest=True)
-# def send_otp_test(email=None):
-    
-# 	frappe.set_user("Administrator")
-# 	email = "ravi.patel@mantratec.com"
-# 	# frappe.msgprint(email)
-# 	filters = {
-# 		"name": email,
-# 		"enabled":1
-# 	}
-# 	#check user are exists or not
-# 	userexists = frappe.db.exists("User", filters)
-# 	# If record exists, return True
-# 	if userexists:
-# 		otpsend = frappe.db.exists("Email OTP", {"email_id":email})
-# 		numeric_characters = string.digits
-# 		alphabet_characters = string.ascii_letters
-	
-# 		# Generate the OTP with 2 numeric characters and 1 alphabetical character
-# 		otp1 = ''.join(random.choices(numeric_characters, k=2)) + random.choice(alphabet_characters)
-# 		otp2 = random.choice(numeric_characters) + ''.join(random.choices(alphabet_characters, k=2))
-
-		
-# 		email_otp=otp1+otp2
-# 		if otpsend:
-# 			# Update Send otp Log
-# 			new_otp=frappe.get_doc("Email OTP",email)
-# 			new_otp.email_otp=email_otp
-# 			new_otp.datetime=now()
-# 			new_otp.save(ignore_permissions=True)
-# 			frappe.db.commit()
-# 			full_name=new_otp.full_name
-# 			send_email(email,email_otp,full_name)
-# 		else:
-# 			# Create Send otp Log
-# 			# frappe.msgprint("new login")
-# 			new_otp=frappe.new_doc("Email OTP")
-# 			new_otp.email_id=email
-# 			new_otp.email_otp=email_otp
-# 			new_otp.datetime=now()
-# 			new_otp.insert(ignore_permissions=True)
-# 			frappe.db.commit()
-# 			full_name=new_otp.full_name
-# 			send_email(email,email_otp,full_name)
-# 		flush()
-# 		return "Done"
-# 	else:
-# 		frappe.msgprint("User with email {} does not exist".format(email))
-# 		return "Error"
-
 
 def send_email(email,email_otp,full_name):
 	

@@ -451,6 +451,12 @@ def process_one_record_background():
 
 	return reply
 
+# def update_error_log_key_name(error_log):
+# 	query_update_sub_date = "UPDATE `tabError Log` SET `method`='BODYPROCESSAVDM-NOT' WHERE `name`='{}'".format(error_log['name'])
+# 	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+# 	return True
+											
+
 
 @frappe.whitelist(allow_guest=True)
 def process_request_temp(serialNo):
@@ -499,7 +505,8 @@ def process_request(process_record,creating_url,headers):
 
 
 			if not found_exp:
-				frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data))
+				# frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data))
+				errorLog('RDEXPNOTFOUNDNEW',str(s_no_data).replace("'","''"),True)
 				continue
 
 			try:
@@ -715,7 +722,12 @@ def fetch_sub_serial_no_records():
 											doc.find_item_mode = False
 											doc.insert(ignore_permissions=True)
 											frappe.enqueue(update_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
+										else:
+											query_update_sub_date = "UPDATE `tabSub Serial No` SET `fail`=0,`remark`='' WHERE `name`='{}'".format(sub_serial_no)
+											sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+											frappe.enqueue(update_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 
+											
 									except Exception as e:
 										send_error_message_to_developer("Error: EVDM-sub-serial-error","fetch_sub_serial_no_records <br>{}<br>{}<br>{}".format(str(reply),str(e),str(str(traceback.format_exc()))))
 
@@ -764,9 +776,13 @@ def update_serial_no_dates(main_serial_no,sub_serial_no):
 		if amc not in ['None',None,""]:
 			query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(amc,sub_serial_no)
 			sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+			query_update_sub_date2 = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(amc,sub_serial_no)
+			sr_no_details = frappe.db.sql(query_update_sub_date2,as_dict=1)   
 		if warranty not in ['None',None,""]:
 			query_update_sub_date = "UPDATE `tabSub Serial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(warranty,sub_serial_no)
 			sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+			query_update_sub_date2 = "UPDATE `tabSerial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(warranty,sub_serial_no)
+			sr_no_details = frappe.db.sql(query_update_sub_date2,as_dict=1)
 		# query_update_sub_date = "UPDATE `tabSub Serial No` SET `amc_expiry_date`='{}',`warranty_expiry_date`='{}' WHERE `name`='{}'".format(sr_no_details[0]['amc_expiry_date'],sr_no_details[0]['warranty_expiry_date'],sub_serial_no)
 		# sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
 	return True
@@ -831,7 +847,7 @@ def sub_serial_item_code_and_model_checking(doc_name):
 	for serial_no_record in list_serial_no:
 		query = "SELECT custom_reference_submodel_no,name from `tabItem` WHERE `name`='{}'".format(serial_no_record['sub_item_code'])
 		list_item = frappe.db.sql(query,as_dict=1)
-#,
+
 		if len(list_item)==0:
 			query_update = "UPDATE `tabSub Serial No` SET `remark`='{}',`fail`=1 WHERE `name`='{}'".format(key_sub_item_code_error_find,doc_name)
 			update_item_detail = frappe.db.sql(query_update,as_dict=1)
@@ -992,8 +1008,10 @@ def prepare_body_to_upload_subsr():
 	if len(body)!=0:
 		query = "UPDATE `tabScheduled Job Type` SET `stopped`=0 WHERE `method` = '{}'".format('mantra_dev.backend_code.avdm.process_one_record')
 		records = frappe.db.sql(query,as_dict=1)
+		return "Sub serial no body is prepare"
 
-	return True
+
+	return "No sub serial no body is found"
 	
 ##############################################################
 

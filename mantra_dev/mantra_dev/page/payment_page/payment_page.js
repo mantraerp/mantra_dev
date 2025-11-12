@@ -644,7 +644,7 @@ function showBankAccountDialog() {
 function sendOTP(bank_account) {
     frappe.dom.freeze("Please wait... Sending OTP");
     frappe.call({
-        method: "mantra_dev.api_code.banck_transaction.send_otp",
+        method: "mantra_dev.api_code.bank_transaction.send_otp",
         args: {
             email: frappe.session.user,
         },
@@ -679,7 +679,7 @@ function showOTPDIalog(bank_account) {
 }
 function verifyotp(otp, bank_account) {
     frappe.call({
-        method: "mantra_dev.api_code.banck_transaction.verify_otp",
+        method: "mantra_dev.api_code.bank_transaction.verify_otp",
         args: {
             email: frappe.session.user,
             otp: otp,
@@ -712,7 +712,7 @@ function selectPaymentEntry(data, bank_account) {
         function () {
 
             frappe.call({
-                method: "mantra_dev.api_code.banck_transaction.upload_file",
+                method: "mantra_dev.api_code.bank_transaction.upload_file",
                 args: {
                     payment_entry_list: data,
                     bank_account: bank_account,
