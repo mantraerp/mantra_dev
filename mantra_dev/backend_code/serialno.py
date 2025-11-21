@@ -117,8 +117,43 @@ def process_dc_api(dc_no):
 
 	return "DC Process"
 
+
+
+def item_detail_update(dc_item,dc_doc):
+
+	dc_doc_items = frappe.get_doc("Delivery Note Item", dc_item)
+	item_detail = frappe.get_doc("Item", dc_doc_items.item_code)
+	if item_detail.custom_avdm_enable in [True,1]:
+		#Main serial no validation
+		if dc_doc_items.custom_rd_service_time_period in [None,""," ","None","Not Applicable","No Warranty"]:
+			# if dc_doc_items.custom_warranty_time_periodin_months not in [None,""," ","None","Not Applicable","No Warranty"]:
+			# 	#If AVDM enable but month not set then require to set same month as RMA
+			# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
+			# 	records = frappe.db.sql(query,as_dict=1)
+			# else:
+			if item_detail.custom_rd_service_minimum_time_period not in [None,""," ","None","Not Applicable","No Warranty"]:
+				# If RAM month not found then check in item minimum month is set. If yes then set it
+				query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
+				records = frappe.db.sql(query,as_dict=1)
+	else:
+		#Check for sub serial no
+		if item_detail.custom_submodel_avdm_enable in [True,1]:
+			if dc_doc_items.custom_rd_service_time_period in [None,""," ","None","Not Applicable","No Warranty"]:
+				# if dc_doc_items.custom_warranty_time_periodin_months not in [None,""," ","None","Not Applicable","No Warranty"]:
+				# 	#If AVDM enable but month not set then require to set same month as RMA
+				# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
+				# 	records = frappe.db.sql(query,as_dict=1)
+				# else:
+				if item_detail.custom_rd_service_minimum_time_period not in [None,""," ","None","Not Applicable","No Warranty"]:
+					# If RAM month not found then check in item minimum month is set. If yes then set it
+					query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
+					records = frappe.db.sql(query,as_dict=1)
+
 # http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc_item?dc_no=M/DC/25-26/02734
 def process_dc_item(dc_item,dc_doc):
+
+	item_detail_update(dc_item,dc_doc)
+
 	sr_no_list=[]
 	dc_doc_items = frappe.get_doc("Delivery Note Item", dc_item)
 
