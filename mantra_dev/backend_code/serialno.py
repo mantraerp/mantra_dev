@@ -133,7 +133,7 @@ def item_detail_update(dc_item,dc_doc):
 			# else:
 			if item_detail.custom_rd_service_minimum_time_period not in [None,""," ","None","Not Applicable","No Warranty"]:
 				# If RAM month not found then check in item minimum month is set. If yes then set it
-				query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
+				query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
 				records = frappe.db.sql(query,as_dict=1)
 	else:
 		#Check for sub serial no
