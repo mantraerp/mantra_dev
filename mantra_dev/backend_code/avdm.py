@@ -446,7 +446,7 @@ def process_one_record_background():
 
 	reply= {}
 	try:
-		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 20".format(key_body_process)
+		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT 100".format(key_body_process)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
 		reply["Body process"]=len(list_body_to_process)
 	
@@ -478,7 +478,7 @@ def process_one_record_background():
 			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_serial_no)
 			serial_no_list = frappe.db.sql(query)			
 			if len(serial_no_list)!=0:
-				return update_serial_no_records(500)
+				return update_serial_no_records(1000)
 
 			# Serial no update record not found then start dn record update
 			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_dc_no)
@@ -698,7 +698,7 @@ def fetch_sub_serial_no_records():
 
 	reply={}
 	reply["Process_status"]="Serial no sub"
-	limit_records = 250
+	limit_records = 2000
 	try:
 		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT {}".format(key_sub_serial_no,limit_records)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
@@ -1285,7 +1285,7 @@ def update_serial_no_records(limit):
 
 	# limit = 5000
 	reply={}
-	reply["Process_status"]="Serial update process"
+	reply["Process_status"]="Serial update process {}".format(key_serial_no)
 	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT {}".format(key_serial_no,limit)
 	serial_no_list = frappe.db.sql(query)
 	reply["serial_no_list"]=serial_no_list
