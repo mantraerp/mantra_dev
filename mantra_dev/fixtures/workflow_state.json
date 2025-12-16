@@ -182,24 +182,6 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2024-03-08 17:19:25.858649",
-  "name": "Initiated",
-  "style": "Danger",
-  "workflow_state_name": "Initiated"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2024-04-03 12:07:13.447231",
-  "name": "Posted in Tally",
-  "style": "Success",
-  "workflow_state_name": "Posted in Tally"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
   "icon": "remove",
   "modified": "2024-01-25 17:56:40.645048",
   "name": "Rejected",
@@ -210,10 +192,28 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2024-03-08 17:19:25.858649",
+  "name": "Initiated",
+  "style": "Danger",
+  "workflow_state_name": "Initiated"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2025-06-02 14:42:58.877490",
   "name": "Approval Pending by HoD",
   "style": "",
   "workflow_state_name": "Approval Pending by HoD"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-04-03 12:07:13.447231",
+  "name": "Posted in Tally",
+  "style": "Success",
+  "workflow_state_name": "Posted in Tally"
  },
  {
   "docstatus": 0,

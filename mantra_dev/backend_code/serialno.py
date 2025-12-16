@@ -230,8 +230,8 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 
 			if str(first_obj).lower() not in ["no","not","","0",None]:
 				month_to_add = int(first_obj)
-				# if month_to_add == 12:
-				# 	month_to_add = 15
+				if month_to_add == 12:
+					month_to_add = 15
 				new_warranty_date = add_months(dc_doc.posting_date, month_to_add)
 
 		new_rd_date = ""
