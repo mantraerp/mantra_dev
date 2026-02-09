@@ -159,6 +159,10 @@ def clear_beny_file_process_log():
 	test= frappe.db.sql(query,as_dict=1) 
 	return "Record deleted"
 
+
+
+# https://mantratec.milaap.ai/api/method/mantra.backend_code.globle.ClearBenyFileProcessLog_withTitle?title=mantra.backend_code.serialno.process_dc_item
+
 @frappe.whitelist(allow_guest=True)
 def ClearBenyFileProcessLog_withTitle(title):
 	query = "DELETE FROM `tabError Log` WHERE `method` like '{}%'".format(title)

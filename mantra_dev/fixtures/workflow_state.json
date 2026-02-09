@@ -165,28 +165,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-06-05 13:15:14.338683",
-  "name": "For Review",
-  "style": "",
-  "workflow_state_name": "For Review"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2024-04-02 16:52:23.832985",
   "name": "Hold",
   "style": "Danger",
   "workflow_state_name": "Hold"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "remove",
-  "modified": "2024-01-25 17:56:40.645048",
-  "name": "Rejected",
-  "style": "Danger",
-  "workflow_state_name": "Rejected"
  },
  {
   "docstatus": 0,
@@ -210,6 +192,33 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2025-06-05 13:15:14.338683",
+  "name": "For Review",
+  "style": "",
+  "workflow_state_name": "For Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-23 20:41:14.065108",
+  "name": "Dispatched",
+  "style": "",
+  "workflow_state_name": "Dispatched"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2024-01-25 17:56:40.645048",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2024-04-03 12:07:13.447231",
   "name": "Posted in Tally",
   "style": "Success",
@@ -228,19 +237,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
+  "modified": "2024-03-12 16:25:57.261501",
+  "name": "Checked",
+  "style": "Success",
+  "workflow_state_name": "Checked"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-03-12 16:25:57.261501",
-  "name": "Checked",
-  "style": "Success",
-  "workflow_state_name": "Checked"
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
+  "style": "",
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
@@ -268,5 +277,23 @@
   "name": "Pending",
   "style": "",
   "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-23 20:42:58.813893",
+  "name": "Submitted",
+  "style": "",
+  "workflow_state_name": "Submitted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-23 20:39:58.400689",
+  "name": "To Dispatch",
+  "style": "",
+  "workflow_state_name": "To Dispatch"
  }
 ]

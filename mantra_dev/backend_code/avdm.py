@@ -416,7 +416,7 @@ def process_one_record():
 	# records = frappe.db.sql(query,as_dict=1)
 
 	#Comment
-	frappe.enqueue(process_one_record_background, queue='long', timeout=3600)
+	process_one_record_background()
 	return "process start in background"
 
 
@@ -442,6 +442,12 @@ def process_one_record_background():
 		return
 
 	if get_all_jobs("process_one_record_background")!=0:
+		return "Already schedule in loop"
+
+	if get_all_jobs("mantra_dev.backend_code.avdm.process_one_record")!=0:
+		return "Already schedule in loop"
+
+	if get_all_jobs("avdm.process_one_record")!=0:
 		return "Already schedule in loop"
 
 	reply= {}
@@ -1473,15 +1479,35 @@ def generate_token_pratham():
 
 	return reply
 
+# @frappe.whitelist(allow_guest=True)
+# def date_convert(timestamp):
+# 	# timestamp = "2025-02-11T10:59:20.348062Z"
+# 	# timestamp = "2025-02-11T9:59:20.3480264422Z"
+# 	frappe.log_error(title="Date", message = str(timestamp))
+# 	date_part, time_part = timestamp.split("T")
+# 	time_part, microseconds = time_part.split(".")
+# 	hours, minutes, seconds = time_part.split(":")
+# 	hours = hours.zfill(2)
+# 	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
+# 	return formatted_timestamp
+
 @frappe.whitelist(allow_guest=True)
 def date_convert(timestamp):
-	# timestamp = "2025-02-11T10:59:20.348062Z"
-	# timestamp = "2025-02-11T9:59:20.3480264422Z"
+ # timestamp = "2025-02-11T10:59:20.348062Z"
+ # timestamp = "2025-02-11T9:59:20.3480264422Z"
+ # 2026-01-16T12:39:07Z
+
+	# frappe.log_error(title="Date Convert",message=str(timestamp))
 	date_part, time_part = timestamp.split("T")
-	time_part, microseconds = time_part.split(".")
+	# frappe.log_error(title="date_part",message=str(date_part))
+	# frappe.log_error(title="time_part",message=str(time_part))
+	# time_part, microseconds = time_part.split(".")
+	time_part = time_part.split(".")[0]
+	time_part = time_part.split("Z")[0]
+	# time_part, microseconds = time_part.split("")
 	hours, minutes, seconds = time_part.split(":")
 	hours = hours.zfill(2)
-	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
+	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.000000Z"
 	return formatted_timestamp
 
 @frappe.whitelist(allow_guest=True)

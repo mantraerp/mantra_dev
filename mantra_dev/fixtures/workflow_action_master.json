@@ -110,5 +110,12 @@
   "modified": "2024-04-02 16:51:33.422502",
   "name": "Cancel",
   "workflow_action_name": "Cancel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-12-23 20:48:30.978682",
+  "name": "To Dispatch",
+  "workflow_action_name": "To Dispatch"
  }
 ]

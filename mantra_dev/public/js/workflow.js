@@ -101,6 +101,21 @@ class WorkflowOverride extends frappe.ui.form.States {
 							frappe.confirm('Are you sure you want to proceed.?',
 								() => {
 
+
+									// if (["Sales Order","Purchase Order"].includes(me.frm.doc.doctype) && d.action != "Cancel") {
+									// 	frappe.call({
+									// 	method: "frappe.client.set_value",
+									// 	args: {
+									// 		doctype: me.frm.doc.doctype,
+									// 		name: me.frm.doc.name,
+									// 		fieldname: {
+									// 		custom_late: "",
+									// 		custom_delay_time: 0
+									// 		}
+									// 	}
+									// 	});
+									// }
+
 									if (me.frm.doc.doctype === "Purchase Order" && d.action === "Hold") {
 										let dialog = new frappe.ui.Dialog({
 											title: __("Enter reason to hold"),
