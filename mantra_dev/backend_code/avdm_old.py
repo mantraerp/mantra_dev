@@ -55,7 +55,7 @@ def login_to_avdm_scheduled():
 
 	return True  
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
 
 @frappe.whitelist(allow_guest=True)
 def process_to_avdm_for_date(transaction_date):
@@ -166,7 +166,7 @@ def todays_proccess_dc_mail(dc_list,transaction_date):
 
 
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.login_to_avdm_test?transaction_date=2025-11-13
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.login_to_avdm_test?transaction_date=2025-11-13
 
 
 @frappe.whitelist(allow_guest=True)
@@ -196,7 +196,7 @@ def login_to_avdm_test(transaction_date):
 
 
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.update_item_month?transaction_date=2025-06-02
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.update_item_month?transaction_date=2025-06-02
 
 @frappe.whitelist(allow_guest=True)
 def update_item_month(dc_no,item_code,month):
@@ -416,7 +416,7 @@ def process_one_record():
 	# records = frappe.db.sql(query,as_dict=1)
 
 	#Comment
-	frappe.enqueue(process_one_record_background, queue='long', timeout=3600)
+	process_one_record_background()
 	return "process start in background"
 
 
@@ -434,7 +434,7 @@ def get_all_jobs(method_name):
 
 
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_one_record_background
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.avdm.process_one_record_background
 @frappe.whitelist(allow_guest=True)
 def process_one_record_background():
 
@@ -442,6 +442,12 @@ def process_one_record_background():
 		return
 
 	if get_all_jobs("process_one_record_background")!=0:
+		return "Already schedule in loop"
+
+	if get_all_jobs("mantra_dev.backend_code.avdm.process_one_record")!=0:
+		return "Already schedule in loop"
+
+	if get_all_jobs("avdm.process_one_record")!=0:
 		return "Already schedule in loop"
 
 	reply= {}
@@ -643,13 +649,8 @@ def process_request(process_record,creating_url,headers):
 						if process_dc_of_serial[i['devicesr']] not in delivery_note_number_proccess:
 							process_dc_no.append(process_dc_of_serial[i['devicesr']])
 							delivery_note_number_proccess.append(process_dc_of_serial[i['devicesr']])
-
-						frappe.enqueue(save_successfull_in_so_serial_no, queue='long', timeout=3600,data=i)
-
 					else:
 						error_searial_no.append(str(i['devicesr']))
-						frappe.enqueue(save_fail_in_so_serial_no, queue='long', timeout=3600,data=i)
-
 
 				for dc_no in process_dc_no:
 					errorLog(key_dc_no,str(dc_no))
@@ -694,19 +695,8 @@ def process_request(process_record,creating_url,headers):
 
 	return reply
 
-@frappe.whitelist()
-def save_successfull_in_so_serial_no(data):
 
-	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET `update_response`='1', `response_rd_date`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(amc,data['rdEndDate'],amc,data['devicesr'])
-	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
-	return True
 
-@frappe.whitelist()
-def save_fail_in_so_serial_no(data):
-
-	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET  `failed`=1, `update_response`='1', `description`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(amc,data['errorDescription'],amc,data['devicesr'])
-	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
-	return True
 
 
 @frappe.whitelist()
@@ -750,7 +740,7 @@ def fetch_sub_serial_no_records():
 
 		reply['request_url']=creating_url
 		reply['request_header']=headers
-		reply['request_body']=searil_no_pass
+		reply['request_body']=searil_no_pass  
 
 		response1 = requests.post(creating_url, headers=headers, json=searil_no_pass)
 		reply['resposne_status_code']=str(response1.status_code)
@@ -1326,6 +1316,10 @@ def update_serial_no_records(limit):
 		query_update = query_update.replace("',)","')")
 		serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
 
+		#Update in So Serial Number Log
+
+
+
 		#Delete updated serial number from log
 		query_delete = "DELETE FROM `tabError Log` WHERE `method`='{}' AND `error` IN {}".format(key_serial_no,flat_list2)
 		query_delete = query_delete.replace("',)","')")
@@ -1485,15 +1479,35 @@ def generate_token_pratham():
 
 	return reply
 
+# @frappe.whitelist(allow_guest=True)
+# def date_convert(timestamp):
+# 	# timestamp = "2025-02-11T10:59:20.348062Z"
+# 	# timestamp = "2025-02-11T9:59:20.3480264422Z"
+# 	frappe.log_error(title="Date", message = str(timestamp))
+# 	date_part, time_part = timestamp.split("T")
+# 	time_part, microseconds = time_part.split(".")
+# 	hours, minutes, seconds = time_part.split(":")
+# 	hours = hours.zfill(2)
+# 	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
+# 	return formatted_timestamp
+
 @frappe.whitelist(allow_guest=True)
 def date_convert(timestamp):
-	# timestamp = "2025-02-11T10:59:20.348062Z"
-	# timestamp = "2025-02-11T9:59:20.3480264422Z"
+ # timestamp = "2025-02-11T10:59:20.348062Z"
+ # timestamp = "2025-02-11T9:59:20.3480264422Z"
+ # 2026-01-16T12:39:07Z
+
+	# frappe.log_error(title="Date Convert",message=str(timestamp))
 	date_part, time_part = timestamp.split("T")
-	time_part, microseconds = time_part.split(".")
+	# frappe.log_error(title="date_part",message=str(date_part))
+	# frappe.log_error(title="time_part",message=str(time_part))
+	# time_part, microseconds = time_part.split(".")
+	time_part = time_part.split(".")[0]
+	time_part = time_part.split("Z")[0]
+	# time_part, microseconds = time_part.split("")
 	hours, minutes, seconds = time_part.split(":")
 	hours = hours.zfill(2)
-	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
+	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.000000Z"
 	return formatted_timestamp
 
 @frappe.whitelist(allow_guest=True)
