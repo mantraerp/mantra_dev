@@ -254,10 +254,10 @@ def process_single_dc(dc_no):
 	if get_app_name()!="mantra":
 		return "Application is not mantra"
 	
- 
- 	#Update serial no in master
+
+	#Update serial no in master
 	process_dc_api(dc_no)
- 
+
 	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
 
 	if len(dc_list)!=0:
@@ -697,14 +697,14 @@ def process_request(process_record,creating_url,headers):
 @frappe.whitelist()
 def save_successfull_in_so_serial_no(data):
 
-	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET `update_response`='1', `response_rd_date`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(amc,data['rdEndDate'],amc,data['devicesr'])
+	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET `update_response`='1', `response_rd_date`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(data['rdEndDate'],data['devicesr'])
 	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
 	return True
 
 @frappe.whitelist()
 def save_fail_in_so_serial_no(data):
 
-	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET  `failed`=1, `update_response`='1', `description`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(amc,data['errorDescription'],amc,data['devicesr'])
+	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET  `failed`=1, `update_response`='1', `description`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(data['errorDescription'],data['devicesr'])
 	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
 	return True
 
@@ -862,7 +862,7 @@ def fetch_sub_serial_no_records():
 	return reply
 
 def update_sub_serial_no_dates(main_serial_no,sub_serial_no):
-    
+	
 	# frappe.log_error(title=f"Sub sr {main_serial_no} - {sub_serial_no}",message='')
 	query_update = "SELECT warranty_expiry_date,amc_expiry_date,item_code FROM `tabSerial No` WHERE `name`='{}'".format(main_serial_no)
 	sr_no_details = frappe.db.sql(query_update,as_dict=1)
@@ -949,12 +949,12 @@ def find_subserialno_amc_when_main_sr_no_having_date(main_serial_no,sub_serial_n
 	
 		query_update_sub_date2 = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sub_serial_no)
 		sr_no_details = frappe.db.sql(query_update_sub_date2,as_dict=1) 
- 
+
 	except Exception as e:
 		frappe.log_error(title=f"Issue in find_subserialno_amc_when_main_sr_no_having_date", message= str(e))
 		return f"eception: {str(e)}\n{str(traceback.format_exc())}"
- 
- 
+
+
 	return "Process done"
 
 def find_subserialno_waranty_when_main_sr_no_having_date(main_serial_no,sub_serial_no):
@@ -1017,8 +1017,8 @@ def find_subserialno_waranty_when_main_sr_no_having_date(main_serial_no,sub_seri
 	except Exception as e:
 		frappe.log_error(title=f"Issue in find_subserialno_waranty_when_main_sr_no_having_date", message= str(e))
 		return f"eception: {str(e)}\n{str(traceback.format_exc())}"
- 
- 
+
+
 	return "Process done"
 
 
@@ -1488,11 +1488,14 @@ def generate_token_pratham():
 @frappe.whitelist(allow_guest=True)
 def date_convert(timestamp):
 	# timestamp = "2025-02-11T10:59:20.348062Z"
+	# timestamp = "2025-03-27T16:21:40Z"
 	# timestamp = "2025-02-11T9:59:20.3480264422Z"
 	date_part, time_part = timestamp.split("T")
-	time_part, microseconds = time_part.split(".")
+	time_part = time_part.split(".")[0]
+	time_part = time_part.split("Z")[0]
 	hours, minutes, seconds = time_part.split(":")
 	hours = hours.zfill(2)
+	microseconds = "000"
 	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
 	return formatted_timestamp
 
