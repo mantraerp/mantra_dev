@@ -22,7 +22,7 @@ scheduler_events = {
             "mantra_dev.backend_code.avdm.process_one_record"
         ],        
         "0/5 * * * *": [
-            "mantra_dev.api_code.bank_transaction.get_icici_bank_file",
+            # "mantra_dev.api_code.bank_transaction.get_icici_bank_file",
         ],
         "30 22 * * *": [
             "mantra_dev.backend_code.serialno.serial_no_scheduled"
