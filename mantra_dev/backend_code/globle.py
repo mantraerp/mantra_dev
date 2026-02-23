@@ -25,6 +25,39 @@ def create_todo(description,allocated_to,date=None,status='Open',priority='Mediu
     return f"ToDo created with name: {todo.name}"
 
 
+
+@frappe.whitelist(allow_guest=True)
+def get_app_name():
+	siteurl = get_url()
+	if siteurl in ["http://10.172.100.21:8001","https://mantratec.milaap.ai","http://mantratecerpstage.com:8001","http://127.0.0.1:8001"]:
+		return "mantra"
+	elif siteurl in ["http://10.172.100.22:8008","https://mefron.milaap.ai","http://mefronerp.com:8008","http://mefronerp.com:8003","http://10.172.100.22:8003","http://127.0.0.1:8008"]:
+		return "mefron"
+	elif siteurl in ["http://10.172.100.22:8000","https://mantrasmart.milaap.ai","http://mantrasmartidentityrep.com:8000","http://ibu.mantraidentity.com:8000","http://127.0.0.1:8000","https://mantrasmart.milaap.ai:8000"]:
+		return "smart identity"
+	elif siteurl in ["http://10.172.100.22:8001","https://mitras.milaap.ai","http://mitrasglobal.com:8002","http://127.0.0.1:8001"]:
+		return "mitras global"
+	elif siteurl in ["http://10.172.100.22:8002","https://mewurk.milaap.ai","http://mewurktechnologies.com:8002","http://127.0.0.1:8002"]:
+		return "mewurk"
+	elif siteurl in ["http://10.172.100.22:8005","https://mocula.milaap.ai","http://mocula.com:8005","http://127.0.0.1:8005"]:
+		return "mocula"
+	elif siteurl in ["http://10.172.100.22:8006","https://mupizo.milaap.ai","http://mupizo.com:8006","http://127.0.0.1:8006"]:
+		return "mupizo"
+	elif siteurl in ["http://10.172.100.22:8009","https://Smartfzco.milaap.ai","https://smartfzco.milaap.ai","http://fzco.com:8009","http://127.0.0.1:8009"]:
+		return "smartfzco"
+	elif siteurl in ["http://10.172.100.22:8010","https://smartfze.milaap.ai","http://fzcodubai.com:8010","http://127.0.0.1:8010"]:
+		return "smartfze"	
+	elif siteurl in ["http://10.172.100.22:8004","http://servico.com:8004"]:
+		return "servico"
+	elif siteurl in ["http://10.172.100.22:8011","https://mexcys.milaap.ai","http://mexcys_nodes:8011","http://mexcys.com:8011","http://127.0.0.1:8011"]:
+		return "mexcys"
+
+	send_error_message_to_developer("Application name not found","site url is :{}".format(siteurl))
+
+	return '-'
+
+
+
 def site_base_url():
 	siteurl = get_url()
 	if siteurl=="http://192.168.1.38:8001":

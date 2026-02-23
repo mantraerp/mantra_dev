@@ -4,7 +4,7 @@ from frappe.utils import nowdate,today,add_months,add_days # type: ignore
 import json
 import traceback
 import requests # type: ignore
-from mantra.backend_code.globle import errorLog,get_app_name,create_todo,send_error_message_to_developer # type: ignore
+from mantra_dev.backend_code.globle import errorLog,get_app_name # type: ignore
 import ast
 from requests.auth import HTTPBasicAuth # type: ignore
 from datetime import datetime, timezone
@@ -46,17 +46,24 @@ def login_to_avdm_scheduled():
 	if not get_app_name()=="mantra":
 		return
 
-	# return get_app_name()
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
 	one_day_old = add_days(nowdate(), -1)
 	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=one_day_old)
 
-	# frappe.enqueue(serial_no_scheduled, queue='long', timeout=3600)
-
 	return True  
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
 
+# # http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date_subserialno
+
+# @frappe.whitelist(allow_guest=True)
+# def process_to_avdm_for_date_subserialno():
+
+# 	frappe.log_error(title="SUBSERIALNO",message='[{"serialNo":"2510109030"}]')
+
+# 	return 
+
+
+# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
 @frappe.whitelist(allow_guest=True)
 def process_to_avdm_for_date(transaction_date):
 	return login_to_avdm(transaction_date)
@@ -67,15 +74,13 @@ def login_to_avdm(transaction_date):
 	#To create ToDo list
 	todo_description = "EVDM Process {}".format(str(transaction_date))
 	allocated_to="ravi.patel@mantratec.com"
-	# frappe.enqueue(create_todo, queue='long', timeout=600, description=todo_description,allocated_to=allocated_to,date=frappe.utils.nowdate(),status='Open',priority='Low',reference_type='',reference_name='')
 
-	delivery_note_number_proccess = [] #reset globle variable
+	delivery_note_number_proccess = []
 
 	errorLog('AVDM-Start',transaction_date,False)
 	reply={}
 
 	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
-		# dc_list = frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
 		
 		start_datetime = f"{transaction_date} 00:00:00.000000"
 		end_datetime = f"{transaction_date} 23:59:59.000000"
@@ -92,7 +97,6 @@ def login_to_avdm(transaction_date):
 		)
 
 		reply["Total DC"]=len(dc_list)
-
 
 		if len(dc_list)==0:
 			reply['message']="no delivery note found"
@@ -121,6 +125,17 @@ def login_to_avdm(transaction_date):
 		send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
 		
 	return reply   
+
+
+def send_error_message_to_developer(subject,body):
+	frappe.sendmail(
+		recipients=['ravi.patel@mantratec.com'],
+		subject=subject,
+		message=body,
+	)
+	return "Message send"
+
+
 
 
 @frappe.whitelist()
@@ -243,21 +258,15 @@ def update_item_month(dc_no,item_code,month):
 	reply['message']="Sucessfully : Process DC in background. You will get log in EVDM Sync Log."
 	return reply
 
-
-
-
-
-
 @frappe.whitelist(allow_guest=True)
 def process_single_dc(dc_no):
 	
 	if get_app_name()!="mantra":
 		return "Application is not mantra"
-	
 
-	#Update serial no in master
+ 	#Update serial no in master
 	process_dc_api(dc_no)
-
+ 
 	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
 
 	if len(dc_list)!=0:
@@ -320,8 +329,6 @@ def process_dc_list(dc_list):
 								if s_no['item_code'] == i.item_code:
 									sr_list.append(str(s_no['serial_no']))
 
-
-						# frappe.log_error(title=f"DC Serial no {dc}",message=str(sr_list))
 						#Remove duplicate
 						unique_list = []
 						seen = set()
@@ -662,16 +669,13 @@ def process_request(process_record,creating_url,headers):
 							# email_serial_no_with_error.append(s_no_data)
 							errorLog(key_sr_register_error_find,str(s_no_data))
 
-					# if len(email_serial_no_with_error)!=0:
-					# 	frappe.sendmail(
-					# 		recipients=["ravi.patel@mantratec.com"],
-					# 		subject="Serial no with error response",
-					# 		message="{}".format(str(email_serial_no_with_error))
-					# 	)
 		else:
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
 			send_error_message_to_developer("Error: AVDM request process error","{}".format(str(reply)))
+
+
+
 		try:
 			todo = frappe.get_doc({
 					"doctype": "EVDM Sync Log",
@@ -697,15 +701,34 @@ def process_request(process_record,creating_url,headers):
 @frappe.whitelist()
 def save_successfull_in_so_serial_no(data):
 
+	#Check RD date response date
 	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET `update_response`='1', `response_rd_date`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(data['rdEndDate'],data['devicesr'])
-	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+	sr_no_details = frappe.db.sql(query_update_sub_date)
+
+
+	query_update = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSerial No` WHERE `name`='{}'".format(data['devicesr'])
+	sr_no_details = frappe.db.sql(query_update,as_dict=1)
+	if len(sr_no_details)!=0:
+		reponse_date = str(data['rdEndDate']).split(' ')[0] #2027-05-19
+
+		if sr_no_details[0]['amc_expiry_date'] not in ['None',None,' ']:
+			erp_date = str(sr_no_details[0]['amc_expiry_date']).split(' ')[0] #2028-04-04
+			if reponse_date != erp_date:
+				frappe.log_error(title="ERR:EVDM:ERPDATEMISMATCH",message="EVDM serial no and erp DB sr RD date is not same. Sr:{}<br>EVDM:{}<br>ERP:{}".format(data['devicesr'],reponse_date,erp_date))
+		else:
+			frappe.log_error(title="ERR:EVDM:SRRDNOTFOUND",message="EVDM response try to validate date with ERP but in ERP date is not set. {}".format(data['devicesr']))
+	else:
+		frappe.log_error(title="ERR:EVDM:SRNOTFOUND",message="EVDM serial no try to update but in erp DB sr is not found. {}".format(data['devicesr']))
+
 	return True
 
 @frappe.whitelist()
 def save_fail_in_so_serial_no(data):
 
+	frappe.log_error(title="ERR:EVDM:SRUPDATEERROR",message="EVDM serial no get fail response from server. {}".format(data['devicesr']))
+
 	query_update_sub_date = "UPDATE `tabSo Serial Number Log` SET  `failed`=1, `update_response`='1', `description`='{}' WHERE `serialno`='{}' AND `update_response`=0".format(data['errorDescription'],data['devicesr'])
-	sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+	sr_no_details = frappe.db.sql(query_update_sub_date)
 	return True
 
 
@@ -825,12 +848,6 @@ def fetch_sub_serial_no_records():
 									except Exception as e:
 										send_error_message_to_developer("Error: EVDM-sub-serial-error","fetch_sub_serial_no_records <br>{}<br>{}<br>{}".format(str(reply),str(e),str(str(traceback.format_exc()))))
 
-				# else:
-				# 	frappe.sendmail(
-				# 		recipients=["ravi.patel@mantratec.com"],
-				# 		subject="Not Sucess: EVDM serial detail not found",
-				# 		message="fetch_sub_serial_no_records <br><br>{}".format(str(reply))
-				# 	)
 			#Delete serial number which is process
 			for err_name in list_body_to_process:
 				query = "DELETE FROM `tabError Log` WHERE `name`='{}'".format(err_name['name'])
@@ -842,16 +859,8 @@ def fetch_sub_serial_no_records():
 			reply['response']=dc_response_json
 			send_error_message_to_developer("Error: EVDM-sub serial request not process","fetch_sub_serial_no_records <br>{}".format(str(reply)))
 
-		# todo = frappe.get_doc({
-		# 	"doctype": "EVDM Sync Log",
-		# 	"url": str(reply['request_url']),
-		# 	"execute": True,
-		# 	"response_status": str(reply['resposne_status_code']),
-		# 	"payload": str(reply['request_body']),
-		# 	"response": str(reply['response']),
-		# 	"call_type": "Sub-serial no body",
-		# })
-		# todo.insert(ignore_permissions=True)
+		#Save into log
+		frappe.enqueue(log_added_in_db, queue='long', timeout=3600,url=str(reply['request_url']),execute=True,response_status=str(reply['resposne_status_code']),payload=str(reply['request_body']),response=str(reply['response']),call_type="Pratham SubSerial No")
 
 	except Exception as e:
 		reply['message']=str(e)
@@ -861,8 +870,30 @@ def fetch_sub_serial_no_records():
 
 	return reply
 
+
+def log_added_in_db(url,execute,response_status,payload,response,call_type):
+
+	try:
+		todo = frappe.get_doc({
+				"doctype": "EVDM Sync Log",
+				"url": str(url),
+				"execute": execute,
+				"response_status": str(response_status),
+				"payload": str(payload),
+				"response": str(response),
+				"call_type": call_type,
+			})
+		todo.insert(ignore_permissions=True)
+	except Exception as e:
+		frappe.log_error("Error EVDM Log Saving",str(traceback.format_exc()))
+
+	return True
+
+
+
+
 def update_sub_serial_no_dates(main_serial_no,sub_serial_no):
-	
+    
 	# frappe.log_error(title=f"Sub sr {main_serial_no} - {sub_serial_no}",message='')
 	query_update = "SELECT warranty_expiry_date,amc_expiry_date,item_code FROM `tabSerial No` WHERE `name`='{}'".format(main_serial_no)
 	sr_no_details = frappe.db.sql(query_update,as_dict=1)
@@ -949,12 +980,12 @@ def find_subserialno_amc_when_main_sr_no_having_date(main_serial_no,sub_serial_n
 	
 		query_update_sub_date2 = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sub_serial_no)
 		sr_no_details = frappe.db.sql(query_update_sub_date2,as_dict=1) 
-
+ 
 	except Exception as e:
 		frappe.log_error(title=f"Issue in find_subserialno_amc_when_main_sr_no_having_date", message= str(e))
 		return f"eception: {str(e)}\n{str(traceback.format_exc())}"
-
-
+ 
+ 
 	return "Process done"
 
 def find_subserialno_waranty_when_main_sr_no_having_date(main_serial_no,sub_serial_no):
@@ -1017,8 +1048,8 @@ def find_subserialno_waranty_when_main_sr_no_having_date(main_serial_no,sub_seri
 	except Exception as e:
 		frappe.log_error(title=f"Issue in find_subserialno_waranty_when_main_sr_no_having_date", message= str(e))
 		return f"eception: {str(e)}\n{str(traceback.format_exc())}"
-
-
+ 
+ 
 	return "Process done"
 
 
@@ -1420,30 +1451,8 @@ def generate_token():
 	errorLog(key_token,str(api_token))
 
 
-
-	try:
-		todo = frappe.get_doc({
-				"doctype": "EVDM Sync Log",
-				"url": str(reply['request_url']),
-				"execute": True,
-				"response_status": str(reply['resposne_status_code']),
-				"payload": str(reply['request_body']),
-				"response": str(reply['response']),
-				"call_type": "EVDM Token",
-			})
-		todo.insert(ignore_permissions=True)
-	except Exception as e:
-		frappe.log_error(title="EVDM Token Save exception:",message=str(e))
-
-
-
-
-
-
-
-
-
-
+	#Save into log
+	frappe.enqueue(log_added_in_db, queue='long', timeout=3600,url=str(reply['request_url']),execute=True,response_status=str(reply['resposne_status_code']),payload=str(reply['request_body']),response=str(reply['response']),call_type="EVDM Token")
 	return "Token generated and save in log"
 
 def generate_token_pratham():
@@ -1488,14 +1497,11 @@ def generate_token_pratham():
 @frappe.whitelist(allow_guest=True)
 def date_convert(timestamp):
 	# timestamp = "2025-02-11T10:59:20.348062Z"
-	# timestamp = "2025-03-27T16:21:40Z"
 	# timestamp = "2025-02-11T9:59:20.3480264422Z"
 	date_part, time_part = timestamp.split("T")
-	time_part = time_part.split(".")[0]
-	time_part = time_part.split("Z")[0]
+	time_part, microseconds = time_part.split(".")
 	hours, minutes, seconds = time_part.split(":")
 	hours = hours.zfill(2)
-	microseconds = "000"
 	formatted_timestamp = f"{date_part}T{hours}:{minutes}:{seconds}.{microseconds}"
 	return formatted_timestamp
 
