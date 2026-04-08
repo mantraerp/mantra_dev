@@ -46,9 +46,9 @@ def login_to_avdm_scheduled():
 	if not get_app_name()=="mantra":
 		return
 
-	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=nowdate())
+	frappe.enqueue(login_to_avdm, queue='default', timeout=3600,transaction_date=nowdate())
 	one_day_old = add_days(nowdate(), -1)
-	frappe.enqueue(login_to_avdm, queue='long', timeout=3600,transaction_date=one_day_old)
+	frappe.enqueue(login_to_avdm, queue='default', timeout=3600,transaction_date=one_day_old)
 
 	return True  
 
@@ -242,7 +242,7 @@ def update_item_month(dc_no,item_code,month):
 		frappe.db.commit()
 
 
-	frappe.enqueue(process_single_dc, job_name='DCProcessing',queue='long', timeout=3600,dc_no=dc_no)
+	frappe.enqueue(process_single_dc, job_name='DCProcessing',queue='default', timeout=3600,dc_no=dc_no)
 
 	reply['message']="Sucessfully : Process DC in background. You will get log in EVDM Sync Log."
 	return reply
