@@ -209,6 +209,15 @@
  {
   "docstatus": 0,
   "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-24 18:55:02.940308",
+  "name": "TL Approval",
+  "style": "",
+  "workflow_state_name": "TL Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
   "icon": "remove",
   "modified": "2024-01-25 17:56:40.645048",
   "name": "Rejected",
@@ -232,15 +241,6 @@
   "name": "Hold",
   "style": "Danger",
   "workflow_state_name": "Hold"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-02-24 18:55:02.940308",
-  "name": "TL Approval",
-  "style": "",
-  "workflow_state_name": "TL Approval"
  },
  {
   "docstatus": 0,
@@ -273,15 +273,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-02-24 18:54:49.347678",
-  "name": "Verified",
-  "style": "",
-  "workflow_state_name": "Verified"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2024-04-03 12:07:13.447231",
   "name": "Posted in Tally",
   "style": "Success",
@@ -309,37 +300,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-03-28 15:24:16.584776",
-  "name": "Authorisation",
-  "style": "",
-  "workflow_state_name": "Authorisation"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2026-03-31 12:20:47.898844",
   "name": "Received / Partially Received",
   "style": "",
   "workflow_state_name": "Received / Partially Received"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2024-02-08 15:05:19.885801",
-  "name": "Reviewed",
-  "style": "",
-  "workflow_state_name": "Reviewed"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-03-30 13:18:12.170090",
-  "name": "Final Approval",
-  "style": "",
-  "workflow_state_name": "Final Approval"
  },
  {
   "docstatus": 0,
@@ -354,6 +318,42 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-03-31 12:20:40.314379",
+  "name": "Intransit",
+  "style": "",
+  "workflow_state_name": "Intransit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-24 18:54:49.347678",
+  "name": "Verified",
+  "style": "",
+  "workflow_state_name": "Verified"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-03-28 15:24:16.584776",
+  "name": "Authorisation",
+  "style": "",
+  "workflow_state_name": "Authorisation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:05:19.885801",
+  "name": "Reviewed",
+  "style": "",
+  "workflow_state_name": "Reviewed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2024-02-08 15:10:55.973221",
   "name": "BU Approval",
   "style": "",
@@ -363,19 +363,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-03-31 12:20:40.314379",
-  "name": "Intransit",
+  "modified": "2026-03-30 13:18:12.170090",
+  "name": "Final Approval",
   "style": "",
-  "workflow_state_name": "Intransit"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "question-sign",
-  "modified": "2024-01-25 17:56:40.643417",
-  "name": "Pending",
-  "style": "",
-  "workflow_state_name": "Pending"
+  "workflow_state_name": "Final Approval"
  },
  {
   "docstatus": 0,
@@ -385,5 +376,14 @@
   "name": "Approved",
   "style": "Success",
   "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2024-01-25 17:56:40.643417",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
  }
 ]
