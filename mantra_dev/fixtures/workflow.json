@@ -7057,7 +7057,7 @@
   "doctype": "Workflow",
   "document_type": "Purchase Order",
   "is_active": 1,
-  "modified": "2026-04-09 13:56:12.387787",
+  "modified": "2026-04-13 15:35:34.420206",
   "name": "Purchase Order -1",
   "override_status": 0,
   "send_email_alert": 0,
@@ -7618,6 +7618,20 @@
     "parentfield": "transitions",
     "parenttype": "Workflow",
     "state": "Reviewed",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Resubmit",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "custom_default_time": null,
+    "custom_exempted": 0,
+    "next_state": "Authorisation",
+    "parent": "Purchase Order -1",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Final Approval",
     "workflow_builder_id": null
    }
   ],
