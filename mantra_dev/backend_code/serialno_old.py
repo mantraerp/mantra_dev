@@ -10,14 +10,13 @@ from requests.auth import HTTPBasicAuth # type: ignore
 from frappe.utils import getdate
 
 
-
 @frappe.whitelist(allow_guest=True)
 def serial_no_scheduled():
 
 	if not get_app_name()=="mantra":
 		return
 
-	frappe.enqueue(process_serial_no_for_date, queue='long', timeout=3600,transaction_date=nowdate())
+	frappe.enqueue(process_serial_no_for_date, queue='default', timeout=3600,transaction_date=nowdate())
 	return True  
 
 
@@ -39,7 +38,7 @@ def remain_dc_to_process_sr_date(start_datetime,end_datetime):
 	)
 
 	for dc in dc_list:
-		frappe.enqueue(process_dc, job_name='DC',queue='long', timeout=1000,dc_no=dc.name)
+		frappe.enqueue(process_dc, job_name='DC',queue='default', timeout=1000,dc_no=dc.name)
 
 	return len(dc_list)
 
@@ -77,7 +76,7 @@ def process_serial_no_for_date(transaction_date):
 
 	try:
 		for i in dc_list:
-			frappe.enqueue(process_dc, job_name='DC',queue='long', timeout=1000,dc_no=i.name)
+			frappe.enqueue(process_dc, job_name='DC',queue='default', timeout=1000,dc_no=i.name)
 
 		return reply
 
@@ -88,7 +87,7 @@ def process_serial_no_for_date(transaction_date):
 
 	return reply   
 
-# http://10.172.100.21:8001/api/method/mantra.backend_code.serialno.process_dc?dc_no=M/DC/25-26/06983
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc?dc_no=M/DC/25-26/06983
 
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
@@ -99,7 +98,7 @@ def process_dc(dc_no):
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
 	dc_item = dc_doc.items
 	for i in dc_item:
-		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='default', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
 
 	return "DC Process"
 
@@ -114,7 +113,7 @@ def process_dc_api(dc_no):
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
 	dc_item = dc_doc.items
 	for i in dc_item:
-		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='default', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
 
 	return "DC Process"
 
@@ -129,7 +128,7 @@ def item_detail_update(dc_item,dc_doc):
 		if dc_doc_items.custom_rd_service_time_period in [None,""," ","None","Not Applicable","No Warranty"]:
 			# if dc_doc_items.custom_warranty_time_periodin_months not in [None,""," ","None","Not Applicable","No Warranty"]:
 			# 	#If AVDM enable but month not set then require to set same month as RMA
-			# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
+			# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
 			# 	records = frappe.db.sql(query,as_dict=1)
 			# else:
 			if item_detail.custom_rd_service_minimum_time_period not in [None,""," ","None","Not Applicable","No Warranty"]:
@@ -142,15 +141,15 @@ def item_detail_update(dc_item,dc_doc):
 			if dc_doc_items.custom_rd_service_time_period in [None,""," ","None","Not Applicable","No Warranty"]:
 				# if dc_doc_items.custom_warranty_time_periodin_months not in [None,""," ","None","Not Applicable","No Warranty"]:
 				# 	#If AVDM enable but month not set then require to set same month as RMA
-				# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
+				# 	query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(dc_doc_items.custom_warranty_time_periodin_months,dc_doc_items.name)
 				# 	records = frappe.db.sql(query,as_dict=1)
 				# else:
 				if item_detail.custom_rd_service_minimum_time_period not in [None,""," ","None","Not Applicable","No Warranty"]:
 					# If RAM month not found then check in item minimum month is set. If yes then set it
-					query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`='{}' WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
+					query = "UPDATE `tabDelivery Note Item` SET `custom_rd_service_time_period`={} WHERE `name` = '{}'".format(item_detail.custom_rd_service_minimum_time_period,dc_doc_items.name)
 					records = frappe.db.sql(query,as_dict=1)
 
-# http://10.172.100.21:8001/api/method/mantra.backend_code.serialno.process_dc_item?dc_no=M/DC/25-26/02734
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.process_dc_item?dc_no=M/DC/25-26/02734
 def process_dc_item(dc_item,dc_doc):
 
 	item_detail_update(dc_item,dc_doc)
@@ -171,7 +170,7 @@ def process_dc_item(dc_item,dc_doc):
 	if item_detail.custom_rma_enable in [True,1]:
 		if dc_doc_items.custom_warranty_time_periodin_months in [None,""," ","None"]:
 			frappe.sendmail(
-				recipients=["ravi.patel@mantratec.com","sajal.chandrawanshi@mantratec.com","abhishek.jain@mantratec.com"],
+				recipients=["ravi.patel@mantratec.com","abhishek.jain@mantratec.com"],
 				subject="Alert: serial number RMA enable but month not set : {}".format(dc_doc.name),
 				message="Item Code:{}".format(str(dc_doc_items.item_code))
 			)
@@ -203,7 +202,7 @@ def process_dc_item(dc_item,dc_doc):
 
 
 	for s_no in unique_list:
-		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
+		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='default', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
 
 	return "DC item process"
 
@@ -263,16 +262,17 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 		if len(sr_no_details)!=0:
 			if new_warranty_date!="":
 				erp_rma = sr_no_details[0]['warranty_expiry_date']
-				if erp_rma not in ['None',None,' ','']:
+				if erp_rma in ['None',None,' ','']:
 					if str(erp_rma) != str(new_warranty_date):
-						erp_date_object = getdate(erp_rma)
-						avdm_date_object = getdate(new_warranty_date)
-						#If ERP date is bigger then only update date.
-						if avdm_date_object > erp_date_object:
-							query_update = "UPDATE `tabSerial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sr_no)
-							query_update = query_update.replace("',)","')")
-							serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
-							reply["o1_warranty_expiry_date"]=query_update
+						if erp_rma != new_warranty_date:
+							erp_date_object = getdate(erp_rma)
+							avdm_date_object = getdate(new_warranty_date)
+							#If ERP date is bigger then only update date.
+							if avdm_date_object < erp_date_object:
+								query_update = "UPDATE `tabSerial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sr_no)
+								query_update = query_update.replace("',)","')")
+								serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
+								reply["o1_warranty_expiry_date"]=query_update
 				else:
 					query_update = "UPDATE `tabSerial No` SET `warranty_expiry_date`='{}' WHERE `name`='{}'".format(new_warranty_date,sr_no)
 					query_update = query_update.replace("',)","')")
@@ -281,16 +281,17 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 
 			if new_rd_date!="":
 				erp_rd = sr_no_details[0]['amc_expiry_date']
-				if erp_rd not in ['None',None,' ','']:
+				if erp_rd in ['None',None,' ','']:
 					if str(erp_rd) != str(new_rd_date):
-						erp_date_rd_object = getdate(erp_rd)
-						avdm_date_rd_object = getdate(new_rd_date)
-						#If ERP date is bigger then only update date.
-						if avdm_date_rd_object > erp_date_rd_object:
-							query_update = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_rd_date,sr_no)
-							query_update = query_update.replace("',)","')")
-							serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
-							reply["o1_amc_expiry_date"]=query_update
+						if erp_rd != new_rd_date:
+							erp_date_rd_object = getdate(erp_rd)
+							avdm_date_rd_object = getdate(new_rd_date)
+							#If ERP date is bigger then only update date.
+							if avdm_date_rd_object < erp_date_rd_object:
+								query_update = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_rd_date,sr_no)
+								query_update = query_update.replace("',)","')")
+								serial_no_list_update = frappe.db.sql(query_update,as_dict=1)
+								reply["o1_amc_expiry_date"]=query_update
 				else:
 					query_update = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(new_rd_date,sr_no)
 					query_update = query_update.replace("',)","')")
@@ -305,6 +306,7 @@ def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 		send_error_message_to_developer("Exception : Serial no expire date update {}".format(dc_doc.name),"serialno.py {}".format(str(reply)))
 
 	return reply
+
 
 def process_dc_bundle(dc_no,sbb_name):
 	
@@ -328,7 +330,7 @@ def process_dc_bundle(dc_no,sbb_name):
 
 
 
-# http://10.172.100.21:8001/api/method/mantra.backend_code.serialno.get_serial_no_history?sr_no=9408938
+# http://192.168.1.38:8001/api/method/mantra_dev.backend_code.serialno.get_serial_no_history?sr_no=9408938
 
 @frappe.whitelist(allow_guest=True)
 def get_serial_no_history(sr_no):
