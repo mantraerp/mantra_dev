@@ -52,10 +52,10 @@ def login_to_avdm_scheduled():
 
 	return True  
 
-# http://10.172.100.21:8001/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
+# https://mantratec.milaap.ai/api/method/mantra_dev.backend_code.avdm.process_to_avdm_for_date?transaction_date=2025-06-02
 @frappe.whitelist(allow_guest=True)
 def process_to_avdm_for_date(transaction_date):
-	return login_to_avdm(transaction_date)
+	return login_to_avdm_without_restriction(transaction_date)
 
 @frappe.whitelist()
 def login_to_avdm(transaction_date):
@@ -81,6 +81,64 @@ def login_to_avdm(transaction_date):
 				"docstatus": 1,
 				"is_return": 0,
 				"custom_marked_in_avdm": 0
+			},
+			fields=["name", "modified"]
+		)
+
+		reply["Total DC"]=len(dc_list)
+
+		if len(dc_list)==0:
+			reply['message']="no delivery note found"
+			errorLog('AVDM-End',transaction_date,False)
+			return reply
+
+		try:
+			query = "DELETE FROM `tabError Log` WHERE `method` IN ('{}','{}','{}','{}')".format(key_subsr_process,key_sub_item_code_error_find,key_sub_item_code_model_error_find,key_subsr_try_register)
+			records_deleted = frappe.db.sql(query,as_dict=1)
+
+			generate_token()
+			generate_token_pratham()
+			process_dc_list(dc_list)
+			frappe.enqueue(todays_proccess_dc_mail, job_name='Mail',queue='long', timeout=3600,dc_list=dc_list,transaction_date=transaction_date)
+
+			errorLog('AVDM-End',transaction_date,False)
+			return reply
+
+		except Exception as e:
+			reply['message']="Exception"
+			reply['message_traceback']=str(traceback.format_exc())
+			mssage = str(traceback.format_exc())
+			send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
+	else:
+		reply['message']="AVDM setting is not enable"
+		send_error_message_to_developer("AVDM not process due to exception","avdm.py - login_to_avdm <br>{}".format(mssage))
+		
+	return reply   
+
+
+@frappe.whitelist()
+def login_to_avdm_without_restriction(transaction_date):
+	
+	#To create ToDo list
+	todo_description = "EVDM Process {}".format(str(transaction_date))
+	allocated_to="ravi.patel@mantratec.com"
+
+	delivery_note_number_proccess = []
+
+	errorLog('AVDM-Start',transaction_date,False)
+	reply={}
+
+	if frappe.db.get_single_value("AVDM Setting", "enable") == 1:
+		
+		start_datetime = f"{transaction_date} 00:00:00.000000"
+		end_datetime = f"{transaction_date} 23:59:59.000000"
+
+		dc_list = frappe.get_all(
+			"Delivery Note",
+			filters={
+				"modified": ["between", [start_datetime, end_datetime]],
+				"docstatus": 1,
+				"is_return": 0,
 			},
 			fields=["name", "modified"]
 		)

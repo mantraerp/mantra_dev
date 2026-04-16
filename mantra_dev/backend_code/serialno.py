@@ -86,9 +86,54 @@ def process_serial_no_for_date(transaction_date):
 		reply['message_traceback']=str(traceback.format_exc())
 		send_error_message_to_developer("Exception : Serial no expire date","serialno.py - login_to_avdm <br>{}".format(str(traceback.format_exc())))
 
-	return reply   
+	return reply
+
+
+
+@frappe.whitelist(allow_guest=True)
+def process_serial_no_for_date_without_restriction(transaction_date):
+
+	if not get_app_name()=="mantra":
+		return
+
+	errorLog("Serial no date update on server",str(transaction_date))
+
+	reply={}
+	# dc_list =frappe.get_all("Delivery Note", filters={"posting_date": transaction_date, "docstatus": 1, "is_return": 0})
+
+	start_datetime = f"{transaction_date} 00:00:00.000000"
+	end_datetime = f"{transaction_date} 23:59:59.000000"
+
+	dc_list = frappe.get_all(
+		"Delivery Note",
+		filters={
+			"modified": ["between", [start_datetime, end_datetime]],
+			"docstatus": 1,
+			"is_return": 0,
+		},
+		fields=["name", "modified"]
+	)
+
+	reply["Total DC"]=len(dc_list)
+	if len(dc_list)==0:
+		reply['message']="no delivery note found"
+		return reply
+
+	try:
+		for i in dc_list:
+			frappe.enqueue(process_dc, job_name='DC',queue='long', timeout=1000,dc_no=i.name)
+
+		return reply
+
+	except Exception as e:
+		reply['message']="Exception"
+		reply['message_traceback']=str(traceback.format_exc())
+		send_error_message_to_developer("Exception : Serial no expire date","serialno.py - login_to_avdm <br>{}".format(str(traceback.format_exc())))
+
+	return reply 
 
 # http://10.172.100.21:8001/api/method/mantra.backend_code.serialno.process_dc?dc_no=M/DC/25-26/06983
+
 
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
@@ -97,6 +142,20 @@ def process_dc(dc_no):
 		return "App is not mantra"
 
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
+	dc_item = dc_doc.items
+	for i in dc_item:
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+
+	return "DC Process"
+
+
+@frappe.whitelist(allow_guest=True)
+def process_dc_dl(doc, method=None):
+
+	if get_app_name()!="mantra":
+		return "App is not mantra"
+
+	dc_doc = frappe.get_doc("Delivery Note", doc.name)
 	dc_item = dc_doc.items
 	for i in dc_item:
 		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
