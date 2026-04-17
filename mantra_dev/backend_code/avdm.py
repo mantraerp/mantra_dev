@@ -960,7 +960,7 @@ def fetch_sub_serial_no_records():
 											doc.insert(ignore_permissions=True)
 											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 										else:
-											query_update_sub_date = "UPDATE `tabSub Serial No` SET `fail`=0,`remark`='' WHERE `name`='{}'".format(sub_serial_no)
+											query_update_sub_date = "UPDATE `tabSub Serial No` SET `fail`=0,`custom_marked_in_avdm`=0,`remark`='' WHERE `name`='{}'".format(sub_serial_no)
 											sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
 											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 
