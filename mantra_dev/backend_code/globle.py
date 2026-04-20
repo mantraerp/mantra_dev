@@ -56,7 +56,13 @@ def get_app_name():
 
 	return '-'
 
-
+def send_error_message_to_developer(subject,body):
+	frappe.sendmail(
+		recipients=['ravi.patel@mantratec.com'],
+		subject=subject,
+		message=body,
+	)
+	return "Message send"
 
 def site_base_url():
 	siteurl = get_url()
