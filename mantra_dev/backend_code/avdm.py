@@ -860,7 +860,7 @@ def fetch_sub_serial_no_records():
 
 	reply={}
 	reply["Process_status"]="Serial no sub"
-	limit_records = 2000
+	limit_records = 5000
 	try:
 		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT {}".format(key_sub_serial_no,limit_records)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
@@ -1614,7 +1614,7 @@ def generate_token_pratham():
 	reply['api_token']=api_token
 
 	#Delete token and resave in list
-	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 1".format(key_token_pratham)
+	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 10".format(key_token_pratham)
 	records = frappe.db.sql(query,as_dict=1)
 	errorLog(key_token_pratham,str(api_token))
 
