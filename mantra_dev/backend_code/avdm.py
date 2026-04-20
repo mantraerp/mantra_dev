@@ -586,6 +586,7 @@ def process_one_record_background():
 		}
 		reply['message']="Going to register serial no body on server key {}".format(key_body_process)
 		for process_record in list_body_to_process:
+			# return process_request(process_record=process_record,creating_url=creating_url,headers=headers)
 			frappe.enqueue(process_request, queue='long', timeout=3600,process_record=process_record,creating_url=creating_url,headers=headers)
 
 	except Exception as e:
@@ -694,7 +695,6 @@ def process_request(process_record,creating_url,headers):
 
 
 			if not found_exp:
-				# frappe.log_error(title='RDEXPNOTFOUNDNEW',message=str(s_no_data))
 				errorLog('RDEXPNOTFOUNDNEW',str(s_no_data).replace("'","''"),True)
 				continue
 
@@ -725,6 +725,7 @@ def process_request(process_record,creating_url,headers):
 
 		# reply['request_dump']=body_json
 		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
+		reply['resposne_raw']=str(response1)
 		reply['resposne_status_code']=str(response1.status_code)
 
 		if print_log:
@@ -774,10 +775,9 @@ def process_request(process_record,creating_url,headers):
 							errorLog(key_sr_register_error_find,str(s_no_data))
 
 		else:
-			dc_response_json = json.loads(dc_response_content)
-			reply['response']=dc_response_json
+			generate_token()
+			reply['response']=response1.text
 			send_error_message_to_developer("Error: AVDM request process error","{}".format(str(reply)))
-
 
 
 		try:
@@ -795,10 +795,13 @@ def process_request(process_record,creating_url,headers):
 			frappe.log_error("Start saving doc",str(e))
 
 	except Exception as e:
+		generate_token()
 		reply['message']=str(e)
 		mssage = str(traceback.format_exc())
 		reply['message_traceback']=mssage
 		send_error_message_to_developer("Error: AVDM not process due to issue","process_request <br>{}".format(str(reply)))
+
+
 
 	return reply
 
@@ -1569,7 +1572,7 @@ def generate_token():
 	reply['api_token']=api_token
 
 	#Delete token and resave in list
-	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 1".format(key_token)
+	query = "DELETE FROM `tabError Log` WHERE method='{}' LIMIT 10".format(key_token)
 	records = frappe.db.sql(query,as_dict=1)
 	errorLog(key_token,str(api_token))
 
