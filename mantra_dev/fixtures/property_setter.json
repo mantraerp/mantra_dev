@@ -286,5 +286,37 @@
   "property_type": "Check",
   "row_name": null,
   "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Bu Master",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "in_transit_warehouse",
+  "is_system_generated": 0,
+  "modified": "2026-04-22 12:51:39.841159",
+  "module": "Mantra Dev",
+  "name": "Bu Master-in_transit_warehouse-ignore_user_permission",
+  "property": "ignore_user_permission",
+  "property_type": "check",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Bu Master",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "warehouse",
+  "is_system_generated": 0,
+  "modified": "2026-04-22 12:51:34.575449",
+  "module": "Mantra Dev",
+  "name": "Bu Master-warehouse-ignore_user_permission",
+  "property": "ignore_user_permission",
+  "property_type": "check",
+  "row_name": null,
+  "value": "1"
  }
 ]
