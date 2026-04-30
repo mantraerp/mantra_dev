@@ -518,7 +518,6 @@ def process_one_record_background():
 				# return "fetching sub sr no"
 				return fetch_sub_serial_no_records()
 
-			# return "test"
 			#Find sub serial number model number and fill it
 			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_process)
 			list_body_to_process = frappe.db.sql(query,as_dict=1)
@@ -916,10 +915,16 @@ def fetch_sub_serial_no_records():
 					send_error_message_to_developer("Return Sucess is false","fetch_sub_serial_no_records <br>{}".format(str(reply)))
 					dc_response_json = []
 
+
+
+
 			if len(dc_response_json)!=0:
+				# frappe.log_error(title="Sub serial no found",message=str(dc_response_json))
 				# if dc_response_json['isSuccess'] in [True,"True",1,"true"]:
 				body=[]
 				all_serial_no_response = recoursion_all_serial_no(dc_response_json)
+				# frappe.log_error(title="Sub serial no found 2",message=str(all_serial_no_response))
+
 				process_serial_no = all_serial_no_response.keys()
 				#Check all parent serial no
 				for sr_no in process_serial_no:
@@ -948,6 +953,8 @@ def fetch_sub_serial_no_records():
 
 									try:
 										if not frappe.db.exists("Sub Serial No", sub_serial_no):
+											# frappe.log_error(title="Sub serial no found 3",message=str(sub_serial_no))
+
 											doc = frappe.new_doc("Sub Serial No")
 											doc.parent_serial_no = str(sr_no)
 											doc.serial_no = sub_serial_no
@@ -963,8 +970,34 @@ def fetch_sub_serial_no_records():
 											doc.insert(ignore_permissions=True)
 											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 										else:
-											query_update_sub_date = "UPDATE `tabSub Serial No` SET `fail`=0,`custom_marked_in_avdm`=0,`remark`='' WHERE `name`='{}'".format(sub_serial_no)
-											sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+											# frappe.log_error(title="Sub serial no found 4",message=str(sub_serial_no))
+
+											# sub_serial_no_doc = frappe.get_doc("Sub Serial No", sub_serial_no)
+											# sub_serial_no_doc.fail = 0
+											# sub_serial_no_doc.custom_marked_in_avdm = 0
+											# sub_serial_no_doc.remark = ""
+											# # sub_serial_no_doc.flags
+											# sub_serial_no_doc.save(ignore_permissions=True)
+
+
+											frappe.db.set_value(
+												"Sub Serial No",
+												sub_serial_no,
+												{
+													"fail": 0,
+													"custom_marked_in_avdm": 0,
+													"remark": ""
+												},
+												update_modified=True
+											)
+
+
+
+											# query_update_sub_date = "UPDATE `tabSub Serial No` SET `fail`=0,`custom_marked_in_avdm`=0,`remark`='' WHERE `name`='{}'".format(sub_serial_no)
+											# frappe.log_error(title="Sub serial no found query",message=str(query_update_sub_date))
+
+											# sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
+											# frappe.db.commit()
 											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 
 											

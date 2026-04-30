@@ -173,7 +173,7 @@ def process_dc_api(dc_no):
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
 	dc_item = dc_doc.items
 	for i in dc_item:
-		frappe.enqueue(process_dc_item, job_name='DCItem',queue='long', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
+		frappe.enqueue(process_dc_item, job_name='DCItem',queue='default', timeout=3600,dc_item=i.name,dc_doc=dc_doc)
 
 	return "DC Process"
 
@@ -262,7 +262,7 @@ def process_dc_item(dc_item,dc_doc):
 
 
 	for s_no in unique_list:
-		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='long', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
+		frappe.enqueue(process_dc_date_information, job_name='SRExpDate',queue='default', timeout=3600,dc_item=dc_doc_items,dc_doc=dc_doc,sr_no=s_no,item_detail=item_detail)
 
 	return "DC item process"
 
