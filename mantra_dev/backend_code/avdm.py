@@ -1614,9 +1614,11 @@ def update_serial_no_records(limit):
 def update_delivery_note_records():
 
 	reply={}
-	reply["Process_status"]="DC update process 100 in bulk"
-	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 100".format(key_dc_no)
+	reply["Process_status"]="DC update process 200 in bulk"
+	query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 200".format(key_dc_no)
 	serial_no_list = frappe.db.sql(query)
+	reply["Process_status"]="DC update process {} in bulk - DCNOAVDM".format(len(serial_no_list))
+
 	if len(serial_no_list)==0:
 		reply["Process_status_sub"]="No dc no to update"
 		return reply
