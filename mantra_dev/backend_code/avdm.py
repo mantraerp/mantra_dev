@@ -519,22 +519,23 @@ def process_one_record_background():
 				return fetch_sub_serial_no_records()
 
 			#Find sub serial number model number and fill it
-			query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_process)
-			list_body_to_process = frappe.db.sql(query,as_dict=1)
+			# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_process)
+			# list_body_to_process = frappe.db.sql(query,as_dict=1)
+
+			list_body_to_process = sub_serial_item_code_and_model_data()
+
 			if len(list_body_to_process)!=0:
 				# return "Find sub serial no"
-				return sub_serial_item_code_and_model()
+				return sub_serial_item_code_and_model(list_body_to_process)
 
 			# return "test"
 			#Start process sub serial no #######################
-			query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN (SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_try_register)
-			# query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0"
-			item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
-			if len(item_sub_serial_no_list)!=0:
-				# return "Start sub serial no"
-				return prepare_body_to_upload_subsr()
+			# query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN (SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_try_register)
+			# item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
 
-			# return "test1"
+			item_sub_serial_no_list = find_sub_sr_body()
+			if len(item_sub_serial_no_list)!=0:
+				return prepare_body_to_upload_subsr(item_sub_serial_no_list)
 
 
 			#Start update serial no in database
@@ -542,7 +543,7 @@ def process_one_record_background():
 			serial_no_list = frappe.db.sql(query)
 			if len(serial_no_list)!=0:
 				# return "update sr no"
-				return update_serial_no_records(1000)
+				return update_serial_no_records(3000)
 
 			# Serial no update record not found then start dn record update
 			query = "SELECT error from `tabError Log` WHERE method='{}' LIMIT 1".format(key_dc_no)
@@ -833,14 +834,38 @@ def save_successfull_in_so_serial_no(data):
 					query_update_serial_no_date = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(reponse_date,data['devicesr'])
 					update_sr_master = frappe.db.sql(query_update_serial_no_date)
 				else:
-					frappe.log_error(title="ERR:EVDM:ERPDATEMISMATCH",message="EVDM serial no and erp DB sr RD date is not same. Sr:{}<br>EVDM:{}<br>ERP:{}".format(data['devicesr'],reponse_date,erp_date))
-
-
-
+					if reponse_date not in ['1899-12-30']:
+						frappe.log_error(title="ERR:EVDM:ERPDATEMISMATCH",message="EVDM serial no and erp DB sr RD date is not same. Sr:{}<br>EVDM:{}<br>ERP:{}".format(data['devicesr'],reponse_date,erp_date))
 		else:
 			frappe.log_error(title="ERR:EVDM:SRRDNOTFOUND",message="EVDM response try to validate date with ERP but in ERP date is not set. {}".format(data['devicesr']))
 	else:
-		frappe.log_error(title="ERR:EVDM:SRNOTFOUND",message="EVDM serial no try to update but in erp DB sr is not found. {}".format(data['devicesr']))
+
+		query_update_sub = "SELECT warranty_expiry_date,amc_expiry_date FROM `tabSub Serial No` WHERE `name`='{}'".format(data['devicesr'])
+		sr_no_sub_details = frappe.db.sql(query_update_sub,as_dict=1)
+		if len(sr_no_sub_details)!=0:
+
+			reponse_date = str(data['rdEndDate']).split(' ')[0]
+			if reponse_date in ['0001-01-01']:
+				frappe.log_error(title="ERR:EVDM:ERPDATEMISMATCH",message="EVDM response wrong date formate. Sr:{}<br>EVDM:{}".format(data['devicesr'],reponse_date))
+				return "EVDM response wrong date fromte"
+
+			if sr_no_sub_details[0]['amc_expiry_date'] not in ['None',None,' ']:
+				erp_date = str(sr_no_sub_details[0]['amc_expiry_date']).split(' ')[0]
+				if reponse_date != erp_date:
+					erp_date_object = getdate(erp_date)
+					avdm_date_object = getdate(reponse_date)
+					if avdm_date_object > erp_date_object:
+						query_update_serial_no_date = "UPDATE `tabSerial No` SET `amc_expiry_date`='{}' WHERE `name`='{}'".format(reponse_date,data['devicesr'])
+						update_sr_master = frappe.db.sql(query_update_serial_no_date)
+					else:
+						if reponse_date not in ['1899-12-30']:
+							frappe.log_error(title="ERR:EVDM:ERPDATEMISMATCH",message="EVDM serial no and erp DB sr RD date is not same. Sr:{}<br>EVDM:{}<br>ERP:{}".format(data['devicesr'],reponse_date,erp_date))
+			else:
+				frappe.log_error(title="ERR:EVDM:SRRDNOTFOUND",message="EVDM response try to validate date with ERP but in ERP date is not set. {}".format(data['devicesr']))
+
+
+		else:
+			frappe.log_error(title="ERR:EVDM:SRNOTFOUND",message="EVDM serial no try to update but in erp DB sr is not found. {}".format(data['devicesr']))
 
 	return True
 
@@ -1233,15 +1258,45 @@ def process_all_level_serial_no(device, data):
 
 ##############################################################
 #Check all sub serial number item code and model number code
+
+
+def sub_serial_item_code_and_model_data():
+	# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 1".format(key_subsr_process)
+	# list_body_to_process = frappe.db.sql(query,as_dict=1)
+
+
+	query_update = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0"
+	item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
+
+	query_update = "SELECT error FROM `tabError Log` WHERE `method`='{}'".format(key_subsr_process)
+	already_process_sr = frappe.db.sql(query_update,as_dict=1)
+
+	final_data = []
+
+	for sr in item_sub_serial_no_list:
+		found = False
+		for pro_sr in already_process_sr:
+			if sr['name']==pro_sr['error']:
+				found = True
+				break
+			
+		if not found:
+			final_data.append(sr)
+	
+	return final_data
+
+
+
+
 @frappe.whitelist(allow_guest=True)
-def sub_serial_item_code_and_model():
+def sub_serial_item_code_and_model(list_body_to_process):
 
 	reply={}
 	reply["Process_status"]="Serial no sub model and item code finding"
 	try:
-		query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 200".format(key_subsr_process)
-		# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 LIMIT 25"
-		list_body_to_process = frappe.db.sql(query,as_dict=1)
+		# query = "SELECT name FROM `tabSub Serial No` WHERE `custom_marked_in_avdm`=0 AND `find_item_model`=0 AND `fail`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}') LIMIT 200".format(key_subsr_process)
+		# list_body_to_process = frappe.db.sql(query,as_dict=1)
+
 		# frappe.log_error(title='Total Remain',message=len(list_body_to_process))
 		reply["Process_data"]=len(list_body_to_process)
 		for process_record in list_body_to_process:
@@ -1395,13 +1450,35 @@ def notify_model_not_found_in_erp():
 	return "Email sent successfully!"
 
 
-def prepare_body_to_upload_subsr():
 
 
-	# return "prepare sub body"
-	query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}')".format(key_subsr_try_register)
-	# query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0"
+
+def find_sub_sr_body():
+
+	query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name`"
 	item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
+
+	query_update = "SELECT error FROM `tabError Log` WHERE `method`='{}'".format(key_subsr_try_register)
+	already_process_sr = frappe.db.sql(query_update,as_dict=1)
+
+	final_data = []
+
+	for sr in item_sub_serial_no_list:
+		found = False
+		for pro_sr in already_process_sr:
+			if sr['name']==pro_sr['error']:
+				found = True
+				break
+			
+		if not found:
+			final_data.append(sr)
+	
+	return final_data
+
+def prepare_body_to_upload_subsr(item_sub_serial_no_list):
+
+	# query_update = "SELECT * FROM `tabSub Serial No` WHERE `find_item_model`=1 AND `custom_marked_in_avdm`=0 AND `name` NOT IN	(SELECT error FROM `tabError Log` WHERE `method`='{}')".format(key_subsr_try_register)
+	# item_sub_serial_no_list = frappe.db.sql(query_update,as_dict=1)
 
 	body = []
 	for rec in item_sub_serial_no_list:
