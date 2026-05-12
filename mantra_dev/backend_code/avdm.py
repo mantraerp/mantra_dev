@@ -523,7 +523,6 @@ def process_one_record_background():
 			# list_body_to_process = frappe.db.sql(query,as_dict=1)
 
 			list_body_to_process = sub_serial_item_code_and_model_data()
-
 			if len(list_body_to_process)!=0:
 				# return "Find sub serial no"
 				return sub_serial_item_code_and_model(list_body_to_process)
@@ -884,7 +883,7 @@ def fetch_sub_serial_no_records():
 
 	reply={}
 	reply["Process_status"]="Serial no sub"
-	limit_records = 5000
+	limit_records = 3000
 	try:
 		query = "SELECT * from `tabError Log` WHERE method='{}' LIMIT {}".format(key_sub_serial_no,limit_records)
 		list_body_to_process = frappe.db.sql(query,as_dict=1)
@@ -898,6 +897,8 @@ def fetch_sub_serial_no_records():
 			record_to_be_proccess.append(body_pass)
 			searil_no_pass.append(body_pass['serialNo'])
 
+
+		# frappe.log_error(title="Sub serial no list to be process",message=str(searil_no_pass))
 
 		if len(searil_no_pass)==0:
 			return "No serial number found"
@@ -929,11 +930,15 @@ def fetch_sub_serial_no_records():
 			dc_response_content = dc_response_content.decode('utf-8')
 		reply['resposne_contennt']=dc_response_content
 
+
+
+
 		# return record_to_be_proccess
 		if response1.status_code==200:
 			#Get all serial number response in this.
 			dc_response_json = json.loads(dc_response_content)
 			reply['response']=dc_response_json
+			# frappe.log_error(title="Sub serial no response",message=str(dc_response_json))
 
 			if isinstance(dc_response_json, dict):
 				if dc_response_json['isSuccess'] in [False,"False",0,"false"]:
@@ -944,41 +949,41 @@ def fetch_sub_serial_no_records():
 
 
 			if len(dc_response_json)!=0:
-				# frappe.log_error(title="Sub serial no found",message=str(dc_response_json))
-				# if dc_response_json['isSuccess'] in [True,"True",1,"true"]:
 				body=[]
 				all_serial_no_response = recoursion_all_serial_no(dc_response_json)
 				# frappe.log_error(title="Sub serial no found 2",message=str(all_serial_no_response))
 
 				process_serial_no = all_serial_no_response.keys()
+				# frappe.log_error(title="Sub serial no found 3",message=str(process_serial_no))
 				#Check all parent serial no
 				for sr_no in process_serial_no:
 				#Find serial no from pass list
 					for sr_no_record in record_to_be_proccess:
 						#If same serial no found then prepare body to register on server
 						if sr_no==sr_no_record['serialNo']:
+							# frappe.log_error(title="Sub serial no found 4",message=str(sr_no))
+							# frappe.log_error(title="Sub serial no found 5",message=str(sr_no_record['serialNo']))
+
 							for single_serial_no in all_serial_no_response[sr_no]:
+
+								# frappe.log_error(title="Sub serial no found 7",message=str(single_serial_no))
+
+
 								process_sub_serial_no = single_serial_no.keys()
+								# frappe.log_error(title="Sub serial no found 8",message=str(process_sub_serial_no))
+
+
 								for sub_serial_no in process_sub_serial_no:
-									# obj={}
-									# obj['serialNo']=sub_serial_no #child serial no
-									#find model no here
-									#item_code = process_sub_serial_no[sub_serial_no]
-									# obj['model']=sr_no_record["model"]
-									# obj['custName']=sr_no_record["custName"]
-									# obj['dcNo']=sr_no_record["dcNo"]
-									# obj['dcDate']=sr_no_record["dcDate"]
-									# obj['mastCode']="0"
-									# obj['subModelType']="0"
-									# body.append(obj)
+									# frappe.log_error(title="Sub serial no found 9",message=str(sub_serial_no))
 
 									reply['sub_serial_no']=sub_serial_no
 									reply['sr_no']=sr_no
 									reply['sr_no_record']=str(sr_no_record)
+									# frappe.log_error(title="Sub serial no found 10",message=str(reply))
 
 									try:
 										if not frappe.db.exists("Sub Serial No", sub_serial_no):
-											# frappe.log_error(title="Sub serial no found 3",message=str(sub_serial_no))
+											frappe.log_error(title="Sub serial no found 11",message=str(sub_serial_no))
 
 											doc = frappe.new_doc("Sub Serial No")
 											doc.parent_serial_no = str(sr_no)
@@ -992,17 +997,19 @@ def fetch_sub_serial_no_records():
 											doc.dcdate = str(sr_no_record["dcDate"])
 											doc.custom_marked_in_avdm = False
 											doc.find_item_mode = False
-											doc.insert(ignore_permissions=True)
-											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
-										else:
-											# frappe.log_error(title="Sub serial no found 4",message=str(sub_serial_no))
+											# doc.insert(ignore_permissions=True)
+											try:
+												doc.insert(ignore_permissions=True)
+												frappe.db.commit()
+											except Exception:
+												frappe.log_error(frappe.get_traceback(), "Insert Failed AVDM")
+												send_error_message_to_developer("Error: AVDM -Sub Serial no",frappe.get_traceback())
 
-											# sub_serial_no_doc = frappe.get_doc("Sub Serial No", sub_serial_no)
-											# sub_serial_no_doc.fail = 0
-											# sub_serial_no_doc.custom_marked_in_avdm = 0
-											# sub_serial_no_doc.remark = ""
-											# # sub_serial_no_doc.flags
-											# sub_serial_no_doc.save(ignore_permissions=True)
+											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)
+											# frappe.log_error(title="Sub serial no found 11.1",message=str(sub_serial_no))
+ 
+										else:
+											# frappe.log_error(title="Sub serial no found 12",message=str(sub_serial_no))
 
 
 											frappe.db.set_value(
@@ -1022,7 +1029,6 @@ def fetch_sub_serial_no_records():
 											# frappe.log_error(title="Sub serial no found query",message=str(query_update_sub_date))
 
 											# sr_no_details = frappe.db.sql(query_update_sub_date,as_dict=1)
-											# frappe.db.commit()
 											frappe.enqueue(update_sub_serial_no_dates, queue='short', timeout=3600,main_serial_no=str(sr_no),sub_serial_no=sub_serial_no)      
 
 											
@@ -1041,7 +1047,18 @@ def fetch_sub_serial_no_records():
 			send_error_message_to_developer("Error: EVDM-sub serial request not process","fetch_sub_serial_no_records <br>{}".format(str(reply)))
 
 		#Save into log
-		frappe.enqueue(log_added_in_db, queue='long', timeout=3600,url=str(reply['request_url']),execute=True,response_status=str(reply['resposne_status_code']),payload=str(reply['request_body']),response=str(reply['response']),call_type="Pratham SubSerial No")
+		todo = frappe.get_doc({
+			"doctype": "EVDM Sync Log",
+			"url": str(reply['request_url']),
+			"execute": True,
+			"response_status": str(reply['resposne_status_code']),
+			"payload": str(reply['request_body']),
+			"response": str(reply['response']),
+			"call_type": "Pratham SubSerial No",
+		})
+		todo.insert(ignore_permissions=True)
+		frappe.db.commit()
+		# log_added_in_db(url=str(reply['request_url']),execute=True,response_status=str(reply['resposne_status_code']),payload=str(reply['request_body']),response=str(reply['response']),call_type="Pratham SubSerial No")
 
 	except Exception as e:
 		reply['message']=str(e)
