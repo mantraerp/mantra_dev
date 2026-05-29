@@ -983,7 +983,7 @@ def fetch_sub_serial_no_records():
 
 									try:
 										if not frappe.db.exists("Sub Serial No", sub_serial_no):
-											frappe.log_error(title="Sub serial no found 11",message=str(sub_serial_no))
+											# frappe.log_error(title="Sub serial no found 11",message=str(sub_serial_no))
 
 											doc = frappe.new_doc("Sub Serial No")
 											doc.parent_serial_no = str(sr_no)
