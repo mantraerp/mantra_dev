@@ -114,6 +114,27 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2026-06-09 15:55:05.552040",
+  "name": "Candidate Backed Out",
+  "workflow_action_name": "Candidate Backed Out"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-09 16:09:00.700468",
+  "name": "Joined",
+  "workflow_action_name": "Joined"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-06-17 11:57:55.164365",
+  "name": "Offer Revise",
+  "workflow_action_name": "Offer Revise"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2024-01-25 17:56:40.664614",
   "name": "Review",
   "workflow_action_name": "Review"

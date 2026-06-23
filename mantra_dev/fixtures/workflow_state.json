@@ -138,19 +138,91 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-02-24 18:57:47.835693",
-  "name": "CGC Approval",
-  "style": "",
-  "workflow_state_name": "CGC Approval"
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "Hold",
+  "style": "Danger",
+  "workflow_state_name": "Hold"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:52:23.832985",
-  "name": "Hold",
-  "style": "Danger",
-  "workflow_state_name": "Hold"
+  "modified": "2026-06-09 15:56:25.875699",
+  "name": "Joined",
+  "style": "",
+  "workflow_state_name": "Joined"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-09 16:03:31.696361",
+  "name": "Candidate Backed Out",
+  "style": "",
+  "workflow_state_name": "Candidate Backed Out"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:06.087938",
+  "name": "Offer Revise - Approval Pending By Team Lead- Talent Acquisition",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Approval Pending By Team Lead- Talent Acquisition"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:14.089045",
+  "name": "Offer Revise - Approval Pending By Manager Talent Acquisition",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Approval Pending By Manager Talent Acquisition"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:26.794308",
+  "name": "Offer Revise - Rejected",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:42.986945",
+  "name": "Offer Revise - Approved",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:50.720467",
+  "name": "Offer Revise - On Hold",
+  "style": "",
+  "workflow_state_name": "Offer Revise - On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:20:57.444352",
+  "name": "Offer Revise - Declined",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Declined"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-18 16:21:03.507392",
+  "name": "Offer Revise - Accepted",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Accepted"
  },
  {
   "docstatus": 0,
@@ -165,10 +237,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-03 12:07:13.447231",
-  "name": "Posted in Tally",
-  "style": "Success",
-  "workflow_state_name": "Posted in Tally"
+  "modified": "2026-06-18 16:20:34.674850",
+  "name": "Offer Revise - Approval Pending By Director",
+  "style": "",
+  "workflow_state_name": "Offer Revise - Approval Pending By Director"
  },
  {
   "docstatus": 0,
@@ -183,19 +255,28 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-02-06 16:32:18.033564",
-  "name": "Approval Pending By Director",
-  "style": "Success",
-  "workflow_state_name": "Approval Pending By Director"
+  "modified": "2025-06-05 13:15:14.338683",
+  "name": "For Review",
+  "style": "",
+  "workflow_state_name": "For Review"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-06-05 13:15:14.338683",
-  "name": "For Review",
+  "modified": "2026-06-18 16:19:55.917798",
+  "name": "Offer Revise - Draft",
   "style": "",
-  "workflow_state_name": "For Review"
+  "workflow_state_name": "Offer Revise - Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-02-06 16:32:18.033564",
+  "name": "Approval Pending By Director",
+  "style": "Success",
+  "workflow_state_name": "Approval Pending By Director"
  },
  {
   "docstatus": 0,
@@ -228,19 +309,28 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-03-31 12:21:16.266893",
-  "name": "Approve",
+  "modified": "2026-03-30 13:18:12.170090",
+  "name": "Final Approval",
   "style": "",
-  "workflow_state_name": "Approve"
+  "workflow_state_name": "Final Approval"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-03-30 13:18:12.170090",
-  "name": "Final Approval",
+  "modified": "2026-02-24 18:57:47.835693",
+  "name": "CGC Approval",
   "style": "",
-  "workflow_state_name": "Final Approval"
+  "workflow_state_name": "CGC Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-04-02 16:52:23.832985",
+  "name": "On Hold",
+  "style": "Danger",
+  "workflow_state_name": "On Hold"
  },
  {
   "docstatus": 0,
@@ -264,6 +354,24 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2024-04-03 12:07:13.447231",
+  "name": "Posted in Tally",
+  "style": "Success",
+  "workflow_state_name": "Posted in Tally"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-03-31 12:21:16.266893",
+  "name": "Approve",
+  "style": "",
+  "workflow_state_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-03-28 15:24:16.584776",
   "name": "Authorisation",
   "style": "",
@@ -273,10 +381,10 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:52:23.832985",
-  "name": "On Hold",
+  "modified": "2024-04-02 16:50:55.498030",
+  "name": "Cancelled",
   "style": "Danger",
-  "workflow_state_name": "On Hold"
+  "workflow_state_name": "Cancelled"
  },
  {
   "docstatus": 0,
@@ -300,33 +408,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2024-04-02 16:50:55.498030",
-  "name": "Cancelled",
-  "style": "Danger",
-  "workflow_state_name": "Cancelled"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2026-02-24 18:55:23.667558",
-  "name": "A/C Approval",
-  "style": "",
-  "workflow_state_name": "A/C Approval"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
-  "modified": "2024-02-08 15:10:55.973221",
-  "name": "BU Approval",
-  "style": "",
-  "workflow_state_name": "BU Approval"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2025-12-23 20:42:58.813893",
   "name": "Submitted",
   "style": "",
@@ -345,15 +426,6 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-02-18 18:03:32.614221",
-  "name": "Draft",
-  "style": "",
-  "workflow_state_name": "Draft"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow State",
-  "icon": "",
   "modified": "2024-02-08 15:05:19.885801",
   "name": "Reviewed",
   "style": "",
@@ -363,10 +435,37 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
+  "modified": "2026-02-24 18:55:23.667558",
+  "name": "A/C Approval",
+  "style": "",
+  "workflow_state_name": "A/C Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
   "modified": "2026-05-04 17:01:29.097998",
   "name": "First Approval",
   "style": "",
   "workflow_state_name": "First Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-02-18 18:03:32.614221",
+  "name": "Draft",
+  "style": "",
+  "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2024-02-08 15:10:55.973221",
+  "name": "BU Approval",
+  "style": "",
+  "workflow_state_name": "BU Approval"
  },
  {
   "docstatus": 0,
