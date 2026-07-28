@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 from mantra_dev.backend_code.serialno import serial_no_scheduled,process_dc_api # type: ignore
 from frappe.utils.background_jobs import get_jobs # type: ignore
-from frappe.utils import getdate
+from frappe.utils import getdate # type: ignore
 
 
 delivery_note_number_proccess = []
@@ -264,11 +264,9 @@ def login_to_avdm_test(transaction_date):
 def update_item_month(dc_no,item_code,month):
 	
 	reply={}
-	if frappe.session.user not in ['abhishek.jain@mantratec.com','Administrator','ravi.patel@mantratec.com']:
+	if frappe.session.user not in ['accounts6@mantratec.com','Administrator','ravi.patel@mantratec.com']:
 		reply['message']='User is not allow to perform this action'
-		# return reply
-
-
+		return reply
 
 	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
 	if len(dc_list)==0:
@@ -305,6 +303,53 @@ def update_item_month(dc_no,item_code,month):
 	reply['message']="Sucessfully : Process DC in background. You will get log in EVDM Sync Log."
 	return reply
 
+
+@frappe.whitelist(allow_guest=True)
+def update_item_month_rma(dc_no,item_code,month):
+	
+	reply={}
+	if frappe.session.user not in ['accounts6@mantratec.com','Administrator','ravi.patel@mantratec.com']:
+		reply['message']='User is not allow to perform this action'
+		return reply
+
+	dc_list = frappe.get_all("Delivery Note", filters={"name": dc_no, "docstatus": 1, "is_return": 0})
+	if len(dc_list)==0:
+		reply['message']="Error : DC is not found or return"
+		return reply
+
+	query = "SELECT name FROM `tabWarranty Time Period` WHERE `name` = '{}'".format(month)
+	warrenty_record = frappe.db.sql(query, as_dict=True)
+	if len(warrenty_record)==0:
+		reply['message']="Error : Warrenty time is not match with exting data."
+		return reply
+
+	dn = frappe.get_doc("Delivery Note", dc_no)
+
+	found_item = False
+	for item in dn.items:
+		if item_code==item.item_code:
+			itemDetail = frappe.get_doc("Item", item.item_code)
+			if itemDetail.custom_rma_enable in [1,True]:
+				found_item = True
+				query = "UPDATE `tabDelivery Note Item` SET `custom_warranty_time_periodin_months`='{}' WHERE `name` = '{}' AND `parent`='{}'".format(month,item.name,dc_no)
+				warrenty_record = frappe.db.sql(query, as_dict=True)
+
+	if not found_item:
+		reply['message']="Error : Item code not found in DC"
+		return reply
+	else:
+		frappe.db.commit()
+
+	process_dc_api(dc_no)
+	reply['message']="Sucessfully : RMA(Warrenty) updated."
+	return reply
+
+
+
+
+
+
+
 @frappe.whitelist(allow_guest=True)
 def process_single_dc(dc_no):
 	
@@ -339,6 +384,9 @@ def process_dc_list(dc_list):
 				dc_item = dc_doc.items
 
 				for i in dc_item:
+
+					is_only_sub_active = False
+					sub_serial_no_model = ""
 					
 					#To handle if item code previously not having AVDM enable change change it now
 					if i.custom_abdm_enable == 0 or i.custom_reference_model_no in ['',None," "]:
@@ -354,6 +402,11 @@ def process_dc_list(dc_list):
 
 								records = frappe.db.sql(query,as_dict=1)
 								i = frappe.get_doc("Delivery Note Item", i.name)
+							else:
+								if item_detail[0]['custom_submodel_avdm_enable'] in [True,1]:
+									is_only_sub_active = True
+									if item_detail[0]['custom_submodel_avdm_enable'] not in [None,'',' ']:
+										sub_serial_no_model = item_detail[0]['custom_reference_submodel_no']
 
 
 
@@ -400,6 +453,49 @@ def process_dc_list(dc_list):
 							body.append(data)
 							data['item_code']=i.item_code
 							errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
+					else:
+						sr_list = []
+						if i.serial_no:
+							sr_no = i.serial_no
+							serial_no = sr_no.replace("\n", ",")
+							serial_no_list = serial_no.split(",")
+
+							for s_no in serial_no_list:
+								sr_list.append( str(s_no))
+
+						bundle_sr_no = process_dc_bundle(dc_doc.name,i.serial_and_batch_bundle)
+						for s_no in bundle_sr_no:
+							if s_no['serial_no'] not in sr_list:
+								if s_no['item_code'] == i.item_code:
+									sr_list.append(str(s_no['serial_no']))
+
+						#Remove duplicate
+						unique_list = []
+						seen = set()
+
+						for item in sr_list:
+							if item not in seen:
+								seen.add(item)
+								unique_list.append(item)
+
+
+						for s_no in unique_list:
+							data = {
+								"mastCode": "0",
+								"serialNo": str(s_no),
+								"custName": str(dc_doc.customer_name),
+								"dcNo": str(dc_doc.name),
+								"dcDate": f"{dc_doc.posting_date}T{dc_doc.posting_time}Z",
+								"model": sub_serial_no_model,
+								"subModelType": "0"
+							}
+
+							# body.append(data)
+							data['item_code']=i.item_code
+							errorLog(key_sub_serial_no,str(data)) # Add serial number to check for sub serial number
+
+
+
 
 			cunk_size = 75
 
