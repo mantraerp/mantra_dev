@@ -43,7 +43,7 @@ pratham_url = "http://prathamapi.mantratecapp.com"
 @frappe.whitelist(allow_guest=True)
 def login_to_avdm_scheduled():
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	frappe.enqueue(login_to_avdm, queue='default', timeout=3600,transaction_date=nowdate())
@@ -353,7 +353,7 @@ def update_item_month_rma(dc_no,item_code,month):
 @frappe.whitelist(allow_guest=True)
 def process_single_dc(dc_no):
 	
-	if get_app_name()!="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return "Application is not mantra"
 
  	#Update serial no in master
@@ -556,7 +556,7 @@ def process_dc_bundle(dc_no,sbb_name):
 @frappe.whitelist(allow_guest=True)
 def process_one_record():
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		query = "UPDATE `tabScheduled Job Type` SET `stopped`=1 WHERE `method` = 'mantra_dev.backend_code.avdm.process_one_record'"
 		records = frappe.db.sql(query,as_dict=1)
 		return
@@ -588,7 +588,7 @@ def get_all_jobs(method_name):
 @frappe.whitelist(allow_guest=True)
 def process_one_record_background():
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	if get_all_jobs("process_one_record_background")!=0:
@@ -699,7 +699,7 @@ def process_one_record_background():
 @frappe.whitelist()
 def immidiat_process_body(error_log_doc_name):
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	reply= {}
@@ -819,7 +819,7 @@ def process_request(process_record,creating_url,headers):
 			frappe.log_error("AVDM Request Body",str(body_pass_avdm))
 
 		# reply['request_dump']=body_json
-		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm)
+		response1 = requests.post(creating_url, headers=headers, json=body_pass_avdm,verify=False)
 		reply['resposne_raw']=str(response1)
 		reply['resposne_status_code']=str(response1.status_code)
 
@@ -1019,7 +1019,7 @@ def fetch_sub_serial_no_records():
 		reply['request_header']=headers
 		reply['request_body']=searil_no_pass
 
-		response1 = requests.post(creating_url, headers=headers, json=searil_no_pass)
+		response1 = requests.post(creating_url, headers=headers, json=searil_no_pass,verify=False)
 		reply['resposne_status_code']=str(response1.status_code)
 		dc_response_content = response1.content
 		if isinstance(dc_response_content, bytes):
@@ -1780,7 +1780,7 @@ def generate_token():
 		"password": password
 	}
 	reply['request_body']=login_body
-	response = requests.post(login_url, headers=login_headers, json=login_body)
+	response = requests.post(login_url, headers=login_headers, json=login_body,verify=False)
 
 	# Check if the response content is in bytes and decode it
 	response_content = response.content
@@ -1825,7 +1825,7 @@ def generate_token_pratham():
 		'Content-Type': 'application/json',
 	}
 
-	response = requests.post(url, headers=headers, data=payload,auth=HTTPBasicAuth(username, password))
+	response = requests.post(url, headers=headers, data=payload,auth=HTTPBasicAuth(username, password),verify=False)
 
 	response_content = response.content
 	if isinstance(response_content, bytes):

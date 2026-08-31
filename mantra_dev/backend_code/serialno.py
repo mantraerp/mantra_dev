@@ -14,7 +14,7 @@ from frappe.utils import getdate
 @frappe.whitelist(allow_guest=True)
 def serial_no_scheduled():
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	frappe.enqueue(process_serial_no_for_date, queue='long', timeout=3600,transaction_date=nowdate())
@@ -48,7 +48,7 @@ def remain_dc_to_process_sr_date(start_datetime,end_datetime):
 @frappe.whitelist(allow_guest=True)
 def process_serial_no_for_date(transaction_date):
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	errorLog("Serial no date update on server",str(transaction_date))
@@ -93,7 +93,7 @@ def process_serial_no_for_date(transaction_date):
 @frappe.whitelist(allow_guest=True)
 def process_serial_no_for_date_without_restriction(transaction_date):
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return
 
 	errorLog("Serial no date update on server",str(transaction_date))
@@ -138,7 +138,7 @@ def process_serial_no_for_date_without_restriction(transaction_date):
 @frappe.whitelist(allow_guest=True)
 def process_dc(dc_no):
 
-	if get_app_name()!="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return "App is not mantra"
 
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
@@ -152,7 +152,7 @@ def process_dc(dc_no):
 @frappe.whitelist(allow_guest=True)
 def process_dc_dl(doc, method=None):
 
-	if get_app_name()!="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return "App is not mantra"
 
 	dc_doc = frappe.get_doc("Delivery Note", doc.name)
@@ -167,7 +167,7 @@ def process_dc_dl(doc, method=None):
 @frappe.whitelist(allow_guest=True)
 def process_dc_api(dc_no):
 
-	if get_app_name()!="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return "App is not mantra"
 
 	dc_doc = frappe.get_doc("Delivery Note", dc_no)
@@ -268,7 +268,7 @@ def process_dc_item(dc_item,dc_doc):
 
 def process_dc_date_information(dc_item,dc_doc,sr_no,item_detail):
 
-	if not get_app_name()=="mantra":
+	if get_app_name() not in ["mantra","smart identity"]:
 		return "App is not mantra"
 
 	sr_no = sr_no.replace("',)","')")
