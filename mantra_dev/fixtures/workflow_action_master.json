@@ -30,37 +30,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2025-05-30 19:34:49.349005",
-  "name": "Submit",
-  "workflow_action_name": "Submit"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2024-04-03 12:06:49.705207",
-  "name": "Post in Tally",
-  "workflow_action_name": "Post in Tally"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
   "modified": "2024-09-14 15:24:25.519357",
   "name": "Process",
   "workflow_action_name": "Process"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2024-03-13 18:22:09.862223",
-  "name": "To Check",
-  "workflow_action_name": "To Check"
- },
- {
-  "docstatus": 0,
-  "doctype": "Workflow Action Master",
-  "modified": "2025-12-23 20:48:30.978682",
-  "name": "To Dispatch",
-  "workflow_action_name": "To Dispatch"
  },
  {
   "docstatus": 0,
@@ -107,6 +79,34 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
+  "modified": "2025-12-23 20:48:30.978682",
+  "name": "To Dispatch",
+  "workflow_action_name": "To Dispatch"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2025-05-30 19:34:49.349005",
+  "name": "Submit",
+  "workflow_action_name": "Submit"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-04-03 12:06:49.705207",
+  "name": "Post in Tally",
+  "workflow_action_name": "Post in Tally"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2024-03-13 18:22:09.862223",
+  "name": "To Check",
+  "workflow_action_name": "To Check"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
   "modified": "2024-03-13 18:20:11.458567",
   "name": "Checked",
   "workflow_action_name": "Checked"
@@ -121,9 +121,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-02-12 13:03:01.436096",
-  "name": "Resubmit",
-  "workflow_action_name": "Resubmit"
+  "modified": "2026-02-24 18:56:13.936580",
+  "name": "Validate",
+  "workflow_action_name": "Validate"
  },
  {
   "docstatus": 0,
@@ -135,9 +135,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2026-02-24 18:56:13.936580",
-  "name": "Validate",
-  "workflow_action_name": "Validate"
+  "modified": "2024-01-25 17:56:40.664614",
+  "name": "Review",
+  "workflow_action_name": "Review"
  },
  {
   "docstatus": 0,
@@ -149,9 +149,9 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.664614",
-  "name": "Review",
-  "workflow_action_name": "Review"
+  "modified": "2024-02-12 13:03:01.436096",
+  "name": "Resubmit",
+  "workflow_action_name": "Resubmit"
  },
  {
   "docstatus": 0,
@@ -163,15 +163,15 @@
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.664115",
-  "name": "Reject",
-  "workflow_action_name": "Reject"
+  "modified": "2024-01-25 17:56:40.663510",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow Action Master",
-  "modified": "2024-01-25 17:56:40.663510",
-  "name": "Approve",
-  "workflow_action_name": "Approve"
+  "modified": "2024-01-25 17:56:40.664115",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
  }
 ]
